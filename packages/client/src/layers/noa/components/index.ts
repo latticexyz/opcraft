@@ -1,0 +1,1 @@
+export { defineSelectedSlotComponent } from "./SelectedSlot";

@@ -1,0 +1,10 @@
+{
+  "width": 31,
+  "height": 31,
+  "components": [
+    { "name": "position", "unhashedId": "ember.component.position", "encoding": ["int32", "int32", "int32"] },
+    { "name": "blockType", "unhashedId": "ember.component.blockType", "encoding": ["uint32"] }
+  ],
+  "state": [
+  ]
+}

@@ -1,0 +1,5 @@
+node_modules
+.eslintcache
+.DS_STORE
+.DS_Store
+.parcel-cache

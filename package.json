@@ -1,0 +1,54 @@
+{
+  "name": "mudcraft",
+  "version": "0.0.0",
+  "description": "An infinite, unstoppable World",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/latticexyz/mudcraft.git"
+  },
+  "private": true,
+  "workspaces": {
+    "packages": [
+      "packages/*"
+    ]
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^16.2.4",
+    "@commitlint/config-conventional": "^16.2.4",
+    "@typescript-eslint/eslint-plugin": "^5.23.0",
+    "@typescript-eslint/parser": "^5.23.0",
+    "commitizen": "^4.2.4",
+    "cz-conventional-changelog": "3.3.0",
+    "eslint": "^8.15.0",
+    "husky": ">=6",
+    "lerna": "^4.0.0",
+    "lint-staged": ">=10",
+    "prettier": "^2.6.2",
+    "run-pty": "^3.0.0"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  },
+  "scripts": {
+    "prepare": "husky install && yarn lerna run prepare",
+    "commit": "cz",
+    "prettier:check": "prettier --check 'packages/**/*.ts'",
+    "prettier": "prettier --write 'packages/**/*.ts'",
+    "lint": "eslint . --ext .ts",
+    "lerna:release": "lerna version --conventional-commits --yes",
+    "lerna:publish": "lerna publish --no-private --force-publish",
+    "start:ri": "run-pty % yarn workspace ri-contracts run start % yarn workspace ri-client run start",
+    "foundryup": "curl -L https://foundry.paradigm.xyz | bash && exec \"$SHELL\" && foundryup",
+    "start": "run-pty % yarn start:contracts % yarn start:client",
+    "start:client": "wait-on tcp:8545 && yarn workspace ri-client run start",
+    "start:contracts": "yarn workspace ri-contracts run start",
+    "link:mud": "for i in node_modules/@latticexyz/*; do yarn link @latticexyz/$(basename $i); done",
+    "unlink:mud": "for i in node_modules/@latticexyz/*; do yarn unlink @latticexyz/$(basename $i); done && yarn install --force"
+  },
+  "lint-staged": {
+    "*.ts": "eslint --cache --fix",
+    "*.{ts,css,md,sol}": "prettier --write"
+  }
+}

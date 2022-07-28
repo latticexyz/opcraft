@@ -1,0 +1,17 @@
+{
+  "components": [
+    "PositionComponent",
+    "BlockTypeComponent",
+    "OwnedByComponent",
+    "GameConfigComponent",
+    "RecipeComponent"
+  ],
+  "systems": [
+    { "name": "ComponentDevSystem", "writeAccess": ["*"] },
+    { "name": "BulkSetStateSystem", "writeAccess": ["*"] },
+    { "name": "BuildSystem", "writeAccess": ["PositionComponent", "BlockTypeComponent", "OwnedByComponent"] },
+    { "name": "MineSystem", "writeAccess": ["PositionComponent", "OwnedByComponent"] },
+    { "name": "InitSystem", "writeAccess": ["GameConfigComponent", "RecipeComponent"], "initialize": "new bytes(0)" },
+    { "name": "MoveSystem", "writeAccess": ["PositionComponent"] }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "packages": [
+    "packages/*",
+    "packages/ri/*"
+  ],
+  "version": "0.2.0",
+  "npmClient": "yarn",
+  "useWorkspaces": true,
+  "command": {
+    "publish": {
+      "conventionalCommits": true,
+      "message": "chore(release): publish",
+      "registry": "https://npm.pkg.github.com",
+      "allowBranch": "main"
+    }
+  }
+}
