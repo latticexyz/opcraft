@@ -1,9 +1,9 @@
 import { Engine } from "noa-engine";
 // add a mesh to represent the player, and scale it, etc.
-import { Mesh } from "@babylonjs/core/Meshes/mesh";
 import "@babylonjs/core/Meshes/Builders/boxBuilder";
 import { VoxelCoord } from "@latticexyz/utils";
-import { Blocks, BlockType, Textures } from "../constants";
+import { Blocks, Textures } from "../constants";
+import { BlockType } from "../../network";
 
 export function setupNoaEngine(getVoxel: (coord: VoxelCoord) => BlockType) {
   const opts = {

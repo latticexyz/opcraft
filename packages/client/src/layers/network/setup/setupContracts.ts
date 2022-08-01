@@ -95,7 +95,7 @@ export async function setupContracts<C extends ContractComponents>(config: GameC
       initialBlockNumber: config.initialBlockNumber ?? 0,
       mappings,
       chainId: config.chainId,
-      disableCache: config.devMode, // Disable cache on hardhat
+      disableCache: false,
       checkpointServiceUrl: networkConfig.checkpointServiceUrl,
     });
   }

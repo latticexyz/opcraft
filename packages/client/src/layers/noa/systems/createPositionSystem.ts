@@ -1,18 +1,8 @@
-import { Mesh, _UpdateRGBDAsync, Material, StandardMaterial, Color3 } from "@babylonjs/core";
-import {
-  defineComponentSystem,
-  defineSystem,
-  EntityIndex,
-  getComponentValue,
-  getComponentValueStrict,
-  Has,
-  Not,
-  UpdateType,
-} from "@latticexyz/recs";
+import { Mesh, StandardMaterial, Color3 } from "@babylonjs/core";
+import { defineSystem, EntityIndex, getComponentValueStrict, Has, Not, UpdateType } from "@latticexyz/recs";
 import { getAddressColor } from "@latticexyz/std-client";
-import { sleep, VoxelCoord } from "@latticexyz/utils";
+import { VoxelCoord } from "@latticexyz/utils";
 import { NetworkLayer } from "../../network";
-import { BlockType as BlockTypeEnum } from "../constants";
 import { NoaLayer } from "../types";
 
 export function createPositionSystem(network: NetworkLayer, context: NoaLayer) {

@@ -1,9 +1,8 @@
 import React from "react";
 import { registerUIComponent } from "../engine";
-import { map, of } from "rxjs";
+import { map } from "rxjs";
 import { BlockIcon, Center, GUI } from "./common/GUI";
 import styled from "styled-components";
-import { BlockType, BlockType as BlockTypeEnum, getBlockIconUrl } from "../../noa/constants";
 import { range } from "@latticexyz/utils";
 import {
   EntityIndex,
@@ -13,7 +12,7 @@ import {
   HasValue,
   runQuery,
 } from "@latticexyz/recs";
-import { useMemo } from "react";
+import { BlockType } from "../../network";
 
 const SCALE = 3;
 
@@ -47,7 +46,7 @@ export function registerCrafting() {
 
       const {
         noa: {
-          components: { CraftingTable, SelectedSlot },
+          components: { SelectedSlot },
           SingletonEntity,
           api: { clearCraftingTable, setCraftingTableIndex },
           noa,

@@ -1,6 +1,5 @@
-import { EntityID, getComponentValue, getEntitiesWithValue, HasValue, runQuery, setComponent } from "@latticexyz/recs";
-import { NetworkLayer } from "../../network";
-import { BlockType as BlockTypeEnum } from "../constants";
+import { EntityID, getComponentValue, HasValue, runQuery, setComponent } from "@latticexyz/recs";
+import { NetworkLayer, BlockType as BlockTypeEnum } from "../../network";
 import { NoaLayer } from "../types";
 
 export function createInputSystem(network: NetworkLayer, context: NoaLayer) {

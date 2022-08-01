@@ -11,7 +11,7 @@ import {
   defineGameConfigComponent,
   defineRecipeComponent,
 } from "./components";
-import { BlockType } from "../noa/constants";
+import { BlockType } from "./constants";
 
 /**
  * The Network layer is the lowest layer in the client architecture.

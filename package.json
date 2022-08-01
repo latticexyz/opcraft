@@ -45,10 +45,23 @@
     "start:client": "wait-on tcp:8545 && yarn workspace ri-client run start",
     "start:contracts": "yarn workspace ri-contracts run start",
     "link:mud": "for i in node_modules/@latticexyz/*; do yarn link @latticexyz/$(basename $i); done",
-    "unlink:mud": "for i in node_modules/@latticexyz/*; do yarn unlink @latticexyz/$(basename $i); done && yarn install --force"
+    "unlink:mud": "for i in node_modules/@latticexyz/*; do yarn unlink @latticexyz/$(basename $i); done && yarn install --force",
+    "yalc:mud": "yarn unlink:mud && for i in node_modules/@latticexyz/*; do yalc add @latticexyz/$(basename $i); done",
+    "unyalc:mud": "for i in node_modules/@latticexyz/*; do yalc remove @latticexyz/$(basename $i); done && yarn install --force"
   },
   "lint-staged": {
     "*.ts": "eslint --cache --fix",
     "*.{ts,css,md,sol}": "prettier --write"
+  },
+  "dependencies": {
+    "@latticexyz/cli": "file:.yalc/@latticexyz/cli",
+    "@latticexyz/ecs-browser": "file:.yalc/@latticexyz/ecs-browser",
+    "@latticexyz/network": "file:.yalc/@latticexyz/network",
+    "@latticexyz/phaserx": "file:.yalc/@latticexyz/phaserx",
+    "@latticexyz/recs": "file:.yalc/@latticexyz/recs",
+    "@latticexyz/solecs": "file:.yalc/@latticexyz/solecs",
+    "@latticexyz/std-client": "file:.yalc/@latticexyz/std-client",
+    "@latticexyz/std-contracts": "file:.yalc/@latticexyz/std-contracts",
+    "@latticexyz/utils": "file:.yalc/@latticexyz/utils"
   }
 }

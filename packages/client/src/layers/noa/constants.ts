@@ -1,23 +1,6 @@
 import { EntityID } from "@latticexyz/recs";
+import { BlockType } from "../network";
 import { Block } from "./types";
-
-export enum BlockType {
-  Air,
-  Grass,
-  Dirt,
-  Log,
-  Sand,
-  Water,
-  Stone,
-  Cobblestone,
-  Coal,
-  Crafting,
-  Iron,
-  Gold,
-  Diamond,
-  Leaves,
-  Planks,
-}
 
 export enum MaterialType {
   Grass = "Grass",

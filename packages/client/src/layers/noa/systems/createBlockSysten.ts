@@ -1,6 +1,5 @@
 import { defineComponentSystem, defineSystem, getComponentValue, Has } from "@latticexyz/recs";
-import { NetworkLayer } from "../../network";
-import { BlockType as BlockTypeEnum } from "../constants";
+import { NetworkLayer, BlockType as BlockTypeEnum } from "../../network";
 import { NoaLayer } from "../types";
 
 export function createBlockSystem(network: NetworkLayer, context: NoaLayer) {

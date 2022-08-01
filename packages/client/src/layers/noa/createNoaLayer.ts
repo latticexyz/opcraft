@@ -11,10 +11,10 @@ import {
   setComponent,
 } from "@latticexyz/recs";
 import { VoxelCoord } from "@latticexyz/utils";
-import { NetworkLayer } from "../network";
+import { BlockType, NetworkLayer } from "../network";
 import { defineSelectedSlotComponent } from "./components";
 import { defineCraftingTableComponent } from "./components/CraftingTable";
-import { BlockType, Singleton } from "./constants";
+import { Singleton } from "./constants";
 import { setupNoaEngine } from "./setup";
 import { createBlockSystem, createInputSystem, createPositionSystem } from "./systems";
 

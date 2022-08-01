@@ -1,0 +1,41 @@
+{
+  "version": "v1",
+  "packages": {
+    "@latticexyz/cli": {
+      "signature": "e71903ba7256a6f067e63d20ce8056c1",
+      "file": true
+    },
+    "@latticexyz/ecs-browser": {
+      "signature": "2d111fdce0f2408c4198f963ec9dcc05",
+      "file": true
+    },
+    "@latticexyz/network": {
+      "signature": "27237e6380230091b87e07d1bc803904",
+      "file": true
+    },
+    "@latticexyz/phaserx": {
+      "signature": "3f6e584ed5e2af9801c60ca34da85bc6",
+      "file": true
+    },
+    "@latticexyz/recs": {
+      "signature": "ee24e18889a4c361ac339b60d41bef34",
+      "file": true
+    },
+    "@latticexyz/solecs": {
+      "signature": "379196178a392b2c9561c42d2933ea08",
+      "file": true
+    },
+    "@latticexyz/std-client": {
+      "signature": "47acec82bc78341ef9a5f4e4a5fcb8bb",
+      "file": true
+    },
+    "@latticexyz/std-contracts": {
+      "signature": "4ad5a8f5a3fe9befef2701226e76f78b",
+      "file": true
+    },
+    "@latticexyz/utils": {
+      "signature": "f8eb5db858558aa854df4e792a90f334",
+      "file": true
+    }
+  }
+}

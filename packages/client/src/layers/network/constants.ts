@@ -1,0 +1,17 @@
+export enum BlockType {
+  Air,
+  Grass,
+  Dirt,
+  Log,
+  Sand,
+  Water,
+  Stone,
+  Cobblestone,
+  Coal,
+  Crafting,
+  Iron,
+  Gold,
+  Diamond,
+  Leaves,
+  Planks,
+}

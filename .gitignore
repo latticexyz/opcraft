@@ -1,4 +1,5 @@
 node_modules
+.yalc
 .eslintcache
 .DS_STORE
 .DS_Store

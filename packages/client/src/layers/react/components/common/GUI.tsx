@@ -1,5 +1,6 @@
 import styled from "styled-components";
-import { BlockType, getBlockIconUrl } from "../../../noa/constants";
+import { BlockType } from "../../../network";
+import { getBlockIconUrl } from "../../../noa/constants";
 
 export const GUI = styled.div<{ _x: number; _y: number; _height: number; _width: number; scale: number }>`
   height: ${(p) => p._height * p.scale}px;
