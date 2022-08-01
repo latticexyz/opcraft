@@ -9,7 +9,7 @@ import { getAddressById } from "solecs/utils.sol";
 uint256 constant ID = uint256(keccak256("ember.system.componentDev"));
 
 contract ComponentDevSystem is System {
-  constructor(IUint256Component _components, IWorld _world) System(_components, _world) {}
+  constructor(IWorld _world, address _components) System(_world, _components) {}
 
   function requirement(bytes memory) public view returns (bytes memory) {
     // NOTE: Make sure to not include this system in a production deployment, as anyone can change all component values

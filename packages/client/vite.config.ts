@@ -12,7 +12,7 @@ export default defineConfig({
     port: 3000,
   },
   resolve: {
-    dedupe: ["proxy-deep"],
+    dedupe: ["proxy-deep", "styled-components"],
   },
   define: {
     global: "globalThis",
@@ -21,6 +21,7 @@ export default defineConfig({
     esbuildOptions: {
       target: "es2020",
     },
+    exclude: ["@latticexyzy/network"],
   },
   server: {
     fs: {

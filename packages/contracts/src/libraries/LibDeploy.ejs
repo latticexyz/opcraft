@@ -70,7 +70,7 @@ library LibDeploy {
     IUint256Component components = world.components();
 <% systems.forEach(system => { %>
     console.log("Deploying <%= system.name %>");
-    system = new <%= system.name %>(components, world);
+    system = new <%= system.name %>(world, address(components));
     world.registerSystem(address(system), <%= system.name %>ID);
 <% system.writeAccess?.forEach(component => { -%>
 <% if(component === "*") { -%>

@@ -13,7 +13,7 @@ import { GodID, BlockType, CraftingRecipeID, PlanksRecipeID } from "../constants
 uint256 constant ID = uint256(keccak256("ember.system.init"));
 
 contract InitSystem is System {
-  constructor(IUint256Component _components, IWorld _world) System(_components, _world) {}
+  constructor(IWorld _world, address _components) System(_world, _components) {}
 
   function execute(bytes memory) public returns (bytes memory) {
     GameConfigComponent gameConfigComponent = GameConfigComponent(getAddressById(components, GameConfigComponentID));

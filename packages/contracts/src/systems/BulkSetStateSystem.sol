@@ -17,7 +17,7 @@ struct ECSEvent {
 }
 
 contract BulkSetStateSystem is System {
-  constructor(IUint256Component _components, IWorld _world) System(_components, _world) {}
+  constructor(IWorld _world, address _components) System(_world, _components) {}
 
   function requirement(bytes memory) public view returns (bytes memory) {
     // NOTE: Make sure to not include this system in a production deployment, as anyone can cahnge all component values

@@ -15,7 +15,7 @@ import { BlockType, GodID } from "../constants.sol";
 uint256 constant ID = uint256(keccak256("ember.system.build"));
 
 contract BuildSystem is System {
-  constructor(IUint256Component _components, IWorld _world) System(_components, _world) {}
+  constructor(IWorld _world, address _components) System(_world, _components) {}
 
   function execute(bytes memory arguments) public returns (bytes memory) {
     (uint256 blockEntity, VoxelCoord memory targetPosition, BlockType blockType) = abi.decode(

@@ -1,4 +1,7 @@
 import { HardhatUserConfig } from "hardhat/config";
+import "hardhat-deploy";
+import "@nomiclabs/hardhat-ethers";
+import "./tasks/compile";
 
 const degen = {
   live: true,
@@ -16,6 +19,13 @@ const localhost = {
     "0x67195c963ff445314e667112ab22f4a7404bad7f9746564eb409b9bb8c6aed32",
   ],
   chainId: 31337,
+};
+
+const op = {
+  live: true,
+  url: "http://143.198.244.205:9545",
+  accounts: ["0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"],
+  chainId: 901,
 };
 
 const hardhat = {
@@ -48,10 +58,17 @@ const hardhat = {
 
 const config: HardhatUserConfig = {
   defaultNetwork: "hardhat",
+  namedAccounts: {
+    deployer: 0, // first skey derived from the hd wallet
+  },
   networks: {
     degen,
     localhost,
     hardhat,
+    op,
+  },
+  paths: {
+    sources: "./src",
   },
   solidity: {
     version: "0.8.13",

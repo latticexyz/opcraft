@@ -11,7 +11,7 @@ import { PositionComponent, ID as PositionComponentID, VoxelCoord } from "../com
 uint256 constant ID = uint256(keccak256("ember.system.move"));
 
 contract MoveSystem is System {
-  constructor(IUint256Component _components, IWorld _world) System(_components, _world) {}
+  constructor(IWorld _world, address _components) System(_world, _components) {}
 
   function execute(bytes memory arguments) public returns (bytes memory) {
     VoxelCoord memory targetPosition = abi.decode(arguments, (VoxelCoord));
