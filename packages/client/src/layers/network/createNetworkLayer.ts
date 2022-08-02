@@ -2,7 +2,7 @@ import { createIndexer, createWorld, EntityID, EntityIndex } from "@latticexyz/r
 import { setupContracts, setupDevSystems } from "./setup";
 import { createActionSystem } from "@latticexyz/std-client";
 import { GameConfig } from "./config";
-import { VoxelCoord } from "@latticexyz/utils";
+import { deferred, VoxelCoord } from "@latticexyz/utils";
 import { BigNumber } from "ethers";
 import {
   defineBlockTypeComponent,
@@ -76,28 +76,56 @@ export async function createNetworkLayer(config: GameConfig) {
   function mine(coord: VoxelCoord) {
     const entityAtPos = [...components.Position.getEntitiesWithValue(coord)][0];
     console.log("entity", entityAtPos);
+    const airEntity = world.registerEntity();
     actions.add({
       id: `mine+${coord.x}/${coord.y}/${coord.z}` as EntityID,
       requirement: () => true,
-      components: { Position: components.Position, OwnedBy: components.OwnedBy },
+      components: { Position: components.Position, OwnedBy: components.OwnedBy, BlockType: components.BlockType },
       execute: () => systems["ember.system.mine"].executeTyped(coord),
       updates: () => [
+        {
+          component: "Position",
+          entity: airEntity,
+          value: coord,
+        },
+        {
+          component: "BlockType",
+          entity: airEntity,
+          value: { value: BlockType.Air },
+        },
         {
           component: "OwnedBy",
           entity: entityAtPos,
           value: { value: network.connectedAddress.get() },
-        },
-        {
-          component: "Position",
-          entity: entityAtPos,
-          value: null,
         },
       ],
     });
   }
 
   function move(coord: VoxelCoord) {
-    systems["ember.system.move"].executeTyped(coord);
+    // systems["ember.system.move"].executeTyped(coord);
+  }
+
+  async function craft(ingredients: EntityIndex[], result: BlockType) {
+    const [resolve, , promise] = deferred();
+    actions.add({
+      id: `craft+${ingredients.join("/")}` as EntityID,
+      requirement: () => true,
+      components: {},
+      execute: () => {
+        const tx = systems["ember.system.craft"].executeTyped(
+          ingredients.map((i) => BigNumber.from(world.entities[i])),
+          BigNumber.from(result),
+          { gasLimit: 1_000_000 }
+        );
+        // Hacky af, improve this
+        tx.then((r) => r.wait().then(resolve));
+        return tx;
+      },
+      updates: () => [],
+    });
+
+    return promise;
   }
 
   // --- CONTEXT --------------------------------------------------------------------
@@ -110,7 +138,7 @@ export async function createNetworkLayer(config: GameConfig) {
     startSync,
     network,
     actions,
-    api: { build, mine, move },
+    api: { build, mine, move, craft },
     dev: setupDevSystems(world, encoders, systems),
   };
 

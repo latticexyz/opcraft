@@ -54,6 +54,7 @@ export function registerCrafting() {
         network: {
           components: { BlockType: BlockTypeComponent, OwnedBy, Recipe },
           network: { connectedAddress },
+          api: { craft },
         },
       } = layers;
 
@@ -79,8 +80,15 @@ export function registerCrafting() {
         setCraftingTableIndex(index, uniqueBlockOfType);
       }
 
-      function handleCraft() {
-        console.log("Craft!");
+      async function handleCraft() {
+        const result = recipeResult();
+        if (!craftingTable || recipeResult == null) {
+          return console.warn("Invalid crafting request", craftingTable, recipeResult);
+        }
+
+        await craft(craftingTable.value as EntityIndex[], result as BlockType);
+        clearCraftingTable();
+        noa.container.setPointerLock(true);
       }
 
       const recipeResult = () => {
@@ -109,7 +117,7 @@ export function registerCrafting() {
           <Wrapper>
             <Grid>
               {[...range(9)].map((i) => (
-                <SlotWrapper onClick={() => handleClick(i)}>
+                <SlotWrapper key={"craftingslot" + i} onClick={() => handleClick(i)}>
                   <GUI _x={188} _y={184} _height={22} _width={22} scale={SCALE} key={"crafting-grid" + i}></GUI>
                   <Block blockType={getBlockType(craftingTable.value[i] as EntityIndex)} scale={2.7}></Block>
                 </SlotWrapper>

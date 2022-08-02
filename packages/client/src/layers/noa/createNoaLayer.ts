@@ -1,5 +1,4 @@
 import {
-  EntityID,
   EntityIndex,
   getComponentValue,
   getComponentValueStrict,
@@ -64,7 +63,7 @@ export function createNoaLayer(network: NetworkLayer) {
     world,
     components,
     noa,
-    api: { setBlock, setCraftingTable, clearCraftingTable, setCraftingTableIndex },
+    api: { setBlock, setCraftingTable, clearCraftingTable, setCraftingTableIndex, getVoxel },
     SingletonEntity,
   };
 
@@ -72,24 +71,6 @@ export function createNoaLayer(network: NetworkLayer) {
   createInputSystem(network, context);
   createBlockSystem(network, context);
   createPositionSystem(network, context);
-
-  // --- AUTORUN --------------------------------------------------------------------
-  const interval = setInterval(() => {
-    // Share own position with other players
-    const position = noa.entities.getPosition(noa.playerEntity);
-    const roundPos = { x: Math.floor(position[0]), y: Math.floor(position[1]), z: Math.floor(position[2]) };
-    const playerEntity = world.entityToIndex.get(network.network.connectedAddress.get() as EntityID);
-    const lastPlayerPos = playerEntity != null && getComponentValue(network.components.Position, playerEntity);
-    if (
-      !lastPlayerPos ||
-      roundPos.x !== lastPlayerPos.x ||
-      roundPos.y != lastPlayerPos.y ||
-      roundPos.z !== lastPlayerPos.z
-    ) {
-      network.api.move(roundPos);
-    }
-  }, 5000);
-  world.registerDisposer(() => clearInterval(interval));
 
   return context;
 }

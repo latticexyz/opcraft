@@ -4,7 +4,7 @@ import { NoaLayer } from "../types";
 
 export function createBlockSystem(network: NetworkLayer, context: NoaLayer) {
   const {
-    api: { setBlock },
+    api: { setBlock, getVoxel },
   } = context;
 
   const {
@@ -17,11 +17,10 @@ export function createBlockSystem(network: NetworkLayer, context: NoaLayer) {
   const OptimisticBlockType = withOptimisticUpdates(BlockType);
 
   // "Exit system"
-  defineComponentSystem(world, OptimisticPosition, ({ value, entity }) => {
-    console.log("block update", value[0], value[1]);
-    // TODO: remove the number.max_safe_integer hack
-    if (!value[0] && value[1] && entity !== Number.MAX_SAFE_INTEGER) {
-      setBlock(value[1], BlockTypeEnum.Air);
+  defineComponentSystem(world, OptimisticPosition, ({ value }) => {
+    if (!value[0] && value[1]) {
+      const voxel = getVoxel(value[1]);
+      setBlock(value[1], voxel);
     }
   });
 
