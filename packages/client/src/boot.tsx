@@ -16,6 +16,14 @@ let createNoaLayer = createNoaLayerImport;
 let registerUIComponents = registerUIComponentsImport;
 let Engine = EngineImport;
 
+const defaultParams = {
+  chainId: "901",
+  worldAddress: "0x158d291D8b47F056751cfF47d1eEcd19FDF9B6f8",
+  rpc: "http://143.198.244.205:9545",
+  wsRpc: "ws://143.198.244.205:9546",
+  initialBlockNumber: "41200",
+};
+
 /**
  * This function is called once when the game boots up.
  * It creates all the layers and their hierarchy.
@@ -30,15 +38,15 @@ async function bootGame() {
     mountReact.current(false);
 
     const params = new URLSearchParams(window.location.search);
-    const worldAddress = params.get("worldAddress");
+    const worldAddress = params.get("worldAddress") ?? defaultParams.worldAddress;
     let privateKey = params.get("burnerWalletPrivateKey");
-    const chainIdString = params.get("chainId");
-    const jsonRpc = params.get("rpc") || undefined;
-    const wsRpc = params.get("wsRpc") || undefined; // || (jsonRpc && jsonRpc.replace("http", "ws"));
+    const chainIdString = params.get("chainId") ?? defaultParams.chainId;
+    const jsonRpc = params.get("rpc") ?? defaultParams.rpc;
+    const wsRpc = params.get("wsRpc") ?? defaultParams.wsRpc; // || (jsonRpc && jsonRpc.replace("http", "ws"));
     const checkpointUrl = params.get("checkpoint") || undefined;
     const peerJsUrl = params.get("peerJs") || undefined;
     const devMode = params.get("dev") === "true";
-    const initialBlockNumberString = params.get("initialBlockNumber");
+    const initialBlockNumberString = params.get("initialBlockNumber") ?? defaultParams.initialBlockNumber;
     const initialBlockNumber = initialBlockNumberString ? parseInt(initialBlockNumberString) : 0;
 
     if (!privateKey) {

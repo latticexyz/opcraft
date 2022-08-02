@@ -13,6 +13,7 @@ import {
   runQuery,
 } from "@latticexyz/recs";
 import { BlockType } from "../../network";
+import { INDEX_TO_BLOCK_TYPE } from "./ActionBar";
 
 const SCALE = 3;
 
@@ -63,7 +64,7 @@ export function registerCrafting() {
       }
 
       function handleClick(index: number) {
-        const selectedBlockType = getComponentValue(SelectedSlot, SingletonEntity)?.value ?? 1;
+        const selectedBlockType = INDEX_TO_BLOCK_TYPE[getComponentValue(SelectedSlot, SingletonEntity)?.value ?? 1];
         const ownedBlocksOfType = [
           ...runQuery([
             HasValue(OwnedBy, { value: connectedAddress.get() }),

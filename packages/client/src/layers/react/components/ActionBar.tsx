@@ -8,8 +8,8 @@ import { defineQuery, getComponentValue, HasValue } from "@latticexyz/recs";
 import { BlockType } from "../../network";
 
 const SCALE = 3;
-export const INDEX_TO_BLOCK_TYPE : {[key: number]: BlockType} = {
-  1: BlockType.Dirt,
+export const INDEX_TO_BLOCK_TYPE: { [key: number]: BlockType } = {
+  1: BlockType.Grass,
   2: BlockType.Log,
   3: BlockType.Planks,
   4: BlockType.Sand,
@@ -17,8 +17,8 @@ export const INDEX_TO_BLOCK_TYPE : {[key: number]: BlockType} = {
   6: BlockType.Leaves,
   7: BlockType.Crafting,
   8: BlockType.Stone,
-  9: BlockType.Diamond,
-}
+  9: BlockType.Water,
+};
 
 export function registerActionBar() {
   registerUIComponent(
