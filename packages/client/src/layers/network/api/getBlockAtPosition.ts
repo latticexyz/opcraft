@@ -5,7 +5,7 @@ import { BlockType as BlockTypeEnum } from "../constants";
 const perlinMap = new CoordMap<number>();
 
 function noise(coord: { x: number; y: number }) {
-  return Math.floor(cubicNoiseSample2(cubicNoiseConfig(1000, 64, 256, 256), coord.x, coord.y) * 32 - 16);
+  return Math.floor(cubicNoiseSample2(cubicNoiseConfig(1000, 64, 16, 256, 256), coord.x, coord.y) - 8);
 }
 
 function getHeightAt(coord: VoxelCoord) {
