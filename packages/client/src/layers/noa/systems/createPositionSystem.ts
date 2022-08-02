@@ -3,6 +3,7 @@ import { defineSystem, EntityIndex, getComponentValueStrict, Has, Not, UpdateTyp
 import { getAddressColor } from "@latticexyz/std-client";
 import { VoxelCoord } from "@latticexyz/utils";
 import { NetworkLayer } from "../../network";
+import { applyModel } from "../engine/model";
 import { NoaLayer } from "../types";
 
 export function createPositionSystem(network: NetworkLayer, context: NoaLayer) {
@@ -55,6 +56,17 @@ export function createPositionSystem(network: NetworkLayer, context: NoaLayer) {
       // mesh registered at the center of the box
       offset: [0, h / 2, 0],
     });
+    applyModel(
+      noa,
+      noaEntity,
+      noaEntity.toString(),
+      "./assets/models/player.json",
+      "./assets/skins/steve.png",
+      0,
+      true,
+      "Ludens",
+      [1, 1, 1]
+    );
   }
 
   // Bad style, don't try at home
