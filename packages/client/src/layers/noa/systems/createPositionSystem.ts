@@ -16,7 +16,7 @@ export function createPositionSystem(network: NetworkLayer, context: NoaLayer) {
   const {
     world,
     network: { connectedAddress },
-    components: { BlockType },
+    components: { BlockType, Name },
   } = network;
 
   const mudToNoaId = new Map<number, number>();
@@ -64,7 +64,7 @@ export function createPositionSystem(network: NetworkLayer, context: NoaLayer) {
       "./assets/skins/steve.png",
       0,
       true,
-      "Ludens",
+      "Steve",
       [1, 1, 1]
     );
   }

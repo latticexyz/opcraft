@@ -48,6 +48,7 @@
   "devDependencies": {
     "@originjs/vite-plugin-commonjs": "^1.0.3",
     "@originjs/vite-plugin-require-context": "^1.0.9",
+    "@types/gl-vec3": "^1.1.1",
     "@types/jest": "^27.4.1",
     "@types/lodash": "^4.14.182",
     "@types/peerjs": "^1.1.0",

@@ -1,10 +1,19 @@
-import * as BABYLON from "@babylonjs/core/Legacy/legacy";
-import { AbstractMesh, Mesh } from "@babylonjs/core/Legacy/legacy";
+import {
+  AbstractMesh,
+  DynamicTexture,
+  Matrix,
+  Mesh,
+  MeshBuilder,
+  Scene,
+  Texture,
+  Vector3,
+  Vector4,
+} from "@babylonjs/core";
 import { Engine } from "noa-engine";
 import { getAsset } from "./assets";
 
 const models: { [key: string]: any } = {};
-const templateModels: { [i: string]: BABYLON.Mesh } = {};
+const templateModels: { [i: string]: Mesh } = {};
 
 export function defineModelComp(noa: Engine) {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -59,7 +68,7 @@ async function applyModelTo(
   eid: number,
   uuid: string,
   hitbox: number[],
-  scene: BABYLON.Scene,
+  scene: Scene,
   offset: number
 ) {
   const builded: any = await buildModel(noa, model, data, texture);
@@ -68,7 +77,7 @@ async function applyModelTo(
 
   noa.ents.addComponentAgain(eid, "model", builded);
 
-  const hitboxMesh = BABYLON.MeshBuilder.CreateBox(
+  const hitboxMesh = MeshBuilder.CreateBox(
     `hitbox-${uuid}`,
     {
       height: hitbox[1],
@@ -81,7 +90,7 @@ async function applyModelTo(
   // eslint-disable-next-line no-constant-condition
   if (true || eid != noa.playerEntity) {
     hitboxMesh.setParent(builded.main);
-    hitboxMesh.setPositionWithLocalVector(new BABYLON.Vector3(0, hitbox[1] / 2, 0));
+    hitboxMesh.setPositionWithLocalVector(new Vector3(0, hitbox[1] / 2, 0));
     hitboxMesh.material = noa.rendering.makeStandardMaterial("");
     //hitboxMesh.material.wireframe = true;
     hitboxMesh.isVisible = false;
@@ -96,7 +105,7 @@ async function applyModelTo(
     const data = noa.ents.getPositionData(eid);
 
     builded.main.setParent(noa.entities.getMeshData(eid).mesh);
-    builded.main.position = new BABYLON.Vector3(0, -data!.height / 2, 0);
+    builded.main.position = new Vector3(0, -data!.height / 2, 0);
   }
 
   noa.rendering.addMeshToScene(builded.main, false);
@@ -121,13 +130,7 @@ async function buildModel(noa: Engine, name: string, model: object, texture: str
 
     const mat = noa.rendering.makeStandardMaterial("modelmaterial-" + partName);
     cmesh.material = mat;
-    mat.diffuseTexture = new BABYLON.Texture(
-      getAsset(texture, "texture"),
-      scene,
-      true,
-      true,
-      BABYLON.Texture.NEAREST_SAMPLINGMODE
-    );
+    mat.diffuseTexture = new Texture(getAsset(texture, "texture"), scene, true, true, Texture.NEAREST_SAMPLINGMODE);
     mat.diffuseTexture.hasAlpha = true;
     noa.rendering.addMeshToScene(cmesh);
     meshlist.models[partName] = cmesh;
@@ -157,7 +160,7 @@ function createTemplateModel(noa: Engine, name: string, model: any) {
   const scale = 0.06;
   const txtSize = [model.geometry.texturewidth, model.geometry.textureheight];
 
-  const main = new BABYLON.Mesh("main", scene);
+  const main = new Mesh("main", scene);
 
   const modeldata = model.geometry.bones;
 
@@ -178,44 +181,44 @@ function createTemplateModel(noa: Engine, name: string, model: any) {
       const pos = box[y].origin;
       const off = box[y].uv;
 
-      faceUV[0] = new BABYLON.Vector4(
+      faceUV[0] = new Vector4(
         (off[0] + size[2]) / txtSize[0],
         (txtSize[1] - size[1] - size[2] - off[1]) / txtSize[1],
         (size[2] + size[0] + off[0]) / txtSize[0],
         (txtSize[1] - size[2] - off[1]) / txtSize[1]
       );
-      faceUV[1] = new BABYLON.Vector4(
+      faceUV[1] = new Vector4(
         (off[0] + size[2] * 2 + size[0]) / txtSize[0],
         (txtSize[1] - size[1] - size[2] - off[1]) / txtSize[1],
         (size[2] * 2 + size[0] * 2 + off[0]) / txtSize[0],
         (txtSize[1] - size[2] - off[1]) / txtSize[1]
       );
-      faceUV[2] = new BABYLON.Vector4(
+      faceUV[2] = new Vector4(
         off[0] / txtSize[0],
         (txtSize[1] - size[1] - size[2] - off[1]) / txtSize[1],
         (off[0] + size[2]) / txtSize[0],
         (txtSize[1] - size[2] - off[1]) / txtSize[1]
       );
-      faceUV[3] = new BABYLON.Vector4(
+      faceUV[3] = new Vector4(
         (off[0] + size[2] + size[0]) / txtSize[0],
         (txtSize[1] - size[1] - size[2] - off[1]) / txtSize[1],
         (size[2] + size[0] * 2 + off[0]) / txtSize[0],
         (txtSize[1] - size[2] - off[1]) / txtSize[1]
       );
-      faceUV[4] = new BABYLON.Vector4(
+      faceUV[4] = new Vector4(
         (size[0] + size[2] + off[0]) / txtSize[0],
         (txtSize[1] - size[2] - off[1]) / txtSize[1],
         (off[0] + size[2]) / txtSize[0],
         (txtSize[1] - off[1]) / txtSize[1]
       );
-      faceUV[5] = new BABYLON.Vector4(
+      faceUV[5] = new Vector4(
         (size[0] * 2 + size[2] + off[0]) / txtSize[0],
         (txtSize[1] - size[2] - off[1]) / txtSize[1],
         (off[0] + size[2] + size[0]) / txtSize[0],
         (txtSize[1] - off[1]) / txtSize[1]
       );
 
-      part[y] = BABYLON.MeshBuilder.CreateBox(
+      part[y] = MeshBuilder.CreateBox(
         "part-" + mdata.name + "-" + y,
         {
           height: (size[1] + add) * scale,
@@ -227,7 +230,7 @@ function createTemplateModel(noa: Engine, name: string, model: any) {
         scene
       );
 
-      part[y].position = new BABYLON.Vector3(
+      part[y].position = new Vector3(
         -(pos[0] + (size[0] - add / 2) / 2) * scale,
         (pos[1] + (size[1] - add / 2) / 2) * scale,
         (pos[2] + (size[2] - add / 2) / 2) * scale
@@ -238,9 +241,9 @@ function createTemplateModel(noa: Engine, name: string, model: any) {
 
       part[y].opaque = false;
     }
-    const mesh = BABYLON.Mesh.MergeMeshes(part, true, true, undefined, true, true);
+    const mesh = Mesh.MergeMeshes(part, true, true, undefined, true, true);
     mesh!.setParent(main);
-    mesh!.setPivotMatrix(BABYLON.Matrix.Translation(-pivot[0] * scale, -pivot[1] * scale, -pivot[2] * scale));
+    mesh!.setPivotMatrix(Matrix.Translation(-pivot[0] * scale, -pivot[1] * scale, -pivot[2] * scale));
   }
 
   templateModels[name] = main;
@@ -264,7 +267,7 @@ export function addNametag(noa: Engine, mainMesh: Mesh, name: string, height: nu
   const ratio = planeHeight / DTHeight;
 
   //Use a temporay dynamic texture to calculate the length of the text on the dynamic texture canvas
-  const temp = new BABYLON.DynamicTexture("DynamicTexture", 64, scene, false);
+  const temp = new DynamicTexture("DynamicTexture", 64, scene, false);
   const tmpctx = temp.getContext();
   tmpctx.font = font;
   const DTWidth = tmpctx.measureText(name).width + 8;
@@ -273,12 +276,7 @@ export function addNametag(noa: Engine, mainMesh: Mesh, name: string, height: nu
   const planeWidth = DTWidth * ratio;
 
   //Create dynamic texture and write the text
-  const dynamicTexture = new BABYLON.DynamicTexture(
-    "DynamicTexture",
-    { width: DTWidth, height: DTHeight },
-    scene,
-    false
-  );
+  const dynamicTexture = new DynamicTexture("DynamicTexture", { width: DTWidth, height: DTHeight }, scene, false);
   const mat = noa.rendering.makeStandardMaterial("nametag");
   mat.diffuseTexture = dynamicTexture;
   mat.emissiveTexture = mat.diffuseTexture;
@@ -287,7 +285,7 @@ export function addNametag(noa: Engine, mainMesh: Mesh, name: string, height: nu
   dynamicTexture.drawText(name, null, null, font, "#eeeeee", "#00000066", true);
 
   //Create plane and set dynamic texture as material
-  const plane = BABYLON.MeshBuilder.CreatePlane("plane", { width: planeWidth, height: planeHeight }, scene);
+  const plane = MeshBuilder.CreatePlane("plane", { width: planeWidth, height: planeHeight }, scene);
   plane.material = mat;
 
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -299,7 +297,7 @@ export function addNametag(noa: Engine, mainMesh: Mesh, name: string, height: nu
   plane.isVisible = visible;
 
   plane.setParent(mainMesh);
-  plane.setPositionWithLocalVector(new BABYLON.Vector3(0, height + 0.2, 0));
+  plane.setPositionWithLocalVector(new Vector3(0, height + 0.2, 0));
   noa.rendering.addMeshToScene(plane);
 
   return plane;

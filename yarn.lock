@@ -3946,6 +3946,11 @@
   dependencies:
     "@types/node" "*"
 
+"@types/gl-vec3@^1.1.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@types/gl-vec3/-/gl-vec3-1.1.1.tgz#62cc347c3a1dee3522fcfb729cf09970844d1649"
+  integrity sha512-nLGZ7SX8e1Ni7bLfDZPr+hyhnvENZWKXvyY1PdTY29bY8jBNFw8yxsONis1iT/R8nPAC/bhhGBlCCSBJNHZHqQ==
+
 "@types/glob@^7.1.1", "@types/glob@^7.2.0":
   version "7.2.0"
   resolved "https://registry.yarnpkg.com/@types/glob/-/glob-7.2.0.tgz#bc1b5bf3aa92f25bd5dd39f35c57361bdce5b2eb"

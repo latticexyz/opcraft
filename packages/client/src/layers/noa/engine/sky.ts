@@ -1,9 +1,8 @@
-import * as BABYLON from "@babylonjs/core/Legacy/legacy";
-
+import { Color3, Mesh, MeshBuilder, Scene, StandardMaterial, Texture, Vector3 } from "@babylonjs/core";
 import type { Engine } from "noa-engine";
 
-export let cloudMesh: BABYLON.Mesh;
-export let skyMesh: BABYLON.Mesh;
+export let cloudMesh: Mesh;
+export let skyMesh: Mesh;
 
 /*
  * Setups clouds in a hacky way
@@ -11,7 +10,7 @@ export let skyMesh: BABYLON.Mesh;
 
 export function setupClouds(noa: Engine) {
   const scene = noa.rendering.getScene();
-  cloudMesh = BABYLON.MeshBuilder.CreatePlane(
+  cloudMesh = MeshBuilder.CreatePlane(
     "cloudMesh",
     {
       height: 1.5e3,
@@ -20,14 +19,14 @@ export function setupClouds(noa: Engine) {
     scene
   );
 
-  const cloudMat = new BABYLON.StandardMaterial("cloud", scene);
+  const cloudMat = new StandardMaterial("cloud", scene);
 
-  const cloudTexture = new BABYLON.Texture(
+  const cloudTexture = new Texture(
     "./assets/textures/environment/clouds.png",
     scene,
     true,
     true,
-    BABYLON.Texture.NEAREST_SAMPLINGMODE
+    Texture.NEAREST_SAMPLINGMODE
   );
   cloudTexture.hasAlpha = true;
   cloudTexture.vScale = 0.75;
@@ -36,14 +35,14 @@ export function setupClouds(noa: Engine) {
   cloudMat.diffuseTexture = cloudTexture;
   cloudMat.opacityTexture = cloudTexture;
   cloudMat.backFaceCulling = false;
-  cloudMat.emissiveColor = new BABYLON.Color3(1, 1, 1);
+  cloudMat.emissiveColor = new Color3(1, 1, 1);
 
   cloudMesh.rotation.x = -Math.PI / 2;
   cloudMesh.material = cloudMat;
 
   noa.rendering.addMeshToScene(cloudMesh, false);
 
-  cloudMesh.setPositionWithLocalVector(new BABYLON.Vector3(0, 0, 200));
+  cloudMesh.setPositionWithLocalVector(new Vector3(0, 0, 200));
 
   let pos = [...noa.camera.getPosition()];
 
@@ -57,7 +56,7 @@ export function setupClouds(noa: Engine) {
     cloudTexture.uOffset -= (pos[0] - noa.camera.getPosition()[0]) / 10000;
     pos = [...noa.camera.getPosition()];
 
-    cloudMesh.setPositionWithLocalVector(new BABYLON.Vector3(0, 0, 250 - noa.camera.getPosition()[1]));
+    cloudMesh.setPositionWithLocalVector(new Vector3(0, 0, 250 - noa.camera.getPosition()[1]));
   };
 
   noa.on("beforeRender", update);
@@ -72,11 +71,11 @@ export function setupClouds(noa: Engine) {
  */
 
 export function setupSky(noa: Engine) {
-  const scene: BABYLON.Scene = noa.rendering.getScene();
+  const scene: Scene = noa.rendering.getScene();
   if (skyMesh != null && !skyMesh.isDisposed) {
     skyMesh.dispose();
   }
-  skyMesh = BABYLON.MeshBuilder.CreatePlane(
+  skyMesh = MeshBuilder.CreatePlane(
     "skyMesh",
     {
       height: 1.2e4,
@@ -85,9 +84,9 @@ export function setupSky(noa: Engine) {
     scene
   );
 
-  const skyMat = new BABYLON.StandardMaterial("sky", scene);
+  const skyMat = new StandardMaterial("sky", scene);
   skyMat.backFaceCulling = false;
-  skyMat.emissiveColor = new BABYLON.Color3(0.2, 0.3, 0.7);
+  skyMat.emissiveColor = new Color3(0.2, 0.3, 0.7);
   skyMat.diffuseColor = skyMat.emissiveColor;
 
   skyMesh.infiniteDistance = true;
@@ -98,10 +97,10 @@ export function setupSky(noa: Engine) {
 
   noa.rendering.addMeshToScene(skyMesh, false);
 
-  skyMesh.setPositionWithLocalVector(new BABYLON.Vector3(0, 0, 500));
+  skyMesh.setPositionWithLocalVector(new Vector3(0, 0, 500));
 
   const update = () => {
-    skyMesh.setPositionWithLocalVector(new BABYLON.Vector3(0, 0, 500));
+    skyMesh.setPositionWithLocalVector(new Vector3(0, 0, 500));
   };
 
   noa.on("beforeRender", update);

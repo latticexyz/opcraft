@@ -1,5 +1,4 @@
 import { Engine } from "noa-engine";
-import * as BABYLON from "@babylonjs/core/Legacy/legacy";
 // add a mesh to represent the player, and scale it, etc.
 import "@babylonjs/core/Meshes/Builders/boxBuilder";
 import { VoxelCoord } from "@latticexyz/utils";
@@ -7,6 +6,7 @@ import * as vec3 from "gl-vec3";
 import { Blocks, Textures } from "../constants";
 import { BlockType } from "../../network";
 import { applyModel } from "../engine/model";
+import { Color3 } from "@babylonjs/core";
 
 export function setupNoaEngine(getVoxel: (coord: VoxelCoord) => BlockType) {
   const opts = {
@@ -87,7 +87,7 @@ export function setupNoaEngine(getVoxel: (coord: VoxelCoord) => BlockType) {
   scene.fogStart = 500;
   scene.fogEnd = 4000;
   scene.fogDensity = 0.000001;
-  scene.fogColor = new BABYLON.Color3(...[0.8, 0.9, 1]);
+  scene.fogColor = new Color3(...[0.8, 0.9, 1]);
   applyModel(
     noa,
     noa.playerEntity,
@@ -96,7 +96,7 @@ export function setupNoaEngine(getVoxel: (coord: VoxelCoord) => BlockType) {
     "./assets/skins/steve.png",
     0,
     true,
-    "Ludens",
+    "Steve",
     [1, 1, 1]
   );
   const entityEvent = async function () {
