@@ -36,6 +36,7 @@ async function bootGame() {
     const jsonRpc = params.get("rpc") || undefined;
     const wsRpc = params.get("wsRpc") || undefined; // || (jsonRpc && jsonRpc.replace("http", "ws"));
     const checkpointUrl = params.get("checkpoint") || undefined;
+    const peerJsUrl = params.get("peerJs") || undefined;
     const devMode = params.get("dev") === "true";
     const initialBlockNumberString = params.get("initialBlockNumber");
     const initialBlockNumber = initialBlockNumberString ? parseInt(initialBlockNumberString) : 0;
@@ -52,6 +53,7 @@ async function bootGame() {
         privateKey,
         chainId: parseInt(chainIdString),
         jsonRpc,
+        peerJsUrl,
         wsRpc,
         checkpointUrl,
         devMode,

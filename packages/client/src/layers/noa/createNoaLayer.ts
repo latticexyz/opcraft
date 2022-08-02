@@ -18,10 +18,9 @@ import { setupNoaEngine } from "./setup";
 import { createBlockSystem, createInputSystem, createPositionSystem } from "./systems";
 import { createSyncSystem } from "./systems/createSyncSystem";
 
-const HOST = "localhost";
-const KEY = "blob";
-const PORT = 9999;
-const SECURE = false;
+const DEFAULT_PEER_JS_URL = "http://localhost:9999";
+const DEFAULT_PEER_JS_KEY = "peerjs";
+
 enum Side {
   INITIATOR,
   RECEIVER,
@@ -71,6 +70,11 @@ export function createNoaLayer(network: NetworkLayer) {
   }
 
   // --- P2P ------------------------------------------------------------------------
+  const peerJsParsedUrl = new URL(network.config.peerJsUrl || DEFAULT_PEER_JS_URL);
+  const peerJsHost = peerJsParsedUrl.hostname;
+  const secure = peerJsParsedUrl.protocol.includes("https");
+  const unparsedPort = peerJsParsedUrl.port;
+  const port = unparsedPort.length > 0 ? parseInt(unparsedPort) : secure ? 443 : 80;
   const peerObject = observable.box<Peer>();
   const connections: {
     [key: string]: { connection: DataConnection; metadata: Metadata; lastPong: number } | undefined;
@@ -188,10 +192,10 @@ export function createNoaLayer(network: NetworkLayer) {
   const setupPeer = async () => {
     const peer = new Peer({
       debug: 1,
-      secure: SECURE,
-      port: PORT,
-      key: KEY,
-      host: HOST,
+      secure,
+      port,
+      key: DEFAULT_PEER_JS_KEY,
+      host: peerJsHost,
     });
 
     peer.on("connection", (d) => {
@@ -201,7 +205,7 @@ export function createNoaLayer(network: NetworkLayer) {
     world.registerDisposer(() => peer.destroy());
     peerObject.set(peer);
     // Connect to initial peer list
-    const res = await fetch((SECURE ? "https://" : "http://") + HOST + ":" + PORT + "/" + KEY + "/peers");
+    const res = await fetch((network.config.peerJsUrl || DEFAULT_PEER_JS_URL) + "/" + DEFAULT_PEER_JS_KEY + "/peers");
     const connectedAddress = await awaitValue(network.network.connectedAddress);
     const connectedPeers = await res.json();
     connectedPeers.forEach((c: string) => {

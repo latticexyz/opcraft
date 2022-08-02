@@ -7,6 +7,7 @@ export type GameConfig = {
   jsonRpc: string;
   wsRpc?: string;
   checkpointUrl?: string;
+  peerJsUrl?: string;
   devMode: boolean;
   initialBlockNumber: number;
 };
