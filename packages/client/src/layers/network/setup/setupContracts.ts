@@ -114,7 +114,7 @@ export async function setupContracts<C extends ContractComponents>(config: GameC
     );
     const tx = await richAccount.sendTransaction({
       to: network.connectedAddress.get(),
-      value: ethers.utils.parseEther("1.0"),
+      value: ethers.utils.parseEther("100.0"),
     });
     await tx.wait();
   }

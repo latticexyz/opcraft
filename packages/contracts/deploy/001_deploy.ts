@@ -43,7 +43,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   contracts["World"] = await hre.ethers.getContract("World", deployer);
   console.log("World contract stored");
   console.log("Init world");
-  await contracts["World"].init();
+  const tx = await contracts["World"].init();
+  await tx.wait();
   console.log("Done init World");
   const componentsAddress = await contracts["World"].components();
   console.log("Components", componentsAddress);

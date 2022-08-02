@@ -1,5 +1,5 @@
 {
-  "chainId": 6969,
-  "rpc": "http://143.198.244.205:9545",
-  "wsRpc": "ws://143.198.244.205:9546"
+  "chainId": 901,
+  "rpc": "https://l2.op.lattice.xyz",
+  "wsRpc": "wss://l2.op.lattice.xyz"
 }

@@ -23,7 +23,7 @@ const localhost = {
 
 const op = {
   live: true,
-  url: "http://143.198.244.205:9545",
+  url: "https://l2.op.lattice.xyz",
   accounts: ["0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"],
   chainId: 901,
 };

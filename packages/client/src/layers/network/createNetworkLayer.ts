@@ -86,7 +86,7 @@ export async function createNetworkLayer(config: GameConfig) {
       id: `mine+${coord.x}/${coord.y}/${coord.z}` as EntityID,
       requirement: () => true,
       components: { Position: components.Position, OwnedBy: components.OwnedBy, BlockType: components.BlockType },
-      execute: () => systems["ember.system.mine"].executeTyped(coord, blockType, { gasLimit: 1_000_000 }),
+      execute: () => systems["ember.system.mine"].executeTyped(coord, blockType),
       updates: () => [
         {
           component: "Position",
