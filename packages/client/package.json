@@ -10,7 +10,6 @@
     "@latticexyz/phaserx": "^0.4.3",
     "@latticexyz/recs": "^0.4.3",
     "@latticexyz/std-client": "^0.4.3",
-    "@latticexyz/utils": "^0.4.3",
     "aabb-3d": "fenomas/aabb-3d",
     "async-mutex": "^0.3.2",
     "box-intersect": "fenomas/box-intersect",

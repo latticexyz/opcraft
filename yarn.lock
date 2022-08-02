@@ -1393,10 +1393,8 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
-"@latticexyz/cli@^0.4.3":
+"@latticexyz/cli@^0.4.3", "@latticexyz/cli@file:.yalc/@latticexyz/cli":
   version "0.4.3"
-  resolved "https://npm.pkg.github.com/download/@latticexyz/cli/0.4.3/c5d06698879739be51ab51cab3fd1438316440b5cd7abe69e6da04e0cb9714ce#3c904b62343caf4b1044a22a3aae140a5ab06a6e"
-  integrity sha512-04ZfLAtoxTaZv0lLM0bzDvI3QX4jWGQxUjdwWR1SPs56HfUQl14r7GhojVwktgcaUJiVn+thSFB7IQqt9ojy8w==
   dependencies:
     "@latticexyz/solecs" "^0.4.3"
     "@latticexyz/utils" "^0.4.3"
@@ -1419,51 +1417,45 @@
     uuid "^8.3.2"
     yargs "^17.5.1"
 
-"@latticexyz/ecs-browser@^0.4.3":
+"@latticexyz/ecs-browser@^0.4.3", "@latticexyz/ecs-browser@file:.yalc/@latticexyz/ecs-browser":
   version "0.4.3"
-  resolved "https://npm.pkg.github.com/download/@latticexyz/ecs-browser/0.4.3/b64bbb235410b30cb2516391f99d07fb76b568003b1dd7458612e751c26b02d1#7abe9f27c4c50d6c42ce81f9244e949f40a721d6"
-  integrity sha512-iwCvBtgHRZ6pEUhmdm8XjBQKSyekQOEVhJYTpACfK2evTBu6FIN1xk3RlH9uOZG+vB8DkoWD6OReZgaWLFQqAA==
 
-"@latticexyz/network@^0.4.3":
+"@latticexyz/network@^0.4.3", "@latticexyz/network@file:.yalc/@latticexyz/network":
   version "0.4.3"
-  resolved "https://npm.pkg.github.com/download/@latticexyz/network/0.4.3/e02a45cbb8df20d833a05ee925311f3499e787b01ce4df0aec10b89877cd1ea9#37a41720edde5b7306109e0ae91f998152b2c9f3"
-  integrity sha512-P7XlROTBDocKyiwiSYZB9LecOA/JekbO11OlJk8dwlAUi2gcCgOtVUT4kOB+DTdjVDdGuwK1UsWJvtfAh5C8Iw==
   dependencies:
     "@protobuf-ts/grpcweb-transport" "^2.7.0"
     "@protobuf-ts/runtime-rpc" "^2.7.0"
     observable-webworker "^4.0.1"
 
-"@latticexyz/phaserx@^0.4.3":
+"@latticexyz/phaserx@^0.4.3", "@latticexyz/phaserx@file:.yalc/@latticexyz/phaserx":
   version "0.4.3"
-  resolved "https://npm.pkg.github.com/download/@latticexyz/phaserx/0.4.3/828d9ccf630080d6bf0dfaaea41b6b44535aa0703cf04fe48b25715e2468667a#8e90653995196ea85badb25a7d48cc8b36f61bc5"
-  integrity sha512-Dsmo4Orve72VZ5l6mGyntkTzAm3zR1QKodKBRjM3X9YIjyxKYNx+sCZjUnjNvvbwymkRcm7Xpzrd7qKhjHGFvQ==
   dependencies:
     "@use-gesture/vanilla" "10.2.9"
 
-"@latticexyz/recs@^0.4.3":
+"@latticexyz/recs@^0.4.3", "@latticexyz/recs@file:.yalc/@latticexyz/recs":
   version "0.4.3"
-  resolved "https://npm.pkg.github.com/download/@latticexyz/recs/0.4.3/53be871e6297d174c4b6b3448274191d129119df80795f50ebedf85585c50939#9109a9fc80144a7cdef97305f65171b2927117ee"
-  integrity sha512-EHvdL4ok1J3O1yVed313zts27oQK5AJTLSaMDYHJUt9M9yUhw8D4/rqX+uK8NVLvowFkgEYifpxhvXSVfwq/kg==
 
 "@latticexyz/solecs@^0.4.3":
   version "0.4.3"
   resolved "https://npm.pkg.github.com/download/@latticexyz/solecs/0.4.3/9295f735442891c7dd09ececdb4def5306e627872d689c4bcc13fb59a268b34c#533b8bd854e374d99dd19a26ad88e73dd19ce5d5"
   integrity sha512-/hBda2Za/qZE/Qdd9ZqPD/1modxsmkDCuDkL3wvEJLDznJUChwKhjaIWFq5TE9zNupcY01sJwXczVJZS5J8NIg==
 
-"@latticexyz/std-client@^0.4.3":
+"@latticexyz/solecs@file:.yalc/@latticexyz/solecs":
   version "0.4.3"
-  resolved "https://npm.pkg.github.com/download/@latticexyz/std-client/0.4.3/28e4c2535aebb297e112b0f357a0ff58ee7d1a45bec4b04f953854eb31191df1#a9d629b63475a86f4feaddc14c457ac14c3e2cd3"
-  integrity sha512-ltYb08zDMxzFDk5aD0vr6KWcTBz3DNIMvjYqBYR2sEwsIrhiy2Z9FFc2FHNEEshimLlt+iaF54dLfEMZOrLImw==
 
-"@latticexyz/std-contracts@^0.4.3":
+"@latticexyz/std-client@^0.4.3", "@latticexyz/std-client@file:.yalc/@latticexyz/std-client":
   version "0.4.3"
-  resolved "https://npm.pkg.github.com/download/@latticexyz/std-contracts/0.4.3/1ca2b0c2cd0bf8c81009064e9657099f39bec7137a38bc87fe5a875fc0854de0#6e639de78a2400d4598e55f1b4772a78542f9d25"
-  integrity sha512-xOyRFpUiqLBDoPXbE+L/vPFCJMVRFBNo9XaPhYQOahMKCGI2f0uDdxCR3iIDdc6YvXNClvHlAuzRKNlqKqKn2A==
+
+"@latticexyz/std-contracts@^0.4.3", "@latticexyz/std-contracts@file:.yalc/@latticexyz/std-contracts":
+  version "0.4.3"
 
 "@latticexyz/utils@^0.4.3":
   version "0.4.3"
   resolved "https://npm.pkg.github.com/download/@latticexyz/utils/0.4.3/eab74bcb7790d7d233f6befc946d97357a6581b7244e540952fd27455eed1c88#7aaffd509c114e3162174eedecce390261a61352"
   integrity sha512-691NsVrAW06Q01uaxOPb+bK/8fYTro+qxFDbVx1ORB8rtt09Qabaqgg7/GdMKj2iXp91Rcgsdi+693EGBieLag==
+
+"@latticexyz/utils@file:.yalc/@latticexyz/utils":
+  version "0.4.3"
 
 "@lerna/add@4.0.0":
   version "4.0.0"
