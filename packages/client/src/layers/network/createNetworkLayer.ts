@@ -79,13 +79,14 @@ export async function createNetworkLayer(config: GameConfig) {
 
   function mine(coord: VoxelCoord) {
     const entityAtPos = [...components.Position.getEntitiesWithValue(coord)][0];
-    console.log("entity", entityAtPos);
+    const blockType = entityAtPos == null ? getBlockAtPosition(components, coord) : 0;
+    console.log("entity/blocktype", entityAtPos, blockType);
     const airEntity = world.registerEntity();
     actions.add({
       id: `mine+${coord.x}/${coord.y}/${coord.z}` as EntityID,
       requirement: () => true,
       components: { Position: components.Position, OwnedBy: components.OwnedBy, BlockType: components.BlockType },
-      execute: () => systems["ember.system.mine"].executeTyped(coord),
+      execute: () => systems["ember.system.mine"].executeTyped(coord, blockType, { gasLimit: 1_000_000 }),
       updates: () => [
         {
           component: "Position",
