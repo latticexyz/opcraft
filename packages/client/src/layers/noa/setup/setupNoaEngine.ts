@@ -1,4 +1,5 @@
 import { Engine } from "noa-engine";
+import * as BABYLON from "@babylonjs/core/Legacy/legacy";
 // add a mesh to represent the player, and scale it, etc.
 import "@babylonjs/core/Meshes/Builders/boxBuilder";
 import { VoxelCoord } from "@latticexyz/utils";
@@ -7,11 +8,26 @@ import { BlockType } from "../../network";
 
 export function setupNoaEngine(getVoxel: (coord: VoxelCoord) => BlockType) {
   const opts = {
-    debug: true,
-    showFPS: true,
-    chunkSize: 32,
-    chunkAddDistance: 2.5,
-    chunkRemoveDistance: 3.5,
+    showFPS: false,
+    inverseY: false,
+    inverseX: false,
+    chunkAddDistance: [5, 5],
+    chunkRemoveDistance: [5, 5],
+    blockTestDistance: 7,
+    texturePath: "",
+    playerHeight: 1.85,
+    playerWidth: 0.6,
+    playerAutoStep: 1,
+    clearColor: [0.8, 0.9, 1],
+    ambientColor: [1, 1, 1],
+    lightDiffuse: [1, 1, 1],
+    lightSpecular: [1, 1, 1],
+    groundLightColor: [1, 1, 1],
+    useAO: true,
+    AOmultipliers: [0.93, 0.8, 0.5],
+    reverseAOmultiplier: 1.0,
+    preserveDrawingBuffer: true,
+    gravity: [0, -14, 0],
   };
 
   const noa = new Engine(opts);
@@ -62,6 +78,14 @@ export function setupNoaEngine(getVoxel: (coord: VoxelCoord) => BlockType) {
       if (noa.camera.zoomDistance > 10) noa.camera.zoomDistance = 10;
     }
   });
+
+  const scene = noa.rendering.getScene();
+
+  scene.fogMode = 3;
+  scene.fogStart = 500;
+  scene.fogEnd = 4000;
+  scene.fogDensity = 0.000001;
+  scene.fogColor = new BABYLON.Color3(...[0.8, 0.9, 1]);
 
   return { noa, setBlock };
 }

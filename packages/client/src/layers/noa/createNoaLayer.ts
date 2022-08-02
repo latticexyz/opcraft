@@ -14,6 +14,7 @@ import { defineSelectedSlotComponent } from "./components";
 import { defineCraftingTableComponent } from "./components/CraftingTable";
 import { defineLocalPositionComponent } from "./components/LocalPosition";
 import { Singleton } from "./constants";
+import { setupClouds, setupSky } from "./engine/sky";
 import { setupNoaEngine } from "./setup";
 import { createBlockSystem, createInputSystem, createPositionSystem } from "./systems";
 import { createSyncSystem } from "./systems/createSyncSystem";
@@ -52,6 +53,9 @@ export function createNoaLayer(network: NetworkLayer) {
 
   // --- SETUP ----------------------------------------------------------------------
   const { noa, setBlock } = setupNoaEngine(network.api.getBlockAtPosition);
+  // Modules
+  setupClouds(noa);
+  setupSky(noa);
 
   // --- API ------------------------------------------------------------------------
   function setCraftingTable(entities: EntityIndex[]) {
