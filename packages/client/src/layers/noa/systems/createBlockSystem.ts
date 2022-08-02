@@ -4,13 +4,14 @@ import { NoaLayer } from "../types";
 
 export function createBlockSystem(network: NetworkLayer, context: NoaLayer) {
   const {
-    api: { setBlock, getVoxel },
+    api: { setBlock },
   } = context;
 
   const {
     world,
     components: { Position, BlockType },
     actions: { withOptimisticUpdates },
+    api: { getBlockAtPosition },
   } = network;
 
   const OptimisticPosition = withOptimisticUpdates(Position);
@@ -19,8 +20,8 @@ export function createBlockSystem(network: NetworkLayer, context: NoaLayer) {
   // "Exit system"
   defineComponentSystem(world, OptimisticPosition, ({ value }) => {
     if (!value[0] && value[1]) {
-      const voxel = getVoxel(value[1]);
-      setBlock(value[1], voxel);
+      const block = getBlockAtPosition(value[1]);
+      setBlock(value[1], block);
     }
   });
 

@@ -2,18 +2,14 @@ import {
   EntityID,
   EntityIndex,
   getComponentValue,
-  getComponentValueStrict,
-  Has,
-  HasValue,
   namespaceWorld,
   removeComponent,
-  runQuery,
   setComponent,
 } from "@latticexyz/recs";
-import { awaitValue, Coord, VoxelCoord } from "@latticexyz/utils";
+import { awaitValue } from "@latticexyz/utils";
 import { observable } from "mobx";
 import { DataConnection, Peer } from "peerjs";
-import { BlockType, NetworkLayer } from "../network";
+import { NetworkLayer } from "../network";
 import { defineSelectedSlotComponent } from "./components";
 import { defineCraftingTableComponent } from "./components/CraftingTable";
 import { defineLocalPositionComponent } from "./components/LocalPosition";
@@ -37,9 +33,9 @@ interface Metadata {
 }
 
 const isMetadataFilled = (M: Metadata | undefined) => {
-  if(!M) return false
-  return !!M.from && !!M.to && (M.side !== undefined)
-}
+  if (!M) return false;
+  return !!M.from && !!M.to && M.side !== undefined;
+};
 
 const getMsTime = () => Date.now();
 
@@ -56,18 +52,7 @@ export function createNoaLayer(network: NetworkLayer) {
   };
 
   // --- SETUP ----------------------------------------------------------------------
-  function getVoxel(coord: VoxelCoord) {
-    if (coord.y < 0) {
-      return BlockType.Water;
-    }
-
-    const { Position, BlockType: BlockTypeComponent } = network.components;
-    const block = [...runQuery([HasValue(Position, coord), Has(BlockTypeComponent)])][0];
-    if (block != null) return getComponentValueStrict(BlockTypeComponent, block).value;
-    return BlockType.Air;
-  }
-
-  const { noa, setBlock } = setupNoaEngine(getVoxel);
+  const { noa, setBlock } = setupNoaEngine(network.api.getBlockAtPosition);
 
   // --- API ------------------------------------------------------------------------
   function setCraftingTable(entities: EntityIndex[]) {
@@ -101,17 +86,28 @@ export function createNoaLayer(network: NetworkLayer) {
     console.log("[Peer] New Data!", data);
     if (Object.keys(data).includes("myAddress")) {
       // We are updating the metadata
-      console.log("[Peer] setting reiver address: " + data.myAddress)
+      console.log("[Peer] setting reiver address: " + data.myAddress);
       setMetadata({ from: currentMetadata.from, to: data.myAddress, side: Side.INITIATOR });
     } else if (Object.keys(data).includes("x")) {
-      console.log("[Peer]", currentMetadata)
-      const peerAddress = (currentMetadata.side === Side.INITIATOR ? currentMetadata.to : currentMetadata.from) as EntityID;
+      console.log("[Peer]", currentMetadata);
+      const peerAddress = (
+        currentMetadata.side === Side.INITIATOR ? currentMetadata.to : currentMetadata.from
+      ) as EntityID;
       if (!peerAddress) {
         console.error("We don't know the address of our peer!");
-        return
+        return;
       }
       const entityIndex = world.registerEntity({ id: peerAddress as EntityID });
-      console.log("[Peer] Setting position of entity=" + peerAddress + " at position x=" + data.x + " y=" + data.y + " z=" + data.z)
+      console.log(
+        "[Peer] Setting position of entity=" +
+          peerAddress +
+          " at position x=" +
+          data.x +
+          " y=" +
+          data.y +
+          " z=" +
+          data.z
+      );
       setComponent(context.components.LocalPosition, entityIndex, data);
     } else if (Object.keys(data).includes("ping")) {
       send({ pong: true });
@@ -134,12 +130,12 @@ export function createNoaLayer(network: NetworkLayer) {
 
   const onNewPeer = async (connection: DataConnection) => {
     const connectedAddress = await awaitValue(network.network.connectedAddress);
-    const side = connectedAddress === connection.metadata ? Side.INITIATOR : Side.RECEIVER
-    const metadata : Metadata = {
+    const side = connectedAddress === connection.metadata ? Side.INITIATOR : Side.RECEIVER;
+    const metadata: Metadata = {
       from: connection.metadata,
       side,
-      to: connectedAddress !== connection.metadata ? connectedAddress : undefined
-    }
+      to: connectedAddress !== connection.metadata ? connectedAddress : undefined,
+    };
     console.log("[Peer] New Peer!. We are ", side === Side.INITIATOR ? "initiator" : "receiver");
     connections[connection.connectionId] = {
       connection,
@@ -147,9 +143,9 @@ export function createNoaLayer(network: NetworkLayer) {
       lastPong: getMsTime(),
     };
     const ping = setInterval(() => {
-      if(!isMetadataFilled(connections[connection.connectionId]?.metadata)) {
-        console.log("[Peer] waiting for metadata")
-        return
+      if (!isMetadataFilled(connections[connection.connectionId]?.metadata)) {
+        console.log("[Peer] waiting for metadata");
+        return;
       }
       console.log("[Peer] Pinging peer: " + connection.connectionId);
       if (connections[connection.connectionId]) {
@@ -165,7 +161,7 @@ export function createNoaLayer(network: NetworkLayer) {
     }, 1000);
     world.registerDisposer(() => clearInterval(ping));
     if (side === Side.RECEIVER) {
-      console.warn("[Peer] sending address")
+      console.warn("[Peer] sending address");
       setTimeout(() => connections[connection.connectionId]?.connection.send({ myAddress: connectedAddress }), 1000);
     }
     connection.on("data", (data) =>
@@ -173,7 +169,7 @@ export function createNoaLayer(network: NetworkLayer) {
         data,
         connections[connection.connectionId]!.metadata,
         (m: Metadata) => {
-          console.log("[Peer] setting metadata", m)
+          console.log("[Peer] setting metadata", m);
           if (connections[connection.connectionId] !== undefined) {
             connections[connection.connectionId]!.metadata = { ...m };
           }
@@ -210,7 +206,7 @@ export function createNoaLayer(network: NetworkLayer) {
     const connectedPeers = await res.json();
     connectedPeers.forEach((c: string) => {
       const d = peer.connect(c, { metadata: connectedAddress });
-      onNewPeer(d)
+      onNewPeer(d);
     });
     world.registerDisposer(() => {
       Object.keys(connections).forEach((connectionId) => connections[connectionId]?.connection.close());
@@ -227,7 +223,7 @@ export function createNoaLayer(network: NetworkLayer) {
       connections,
     },
     noa,
-    api: { setBlock, setCraftingTable, clearCraftingTable, setCraftingTableIndex, getVoxel },
+    api: { setBlock, setCraftingTable, clearCraftingTable, setCraftingTableIndex },
     SingletonEntity,
   };
 
@@ -245,7 +241,7 @@ export function createNoaLayer(network: NetworkLayer) {
     const peer = peerObject.get();
     if (peer) {
       Object.keys(connections).forEach((connectionId) => {
-        if(!isMetadataFilled(connections[connectionId]?.metadata)) return
+        if (!isMetadataFilled(connections[connectionId]?.metadata)) return;
         const connection = connections[connectionId]?.connection;
         if (!connection) return;
         connection.send({

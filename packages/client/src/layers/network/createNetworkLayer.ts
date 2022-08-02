@@ -13,6 +13,8 @@ import {
 } from "./components";
 import { BlockType } from "./constants";
 import { defineNameComponent } from "./components/NameComponent";
+import { curry } from "lodash";
+import { getBlockAtPosition } from "./api";
 
 /**
  * The Network layer is the lowest layer in the client architecture.
@@ -144,7 +146,7 @@ export async function createNetworkLayer(config: GameConfig) {
     startSync,
     network,
     actions,
-    api: { build, mine, move, name, craft },
+    api: { build, mine, move, craft, name, getBlockAtPosition: curry(getBlockAtPosition)(components) },
     dev: setupDevSystems(world, encoders, systems),
     config,
   };
