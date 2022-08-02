@@ -18,7 +18,8 @@ import { setupNoaEngine } from "./setup";
 import { createBlockSystem, createInputSystem, createPositionSystem } from "./systems";
 import { createSyncSystem } from "./systems/createSyncSystem";
 
-const DEFAULT_PEER_JS_URL = "http://localhost:9999";
+const DEFAULT_PEER_JS_URL = "https://71f6-100-12-0-67.ngrok.io";
+// const DEFAULT_PEER_JS_URL = "https://peerjs.lattice.xyz";
 const DEFAULT_PEER_JS_KEY = "peerjs";
 
 enum Side {
@@ -190,8 +191,9 @@ export function createNoaLayer(network: NetworkLayer) {
   };
 
   const setupPeer = async () => {
-    const peer = new Peer({
-      debug: 1,
+    const connectedAddress = await awaitValue(network.network.connectedAddress);
+    const peer = new Peer(connectedAddress, {
+      debug: 3,
       secure,
       port,
       key: DEFAULT_PEER_JS_KEY,
@@ -206,7 +208,6 @@ export function createNoaLayer(network: NetworkLayer) {
     peerObject.set(peer);
     // Connect to initial peer list
     const res = await fetch((network.config.peerJsUrl || DEFAULT_PEER_JS_URL) + "/" + DEFAULT_PEER_JS_KEY + "/peers");
-    const connectedAddress = await awaitValue(network.network.connectedAddress);
     const connectedPeers = await res.json();
     connectedPeers.forEach((c: string) => {
       const d = peer.connect(c, { metadata: connectedAddress });
