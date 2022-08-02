@@ -8,13 +8,14 @@ import { NoaLayer } from "../types";
 export function createPositionSystem(network: NetworkLayer, context: NoaLayer) {
   const {
     noa,
+    components: { LocalPosition },
     api: { setBlock },
   } = context;
 
   const {
     world,
     network: { connectedAddress },
-    components: { Position, BlockType },
+    components: { BlockType },
   } = network;
 
   const mudToNoaId = new Map<number, number>();
@@ -98,7 +99,7 @@ export function createPositionSystem(network: NetworkLayer, context: NoaLayer) {
   }
 
   // Everything with a position that is no block is considered a player
-  defineSystem(world, [Has(Position), Not(BlockType)], (update) => {
+  defineSystem(world, [Has(LocalPosition), Not(BlockType)], (update) => {
     if (update.type === UpdateType.Exit) {
       // Remove player
       // TODO: figure out how to remove an entity in NOA
@@ -107,7 +108,7 @@ export function createPositionSystem(network: NetworkLayer, context: NoaLayer) {
 
     const isPlayer = world.entities[update.entity] === connectedAddress.get();
 
-    const position = getComponentValueStrict(Position, update.entity);
+    const position = getComponentValueStrict(LocalPosition, update.entity);
     if (update.type === UpdateType.Enter) {
       // Set player position
       spawnPlayer(update.entity, isPlayer);

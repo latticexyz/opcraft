@@ -4,7 +4,8 @@
     "BlockTypeComponent",
     "OwnedByComponent",
     "GameConfigComponent",
-    "RecipeComponent"
+    "RecipeComponent",
+    "NameComponent"
   ],
   "systems": [
     { "name": "ComponentDevSystem", "writeAccess": ["*"] },
@@ -13,6 +14,7 @@
     { "name": "MineSystem", "writeAccess": ["PositionComponent", "OwnedByComponent"] },
     { "name": "InitSystem", "writeAccess": ["GameConfigComponent", "RecipeComponent"], "initialize": "new bytes(0)" },
     { "name": "MoveSystem", "writeAccess": ["PositionComponent"] },
-    { "name": "CraftingSystem", "writeAccess": ["BlockTypeComponent", "OwnedByComponent"] }
+    { "name": "CraftingSystem", "writeAccess": ["BlockTypeComponent", "OwnedByComponent"] },
+    { "name": "NameSystem", "writeAccess": ["NameComponent"] }
   ]
 }

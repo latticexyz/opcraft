@@ -12,6 +12,7 @@ import {
   defineRecipeComponent,
 } from "./components";
 import { BlockType } from "./constants";
+import { defineNameComponent } from "./components/NameComponent";
 
 /**
  * The Network layer is the lowest layer in the client architecture.
@@ -26,6 +27,7 @@ export async function createNetworkLayer(config: GameConfig) {
   // --- COMPONENTS -----------------------------------------------------------------
   const components = {
     Position: createIndexer(definePositionComponent(world)),
+    Name: defineNameComponent(world),
     BlockType: defineBlockTypeComponent(world),
     OwnedBy: defineOwnedByComponent(world),
     GameConfig: defineGameConfigComponent(world),
@@ -128,6 +130,10 @@ export async function createNetworkLayer(config: GameConfig) {
     return promise;
   }
 
+  function name(name: string) {
+    systems["ember.system.name"].executeTyped(name);
+  }
+
   // --- CONTEXT --------------------------------------------------------------------
   const context = {
     world,
@@ -138,8 +144,9 @@ export async function createNetworkLayer(config: GameConfig) {
     startSync,
     network,
     actions,
-    api: { build, mine, move, craft },
+    api: { build, mine, move, name, craft },
     dev: setupDevSystems(world, encoders, systems),
+    config,
   };
 
   return context;

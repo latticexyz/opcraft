@@ -1,3 +1,3 @@
 export { createInputSystem } from "./createInputSystem";
-export { createBlockSystem } from "./createBlockSysten";
+export { createBlockSystem } from "./createBlockSystem";
 export { createPositionSystem } from "./createPositionSystem";
