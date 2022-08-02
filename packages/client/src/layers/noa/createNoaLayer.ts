@@ -192,7 +192,7 @@ export function createNoaLayer(network: NetworkLayer) {
 
   const setupPeer = async () => {
     const connectedAddress = await awaitValue(network.network.connectedAddress);
-    const peer = new Peer(connectedAddress, {
+    const peer = new Peer({
       debug: 3,
       secure,
       port,
