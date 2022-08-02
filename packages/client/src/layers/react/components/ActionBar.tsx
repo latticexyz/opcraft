@@ -5,8 +5,20 @@ import { BlockIcon, Center, GUI } from "./common/GUI";
 import styled from "styled-components";
 import { range } from "@latticexyz/utils";
 import { defineQuery, getComponentValue, HasValue } from "@latticexyz/recs";
+import { BlockType } from "../../network";
 
 const SCALE = 3;
+export const INDEX_TO_BLOCK_TYPE : {[key: number]: BlockType} = {
+  1: BlockType.Dirt,
+  2: BlockType.Log,
+  3: BlockType.Planks,
+  4: BlockType.Sand,
+  5: BlockType.Cobblestone,
+  6: BlockType.Leaves,
+  7: BlockType.Crafting,
+  8: BlockType.Stone,
+  9: BlockType.Diamond,
+}
 
 export function registerActionBar() {
   registerUIComponent(
@@ -52,8 +64,8 @@ export function registerActionBar() {
             <GUI _x={0} _y={0} _height={22} _width={182} scale={SCALE}></GUI>
             {[...range(9, 1, 1)].map((i) => (
               <Slot pos={i} key={"slot" + i}>
-                <BlockIcon blockType={i} scale={SCALE}>
-                  {quantityPerType[i] ?? 0}
+                <BlockIcon blockType={INDEX_TO_BLOCK_TYPE[i]} scale={SCALE}>
+                  {quantityPerType[INDEX_TO_BLOCK_TYPE[i]] ?? 0}
                 </BlockIcon>
               </Slot>
             ))}

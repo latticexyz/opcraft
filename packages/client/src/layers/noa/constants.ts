@@ -36,7 +36,7 @@ export const Textures = {
   [MaterialType.Iron]: "./assets/blocks/iron_ore.png",
   [MaterialType.Gold]: "./assets/blocks/gold_ore.png",
   [MaterialType.Diamond]: "./assets/blocks/diamond_ore.png",
-  [MaterialType.Leaves]: "./assets/blocks/leaves_oak_carried.tga",
+  [MaterialType.Leaves]: "./assets/blocks/leaves_oak_carried.png",
   [MaterialType.Planks]: "./assets/blocks/planks_oak.png",
   [MaterialType.Crafting]: "./assets/blocks/crafting_table_top.png",
   [MaterialType.CraftingSide]: "./assets/blocks/crafting_table_front.png",

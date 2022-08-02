@@ -1,5 +1,6 @@
 import { EntityID, getComponentValue, HasValue, runQuery, setComponent } from "@latticexyz/recs";
 import { NetworkLayer, BlockType as BlockTypeEnum } from "../../network";
+import { INDEX_TO_BLOCK_TYPE } from "../../react/components/ActionBar";
 import { NoaLayer } from "../types";
 
 export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
@@ -42,7 +43,8 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
         return setCraftingTable([]);
       }
 
-      const blockType = getComponentValue(SelectedSlot, SingletonEntity)?.value ?? 1;
+      const blockIndex = getComponentValue(SelectedSlot, SingletonEntity)?.value ?? 1;
+      const blockType = INDEX_TO_BLOCK_TYPE[blockIndex];
       const ownedEntitiesOfType = runQuery([
         HasValue(OwnedBy, { value: connectedAddress.get() }),
         HasValue(BlockType, { value: blockType }),
