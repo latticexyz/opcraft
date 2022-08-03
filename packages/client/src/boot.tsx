@@ -9,6 +9,9 @@ import { Layers } from "./types";
 import { Engine as EngineImport } from "./layers/react/engine/Engine";
 import { registerUIComponents as registerUIComponentsImport } from "./layers/react/components";
 import { Wallet } from "ethers";
+import { enableLogger } from "@latticexyz/utils";
+
+enableLogger();
 
 // Assign variables that can be overridden by HMR
 let createNetworkLayer = createNetworkLayerImport;
