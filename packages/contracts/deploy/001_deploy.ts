@@ -2,8 +2,8 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
 import { blue, green } from "colorette";
 import { Contract } from "ethers";
-import { idToSystem, systemToId } from "../types/SystemMappings";
-import { resolveProperties, defaultAbiCoder as abi, keccak256, toUtf8Bytes } from "ethers/lib/utils";
+import { systemToId } from "../types/SystemMappings";
+import { defaultAbiCoder as abi, keccak256, toUtf8Bytes } from "ethers/lib/utils";
 import { BaseProvider, TransactionRequest } from "@ethersproject/providers";
 import { components, systems } from "../deploy.json";
 
@@ -28,6 +28,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deployer } = await getNamedAccounts();
   console.log("deployer", deployer);
 
+  console.log("Setting nonce");
+  const signer = await hre.ethers.getSigner(deployer);
+  let nonce = await signer.getTransactionCount();
+  console.log("Nonce", nonce);
+
   const contracts: { [key: string]: Contract } = {};
 
   // Deploy world
@@ -36,6 +41,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     from: deployer,
     log: true,
     args: [],
+    nonce: nonce++,
   });
 
   console.log(green("World deployed at"), WorldAddress);
@@ -43,8 +49,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   contracts["World"] = await hre.ethers.getContract("World", deployer);
   console.log("World contract stored");
   console.log("Init world");
-  const tx = await contracts["World"].init();
-  await tx.wait();
+  await contracts["World"].init({ nonce: nonce++ });
   console.log("Done init World");
   const componentsAddress = await contracts["World"].components();
   console.log("Components", componentsAddress);
@@ -56,10 +61,13 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       from: deployer,
       log: true,
       args: [WorldAddress],
+      nonce: nonce++,
     });
     contracts[compName] = await hre.ethers.getContract(compName, deployer);
     console.log(green(compName + " deployed at"), address);
   }
+
+  const promises: Promise<unknown>[] = [];
 
   // Deploy systems
   for (const { name: systemName, writeAccess, initialize } of systems) {
@@ -68,34 +76,47 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       from: deployer,
       log: true,
       args: [WorldAddress, componentsAddress],
+      nonce: nonce++,
     });
 
     contracts[systemName] = await hre.ethers.getContract(systemName, deployer);
 
-    await (
-      await contracts["World"].registerSystem(address, keccak256(toUtf8Bytes((systemToId as any)[systemName])))
-    ).wait();
+    promises.push(
+      contracts["World"].registerSystem(address, keccak256(toUtf8Bytes((systemToId as any)[systemName])), {
+        nonce: nonce++,
+      })
+    );
 
     // Grant access
-    for (const compName of writeAccess) {
+    for (const compName of writeAccess!) {
       if (compName === "*") {
         for (const c of components) {
           console.log("Giving grant access on", c, "to", systemName);
-          await (await contracts[c].authorizeWriter(address)).wait();
+          promises.push(contracts[c].authorizeWriter(address, { nonce: nonce++ }));
         }
       } else {
         console.log("Giving grant access on", compName, "to", systemName);
-        await (await contracts[compName].authorizeWriter(address)).wait();
+        promises.push(contracts[compName].authorizeWriter(address, { nonce: nonce++ }));
       }
     }
+
+    console.log("Await write access grants");
+    await Promise.all(promises);
+    console.log("Done awaiting write access grants");
 
     // Call init function
     if (initialize) {
       console.log("Initialize", systemName);
-      await (await contracts[systemName].execute([])).wait();
+      promises.push(contracts[systemName].execute([], { nonce: nonce++ }));
     }
 
     console.log(green(systemName + " deployed at"), address);
   }
+
+  console.log("Await outstanding tx");
+  await Promise.all(promises);
+  console.log("Done");
 };
+
+// TODO: promise.all
 export default func;

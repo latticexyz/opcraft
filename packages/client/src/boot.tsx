@@ -21,10 +21,10 @@ let Engine = EngineImport;
 
 const defaultParams = {
   chainId: "901",
-  worldAddress: "0x158d291D8b47F056751cfF47d1eEcd19FDF9B6f8",
-  rpc: "http://143.198.244.205:9545",
-  wsRpc: "ws://143.198.244.205:9546",
-  initialBlockNumber: "41200",
+  worldAddress: "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+  rpc: "https://l2.op.lattice.xyz",
+  wsRpc: "wss://l2.op.lattice.xyz",
+  initialBlockNumber: "1062",
 };
 
 /**

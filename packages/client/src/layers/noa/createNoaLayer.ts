@@ -14,7 +14,7 @@ import { defineSelectedSlotComponent } from "./components";
 import { defineCraftingTableComponent } from "./components/CraftingTable";
 import { defineLocalPositionComponent } from "./components/LocalPosition";
 import { Singleton } from "./constants";
-import { applyModel, defineModelComp } from "./engine/model";
+import { defineModelComp } from "./engine/model";
 import { setupClouds, setupSky } from "./engine/sky";
 import { setupNoaEngine } from "./setup";
 import { createBlockSystem, createInputSystem, createPositionSystem } from "./systems";
@@ -93,31 +93,31 @@ export function createNoaLayer(network: NetworkLayer) {
     setLastPong: (pong: number) => void,
     send: (data: any) => void
   ) => {
-    console.log("[Peer] New Data!", data);
+    // console.log("[Peer] New Data!", data);
     if (Object.keys(data).includes("myAddress")) {
       // We are updating the metadata
-      console.log("[Peer] setting reiver address: " + data.myAddress);
+      // console.log("[Peer] setting reiver address: " + data.myAddress);
       setMetadata({ from: currentMetadata.from, to: data.myAddress, side: Side.INITIATOR });
     } else if (Object.keys(data).includes("x")) {
-      console.log("[Peer]", currentMetadata);
+      // console.log("[Peer]", currentMetadata);
       const peerAddress = (
         currentMetadata.side === Side.INITIATOR ? currentMetadata.to : currentMetadata.from
       ) as EntityID;
       if (!peerAddress) {
-        console.error("We don't know the address of our peer!");
+        // console.error("We don't know the address of our peer!");
         return;
       }
       const entityIndex = world.registerEntity({ id: peerAddress as EntityID });
-      console.log(
-        "[Peer] Setting position of entity=" +
-          peerAddress +
-          " at position x=" +
-          data.x +
-          " y=" +
-          data.y +
-          " z=" +
-          data.z
-      );
+      // console.log(
+      //   "[Peer] Setting position of entity=" +
+      //     peerAddress +
+      //     " at position x=" +
+      //     data.x +
+      //     " y=" +
+      //     data.y +
+      //     " z=" +
+      //     data.z
+      // );
       setComponent(context.components.LocalPosition, entityIndex, data);
     } else if (Object.keys(data).includes("ping")) {
       send({ pong: true });
@@ -130,7 +130,7 @@ export function createNoaLayer(network: NetworkLayer) {
     const peerAddress = (
       currentMetadata.side === Side.INITIATOR ? currentMetadata.to : currentMetadata.from
     ) as EntityID;
-    console.log("[Peer] Peer disconnected: " + peerAddress);
+    // console.log("[Peer] Peer disconnected: " + peerAddress);
     if (world.hasEntity(peerAddress)) {
       const entityIndex = world.getEntityIndexStrict(peerAddress as EntityID);
       removeComponent(context.components.LocalPosition, entityIndex);
@@ -146,7 +146,7 @@ export function createNoaLayer(network: NetworkLayer) {
       side,
       to: connectedAddress !== connection.metadata ? connectedAddress : undefined,
     };
-    console.log("[Peer] New Peer!. We are ", side === Side.INITIATOR ? "initiator" : "receiver");
+    // console.log("[Peer] New Peer!. We are ", side === Side.INITIATOR ? "initiator" : "receiver");
     connections[connection.connectionId] = {
       connection,
       metadata,
@@ -154,15 +154,15 @@ export function createNoaLayer(network: NetworkLayer) {
     };
     const ping = setInterval(() => {
       if (!isMetadataFilled(connections[connection.connectionId]?.metadata)) {
-        console.log("[Peer] waiting for metadata");
+        // console.log("[Peer] waiting for metadata");
         return;
       }
-      console.log("[Peer] Pinging peer: " + connection.connectionId);
+      // console.log("[Peer] Pinging peer: " + connection.connectionId);
       if (connections[connection.connectionId]) {
         connections[connection.connectionId]?.connection.send({ ping: true });
         if (getMsTime() - 5000 > (connections[connection.connectionId]?.lastPong || 0)) {
           clearInterval(ping);
-          console.log("[Peer] Disconnecting unresponsive peer");
+          // console.log("[Peer] Disconnecting unresponsive peer");
           onPeerLost(connection.connectionId, connections[connection.connectionId]!.metadata);
         }
       } else {
@@ -171,7 +171,7 @@ export function createNoaLayer(network: NetworkLayer) {
     }, 1000);
     world.registerDisposer(() => clearInterval(ping));
     if (side === Side.RECEIVER) {
-      console.warn("[Peer] sending address");
+      // console.warn("[Peer] sending address");
       setTimeout(() => connections[connection.connectionId]?.connection.send({ myAddress: connectedAddress }), 1000);
     }
     connection.on("data", (data) =>
@@ -179,7 +179,7 @@ export function createNoaLayer(network: NetworkLayer) {
         data,
         connections[connection.connectionId]!.metadata,
         (m: Metadata) => {
-          console.log("[Peer] setting metadata", m);
+          // console.log("[Peer] setting metadata", m);
           if (connections[connection.connectionId] !== undefined) {
             connections[connection.connectionId]!.metadata = { ...m };
           }
@@ -205,11 +205,11 @@ export function createNoaLayer(network: NetworkLayer) {
       host: peerJsHost,
     });
     peer.on("open", async (id) => {
-      console.log("[Peer] Connected to peer server", id);
+      // console.log("[Peer] Connected to peer server", id);
       const res = await fetch((network.config.peerJsUrl || DEFAULT_PEER_JS_URL) + "/" + DEFAULT_PEER_JS_KEY + "/peers");
       const connectedPeers = await res.json();
       connectedPeers.forEach((c: string) => {
-        console.log("[Peer] Attempting initial connection to " + c);
+        // console.log("[Peer] Attempting initial connection to " + c);
         const d = peer.connect(c, { metadata: connectedAddress });
         onNewPeer(d);
       });
