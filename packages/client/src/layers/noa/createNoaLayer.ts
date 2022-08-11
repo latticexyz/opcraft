@@ -76,165 +76,165 @@ export function createNoaLayer(network: NetworkLayer) {
   }
 
   // --- P2P ------------------------------------------------------------------------
-  const peerJsParsedUrl = new URL(network.config.peerJsUrl || DEFAULT_PEER_JS_URL);
-  const peerJsHost = peerJsParsedUrl.hostname;
-  const secure = peerJsParsedUrl.protocol.includes("https");
-  const unparsedPort = peerJsParsedUrl.port;
-  const port = unparsedPort.length > 0 ? parseInt(unparsedPort) : secure ? 443 : 80;
-  const peerObject = observable.box<Peer>();
-  const connections: {
-    [key: string]: { connection: DataConnection; metadata: Metadata; lastPong: number } | undefined;
-  } = {};
+  // const peerJsParsedUrl = new URL(network.config.peerJsUrl || DEFAULT_PEER_JS_URL);
+  // const peerJsHost = peerJsParsedUrl.hostname;
+  // const secure = peerJsParsedUrl.protocol.includes("https");
+  // const unparsedPort = peerJsParsedUrl.port;
+  // const port = unparsedPort.length > 0 ? parseInt(unparsedPort) : secure ? 443 : 80;
+  // const peerObject = observable.box<Peer>();
+  // const connections: {
+  //   [key: string]: { connection: DataConnection; metadata: Metadata; lastPong: number } | undefined;
+  // } = {};
 
-  const onData = (
-    data: any,
-    currentMetadata: Metadata,
-    setMetadata: (metadata: Metadata) => void,
-    setLastPong: (pong: number) => void,
-    send: (data: any) => void
-  ) => {
-    // console.log("[Peer] New Data!", data);
-    if (Object.keys(data).includes("myAddress")) {
-      // We are updating the metadata
-      // console.log("[Peer] setting reiver address: " + data.myAddress);
-      setMetadata({ from: currentMetadata.from, to: data.myAddress, side: Side.INITIATOR });
-    } else if (Object.keys(data).includes("x")) {
-      // console.log("[Peer]", currentMetadata);
-      const peerAddress = (
-        currentMetadata.side === Side.INITIATOR ? currentMetadata.to : currentMetadata.from
-      ) as EntityID;
-      if (!peerAddress) {
-        // console.error("We don't know the address of our peer!");
-        return;
-      }
-      const entityIndex = world.registerEntity({ id: peerAddress as EntityID });
-      // console.log(
-      //   "[Peer] Setting position of entity=" +
-      //     peerAddress +
-      //     " at position x=" +
-      //     data.x +
-      //     " y=" +
-      //     data.y +
-      //     " z=" +
-      //     data.z
-      // );
-      setComponent(context.components.LocalPosition, entityIndex, data);
-    } else if (Object.keys(data).includes("ping")) {
-      send({ pong: true });
-    } else if (Object.keys(data).includes("pong")) {
-      setLastPong(getMsTime());
-    }
-  };
+  // const onData = (
+  //   data: any,
+  //   currentMetadata: Metadata,
+  //   setMetadata: (metadata: Metadata) => void,
+  //   setLastPong: (pong: number) => void,
+  //   send: (data: any) => void
+  // ) => {
+  //   // console.log("[Peer] New Data!", data);
+  //   if (Object.keys(data).includes("myAddress")) {
+  //     // We are updating the metadata
+  //     // console.log("[Peer] setting reiver address: " + data.myAddress);
+  //     setMetadata({ from: currentMetadata.from, to: data.myAddress, side: Side.INITIATOR });
+  //   } else if (Object.keys(data).includes("x")) {
+  //     // console.log("[Peer]", currentMetadata);
+  //     const peerAddress = (
+  //       currentMetadata.side === Side.INITIATOR ? currentMetadata.to : currentMetadata.from
+  //     ) as EntityID;
+  //     if (!peerAddress) {
+  //       // console.error("We don't know the address of our peer!");
+  //       return;
+  //     }
+  //     const entityIndex = world.registerEntity({ id: peerAddress as EntityID });
+  //     // console.log(
+  //     //   "[Peer] Setting position of entity=" +
+  //     //     peerAddress +
+  //     //     " at position x=" +
+  //     //     data.x +
+  //     //     " y=" +
+  //     //     data.y +
+  //     //     " z=" +
+  //     //     data.z
+  //     // );
+  //     setComponent(context.components.LocalPosition, entityIndex, data);
+  //   } else if (Object.keys(data).includes("ping")) {
+  //     send({ pong: true });
+  //   } else if (Object.keys(data).includes("pong")) {
+  //     setLastPong(getMsTime());
+  //   }
+  // };
 
-  const onPeerLost = (connectionId: string, currentMetadata: Metadata) => {
-    const peerAddress = (
-      currentMetadata.side === Side.INITIATOR ? currentMetadata.to : currentMetadata.from
-    ) as EntityID;
-    // console.log("[Peer] Peer disconnected: " + peerAddress);
-    if (world.hasEntity(peerAddress)) {
-      const entityIndex = world.getEntityIndexStrict(peerAddress as EntityID);
-      removeComponent(context.components.LocalPosition, entityIndex);
-      connections[connectionId] = undefined;
-    }
-  };
+  // const onPeerLost = (connectionId: string, currentMetadata: Metadata) => {
+  //   const peerAddress = (
+  //     currentMetadata.side === Side.INITIATOR ? currentMetadata.to : currentMetadata.from
+  //   ) as EntityID;
+  //   // console.log("[Peer] Peer disconnected: " + peerAddress);
+  //   if (world.hasEntity(peerAddress)) {
+  //     const entityIndex = world.getEntityIndexStrict(peerAddress as EntityID);
+  //     removeComponent(context.components.LocalPosition, entityIndex);
+  //     connections[connectionId] = undefined;
+  //   }
+  // };
 
-  const onNewPeer = async (connection: DataConnection) => {
-    const connectedAddress = await awaitValue(network.network.connectedAddress);
-    const side = connectedAddress === connection.metadata ? Side.INITIATOR : Side.RECEIVER;
-    const metadata: Metadata = {
-      from: connection.metadata,
-      side,
-      to: connectedAddress !== connection.metadata ? connectedAddress : undefined,
-    };
-    // console.log("[Peer] New Peer!. We are ", side === Side.INITIATOR ? "initiator" : "receiver");
-    connections[connection.connectionId] = {
-      connection,
-      metadata,
-      lastPong: getMsTime(),
-    };
-    const ping = setInterval(() => {
-      if (!isMetadataFilled(connections[connection.connectionId]?.metadata)) {
-        // console.log("[Peer] waiting for metadata");
-        return;
-      }
-      // console.log("[Peer] Pinging peer: " + connection.connectionId);
-      if (connections[connection.connectionId]) {
-        connections[connection.connectionId]?.connection.send({ ping: true });
-        if (getMsTime() - 5000 > (connections[connection.connectionId]?.lastPong || 0)) {
-          clearInterval(ping);
-          // console.log("[Peer] Disconnecting unresponsive peer");
-          onPeerLost(connection.connectionId, connections[connection.connectionId]!.metadata);
-        }
-      } else {
-        clearInterval(ping);
-      }
-    }, 1000);
-    world.registerDisposer(() => clearInterval(ping));
-    if (side === Side.RECEIVER) {
-      // console.warn("[Peer] sending address");
-      setTimeout(() => connections[connection.connectionId]?.connection.send({ myAddress: connectedAddress }), 1000);
-    }
-    connection.on("data", (data) =>
-      onData(
-        data,
-        connections[connection.connectionId]!.metadata,
-        (m: Metadata) => {
-          // console.log("[Peer] setting metadata", m);
-          if (connections[connection.connectionId] !== undefined) {
-            connections[connection.connectionId]!.metadata = { ...m };
-          }
-        },
-        (pong: number) => {
-          if (connections[connection.connectionId] !== undefined) {
-            connections[connection.connectionId]!.lastPong = pong;
-          }
-        },
-        (data: any) => connection.send(data)
-      )
-    );
-    connection.on("close", () => onPeerLost(connection.connectionId, connections[connection.connectionId]!.metadata));
-  };
+  // const onNewPeer = async (connection: DataConnection) => {
+  //   const connectedAddress = await awaitValue(network.network.connectedAddress);
+  //   const side = connectedAddress === connection.metadata ? Side.INITIATOR : Side.RECEIVER;
+  //   const metadata: Metadata = {
+  //     from: connection.metadata,
+  //     side,
+  //     to: connectedAddress !== connection.metadata ? connectedAddress : undefined,
+  //   };
+  //   // console.log("[Peer] New Peer!. We are ", side === Side.INITIATOR ? "initiator" : "receiver");
+  //   connections[connection.connectionId] = {
+  //     connection,
+  //     metadata,
+  //     lastPong: getMsTime(),
+  //   };
+  //   const ping = setInterval(() => {
+  //     if (!isMetadataFilled(connections[connection.connectionId]?.metadata)) {
+  //       // console.log("[Peer] waiting for metadata");
+  //       return;
+  //     }
+  //     // console.log("[Peer] Pinging peer: " + connection.connectionId);
+  //     if (connections[connection.connectionId]) {
+  //       connections[connection.connectionId]?.connection.send({ ping: true });
+  //       if (getMsTime() - 5000 > (connections[connection.connectionId]?.lastPong || 0)) {
+  //         clearInterval(ping);
+  //         // console.log("[Peer] Disconnecting unresponsive peer");
+  //         onPeerLost(connection.connectionId, connections[connection.connectionId]!.metadata);
+  //       }
+  //     } else {
+  //       clearInterval(ping);
+  //     }
+  //   }, 1000);
+  //   world.registerDisposer(() => clearInterval(ping));
+  //   if (side === Side.RECEIVER) {
+  //     // console.warn("[Peer] sending address");
+  //     setTimeout(() => connections[connection.connectionId]?.connection.send({ myAddress: connectedAddress }), 1000);
+  //   }
+  //   connection.on("data", (data) =>
+  //     onData(
+  //       data,
+  //       connections[connection.connectionId]!.metadata,
+  //       (m: Metadata) => {
+  //         // console.log("[Peer] setting metadata", m);
+  //         if (connections[connection.connectionId] !== undefined) {
+  //           connections[connection.connectionId]!.metadata = { ...m };
+  //         }
+  //       },
+  //       (pong: number) => {
+  //         if (connections[connection.connectionId] !== undefined) {
+  //           connections[connection.connectionId]!.lastPong = pong;
+  //         }
+  //       },
+  //       (data: any) => connection.send(data)
+  //     )
+  //   );
+  //   connection.on("close", () => onPeerLost(connection.connectionId, connections[connection.connectionId]!.metadata));
+  // };
 
-  const setupPeer = async () => {
-    const connectedAddress = await awaitValue(network.network.connectedAddress);
-    const peer = new Peer({
-      debug: 3,
-      secure,
-      port,
-      key: DEFAULT_PEER_JS_KEY,
-      host: peerJsHost,
-    });
-    peer.on("open", async (id) => {
-      // console.log("[Peer] Connected to peer server", id);
-      const res = await fetch((network.config.peerJsUrl || DEFAULT_PEER_JS_URL) + "/" + DEFAULT_PEER_JS_KEY + "/peers");
-      const connectedPeers = await res.json();
-      connectedPeers.forEach((c: string) => {
-        // console.log("[Peer] Attempting initial connection to " + c);
-        const d = peer.connect(c, { metadata: connectedAddress });
-        onNewPeer(d);
-      });
-    });
+  // const setupPeer = async () => {
+  //   const connectedAddress = await awaitValue(network.network.connectedAddress);
+  //   const peer = new Peer({
+  //     debug: 3,
+  //     secure,
+  //     port,
+  //     key: DEFAULT_PEER_JS_KEY,
+  //     host: peerJsHost,
+  //   });
+  //   peer.on("open", async (id) => {
+  //     // console.log("[Peer] Connected to peer server", id);
+  //     const res = await fetch((network.config.peerJsUrl || DEFAULT_PEER_JS_URL) + "/" + DEFAULT_PEER_JS_KEY + "/peers");
+  //     const connectedPeers = await res.json();
+  //     connectedPeers.forEach((c: string) => {
+  //       // console.log("[Peer] Attempting initial connection to " + c);
+  //       const d = peer.connect(c, { metadata: connectedAddress });
+  //       onNewPeer(d);
+  //     });
+  //   });
 
-    peer.on("connection", (d) => {
-      onNewPeer(d);
-    });
+  //   peer.on("connection", (d) => {
+  //     onNewPeer(d);
+  //   });
 
-    world.registerDisposer(() => peer.destroy());
-    peerObject.set(peer);
-    // Connect to initial peer list
-    world.registerDisposer(() => {
-      Object.keys(connections).forEach((connectionId) => connections[connectionId]?.connection.close());
-    });
-  };
+  //   world.registerDisposer(() => peer.destroy());
+  //   peerObject.set(peer);
+  //   // Connect to initial peer list
+  //   world.registerDisposer(() => {
+  //     Object.keys(connections).forEach((connectionId) => connections[connectionId]?.connection.close());
+  //   });
+  // };
 
-  setupPeer();
+  // setupPeer();
 
   const context = {
     world,
     components,
     peer: {
-      peerObject,
-      connections,
+      peerObject: {},
+      connections: [],
     },
     noa,
     api: { setBlock, setCraftingTable, clearCraftingTable, setCraftingTableIndex },
@@ -248,25 +248,25 @@ export function createNoaLayer(network: NetworkLayer) {
   createSyncSystem(network, context);
 
   // --- AUTORUN --------------------------------------------------------------------
-  const interval = setInterval(async () => {
-    // Share own position with other players
-    const position = noa.entities.getPosition(noa.playerEntity);
-    const roundPos = { x: Math.floor(position[0]), y: Math.floor(position[1]), z: Math.floor(position[2]) };
-    const peer = peerObject.get();
-    if (peer) {
-      Object.keys(connections).forEach((connectionId) => {
-        if (!isMetadataFilled(connections[connectionId]?.metadata)) return;
-        const connection = connections[connectionId]?.connection;
-        if (!connection) return;
-        connection.send({
-          x: roundPos.x,
-          y: roundPos.y,
-          z: roundPos.z,
-        });
-      });
-    }
-  }, 300);
-  world.registerDisposer(() => clearInterval(interval));
+  // const interval = setInterval(async () => {
+  //   // Share own position with other players
+  //   const position = noa.entities.getPosition(noa.playerEntity);
+  //   const roundPos = { x: Math.floor(position[0]), y: Math.floor(position[1]), z: Math.floor(position[2]) };
+  //   const peer = peerObject.get();
+  //   if (peer) {
+  //     Object.keys(connections).forEach((connectionId) => {
+  //       if (!isMetadataFilled(connections[connectionId]?.metadata)) return;
+  //       const connection = connections[connectionId]?.connection;
+  //       if (!connection) return;
+  //       connection.send({
+  //         x: roundPos.x,
+  //         y: roundPos.y,
+  //         z: roundPos.z,
+  //       });
+  //     });
+  //   }
+  // }, 300);
+  // world.registerDisposer(() => clearInterval(interval));
 
   return context;
 }
