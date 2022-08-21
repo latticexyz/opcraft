@@ -53,7 +53,5 @@
     "*.ts": "eslint --cache --fix",
     "*.{ts,css,md,sol}": "prettier --write"
   },
-  "dependencies": {
-    "styled-components": "^5.3.5"
-  }
+  "dependencies": {}
 }
