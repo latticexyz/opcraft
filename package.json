@@ -53,16 +53,5 @@
     "*.ts": "eslint --cache --fix",
     "*.{ts,css,md,sol}": "prettier --write"
   },
-  "dependencies": {
-    "@latticexyz/cli": "file:.yalc/@latticexyz/cli",
-    "@latticexyz/ecs-browser": "file:.yalc/@latticexyz/ecs-browser",
-    "@latticexyz/network": "file:.yalc/@latticexyz/network",
-    "@latticexyz/phaserx": "file:.yalc/@latticexyz/phaserx",
-    "@latticexyz/recs": "file:.yalc/@latticexyz/recs",
-    "@latticexyz/solecs": "file:.yalc/@latticexyz/solecs",
-    "@latticexyz/std-client": "file:.yalc/@latticexyz/std-client",
-    "@latticexyz/std-contracts": "file:.yalc/@latticexyz/std-contracts",
-    "@latticexyz/utils": "file:.yalc/@latticexyz/utils",
-    "styled-components": "^5.3.5"
-  }
+  "dependencies": {}
 }

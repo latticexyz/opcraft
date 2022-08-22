@@ -9,6 +9,9 @@ import { Layers } from "./types";
 import { Engine as EngineImport } from "./layers/react/engine/Engine";
 import { registerUIComponents as registerUIComponentsImport } from "./layers/react/components";
 import { Wallet } from "ethers";
+import { enableLogger } from "@latticexyz/utils";
+
+enableLogger();
 
 // Assign variables that can be overridden by HMR
 let createNetworkLayer = createNetworkLayerImport;
@@ -17,11 +20,11 @@ let registerUIComponents = registerUIComponentsImport;
 let Engine = EngineImport;
 
 const defaultParams = {
-  chainId: "901",
-  worldAddress: "0x158d291D8b47F056751cfF47d1eEcd19FDF9B6f8",
-  rpc: "http://143.198.244.205:9545",
-  wsRpc: "ws://143.198.244.205:9546",
-  initialBlockNumber: "41200",
+  chainId: "31337",
+  worldAddress: undefined,
+  rpc: "http://localhost:8545",
+  wsRpc: "ws://localhost:8545",
+  initialBlockNumber: "0",
 };
 
 /**

@@ -93,31 +93,30 @@ export async function setupContracts<C extends ContractComponents>(config: GameC
       provider: networkConfig.provider,
       worldContract: contractsConfig.World,
       initialBlockNumber: config.initialBlockNumber ?? 0,
-      mappings,
       chainId: config.chainId,
       disableCache: false,
       checkpointServiceUrl: networkConfig.checkpointServiceUrl,
     });
   }
 
-  const { txReduced$ } = applyNetworkUpdates(world, components, ecsEvent$);
+  const { txReduced$ } = applyNetworkUpdates(world, components, ecsEvent$, mappings);
 
   const encoders = createEncoders(world, ComponentsRegistry, signerOrProvider);
 
   // Send yourself some funds if there are none
-  const playerIsBroke = (await network.signer.get()?.getBalance())?.lte(1_000_000);
-  console.log("IsBroke", playerIsBroke);
-  if (playerIsBroke) {
-    const richAccount = new Wallet(
-      "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
-      network.providers.get().json
-    );
-    const tx = await richAccount.sendTransaction({
-      to: network.connectedAddress.get(),
-      value: ethers.utils.parseEther("100.0"),
-    });
-    await tx.wait();
-  }
+  // const playerIsBroke = (await network.signer.get()?.getBalance())?.lte(1_000_000);
+  // console.log("IsBroke", playerIsBroke);
+  // if (playerIsBroke) {
+  //   const richAccount = new Wallet(
+  //     "0x044C7963E9A89D4F8B64AB23E02E97B2E00DD57FCB60F316AC69B77135003AEF",
+  //     network.providers.get().json
+  //   );
+  //   const tx = await richAccount.sendTransaction({
+  //     to: network.connectedAddress.get(),
+  //     value: ethers.utils.parseEther("100.0"),
+  //   });
+  //   await tx.wait();
+  // }
 
   const playerIsStillBroke = (await network.signer.get()?.getBalance())?.lte(1_000_000);
   console.log("IsStillBroke", playerIsStillBroke);
@@ -160,7 +159,8 @@ async function createEncoders(
 function applyNetworkUpdates<C extends Components>(
   world: World,
   components: C,
-  ecsEvent$: Observable<NetworkComponentUpdate<C>>
+  ecsEvent$: Observable<NetworkComponentUpdate<C>>,
+  mappings: Mappings<C>
 ) {
   const txReduced$ = new Subject<string>();
 
@@ -177,14 +177,14 @@ function applyNetworkUpdates<C extends Components>(
       // Running this in a mobx action would result in only one system update per frame (should increase performance)
       // but it currently breaks defineUpdateAction (https://linear.app/latticexyz/issue/LAT-594/defineupdatequery-does-not-work-when-running-multiple-component)
       for (const update of updates) {
-        console.log("block update 1", update.value);
         const entityIndex = world.entityToIndex.get(update.entity) ?? world.registerEntity({ id: update.entity });
+        const componentKey = mappings[update.component];
 
         if (update.value === undefined) {
           // undefined value means component removed
-          removeComponent(components[update.component] as Component<Schema>, entityIndex);
+          removeComponent(components[componentKey] as Component<Schema>, entityIndex);
         } else {
-          setComponent(components[update.component] as Component<Schema>, entityIndex, update.value);
+          setComponent(components[componentKey] as Component<Schema>, entityIndex, update.value);
         }
 
         if (update.lastEventInTx) txReduced$.next(update.txHash);
