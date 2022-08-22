@@ -47,7 +47,8 @@
     "link:mud": "for i in node_modules/@latticexyz/*; do yarn link @latticexyz/$(basename $i); done",
     "unlink:mud": "for i in node_modules/@latticexyz/*; do yarn unlink @latticexyz/$(basename $i); done && yarn install --force",
     "yalc:mud": "for i in node_modules/@latticexyz/*; do yalc add @latticexyz/$(basename $i); done",
-    "unyalc:mud": "for i in node_modules/@latticexyz/*; do yalc remove @latticexyz/$(basename $i); done && yarn install --force"
+    "unyalc:mud": "for i in node_modules/@latticexyz/*; do yalc remove @latticexyz/$(basename $i); done && yarn install --force",
+    "test": "yarn workspaces run test"
   },
   "lint-staged": {
     "*.ts": "eslint --cache --fix",
