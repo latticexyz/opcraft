@@ -1383,13 +1383,13 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
-"@latticexyz/cli@^0.7.0":
-  version "0.7.0"
-  resolved "https://npm.pkg.github.com/download/@latticexyz/cli/0.7.0/56f2ba94a08594fb79cd0875224ff9cecde74217#56f2ba94a08594fb79cd0875224ff9cecde74217"
-  integrity sha512-LZnQyspkyERbEgNina0I9eyOiY05sHCeAKlldmjNMIjuaqj2xxOaOm3o0WMiaRdr9qJC4dkiTWN7fWwym431iA==
+"@latticexyz/cli@^0.8.0":
+  version "0.8.0"
+  resolved "https://npm.pkg.github.com/download/@latticexyz/cli/0.8.0/c4b556a583dc413ed105d6cb83d7631171d37ba8#c4b556a583dc413ed105d6cb83d7631171d37ba8"
+  integrity sha512-xHflVAkMtH/yfQRLLncE0oZ7UL5EJkVa3ShoNTttPiiP4BqSo3k7e5IE5ax1eqAWHyJ/K7ENaLtYeqy4SrZ8Kg==
   dependencies:
-    "@latticexyz/solecs" "^0.7.0"
-    "@latticexyz/utils" "^0.7.0"
+    "@latticexyz/solecs" "^0.8.0"
+    "@latticexyz/utils" "^0.8.0"
     chalk "^5.0.1"
     clear "^0.1.0"
     commander "^9.2.0"
@@ -1409,57 +1409,57 @@
     uuid "^8.3.2"
     yargs "^17.5.1"
 
-"@latticexyz/ecs-browser@^0.7.0":
-  version "0.7.0"
-  resolved "https://npm.pkg.github.com/download/@latticexyz/ecs-browser/0.7.0/5fff30f670e27764dde3c8aef1e7d11b221d4750#5fff30f670e27764dde3c8aef1e7d11b221d4750"
-  integrity sha512-EDu6eyTScYaNyccpydMME5e4rrCyBl+0Otpet0j28UgU7FciPnNVe5BNVpjJ+K7RCZQi4KVWQDKVp5BN/ODHyg==
+"@latticexyz/ecs-browser@^0.8.0":
+  version "0.8.0"
+  resolved "https://npm.pkg.github.com/download/@latticexyz/ecs-browser/0.8.0/4d0f4a1b35eb89c8b1fd5b0234526ffc6dac8617#4d0f4a1b35eb89c8b1fd5b0234526ffc6dac8617"
+  integrity sha512-60qDP349/Vg1BUtKvlo9a1iZ/hDD0lcaLWndBBsmp/Q+f8aEF5tPeWsPj+/v169VO1nOrRasI6vwkQ2nyUWSJw==
 
-"@latticexyz/network@^0.7.0":
-  version "0.7.0"
-  resolved "https://npm.pkg.github.com/download/@latticexyz/network/0.7.0/6a0aa75d5365a03023a7bdc9747fe405962d4c91#6a0aa75d5365a03023a7bdc9747fe405962d4c91"
-  integrity sha512-tKP+g+vD9GDQcUDhZs2NdFFkSi/eFTdq6ZFyoU1ZLqbMKEkM/n019h9cm6QzyMXzIgkX/YYodXp7a1R4W8gg2Q==
+"@latticexyz/network@^0.8.0":
+  version "0.8.0"
+  resolved "https://npm.pkg.github.com/download/@latticexyz/network/0.8.0/f6762fd2d13cb12d1ac3cb2930003e2a7becbbaf#f6762fd2d13cb12d1ac3cb2930003e2a7becbbaf"
+  integrity sha512-BbzDweVTNLg2Lqt/5T81/76TCXWCVXO1ipBhoEcvzV65pAzpyvk6cX54G4UJ94XLTXpu4g+7kkQvZuWfOLBaNg==
   dependencies:
-    "@protobuf-ts/grpcweb-transport" "^2.7.0"
-    "@protobuf-ts/plugin" "^2.7.0"
-    "@protobuf-ts/runtime-rpc" "^2.7.0"
+    "@latticexyz/services" "^0.8.0"
     observable-webworker "^4.0.1"
 
-"@latticexyz/phaserx@^0.7.0":
-  version "0.7.0"
-  resolved "https://npm.pkg.github.com/download/@latticexyz/phaserx/0.7.0/32075e2e3d46b6daf24de3c308d284a2f0eb2660#32075e2e3d46b6daf24de3c308d284a2f0eb2660"
-  integrity sha512-7YiNfkXXXN+BXwhshHt2fwnTh9MObRZTKFt0azFd+KHrwblFSsT6+QihDdYr0/WqUoSG8WzeTvYW55wqx1XmzA==
+"@latticexyz/phaserx@^0.8.0":
+  version "0.8.0"
+  resolved "https://npm.pkg.github.com/download/@latticexyz/phaserx/0.8.0/71b097581966658f69c1f9697fc4b76fd3d1202c#71b097581966658f69c1f9697fc4b76fd3d1202c"
+  integrity sha512-19IF5Id2JblgMhmPBCB1kVgVKXjWwJI++fYN5JqxcQSj7yrPp8ioZB4hiqT7XOB+wYe4WCc+tqyXCylHqghnUg==
   dependencies:
     "@use-gesture/vanilla" "10.2.9"
 
-"@latticexyz/recs@^0.7.0":
-  version "0.7.0"
-  resolved "https://npm.pkg.github.com/download/@latticexyz/recs/0.7.0/7a7169a04cd2b61d5df0c6381f14662d64b01e54#7a7169a04cd2b61d5df0c6381f14662d64b01e54"
-  integrity sha512-Yii9cZZH9ZZ1wv7lNOVKByKC6wuEVDjwIOHKn3wEAbN2Vkr9xXmGjieJ1cLmY1Mpa3LNL9IvzY9HR5ZiLpHrXw==
+"@latticexyz/recs@^0.8.0":
+  version "0.8.0"
+  resolved "https://npm.pkg.github.com/download/@latticexyz/recs/0.8.0/e0eef7433123493d81c00d4941eaa4c4f38bba3a#e0eef7433123493d81c00d4941eaa4c4f38bba3a"
+  integrity sha512-0EZ/m3204zYwNJua2VlW6/ZN/3js78urYsxr02Pl/jSE2stNxHap53jHbTEpRa1M3ZKF+GGXCW52y+OE5Nmmsg==
+  dependencies:
+    react-syntax-highlighter "^15.5.0"
 
-"@latticexyz/services@^0.7.0":
-  version "0.7.0"
-  resolved "https://npm.pkg.github.com/download/@latticexyz/services/0.7.0/aec666c8e50b87017f9dd3b6cbcb718b178fedd6#aec666c8e50b87017f9dd3b6cbcb718b178fedd6"
-  integrity sha512-5N67CnwHIE9ku3M2VAnHfpdyPb3fd8mGsXxnRVDHFmzRRhhO6sTdSa9mzEUBXgYo93oLm8nfCSreV6vNsWVAJw==
+"@latticexyz/services@^0.8.0":
+  version "0.8.0"
+  resolved "https://npm.pkg.github.com/download/@latticexyz/services/0.8.0/c908d68f1a976d4801e756a630c19f80f2b9eacd#c908d68f1a976d4801e756a630c19f80f2b9eacd"
+  integrity sha512-Xu1KyecA6el/QpbkgZYv1kuja02FF8+owG4FEu/xnTy5MTVy1jcmi5/jL3QLFLBOAoqp4xoFJLJJvkRLtf06kQ==
 
-"@latticexyz/solecs@^0.7.0":
-  version "0.7.0"
-  resolved "https://npm.pkg.github.com/download/@latticexyz/solecs/0.7.0/680a8b480e6fa117e7eb5cda4fff03526d4a8bc8#680a8b480e6fa117e7eb5cda4fff03526d4a8bc8"
-  integrity sha512-2XcbzDVQIb2Uw2Ertz6VXzfv+4wFo41DLcELO96yM2KWYaOATEF1wlkrR0qYOQmxmFy6APDVhZzsyqc468ncvQ==
+"@latticexyz/solecs@^0.8.0":
+  version "0.8.0"
+  resolved "https://npm.pkg.github.com/download/@latticexyz/solecs/0.8.0/098ea92aa67e01841f5023b964698b6499b065a3#098ea92aa67e01841f5023b964698b6499b065a3"
+  integrity sha512-bbNUundHffGnVHgz3KdE7rEOcRoiCHiBD6sUT9bl1Yop2M537Pz1dbEs1XZ2pPcF+nz0WpWK/wrKydIl/okzog==
 
-"@latticexyz/std-client@^0.7.0":
-  version "0.7.0"
-  resolved "https://npm.pkg.github.com/download/@latticexyz/std-client/0.7.0/edde63054fd835bb506aa8cb7d40c81fdcb53fc3#edde63054fd835bb506aa8cb7d40c81fdcb53fc3"
-  integrity sha512-fXL43uP+LBIyumZVPkcyvk/BTv+yR2095lrIS7HiJJWrphfro6Ry0271St30G0+L6TvpQXw6mHRNvk/U1kuH2A==
+"@latticexyz/std-client@^0.8.0":
+  version "0.8.0"
+  resolved "https://npm.pkg.github.com/download/@latticexyz/std-client/0.8.0/a01afdd34b3d0fcb074c6d3253bf95e0c3968943#a01afdd34b3d0fcb074c6d3253bf95e0c3968943"
+  integrity sha512-q0+lbCHF7dZhUAXTZFl78G/YSQhewij96N8FpfIJLN4yk0LMTYla97z4Wao0cA2fbTJ4hvO6VO+BtFc0tjtuNg==
 
-"@latticexyz/std-contracts@^0.7.0":
-  version "0.7.0"
-  resolved "https://npm.pkg.github.com/download/@latticexyz/std-contracts/0.7.0/c017aab2a28cbc6feb1de415e27fc60380879aae#c017aab2a28cbc6feb1de415e27fc60380879aae"
-  integrity sha512-he+QHWGsixtc1e8ytrco3SLYuIVH/3dhvBtrLrUZatfEuBgv8pVQdmnkUtMjpoQZThuEoDWNc+pMhkIc6AT68w==
+"@latticexyz/std-contracts@^0.8.0":
+  version "0.8.0"
+  resolved "https://npm.pkg.github.com/download/@latticexyz/std-contracts/0.8.0/9fe680f171391c9d56f1c43912fee0fbf0b94d57#9fe680f171391c9d56f1c43912fee0fbf0b94d57"
+  integrity sha512-4ppXb1Jo1TTDDtmqSkxiYMr6ignwE/OrerxcfoFwTYiV0Beff/W1bWqprVN7parXZThYX8/usloquTjtF30h+Q==
 
-"@latticexyz/utils@^0.7.0":
-  version "0.7.0"
-  resolved "https://npm.pkg.github.com/download/@latticexyz/utils/0.7.0/68d72a25736b20a0c5b3cb83d04350d34209dc6d#68d72a25736b20a0c5b3cb83d04350d34209dc6d"
-  integrity sha512-8kPzqEAifLZvyYZ5vsg1tkwyHcQfQgtEEdZIeBssXCNwjvoOMqIN8mRpzAY2NF7rqYX1GoEH8n1h/s6vaaygtA==
+"@latticexyz/utils@^0.8.0":
+  version "0.8.0"
+  resolved "https://npm.pkg.github.com/download/@latticexyz/utils/0.8.0/a9a90f6125606d054451fef8b22b2faacfe23472#a9a90f6125606d054451fef8b22b2faacfe23472"
+  integrity sha512-CZeXXE2LYqUthPhtKLF1r0oNTCrB/oCaxaDCPmHDHLGglfE079fGZw4V9Xa7MtkcJ1CevQmFdREzMXjefFmM0Q==
 
 "@lerna/add@4.0.0":
   version "4.0.0"
@@ -3544,7 +3544,7 @@
     chrome-trace-event "^1.0.2"
     nullthrows "^1.1.1"
 
-"@protobuf-ts/grpcweb-transport@^2.7.0":
+"@protobuf-ts/grpcweb-transport@^2.8.0":
   version "2.8.0"
   resolved "https://registry.yarnpkg.com/@protobuf-ts/grpcweb-transport/-/grpcweb-transport-2.8.0.tgz#e05897077ec0dad72a67482a081a8639817272c5"
   integrity sha512-zx7sPq3LbwVMBDcYpsKjs8Nel4y8MKTpy1vpne+LkW3M2oie2luOJYwhr24BkZG0absgWYB0HxETXGLxH6TzXA==
@@ -3560,7 +3560,7 @@
     "@protobuf-ts/runtime" "^2.8.0"
     typescript "^3.9"
 
-"@protobuf-ts/plugin@^2.7.0":
+"@protobuf-ts/plugin@^2.8.0":
   version "2.8.0"
   resolved "https://registry.yarnpkg.com/@protobuf-ts/plugin/-/plugin-2.8.0.tgz#6021282c497842e87f7edddee9753699cc958c90"
   integrity sha512-Jcl70WPVZdIYnLtjz7uoANzAPIN2awHUV1NfXXK2ZIkha+cPaP1IwETq38N1o1q7hvVC8uWhbJ2kqTcmvQWFPg==
@@ -3576,7 +3576,7 @@
   resolved "https://registry.yarnpkg.com/@protobuf-ts/protoc/-/protoc-2.8.0.tgz#fd472e26bc10937ac6af1a894c925cf55dcaf802"
   integrity sha512-x2NMHDmeJrk+rbfqLA9uWXIYXjUgL5Qoayu7DZcV16ILSjyi+31Nh/B1WH+tIih81KgPEq/G/i6bpCEeWsK/Yw==
 
-"@protobuf-ts/runtime-rpc@^2.7.0", "@protobuf-ts/runtime-rpc@^2.8.0":
+"@protobuf-ts/runtime-rpc@^2.8.0":
   version "2.8.0"
   resolved "https://registry.yarnpkg.com/@protobuf-ts/runtime-rpc/-/runtime-rpc-2.8.0.tgz#64053eeb7f04ff8453091096fa7322ff5ff37069"
   integrity sha512-B8pVorf2BvZZiCcX5paoYIKPDwkrdNP/pmJDKTIQ1D+6Yab1e6caW6vAU4RYJmb0McZBvNhSxvnkwAgPlKaFjw==

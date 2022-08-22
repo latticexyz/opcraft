@@ -7,6 +7,7 @@ export default defineConfig({
     emptyOutDir: true,
     sourcemap: true,
     assetsInlineLimit: 0,
+    target: "es2020",
   },
   preview: {
     port: 3000,
