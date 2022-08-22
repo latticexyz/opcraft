@@ -20,11 +20,11 @@ let registerUIComponents = registerUIComponentsImport;
 let Engine = EngineImport;
 
 const defaultParams = {
-  chainId: "901",
-  worldAddress: "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-  rpc: "https://l2.op.lattice.xyz",
-  wsRpc: "wss://l2.op.lattice.xyz",
-  initialBlockNumber: "1062",
+  chainId: "31337",
+  worldAddress: undefined,
+  rpc: "http://localhost:8545",
+  wsRpc: "ws://localhost:8545",
+  initialBlockNumber: "0",
 };
 
 /**

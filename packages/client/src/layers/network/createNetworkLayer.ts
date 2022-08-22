@@ -56,11 +56,7 @@ export async function createNetworkLayer(config: GameConfig) {
       id: `build+${coord.x}/${coord.y}/${coord.z}` as EntityID,
       requirement: () => true,
       components: { Position: components.Position, BlockType: components.BlockType, OwnedBy: components.OwnedBy },
-      execute: () =>
-        systems["ember.system.build"].executeTyped(BigNumber.from(entity), coord, type, {
-          gasPrice: 0,
-          gasLimit: 1_000_000,
-        }),
+      execute: () => systems["ember.system.build"].executeTyped(BigNumber.from(entity), coord, type),
       updates: () => [
         {
           component: "BlockType",
