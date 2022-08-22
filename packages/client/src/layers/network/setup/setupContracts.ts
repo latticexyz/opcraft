@@ -104,19 +104,19 @@ export async function setupContracts<C extends ContractComponents>(config: GameC
   const encoders = createEncoders(world, ComponentsRegistry, signerOrProvider);
 
   // Send yourself some funds if there are none
-  // const playerIsBroke = (await network.signer.get()?.getBalance())?.lte(1_000_000);
-  // console.log("IsBroke", playerIsBroke);
-  // if (playerIsBroke) {
-  //   const richAccount = new Wallet(
-  //     "0x044C7963E9A89D4F8B64AB23E02E97B2E00DD57FCB60F316AC69B77135003AEF",
-  //     network.providers.get().json
-  //   );
-  //   const tx = await richAccount.sendTransaction({
-  //     to: network.connectedAddress.get(),
-  //     value: ethers.utils.parseEther("100.0"),
-  //   });
-  //   await tx.wait();
-  // }
+  const playerIsBroke = (await network.signer.get()?.getBalance())?.lte(1_000_000);
+  console.log("IsBroke", playerIsBroke);
+  if (playerIsBroke) {
+    const richAccount = new Wallet(
+      "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
+      network.providers.get().json
+    );
+    const tx = await richAccount.sendTransaction({
+      to: network.connectedAddress.get(),
+      value: ethers.utils.parseEther("100.0"),
+    });
+    await tx.wait();
+  }
 
   const playerIsStillBroke = (await network.signer.get()?.getBalance())?.lte(1_000_000);
   console.log("IsStillBroke", playerIsStillBroke);
