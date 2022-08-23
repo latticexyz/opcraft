@@ -1,14 +1,12 @@
 import { EntityIndex, getComponentValue, namespaceWorld, removeComponent, setComponent } from "@latticexyz/recs";
 import { NetworkLayer } from "../network";
-import { defineSelectedSlotComponent } from "./components";
+import { definePlayerPositionComponent, defineSelectedSlotComponent } from "./components";
 import { defineCraftingTableComponent } from "./components/CraftingTable";
-import { defineLocalPositionComponent } from "./components/LocalPosition";
 import { Singleton } from "./constants";
 import { defineModelComp } from "./engine/model";
 import { setupClouds, setupSky } from "./engine/sky";
 import { setupNoaEngine } from "./setup";
-import { createBlockSystem, createInputSystem, createPositionSystem } from "./systems";
-import { createSyncSystem } from "./systems/createSyncSystem";
+import { createBlockSystem, createInputSystem, createP2PSystem, createPlayerPositionSystem } from "./systems";
 
 export function createNoaLayer(network: NetworkLayer) {
   const world = namespaceWorld(network.world, "noa");
@@ -19,7 +17,7 @@ export function createNoaLayer(network: NetworkLayer) {
   const components = {
     SelectedSlot: defineSelectedSlotComponent(world),
     CraftingTable: defineCraftingTableComponent(world),
-    LocalPosition: defineLocalPositionComponent(world),
+    PlayerPosition: definePlayerPositionComponent(world),
   };
 
   // --- SETUP ----------------------------------------------------------------------
@@ -60,7 +58,8 @@ export function createNoaLayer(network: NetworkLayer) {
   // --- SYSTEMS --------------------------------------------------------------------
   createInputSystem(network, context);
   createBlockSystem(network, context);
-  createPositionSystem(network, context);
+  createPlayerPositionSystem(network, context);
+  createP2PSystem(network, context);
 
   return context;
 }

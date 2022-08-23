@@ -6,17 +6,15 @@ import { NetworkLayer } from "../../network";
 import { applyModel } from "../engine/model";
 import { NoaLayer } from "../types";
 
-export function createPositionSystem(network: NetworkLayer, context: NoaLayer) {
+export function createPlayerPositionSystem(network: NetworkLayer, context: NoaLayer) {
   const {
     noa,
-    components: { LocalPosition },
-    api: { setBlock },
+    components: { PlayerPosition },
   } = context;
 
   const {
     world,
     network: { connectedAddress },
-    components: { BlockType, Name },
   } = network;
 
   const mudToNoaId = new Map<number, number>();
@@ -39,7 +37,7 @@ export function createPositionSystem(network: NetworkLayer, context: NoaLayer) {
     if (w != null) mesh.scaling.z = w;
     if (h != null) mesh.scaling.y = h;
 
-    const address = world.entities[entity];
+    const address = "0x00";
     const color = getAddressColor(address);
     const hexString = "#" + color.toString(16);
     const material = new StandardMaterial(address, scene);
@@ -111,7 +109,7 @@ export function createPositionSystem(network: NetworkLayer, context: NoaLayer) {
   }
 
   // Everything with a position that is no block is considered a player
-  defineSystem(world, [Has(LocalPosition), Not(BlockType)], (update) => {
+  defineSystem(world, [Has(PlayerPosition)], (update) => {
     if (update.type === UpdateType.Exit) {
       // Remove player
       // TODO: figure out how to remove an entity in NOA
@@ -120,7 +118,7 @@ export function createPositionSystem(network: NetworkLayer, context: NoaLayer) {
 
     const isPlayer = world.entities[update.entity] === connectedAddress.get();
 
-    const position = getComponentValueStrict(LocalPosition, update.entity);
+    const position = getComponentValueStrict(PlayerPosition, update.entity);
     if (update.type === UpdateType.Enter) {
       // Set player position
       spawnPlayer(update.entity, isPlayer);

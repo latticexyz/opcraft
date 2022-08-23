@@ -1,6 +1,6 @@
 /* eslint-disable no-var */
-import { BetterConsole } from "@latticexyz/utils";
+import { Logger } from "@latticexyz/utils";
 
 declare global {
-  var logger: BetterConsole;
+  var logger: Logger;
 }
