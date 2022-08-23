@@ -61,7 +61,6 @@ export function createNoaLayer(network: NetworkLayer) {
   createInputSystem(network, context);
   createBlockSystem(network, context);
   createPositionSystem(network, context);
-  createSyncSystem(network, context);
 
   return context;
 }
