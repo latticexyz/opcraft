@@ -1,6 +1,10 @@
 import { EntityIndex, getComponentValue, namespaceWorld, removeComponent, setComponent } from "@latticexyz/recs";
 import { NetworkLayer } from "../network";
-import { definePlayerPositionComponent, defineSelectedSlotComponent } from "./components";
+import {
+  definePlayerDirectionComponent,
+  definePlayerPositionComponent,
+  defineSelectedSlotComponent,
+} from "./components";
 import { defineCraftingTableComponent } from "./components/CraftingTable";
 import { Singleton } from "./constants";
 import { defineModelComp } from "./engine/model";
@@ -18,6 +22,7 @@ export function createNoaLayer(network: NetworkLayer) {
     SelectedSlot: defineSelectedSlotComponent(world),
     CraftingTable: defineCraftingTableComponent(world),
     PlayerPosition: definePlayerPositionComponent(world),
+    PlayerDirection: definePlayerDirectionComponent(world),
   };
 
   // --- SETUP ----------------------------------------------------------------------

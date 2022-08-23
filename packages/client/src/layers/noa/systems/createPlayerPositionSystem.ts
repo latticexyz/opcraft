@@ -1,5 +1,14 @@
-import { Mesh, StandardMaterial, Color3 } from "@babylonjs/core";
-import { defineSystem, EntityIndex, getComponentValueStrict, Has, Not, UpdateType } from "@latticexyz/recs";
+import { Mesh, StandardMaterial, Color3, PivotTools, Matrix, Vector3 } from "@babylonjs/core";
+import {
+  defineSystem,
+  EntityIndex,
+  getComponentValue,
+  getComponentValueStrict,
+  Has,
+  Not,
+  UpdateType,
+  defineComponentSystem,
+} from "@latticexyz/recs";
 import { getAddressColor } from "@latticexyz/std-client";
 import { VoxelCoord } from "@latticexyz/utils";
 import { NetworkLayer } from "../../network";
@@ -9,7 +18,7 @@ import { NoaLayer } from "../types";
 export function createPlayerPositionSystem(network: NetworkLayer, context: NoaLayer) {
   const {
     noa,
-    components: { PlayerPosition },
+    components: { PlayerPosition, PlayerDirection },
   } = context;
 
   const {
@@ -125,5 +134,21 @@ export function createPlayerPositionSystem(network: NetworkLayer, context: NoaLa
     }
 
     !isPlayer && movePlayer(update.entity, position);
+  });
+
+  defineComponentSystem(world, PlayerDirection, (update) => {
+    const direction = update.value[0];
+    if (direction) {
+      const isPlayer = world.entities[update.entity] === connectedAddress.get();
+      if (isPlayer) return;
+
+      const noaEntity = mudToNoaId.get(update.entity);
+      if (noaEntity == null) return console.error("Need to spawn entity first", update.entity);
+
+      const mesh: Mesh = noa.entities.getMeshData(noaEntity).mesh;
+      const head = mesh.getChildMeshes(true)[0];
+      mesh?.lookAt(new Vector3(direction.x, 0, direction.z));
+      head?.lookAt(new Vector3(0, direction.y / 10, 1));
+    }
   });
 }
