@@ -10,6 +10,7 @@ import {
   defineOwnedByComponent,
   defineGameConfigComponent,
   defineRecipeComponent,
+  defineLoadingStateComponent,
 } from "./components";
 import { BlockType } from "./constants";
 import { defineNameComponent } from "./components/NameComponent";
@@ -34,6 +35,7 @@ export async function createNetworkLayer(config: GameConfig) {
     OwnedBy: defineOwnedByComponent(world),
     GameConfig: defineGameConfigComponent(world),
     Recipe: defineRecipeComponent(world),
+    LoadingState: defineLoadingStateComponent(world),
   };
 
   // --- SETUP ----------------------------------------------------------------------
