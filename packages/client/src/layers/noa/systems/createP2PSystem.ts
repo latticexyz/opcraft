@@ -64,7 +64,7 @@ export function createP2PSystem(network: NetworkLayer, context: NoaLayer) {
     const lookAt = data.position.map((v, i) => v + 30 * direction[i]);
 
     sharePosition(data.position, lookAt);
-  }, 1000);
+  }, 100);
 
   world.registerDisposer(() => {
     socket.removeAllListeners("newMessage");
