@@ -21,6 +21,7 @@ export function createBlockSystem(network: NetworkLayer, context: NoaLayer) {
   defineComponentSystem(world, OptimisticPosition, ({ value }) => {
     if (!value[0] && value[1]) {
       const block = getBlockAtPosition(value[1]);
+
       setBlock(value[1], block);
     }
   });

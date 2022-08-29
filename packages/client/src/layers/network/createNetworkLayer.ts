@@ -14,8 +14,7 @@ import {
 } from "./components";
 import { BlockType } from "./constants";
 import { defineNameComponent } from "./components/NameComponent";
-import { curry } from "lodash";
-import { getBlockAtPosition } from "./api";
+import { getBlockAtPosition as getBlockAtPositionApi } from "./api";
 
 /**
  * The Network layer is the lowest layer in the client architecture.
@@ -49,11 +48,20 @@ export async function createNetworkLayer(config: GameConfig) {
   const actions = createActionSystem(world, txReduced$);
 
   // --- API ------------------------------------------------------------------------
+  function getBlockAtPosition(position: VoxelCoord) {
+    const { withOptimisticUpdates } = actions;
+    const context = {
+      Position: withOptimisticUpdates(components.Position),
+      BlockType: withOptimisticUpdates(components.BlockType),
+    };
+    return getBlockAtPositionApi(context, position);
+  }
+
   function build(entity: EntityID, coord: VoxelCoord, type: BlockType) {
     // We have to pass an entity and the block type because we're mixing
     // the build system for creative and "survival" mode. Would be cleaner and
     // cheaper to separate, but hackweek
-    const entityIndex = world.entityToIndex.get(entity) || (Number.MAX_SAFE_INTEGER as EntityIndex);
+    const entityIndex = world.entityToIndex.get(entity) || (Math.random() as EntityIndex);
     actions.add({
       id: `build+${coord.x}/${coord.y}/${coord.z}` as EntityID,
       requirement: () => true,
@@ -81,7 +89,7 @@ export async function createNetworkLayer(config: GameConfig) {
 
   function mine(coord: VoxelCoord) {
     const entityAtPos = [...components.Position.getEntitiesWithValue(coord)][0];
-    const blockType = entityAtPos == null ? getBlockAtPosition(components, coord) : 0;
+    const blockType = entityAtPos == null ? getBlockAtPosition(coord) : 0;
     console.log("entity/blocktype", entityAtPos, blockType);
     const airEntity = world.registerEntity();
     actions.add({
@@ -149,7 +157,7 @@ export async function createNetworkLayer(config: GameConfig) {
     startSync,
     network,
     actions,
-    api: { build, mine, move, craft, name, getBlockAtPosition: curry(getBlockAtPosition)(components) },
+    api: { build, mine, move, craft, name, getBlockAtPosition },
     dev: setupDevSystems(world, encoders, systems),
     config,
   };
