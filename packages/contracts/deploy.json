@@ -16,6 +16,7 @@
     { "name": "MoveSystem", "writeAccess": ["PositionComponent"] },
     { "name": "CraftingSystem", "writeAccess": ["BlockTypeComponent", "OwnedByComponent"] },
     { "name": "NameSystem", "writeAccess": ["NameComponent"] },
-    { "name": "PerlinSystem", "writeAccess": [] }
+    { "name": "PerlinSystem", "writeAccess": [] },
+    { "name": "TerrainSystem", "writeAccess": [] }
   ]
 }
