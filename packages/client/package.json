@@ -5,6 +5,7 @@
   "dependencies": {
     "@babylonjs/core": "^5.0.0-alpha.48",
     "@ethersproject/providers": "^5.6.1",
+    "@flatten-js/interval-tree": "^1.0.19",
     "@latticexyz/ecs-browser": "^0.8.1",
     "@latticexyz/network": "^0.8.1",
     "@latticexyz/phaserx": "^0.8.1",
@@ -27,6 +28,7 @@
     "game-inputs": "^0.5.0",
     "gl-vec3": "^1.1.3",
     "heap-js": "^2.2.0",
+    "keccak-wasm": "^0.10.3",
     "lodash": "^4.17.21",
     "micro-game-shell": "^0.3.0",
     "mobx": "^6.6.1",

@@ -9,3 +9,5 @@ royalty-registry/=../../node_modules/@manifoldxyz/royalty-registry-solidity/cont
 @openzeppelin/=../../node_modules/openzeppelin-solidity/
 base64/=../../node_modules/base64-sol/
 std-contracts/=../../node_modules/@latticexyz/std-contracts/src/
+noise/=../../node_modules/@latticexyz/noise/contracts/
+abdk-libraries-solidity/=../../node_modules/abdk-libraries-solidity/

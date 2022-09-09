@@ -15,6 +15,7 @@
     { "name": "InitSystem", "writeAccess": ["GameConfigComponent", "RecipeComponent"], "initialize": "new bytes(0)" },
     { "name": "MoveSystem", "writeAccess": ["PositionComponent"] },
     { "name": "CraftingSystem", "writeAccess": ["BlockTypeComponent", "OwnedByComponent"] },
-    { "name": "NameSystem", "writeAccess": ["NameComponent"] }
+    { "name": "NameSystem", "writeAccess": ["NameComponent"] },
+    { "name": "PerlinSystem", "writeAccess": [] }
   ]
 }

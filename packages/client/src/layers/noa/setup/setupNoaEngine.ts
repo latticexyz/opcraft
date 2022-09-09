@@ -13,8 +13,8 @@ export function setupNoaEngine(getVoxel: (coord: VoxelCoord) => BlockType) {
     showFPS: false,
     inverseY: false,
     inverseX: false,
-    chunkAddDistance: [5, 5],
-    chunkRemoveDistance: [5, 5],
+    chunkAddDistance: [10, 10],
+    chunkRemoveDistance: [10, 10],
     blockTestDistance: 7,
     texturePath: "",
     playerHeight: 1.85,
@@ -29,7 +29,7 @@ export function setupNoaEngine(getVoxel: (coord: VoxelCoord) => BlockType) {
     AOmultipliers: [0.93, 0.8, 0.5],
     reverseAOmultiplier: 1.0,
     preserveDrawingBuffer: true,
-    gravity: [0, -14, 0],
+    gravity: [0, -1, 0],
   };
 
   const noa = new Engine(opts);
