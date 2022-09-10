@@ -1,4 +1,4 @@
-import { createIndexer, createWorld, EntityID, EntityIndex } from "@latticexyz/recs";
+import { createIndexer, createWorld, EntityID, EntityIndex, getComponentValue } from "@latticexyz/recs";
 import { setupContracts, setupDevSystems } from "./setup";
 import { createActionSystem } from "@latticexyz/std-client";
 import { GameConfig } from "./config";
@@ -89,9 +89,14 @@ export async function createNetworkLayer(config: GameConfig) {
 
   function mine(coord: VoxelCoord) {
     const entityAtPos = [...components.Position.getEntitiesWithValue(coord)][0];
-    const blockType = entityAtPos == null ? getBlockAtPosition(coord) : 0;
+    const blockType =
+      entityAtPos == null ? getBlockAtPosition(coord) : getComponentValue(components.BlockType, entityAtPos)?.value;
+
     console.log("entity/blocktype", entityAtPos, blockType);
+    if (blockType == null) throw new Error("entity has no block type");
+
     const airEntity = world.registerEntity();
+
     actions.add({
       id: `mine+${coord.x}/${coord.y}/${coord.z}` as EntityID,
       requirement: () => true,

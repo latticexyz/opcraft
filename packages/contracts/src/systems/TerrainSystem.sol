@@ -24,16 +24,20 @@ contract TerrainSystem is System {
 
     int128 perlinValue = 0;
 
-    // Continentalness
-    perlinValue += Perlin.noise(coord.x, coord.z, 0, 1000, 64) * 10;
+    // Continentalness (*10)
+    perlinValue = Math.mul(Perlin.noise(coord.x, coord.z, 0, 1000, 64), Math.fromUInt(10));
 
-    // Erosion
-    perlinValue += Perlin.noise(coord.x * DENOM, coord.z * DENOM, perlinValue, 200 * DENOM, 64) * 5;
+    // Erosion (*5)
+    perlinValue = Math.add(
+      perlinValue,
+      Math.mul(Perlin.noise(coord.x, coord.z, Math.toInt(perlinValue), 200, 64), Math.fromUInt(5))
+    );
 
-    // Peaks & Valeys
-    perlinValue += Perlin.noise(coord.x * DENOM, coord.z * DENOM, perlinValue, 49 * DENOM, 64);
+    // // Peaks & Valeys
+    perlinValue = Math.add(perlinValue, Perlin.noise(coord.x, coord.z, Math.toInt(perlinValue), 49, 64));
 
-    // perlinValue / 16 * 255 - 100
+    // perlinValue * 256 - 100
+
     perlinValue = Math.sub(Math.mul(perlinValue, Math.fromUInt(16)), Math.fromUInt(100));
     int64 height = Math.toInt(perlinValue);
 

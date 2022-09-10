@@ -14,10 +14,16 @@ contract TerrainSystemTest is MudTest {
     blockType = TerrainSystem(system(TerrainSystemID)).executeTyped(VoxelCoord(-76, 4, 19));
     assertEq(uint8(blockType), uint8(BlockType.Sand));
 
+    blockType = TerrainSystem(system(TerrainSystemID)).executeTyped(VoxelCoord(-126, -10, -45));
+    assertEq(uint8(blockType), uint8(BlockType.Sand));
+
     blockType = TerrainSystem(system(TerrainSystemID)).executeTyped(VoxelCoord(-76, 5, 19));
     assertEq(uint8(blockType), uint8(BlockType.Air));
 
     blockType = TerrainSystem(system(TerrainSystemID)).executeTyped(VoxelCoord(-148, -11, -90));
+    assertEq(uint8(blockType), uint8(BlockType.Water));
+
+    blockType = TerrainSystem(system(TerrainSystemID)).executeTyped(VoxelCoord(-200, -11, -128));
     assertEq(uint8(blockType), uint8(BlockType.Water));
   }
 }

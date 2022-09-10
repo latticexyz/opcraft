@@ -33,15 +33,15 @@ function noise({ x, y }: { x: number; y: number }) {
   let perlinValue = 0;
 
   // Continentalness
-  perlinValue += continentalSplines(perlin(x, y, perlinValue, 1000)) * 10;
+  perlinValue += continentalSplines(perlin(x, y, 0, 1000)) * 10;
 
   // Erosion
-  perlinValue += erosionSplines(perlin(x, y, perlinValue, 200)) * 5;
+  perlinValue += erosionSplines(perlin(x, y, Math.floor(perlinValue), 200)) * 5;
 
   // Peaks & Valeys
-  perlinValue += peaksAndValleySplines(perlin(x, y, perlinValue, 49)) * 1;
+  perlinValue += peaksAndValleySplines(perlin(x, y, Math.floor(perlinValue), 49)) * 1;
 
-  perlinValue /= 16;
+  // perlinValue /= 16;
 
   // Interesting island landscape:
   // perlinValue += perlin(x, y, perlinValue, 47 * perlin(y, x, 0, 300) * 100) * 4;
@@ -50,7 +50,7 @@ function noise({ x, y }: { x: number; y: number }) {
   // perlinValue += perlin(x, y, perlinValue, 13);
   // perlinValue /= 4 + 3 + 2 + 1;
 
-  return Math.floor(perlinValue * 256) - 100;
+  return Math.floor(perlinValue * 16) - 100;
 }
 
 function getHeightAt(coord: VoxelCoord) {
@@ -87,10 +87,11 @@ export function getBlockAtPosition(
   coord: VoxelCoord
 ) {
   // First check for user placed block
+  // TODO: first render terrain and then place all user placed blocks in this chunk to avoid delays
   const { Position, BlockType } = context;
   const blocksAtPosition = [...runQuery([HasValue(Position, coord), Has(BlockType)])];
 
-  // Prefer non-air blocks at this position
+  // // Prefer non-air blocks at this position
   const block =
     blocksAtPosition?.find((b) => getComponentValueStrict(BlockType, b).value !== BlockTypeEnum.Air) ??
     blocksAtPosition[0];
