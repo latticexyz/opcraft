@@ -19,6 +19,7 @@
     "@protobuf-ts/runtime-rpc": "^2.8.0",
     "aabb-3d": "fenomas/aabb-3d",
     "async-mutex": "^0.3.2",
+    "bezier-js": "^6.1.0",
     "box-intersect": "fenomas/box-intersect",
     "buffer": "^6.0.3",
     "ent-comp": "^0.10.1",
@@ -58,6 +59,7 @@
   "devDependencies": {
     "@originjs/vite-plugin-commonjs": "^1.0.3",
     "@originjs/vite-plugin-require-context": "^1.0.9",
+    "@types/bezier-js": "^4.1.0",
     "@types/gl-vec3": "^1.1.1",
     "@types/jest": "^27.4.1",
     "@types/lodash": "^4.14.182",

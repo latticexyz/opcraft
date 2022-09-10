@@ -4,78 +4,118 @@ import { BlockType as BlockTypeEnum } from "../constants";
 import { perlin } from "@latticexyz/noise";
 import { createSplines } from "@latticexyz/noise/ts/utils";
 
-const perlinMap = new CoordMap<number>();
+const heightMap = new CoordMap<number>();
 
-const continentalSplines = createSplines([
-  [0, 0],
-  // [0.3, 0.2],
-  // [0.5, 0.7],
-  [1, 1],
-]);
-
-const erosionSplines = createSplines([
-  // [0, 1],
-  // [0.2, 0.8],
-  // [0.4, 0.6],
-  // [0.6, 0.5],
-  // [0.8, 0.2],
-  // [1, 0],
-  [0, 0],
-  [1, 1],
-]);
-
-const peaksAndValleySplines = createSplines([
-  [0, 0],
-  [1, 1],
-]);
-
-function noise({ x, y }: { x: number; y: number }) {
-  let perlinValue = 0;
-
-  // Continentalness
-  perlinValue += continentalSplines(perlin(x, y, 0, 1000)) * 10;
-
-  // Erosion
-  perlinValue += erosionSplines(perlin(x, y, Math.floor(perlinValue), 200)) * 5;
-
-  // Peaks & Valeys
-  perlinValue += peaksAndValleySplines(perlin(x, y, Math.floor(perlinValue), 49)) * 1;
-
-  // perlinValue /= 16;
-
-  // Interesting island landscape:
-  // perlinValue += perlin(x, y, perlinValue, 47 * perlin(y, x, 0, 300) * 100) * 4;
-  // perlinValue += perlin(x, y, perlinValue, 99) * 3;
-  // perlinValue += perlin(x, y, perlinValue, 49) * 2;
-  // perlinValue += perlin(x, y, perlinValue, 13);
-  // perlinValue /= 4 + 3 + 2 + 1;
-
-  return Math.floor(perlinValue * 16) - 100;
+enum Biome {
+  Mountains,
+  Desert,
+  Savanna,
+  Forest,
 }
 
-function getHeightAt(coord: VoxelCoord) {
-  const flatCoord = { x: coord.x, y: coord.z };
-  if (!perlinMap.has(flatCoord)) {
-    const height = noise(flatCoord);
-    perlinMap.set(flatCoord, height);
-    return height;
-  } else {
-    return perlinMap.get(flatCoord) || 0;
-  }
+const Biomes: [Biome, Biome, Biome, Biome] = [Biome.Mountains, Biome.Desert, Biome.Savanna, Biome.Forest];
+
+interface Terrain {
+  biome: [number, number, number, number];
+  height: number;
 }
 
-export function getTerrainAtPosition(coord: VoxelCoord) {
-  const height = getHeightAt(coord);
+// [humidity, heat]
+const BiomeVectors: { [key in Biome]: [number, number] } = {
+  [Biome.Mountains]: [0, 0],
+  [Biome.Desert]: [0, 1],
+  [Biome.Forest]: [1, 0],
+  [Biome.Savanna]: [1, 1],
+};
 
-  if (coord.y < height) {
-    if (coord.y < 5) return BlockTypeEnum.Sand;
-    return BlockTypeEnum.Grass;
+const mountains = createSplines([
+  [0, 0],
+  [0.3, 0.2],
+  [0.6, 2],
+  [1, 3],
+]);
+
+const desert = createSplines([
+  [0, 0],
+  [1, 0],
+]);
+
+const forest = createSplines([
+  [0, 0],
+  [1, 0],
+]);
+
+const savanna = createSplines([
+  [0, 0],
+  [1, 0],
+]);
+
+function getHeight({ x, z }: VoxelCoord, biome: [number, number, number, number]): number {
+  // Check cache
+  const flatCoord = { x, y: z };
+  const cacheHeight = heightMap.get(flatCoord);
+  if (cacheHeight != null) return cacheHeight;
+
+  // Compute height
+
+  const continentalness = perlin(x, z, 0, 999);
+  const erosion = perlin(x, z, 0, 49);
+  let biomeErosion = 0;
+  biomeErosion += biome[Biome.Mountains] * mountains(erosion);
+  biomeErosion += biome[Biome.Desert] * desert(erosion);
+  biomeErosion += biome[Biome.Forest] * forest(erosion);
+  biomeErosion += biome[Biome.Savanna] * savanna(erosion);
+  biomeErosion /= biome.reduce((acc, curr) => acc + curr, 1);
+
+  let height = (continentalness * 2 + biomeErosion) / 3;
+
+  height *= 128;
+  height -= 128;
+
+  // Set cache
+  heightMap.set(flatCoord, height);
+  return height;
+}
+
+function distance(a: [number, number], b: [number, number]): number {
+  return Math.sqrt(Math.pow(a[0] - b[0], 2) + Math.pow(a[1] - b[1], 2));
+}
+
+function getBiome({ x, z }: VoxelCoord): [number, number, number, number] {
+  const heat = perlin(x + 222, z + 222, 0, 444);
+  const humidity = perlin(z, x, 999, 333);
+
+  const biomeVector: [number, number] = [humidity, heat];
+  const biome = Biomes.map((b) => Math.max((0.75 - distance(biomeVector, BiomeVectors[b])) * 2, 0)) as [
+    number,
+    number,
+    number,
+    number
+  ];
+
+  return biome;
+}
+
+function getTerrain(coord: VoxelCoord): Terrain {
+  const biome = getBiome(coord);
+  const height = getHeight(coord, biome);
+  return { biome, height };
+}
+
+function getTerrainBlock({ height, biome }: Terrain, { y }: VoxelCoord): BlockTypeEnum {
+  if (y > height) {
+    if (y >= 0) return BlockTypeEnum.Air;
+    return BlockTypeEnum.Air;
   }
 
-  if (coord.y < -10) {
-    return BlockTypeEnum.Water;
-  }
+  const maxBiome = Math.max(...biome);
+  const maxBiomeIndex = biome.findIndex((x) => x === Math.max(...biome));
 
+  if (maxBiome === 0) return BlockTypeEnum.Dirt;
+  if (maxBiomeIndex == Biome.Desert) return BlockTypeEnum.Sand;
+  if (maxBiomeIndex == Biome.Mountains) return BlockTypeEnum.Stone;
+  if (maxBiomeIndex == Biome.Savanna) return BlockTypeEnum.Grass;
+  if (maxBiomeIndex == Biome.Forest) return BlockTypeEnum.Log;
   return BlockTypeEnum.Air;
 }
 
@@ -88,15 +128,16 @@ export function getBlockAtPosition(
 ) {
   // First check for user placed block
   // TODO: first render terrain and then place all user placed blocks in this chunk to avoid delays
-  const { Position, BlockType } = context;
-  const blocksAtPosition = [...runQuery([HasValue(Position, coord), Has(BlockType)])];
+  // const { Position, BlockType } = context;
+  // const blocksAtPosition = [...runQuery([HasValue(Position, coord), Has(BlockType)])];
 
-  // // Prefer non-air blocks at this position
-  const block =
-    blocksAtPosition?.find((b) => getComponentValueStrict(BlockType, b).value !== BlockTypeEnum.Air) ??
-    blocksAtPosition[0];
-  if (block != null) return getComponentValueStrict(BlockType, block).value;
+  // // // Prefer non-air blocks at this position
+  // const block =
+  //   blocksAtPosition?.find((b) => getComponentValueStrict(BlockType, b).value !== BlockTypeEnum.Air) ??
+  //   blocksAtPosition[0];
+  // if (block != null) return getComponentValueStrict(BlockType, block).value;
 
   // If no user placed block is found return the nature block of this position
-  return getTerrainAtPosition(coord);
+
+  return getTerrainBlock(getTerrain(coord), coord);
 }
