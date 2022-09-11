@@ -30,22 +30,20 @@ const BiomeVectors: { [key in Biome]: [number, number] } = {
 
 const continentalness = createSplines([
   [0, 0],
-  [0.3, 0],
-  [0.4, 0.7],
-  [0.6, 1],
-  [1, 1],
+  [0.5, 0.5],
+  [1, 0.5],
 ]);
 
 const mountains = createSplines([
   [0, 0],
-  [0.3, 0.2],
-  [0.6, 1],
-  [1, 2],
+  [0.3, 0.4],
+  [0.6, 2],
+  [1, 4],
 ]);
 
 const desert = createSplines([
   [0, 0],
-  [1, 0.2],
+  [1, 0.4],
 ]);
 
 const forest = createSplines([
@@ -55,18 +53,19 @@ const forest = createSplines([
 
 const savanna = createSplines([
   [0, 0],
-  [1, 0.2],
+  [1, 0.4],
 ]);
 
 const valleys = createSplines([
-  [0.4, 1],
-  [0.45, 0.9],
-  [0.48, 0.8],
-  [0.499, 0.7],
-  [0.501, 0.7],
-  [0.51, 0.8],
-  [0.55, 0.9],
-  [0.6, 1],
+  [0, 1],
+  [0.45, 1],
+  [0.49, 0.9],
+  // [0.492, 0.9],
+  [0.499, 0.8],
+  [0.501, 0.8],
+  // [0.503, 0.9],
+  [0.51, 0.9],
+  [0.55, 1],
   [1, 1],
 ]);
 
@@ -77,17 +76,11 @@ function getHeight({ x, z }: VoxelCoord, biome: [number, number, number, number]
   if (cacheHeight != null) return cacheHeight;
 
   // Compute perlin height
-  const continentalHeight = continentalness(perlin(x, z, 0, 999)); // * 10;
-  let terrainHeight = perlin(x, z, 0, 777) * 10;
+  const continentalHeight = continentalness(perlin(x - 550, z + 550, 0, 999));
+  let terrainHeight = perlin(x - 550, z + 550, 0, 999) * 10;
   terrainHeight += perlin(x, z, 0, 49) * 5;
   terrainHeight += perlin(x, z, 0, 13);
   terrainHeight /= 16;
-  //
-  // Create valleys
-  // const valley = valleys(perlin(x, z, 0, 444));
-  // terrainHeight *= valley;
-
-  // Center height around 0
 
   // Compute biome height
   let height = 0;
@@ -96,6 +89,12 @@ function getHeight({ x, z }: VoxelCoord, biome: [number, number, number, number]
   height += biome[Biome.Forest] * forest(terrainHeight);
   height += biome[Biome.Savanna] * savanna(terrainHeight);
   height /= biome.reduce((acc, curr) => acc + curr, 1);
+
+  height = continentalHeight + height / 2;
+
+  // Create valleys
+  const valley = valleys((perlin(x, z, 0, 333) * 2 + perlin(x, z, 0, 49)) / 3);
+  height *= valley;
 
   // Scale height
   height *= 256;
@@ -134,7 +133,7 @@ function getTerrain(coord: VoxelCoord): Terrain {
 function getTerrainBlock({ height, biome }: Terrain, { y }: VoxelCoord): BlockTypeEnum {
   if (y > height) {
     if (y >= 0) return BlockTypeEnum.Air;
-    return BlockTypeEnum.Air;
+    return BlockTypeEnum.Water;
   }
 
   const maxBiome = Math.max(...biome);
