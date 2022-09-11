@@ -28,26 +28,46 @@ const BiomeVectors: { [key in Biome]: [number, number] } = {
   [Biome.Savanna]: [1, 1],
 };
 
+const continentalness = createSplines([
+  [0, 0],
+  [0.3, 0],
+  [0.4, 0.7],
+  [0.6, 1],
+  [1, 1],
+]);
+
 const mountains = createSplines([
   [0, 0],
   [0.3, 0.2],
-  [0.6, 2],
-  [1, 3],
+  [0.6, 1],
+  [1, 2],
 ]);
 
 const desert = createSplines([
   [0, 0],
-  [1, 0],
+  [1, 0.2],
 ]);
 
 const forest = createSplines([
   [0, 0],
-  [1, 0],
+  [1, 0.5],
 ]);
 
 const savanna = createSplines([
   [0, 0],
-  [1, 0],
+  [1, 0.2],
+]);
+
+const valleys = createSplines([
+  [0.4, 1],
+  [0.45, 0.9],
+  [0.48, 0.8],
+  [0.499, 0.7],
+  [0.501, 0.7],
+  [0.51, 0.8],
+  [0.55, 0.9],
+  [0.6, 1],
+  [1, 1],
 ]);
 
 function getHeight({ x, z }: VoxelCoord, biome: [number, number, number, number]): number {
@@ -56,20 +76,29 @@ function getHeight({ x, z }: VoxelCoord, biome: [number, number, number, number]
   const cacheHeight = heightMap.get(flatCoord);
   if (cacheHeight != null) return cacheHeight;
 
-  // Compute height
+  // Compute perlin height
+  const continentalHeight = continentalness(perlin(x, z, 0, 999)); // * 10;
+  let terrainHeight = perlin(x, z, 0, 777) * 10;
+  terrainHeight += perlin(x, z, 0, 49) * 5;
+  terrainHeight += perlin(x, z, 0, 13);
+  terrainHeight /= 16;
+  //
+  // Create valleys
+  // const valley = valleys(perlin(x, z, 0, 444));
+  // terrainHeight *= valley;
 
-  const continentalness = perlin(x, z, 0, 999);
-  const erosion = perlin(x, z, 0, 49);
-  let biomeErosion = 0;
-  biomeErosion += biome[Biome.Mountains] * mountains(erosion);
-  biomeErosion += biome[Biome.Desert] * desert(erosion);
-  biomeErosion += biome[Biome.Forest] * forest(erosion);
-  biomeErosion += biome[Biome.Savanna] * savanna(erosion);
-  biomeErosion /= biome.reduce((acc, curr) => acc + curr, 1);
+  // Center height around 0
 
-  let height = (continentalness * 2 + biomeErosion) / 3;
+  // Compute biome height
+  let height = 0;
+  height += biome[Biome.Mountains] * mountains(terrainHeight);
+  height += biome[Biome.Desert] * desert(terrainHeight);
+  height += biome[Biome.Forest] * forest(terrainHeight);
+  height += biome[Biome.Savanna] * savanna(terrainHeight);
+  height /= biome.reduce((acc, curr) => acc + curr, 1);
 
-  height *= 128;
+  // Scale height
+  height *= 256;
   height -= 128;
 
   // Set cache
