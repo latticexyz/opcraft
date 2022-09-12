@@ -1,7 +1,8 @@
-import { HardhatUserConfig } from "hardhat/config";
-import "hardhat-deploy";
-import "@nomiclabs/hardhat-ethers";
-import "./tasks/compile";
+/* eslint-disable no-undef */
+require("hardhat-deploy");
+require("@nomiclabs/hardhat-ethers");
+require("@nomicfoundation/hardhat-chai-matchers");
+require("./tasks/compile.cts");
 
 const degen = {
   live: true,
@@ -56,7 +57,7 @@ const hardhat = {
   ],
 };
 
-const config: HardhatUserConfig = {
+module.exports = {
   defaultNetwork: "hardhat",
   namedAccounts: {
     deployer: 0, // first skey derived from the hd wallet
@@ -69,6 +70,7 @@ const config: HardhatUserConfig = {
   },
   paths: {
     sources: "./src",
+    tests: "./hardhat-tests",
   },
   solidity: {
     version: "0.8.13",
@@ -80,5 +82,3 @@ const config: HardhatUserConfig = {
     },
   },
 };
-
-export default config;

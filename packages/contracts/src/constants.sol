@@ -19,6 +19,14 @@ enum BlockType {
   Planks
 }
 
+// Terrain
+enum Biome {
+  Mountains,
+  Desert,
+  Forest,
+  Savanna
+}
+
 uint256 constant GodID = 0x60D;
 
 // Recipes

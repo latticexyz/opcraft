@@ -1,32 +1,17 @@
 import { Component, getComponentValueStrict, Has, HasValue, runQuery, Type } from "@latticexyz/recs";
 import { CoordMap, VoxelCoord } from "@latticexyz/utils";
-import { BlockType as BlockTypeEnum } from "../constants";
+import { BlockType as BlockTypeEnum } from "../../constants";
 import { perlin } from "@latticexyz/noise";
 import { createSplines } from "@latticexyz/noise/ts/utils";
+import { getBiome } from "./getBiome";
+import { Biome } from "./constants";
 
 const heightMap = new CoordMap<number>();
-
-enum Biome {
-  Mountains,
-  Desert,
-  Savanna,
-  Forest,
-}
-
-const Biomes: [Biome, Biome, Biome, Biome] = [Biome.Mountains, Biome.Desert, Biome.Savanna, Biome.Forest];
 
 interface Terrain {
   biome: [number, number, number, number];
   height: number;
 }
-
-// [humidity, heat]
-const BiomeVectors: { [key in Biome]: [number, number] } = {
-  [Biome.Mountains]: [0, 0],
-  [Biome.Desert]: [0, 1],
-  [Biome.Forest]: [1, 0],
-  [Biome.Savanna]: [1, 1],
-};
 
 const continentalness = createSplines([
   [0, 0],
@@ -60,16 +45,14 @@ const valleys = createSplines([
   [0, 1],
   [0.45, 1],
   [0.49, 0.9],
-  // [0.492, 0.9],
   [0.499, 0.8],
   [0.501, 0.8],
-  // [0.503, 0.9],
   [0.51, 0.9],
   [0.55, 1],
   [1, 1],
 ]);
 
-function getHeight({ x, z }: VoxelCoord, biome: [number, number, number, number]): number {
+export function getHeight({ x, z }: VoxelCoord, biome: [number, number, number, number]): number {
   // Check cache
   const flatCoord = { x, y: z };
   const cacheHeight = heightMap.get(flatCoord);
@@ -105,26 +88,7 @@ function getHeight({ x, z }: VoxelCoord, biome: [number, number, number, number]
   return height;
 }
 
-function distance(a: [number, number], b: [number, number]): number {
-  return Math.sqrt(Math.pow(a[0] - b[0], 2) + Math.pow(a[1] - b[1], 2));
-}
-
-function getBiome({ x, z }: VoxelCoord): [number, number, number, number] {
-  const heat = perlin(x + 222, z + 222, 0, 444);
-  const humidity = perlin(z, x, 999, 333);
-
-  const biomeVector: [number, number] = [humidity, heat];
-  const biome = Biomes.map((b) => Math.max((0.75 - distance(biomeVector, BiomeVectors[b])) * 2, 0)) as [
-    number,
-    number,
-    number,
-    number
-  ];
-
-  return biome;
-}
-
-function getTerrain(coord: VoxelCoord): Terrain {
+export function getTerrain(coord: VoxelCoord): Terrain {
   const biome = getBiome(coord);
   const height = getHeight(coord, biome);
   return { biome, height };
