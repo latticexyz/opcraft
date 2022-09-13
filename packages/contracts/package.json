@@ -40,6 +40,7 @@
     "@ethersproject/abi": "^5.6.0",
     "@ethersproject/bytes": "^5.6.0",
     "@ethersproject/providers": "^5.6.1",
+    "@flatten-js/interval-tree": "^1.0.19",
     "@latticexyz/cli": "^0.8.1",
     "@latticexyz/solecs": "^0.8.1",
     "@latticexyz/std-contracts": "^0.8.1",

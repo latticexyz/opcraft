@@ -1,91 +1,13 @@
 import { Component, getComponentValueStrict, Has, HasValue, runQuery, Type } from "@latticexyz/recs";
-import { CoordMap, VoxelCoord } from "@latticexyz/utils";
+import { VoxelCoord } from "@latticexyz/utils";
 import { BlockType as BlockTypeEnum } from "../../constants";
-import { perlin } from "@latticexyz/noise";
-import { createSplines } from "@latticexyz/noise/ts/utils";
-import { getBiome } from "./getBiome";
 import { Biome } from "./constants";
-
-const heightMap = new CoordMap<number>();
+import { getBiome } from "./getBiome";
+import { getHeight } from "./getHeight";
 
 interface Terrain {
   biome: [number, number, number, number];
   height: number;
-}
-
-const continentalness = createSplines([
-  [0, 0],
-  [0.5, 0.5],
-  [1, 0.5],
-]);
-
-const mountains = createSplines([
-  [0, 0],
-  [0.3, 0.4],
-  [0.6, 2],
-  [1, 4],
-]);
-
-const desert = createSplines([
-  [0, 0],
-  [1, 0.4],
-]);
-
-const forest = createSplines([
-  [0, 0],
-  [1, 0.5],
-]);
-
-const savanna = createSplines([
-  [0, 0],
-  [1, 0.4],
-]);
-
-const valleys = createSplines([
-  [0, 1],
-  [0.45, 1],
-  [0.49, 0.9],
-  [0.499, 0.8],
-  [0.501, 0.8],
-  [0.51, 0.9],
-  [0.55, 1],
-  [1, 1],
-]);
-
-export function getHeight({ x, z }: VoxelCoord, biome: [number, number, number, number]): number {
-  // Check cache
-  const flatCoord = { x, y: z };
-  const cacheHeight = heightMap.get(flatCoord);
-  if (cacheHeight != null) return cacheHeight;
-
-  // Compute perlin height
-  const continentalHeight = continentalness(perlin(x - 550, z + 550, 0, 999));
-  let terrainHeight = perlin(x - 550, z + 550, 0, 999) * 10;
-  terrainHeight += perlin(x, z, 0, 49) * 5;
-  terrainHeight += perlin(x, z, 0, 13);
-  terrainHeight /= 16;
-
-  // Compute biome height
-  let height = 0;
-  height += biome[Biome.Mountains] * mountains(terrainHeight);
-  height += biome[Biome.Desert] * desert(terrainHeight);
-  height += biome[Biome.Forest] * forest(terrainHeight);
-  height += biome[Biome.Savanna] * savanna(terrainHeight);
-  height /= biome.reduce((acc, curr) => acc + curr, 1);
-
-  height = continentalHeight + height / 2;
-
-  // Create valleys
-  const valley = valleys((perlin(x, z, 0, 333) * 2 + perlin(x, z, 0, 49)) / 3);
-  height *= valley;
-
-  // Scale height
-  height *= 256;
-  height -= 128;
-
-  // Set cache
-  heightMap.set(flatCoord, height);
-  return height;
 }
 
 export function getTerrain(coord: VoxelCoord): Terrain {
