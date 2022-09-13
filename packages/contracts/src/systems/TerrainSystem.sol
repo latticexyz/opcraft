@@ -2,55 +2,18 @@
 pragma solidity >=0.8.0;
 import "solecs/System.sol";
 import { IWorld } from "solecs/interfaces/IWorld.sol";
-import { IUint256Component } from "solecs/interfaces/IUint256Component.sol";
-import { IComponent } from "solecs/interfaces/IComponent.sol";
-import { getAddressById, addressToEntity } from "solecs/utils.sol";
-import { Perlin } from "noise/Perlin.sol";
 import { VoxelCoord } from "std-contracts/components/VoxelCoordComponent.sol";
-import { ABDKMath64x64 as Math } from "abdk-libraries-solidity/ABDKMath64x64.sol";
-
-import { PositionComponent, ID as PositionComponentID, VoxelCoord } from "../components/PositionComponent.sol";
 import { BlockType } from "../constants.sol";
-import { console } from "forge-std/console.sol";
+import { LibTerrain } from "../libraries/LibTerrain.sol";
 
 uint256 constant ID = uint256(keccak256("system.terrain"));
-int256 constant DENOM = 2**64;
 
 contract TerrainSystem is System {
   constructor(IWorld _world, address _components) System(_world, _components) {}
 
   function execute(bytes memory arguments) public view returns (bytes memory) {
     VoxelCoord memory coord = abi.decode(arguments, (VoxelCoord));
-
-    int128 perlinValue = 0;
-
-    // Continentalness (*10)
-    perlinValue = Math.mul(Perlin.noise(coord.x, coord.z, 0, 1000, 64), Math.fromUInt(10));
-
-    // Erosion (*5)
-    perlinValue = Math.add(
-      perlinValue,
-      Math.mul(Perlin.noise(coord.x, coord.z, Math.toInt(perlinValue), 200, 64), Math.fromUInt(5))
-    );
-
-    // // Peaks & Valeys
-    perlinValue = Math.add(perlinValue, Perlin.noise(coord.x, coord.z, Math.toInt(perlinValue), 49, 64));
-
-    // perlinValue * 256 - 100
-
-    perlinValue = Math.sub(Math.mul(perlinValue, Math.fromUInt(16)), Math.fromUInt(100));
-    int64 height = Math.toInt(perlinValue);
-
-    if (coord.y < height) {
-      if (coord.y < 5) return abi.encode(BlockType.Sand);
-      return abi.encode(BlockType.Grass);
-    }
-
-    if (coord.y < -10) {
-      return abi.encode(BlockType.Water);
-    }
-
-    return abi.encode(BlockType.Air);
+    return abi.encode(LibTerrain.getTerrainBlock(coord));
   }
 
   function executeTyped(VoxelCoord memory coord) public view returns (BlockType) {

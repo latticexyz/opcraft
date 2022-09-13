@@ -6,12 +6,11 @@ import { IUint256Component } from "solecs/interfaces/IUint256Component.sol";
 import { IComponent } from "solecs/interfaces/IComponent.sol";
 import { getAddressById, addressToEntity } from "solecs/utils.sol";
 
-import { TerrainSystem, ID as TerrainSystemID } from "../systems/TerrainSystem.sol";
-
 import { PositionComponent, ID as PositionComponentID, VoxelCoord } from "../components/PositionComponent.sol";
 import { OwnedByComponent, ID as OwnedByComponentID } from "../components/OwnedByComponent.sol";
 import { BlockTypeComponent, ID as BlockTypeComponentID } from "../components/BlockTypeComponent.sol";
 import { BlockType } from "../constants.sol";
+import { LibTerrain } from "../libraries/LibTerrain.sol";
 
 uint256 constant ID = uint256(keccak256("ember.system.mine"));
 
@@ -26,14 +25,12 @@ contract MineSystem is System {
     OwnedByComponent ownedByComponent = OwnedByComponent(getAddressById(components, OwnedByComponentID));
     BlockTypeComponent blockTypeComponent = BlockTypeComponent(getAddressById(components, BlockTypeComponentID));
 
-    TerrainSystem terrainSystem = TerrainSystem(getAddressById(world.systems(), TerrainSystemID));
-
     uint256 entity;
     uint256[] memory entitiesAtPosition = positionComponent.getEntitiesWithValue(targetPosition);
 
     if (entitiesAtPosition.length == 0) {
       // If there is no entity at this position, try mining the terrain block at this position
-      require(terrainSystem.executeTyped(targetPosition) == blockType, "invalid terrain block type");
+      require(LibTerrain.getTerrainBlock(targetPosition) == blockType, "invalid terrain block type");
       entity = world.getUniqueEntityId();
       blockTypeComponent.set(entity, uint32(blockType));
 

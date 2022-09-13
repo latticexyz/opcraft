@@ -4,6 +4,7 @@ pragma solidity >=0.8.0;
 import { Perlin } from "noise/Perlin.sol";
 import { ABDKMath64x64 as Math } from "abdk-libraries-solidity/ABDKMath64x64.sol";
 import { Biome, BlockType } from "../constants.sol";
+import { VoxelCoord } from "std-contracts/components/VoxelCoordComponent.sol";
 
 int128 constant _0 = 0; // 0 * 2**64
 int128 constant _0_3 = 5534023222112865484; // 0.3 * 2**64
@@ -33,12 +34,18 @@ struct Tuple {
 }
 
 library LibTerrain {
+  function getTerrainBlock(VoxelCoord memory coord) public pure returns (BlockType) {
+    int128[4] memory biome = getBiome(coord.x, coord.z);
+    int32 height = getHeight(coord.x, coord.z, biome);
+    return BlockType(getTerrainBlock(coord.x, coord.y, coord.z, height, biome));
+  }
+
   function getTerrainBlock(
     int32 x,
     int32 y,
     int32 z,
     int32 height,
-    int128[] memory biome
+    int128[4] memory biome
   ) public pure returns (uint8) {
     if (y > height) {
       if (y >= 0) return uint8(BlockType.Air);
