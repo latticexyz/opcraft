@@ -42,16 +42,15 @@ export function getBlockAtPosition(
 ) {
   // First check for user placed block
   // TODO: first render terrain and then place all user placed blocks in this chunk to avoid delays
-  // const { Position, BlockType } = context;
-  // const blocksAtPosition = [...runQuery([HasValue(Position, coord), Has(BlockType)])];
+  const { Position, BlockType } = context;
+  const blocksAtPosition = [...runQuery([HasValue(Position, coord), Has(BlockType)])];
 
-  // // // Prefer non-air blocks at this position
-  // const block =
-  //   blocksAtPosition?.find((b) => getComponentValueStrict(BlockType, b).value !== BlockTypeEnum.Air) ??
-  //   blocksAtPosition[0];
-  // if (block != null) return getComponentValueStrict(BlockType, block).value;
+  // // Prefer non-air blocks at this position
+  const block =
+    blocksAtPosition?.find((b) => getComponentValueStrict(BlockType, b).value !== BlockTypeEnum.Air) ??
+    blocksAtPosition[0];
+  if (block != null) return getComponentValueStrict(BlockType, block).value;
 
   // If no user placed block is found return the nature block of this position
-
   return getTerrainBlock(getTerrain(coord), coord);
 }
