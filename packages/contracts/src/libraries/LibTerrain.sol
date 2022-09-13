@@ -75,12 +75,12 @@ library LibTerrain {
     int128[4] memory biome
   ) public pure returns (int32) {
     // Compute perlin height
-    int128 perlin999 = Perlin.noise(x - 550, z + 550, 0, 999, 64);
+    int128 perlin999 = Perlin.noise2d(x - 550, z + 550, 999, 64);
     int128 continentalHeight = continentalness(perlin999);
     int128 terrainHeight = Math.mul(perlin999, _10);
-    int128 perlin49 = Perlin.noise(x, z, 0, 49, 64);
+    int128 perlin49 = Perlin.noise2d(x, z, 49, 64);
     terrainHeight = Math.add(terrainHeight, Math.mul(perlin49, _5));
-    terrainHeight = Math.add(terrainHeight, Perlin.noise(x, z, 0, 13, 64));
+    terrainHeight = Math.add(terrainHeight, Perlin.noise2d(x, z, 13, 64));
     terrainHeight = Math.div(terrainHeight, _16);
 
     // Compute biome height
@@ -93,7 +93,7 @@ library LibTerrain {
     height = Math.add(continentalHeight, Math.div(height, _2));
 
     // Create valleys
-    int128 valley = valleys(Math.div(Math.add(Math.mul(Perlin.noise(x, z, 0, 333, 64), _2), perlin49), _3));
+    int128 valley = valleys(Math.div(Math.add(Math.mul(Perlin.noise2d(x, z, 333, 64), _2), perlin49), _3));
     height = Math.mul(height, valley);
 
     // Scale height
@@ -101,7 +101,7 @@ library LibTerrain {
   }
 
   function getBiome(int32 x, int32 z) public pure returns (int128[4] memory) {
-    int128 heat = Perlin.noise(x + 222, z + 222, 0, 444, 64);
+    int128 heat = Perlin.noise2d(x + 222, z + 222, 444, 64);
     int128 humidity = Perlin.noise(z, x, 999, 333, 64);
 
     Tuple memory biomeVector = Tuple(humidity, heat);
