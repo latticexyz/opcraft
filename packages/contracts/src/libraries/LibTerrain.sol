@@ -3,7 +3,7 @@ pragma solidity >=0.8.0;
 
 import { Perlin } from "noise/Perlin.sol";
 import { ABDKMath64x64 as Math } from "abdk-libraries-solidity/ABDKMath64x64.sol";
-import { Biome } from "../constants.sol";
+import { Biome, BlockType } from "../constants.sol";
 
 int128 constant _0 = 0; // 0 * 2**64
 int128 constant _0_3 = 5534023222112865484; // 0.3 * 2**64
@@ -33,11 +33,40 @@ struct Tuple {
 }
 
 library LibTerrain {
+  function getTerrainBlock(
+    int32 x,
+    int32 y,
+    int32 z,
+    int32 height,
+    int128[] memory biome
+  ) public pure returns (uint8) {
+    if (y > height) {
+      if (y >= 0) return uint8(BlockType.Air);
+      return uint8(BlockType.Water);
+    }
+
+    int128 maxBiome;
+    uint256 maxBiomeIndex;
+    for (uint256 i; i < biome.length; i++) {
+      if (biome[i] > maxBiome) {
+        maxBiome = biome[i];
+        maxBiomeIndex = i;
+      }
+    }
+
+    if (maxBiome == 0) return uint8(BlockType.Dirt);
+    if (maxBiomeIndex == uint256(Biome.Desert)) return uint8(BlockType.Sand);
+    if (maxBiomeIndex == uint256(Biome.Mountains)) return uint8(BlockType.Stone);
+    if (maxBiomeIndex == uint256(Biome.Savanna)) return uint8(BlockType.Grass);
+    if (maxBiomeIndex == uint256(Biome.Forest)) return uint8(BlockType.Log);
+    return uint8(BlockType.Air);
+  }
+
   function getHeight(
     int32 x,
     int32 z,
     int128[4] memory biome
-  ) public view returns (int32) {
+  ) public pure returns (int32) {
     // Compute perlin height
     int128 perlin999 = Perlin.noise(x - 550, z + 550, 0, 999, 64);
     int128 continentalHeight = continentalness(perlin999);
@@ -64,7 +93,7 @@ library LibTerrain {
     return int32(Math.muli(height, 256) - 128);
   }
 
-  function getBiome(int32 x, int32 z) public view returns (int128[4] memory) {
+  function getBiome(int32 x, int32 z) public pure returns (int128[4] memory) {
     int128 heat = Perlin.noise(x + 222, z + 222, 0, 444, 64);
     int128 humidity = Perlin.noise(z, x, 999, 333, 64);
 
@@ -97,6 +126,10 @@ library LibTerrain {
     if (biome == Biome.Savanna) return Tuple(_1, _1);
     revert("unknown biome");
   }
+
+  ///////////////////////
+  // Utils
+  ///////////////////////
 
   // return Math.sqrt(Math.pow(a[0] - b[0], 2) + Math.pow(a[1] - b[1], 2));
   function euclidean(Tuple memory a, Tuple memory b) public pure returns (int128) {

@@ -16,7 +16,7 @@ export function getTerrain(coord: VoxelCoord): Terrain {
   return { biome, height };
 }
 
-function getTerrainBlock({ height, biome }: Terrain, { y }: VoxelCoord): BlockTypeEnum {
+export function getTerrainBlock({ height, biome }: Terrain, { y }: VoxelCoord): BlockTypeEnum {
   if (y > height) {
     if (y >= 0) return BlockTypeEnum.Air;
     return BlockTypeEnum.Water;

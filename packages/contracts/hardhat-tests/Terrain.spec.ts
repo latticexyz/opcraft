@@ -12,6 +12,7 @@ import {
   mountains,
   valleys,
 } from "../../client/src/layers/network/api/terrain/getHeight";
+import { getTerrain, getTerrainBlock } from "../../client/src/layers/network/api/terrain/getBlockAtPosition";
 
 const ethers = (hardhat as any).ethers;
 
@@ -42,6 +43,9 @@ describe("LibTerrain", () => {
 
   const splinesSol: { [key: string]: (x: BigNumber) => Promise<number> } = {};
   let euclideanSol: (a: [number, number], b: [number, number]) => Promise<number> = async () => 0;
+
+  let getTerrainBlockSol: (coord: VoxelCoord) => Promise<number> = async () => 0;
+  let getTerrainBlockTs: (coord: VoxelCoord) => number = () => 0;
 
   before(async () => {
     const Perlin = (await (await ethers.getContractFactory("Perlin")).deploy()).address;
@@ -84,11 +88,22 @@ describe("LibTerrain", () => {
       const safeB = [toSafeFixedPoint(b[0]).sol, toSafeFixedPoint(b[1]).sol];
       return toFloat(await LibTerrain.euclideanRaw(safeA[0], safeA[1], safeB[0], safeB[1]));
     };
+
+    getTerrainBlockTs = (coord: VoxelCoord) => {
+      const terrain = getTerrain(coord);
+      return getTerrainBlock(terrain, coord);
+    };
+
+    getTerrainBlockSol = async (coord: VoxelCoord) => {
+      const biome = await LibTerrain.getBiome(coord.x, coord.z);
+      const height = await LibTerrain.getHeight(coord.x, coord.z, biome);
+      return LibTerrain.getTerrainBlock(coord.x, coord.y, coord.z, height, biome);
+    };
   });
 
   describe("euclidian", () => {
     it("should compute the euclidian distance between two given vectors", async () => {
-      for (let i = 0; i < 100; i++) {
+      for (let i = 0; i < 30; i++) {
         const a0 = toSafeFixedPoint(Math.random());
         const a1 = toSafeFixedPoint(Math.random());
         const b0 = toSafeFixedPoint(Math.random());
@@ -227,6 +242,33 @@ describe("LibTerrain", () => {
         const solHeight = await getHeightSol(coord);
         const tsHeight = getHeightTs(coord);
         expect(solHeight).to.eq(tsHeight);
+      }
+    });
+  });
+
+  describe("getTerrainBlock", () => {
+    it("should compute the same result as getTerrainBlockTs", async () => {
+      // Fixed coords
+      const coords = [
+        { x: -23, y: 299, z: -230 },
+        { x: 0, y: 0, z: 0 },
+        { x: 10, y: 10, z: 10 },
+        { x: 2334, y: -100, z: 1343 },
+        { x: 24, y: 0, z: -3243 },
+      ];
+
+      for (const coord of coords) {
+        const solBlock = await getTerrainBlockSol(coord);
+        const tsBlock = getTerrainBlockTs(coord);
+        expect(solBlock).to.eq(tsBlock);
+      }
+
+      // Random coords
+      for (let i = 0; i < 30; i++) {
+        const coord = { x: random(1000, -1000), y: random(1000, -1000), z: random(1000, -1000) };
+        const solBlock = await getTerrainBlockSol(coord);
+        const tsBlock = getTerrainBlockTs(coord);
+        expect(solBlock).to.eq(tsBlock);
       }
     });
   });
