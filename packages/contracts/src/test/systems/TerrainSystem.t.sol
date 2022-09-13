@@ -8,22 +8,22 @@ import { BlockType } from "../../constants.sol";
 
 contract TerrainSystemTest is MudTest {
   function testExecute() public {
-    BlockType blockType = TerrainSystem(system(TerrainSystemID)).executeTyped(VoxelCoord(82, 41, -13));
-    assertEq(uint8(blockType), uint8(BlockType.Grass));
+    BlockType blockType = TerrainSystem(system(TerrainSystemID)).executeTyped(VoxelCoord(-327, 21, -603));
+    assertEq(uint8(blockType), uint8(BlockType.Stone));
 
-    blockType = TerrainSystem(system(TerrainSystemID)).executeTyped(VoxelCoord(-76, 4, 19));
-    assertEq(uint8(blockType), uint8(BlockType.Sand));
+    blockType = TerrainSystem(system(TerrainSystemID)).executeTyped(VoxelCoord(-377, -1, -632));
+    assertEq(uint8(blockType), uint8(BlockType.Water));
 
-    blockType = TerrainSystem(system(TerrainSystemID)).executeTyped(VoxelCoord(-126, -10, -45));
-    assertEq(uint8(blockType), uint8(BlockType.Sand));
+    blockType = TerrainSystem(system(TerrainSystemID)).executeTyped(VoxelCoord(-377, -1, -631));
+    assertEq(uint8(blockType), uint8(BlockType.Log));
 
-    blockType = TerrainSystem(system(TerrainSystemID)).executeTyped(VoxelCoord(-76, 5, 19));
+    blockType = TerrainSystem(system(TerrainSystemID)).executeTyped(VoxelCoord(-377, 0, -631));
     assertEq(uint8(blockType), uint8(BlockType.Air));
 
-    blockType = TerrainSystem(system(TerrainSystemID)).executeTyped(VoxelCoord(-148, -11, -90));
-    assertEq(uint8(blockType), uint8(BlockType.Water));
+    blockType = TerrainSystem(system(TerrainSystemID)).executeTyped(VoxelCoord(-571, 0, -703));
+    assertEq(uint8(blockType), uint8(BlockType.Grass));
 
-    blockType = TerrainSystem(system(TerrainSystemID)).executeTyped(VoxelCoord(-200, -11, -128));
-    assertEq(uint8(blockType), uint8(BlockType.Water));
+    blockType = TerrainSystem(system(TerrainSystemID)).executeTyped(VoxelCoord(-573, 0, -708));
+    assertEq(uint8(blockType), uint8(BlockType.Sand));
   }
 }
