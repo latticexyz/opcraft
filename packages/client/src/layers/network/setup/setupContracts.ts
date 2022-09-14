@@ -26,7 +26,7 @@ import {
 import { computed, IComputedValue } from "mobx";
 import { keccak256, stretch, toEthAddress } from "@latticexyz/utils";
 import ComponentAbi from "@latticexyz/solecs/abi/Component.json";
-import { Contract, Signer } from "ethers";
+import { Contract, Signer, utils, Wallet } from "ethers";
 import { Component as SolecsComponent } from "@latticexyz/solecs";
 import { SystemTypes } from "ri-contracts/types/SystemTypes";
 import { SystemAbis } from "ri-contracts/types/SystemAbis.mjs";
@@ -98,22 +98,22 @@ export async function setupContracts<C extends ContractComponents>(config: GameC
   const encoders = createEncoders(world, ComponentsRegistry, signerOrProvider);
 
   // Send yourself some funds if there are none
-  // const playerIsBroke = (await network.signer.get()?.getBalance())?.lte(1_000_000);
-  // console.log("IsBroke", playerIsBroke);
-  // if (playerIsBroke) {
-  //   const richAccount = new Wallet(
-  //     "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
-  //     network.providers.get().json
-  //   );
-  //   const tx = await richAccount.sendTransaction({
-  //     to: network.connectedAddress.get(),
-  //     value: ethers.utils.parseEther("100.0"),
-  //   });
-  //   await tx.wait();
-  // }
+  const playerIsBroke = (await network.signer.get()?.getBalance())?.lte(1_000_000);
+  console.log("IsBroke", playerIsBroke);
+  if (playerIsBroke) {
+    const richAccount = new Wallet(
+      "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
+      network.providers.get().json
+    );
+    const tx = await richAccount.sendTransaction({
+      to: network.connectedAddress.get(),
+      value: utils.parseEther("100.0"),
+    });
+    await tx.wait();
+  }
 
-  // const playerIsStillBroke = (await network.signer.get()?.getBalance())?.lte(1_000_000);
-  // console.log("IsStillBroke", playerIsStillBroke);
+  const playerIsStillBroke = (await network.signer.get()?.getBalance())?.lte(1_000_000);
+  console.log("IsStillBroke", playerIsStillBroke);
 
   return { txQueue, txReduced$, encoders, network, startSync, systems };
 }
