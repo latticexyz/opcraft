@@ -21,6 +21,7 @@ export enum MaterialType {
   Planks = "Planks",
   Crafting = "Crafting",
   CraftingSide = "CraftingSide",
+  CraftingBottom = "CraftingBottom",
 }
 
 export const Textures = {
@@ -34,14 +35,15 @@ export const Textures = {
   [MaterialType.Stone]: "./assets/blocks/stone.png",
   [MaterialType.Water]: "./assets/blocks/10-Water.png",
   [MaterialType.Cobblestone]: "./assets/blocks/1-Cobblestone.png",
-  [MaterialType.Coal]: "./assets/blocks/coal_ore.png",
-  [MaterialType.Iron]: "./assets/blocks/iron_ore.png",
-  [MaterialType.Gold]: "./assets/blocks/gold_ore.png",
+  [MaterialType.Coal]: "./assets/blocks/39-Coal_Ore.png",
+  [MaterialType.Iron]: "./assets/blocks/38-Iron_Ore.png",
+  [MaterialType.Gold]: "./assets/blocks/40-Gold_Ore.png",
   [MaterialType.Diamond]: "./assets/blocks/diamond_ore.png",
-  [MaterialType.Leaves]: "./assets/blocks/leaves_oak_carried.png",
-  [MaterialType.Planks]: "./assets/blocks/2-Bricks.png",
-  [MaterialType.Crafting]: "./assets/blocks/crafting_table_top.png",
-  [MaterialType.CraftingSide]: "./assets/blocks/crafting_table_front.png",
+  [MaterialType.Leaves]: "./assets/blocks/06-Leaves.png",
+  [MaterialType.Planks]: "./assets/blocks/05-Wood_plank.png",
+  [MaterialType.Crafting]: "./assets/blocks/46-Crafting_Table-0-top.png",
+  [MaterialType.CraftingSide]: "./assets/blocks/46-Crafting_Table-1-sides.png",
+  [MaterialType.CraftingBottom]: "./assets/blocks/46-Crafting_Table-2-bottom.png",
 };
 
 export const Blocks: { [key in BlockType]: Block | undefined } = {
@@ -54,7 +56,7 @@ export const Blocks: { [key in BlockType]: Block | undefined } = {
   [BlockType.Water]: { material: MaterialType.Water },
   [BlockType.Cobblestone]: { material: MaterialType.Cobblestone },
   [BlockType.Coal]: { material: MaterialType.Coal },
-  [BlockType.Crafting]: { material: [MaterialType.Crafting, MaterialType.CraftingSide] },
+  [BlockType.Crafting]: { material: [MaterialType.Crafting, MaterialType.CraftingBottom, MaterialType.CraftingSide] },
   [BlockType.Iron]: { material: MaterialType.Iron },
   [BlockType.Gold]: { material: MaterialType.Gold },
   [BlockType.Diamond]: { material: MaterialType.Diamond },

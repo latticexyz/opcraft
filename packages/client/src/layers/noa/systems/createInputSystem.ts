@@ -59,8 +59,11 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
   noa.inputs.bind("alt-fire", "E");
 
   // Control selected slot with keys 1-9
-  noa.inputs.bind("slot", "1", "2", "3", "4", "5", "6", "7", "8", "9");
+  noa.inputs.bind("slot", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "P", "O", "I", "U");
   noa.inputs.down.on("slot", (e) => {
-    setComponent(SelectedSlot, SingletonEntity, { value: Number(e.key) });
+    console.log(e.key);
+    const mappings: { [key: number | string]: number } = { 0: 10, P: 11, O: 12, I: 13, U: 14 };
+    const key = mappings[e.key as string | number] ?? Number(e.key);
+    setComponent(SelectedSlot, SingletonEntity, { value: key });
   });
 }

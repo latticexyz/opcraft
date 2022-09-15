@@ -84,7 +84,7 @@ export function setupNoaEngine(apis: APIs) {
   });
 
   // each tick, consume any scroll events and use them to zoom camera
-  noa.on("tick", function (dt) {
+  noa.on("tick", function () {
     const scroll = noa.inputs.state.scrolly;
     if (scroll !== 0) {
       noa.camera.zoomDistance += scroll > 0 ? 1 : -1;
@@ -98,5 +98,10 @@ export function setupNoaEngine(apis: APIs) {
   scene.fogDensity = 0.003;
   scene.fogColor = new BABYLON.Color3(0.8, 0.9, 1);
 
+  // Register sounds
+  new BABYLON.Sound("theme", "/audio/OP_World_Theme_Mix_1.wav", null, null, {
+    loop: true,
+    autoplay: true,
+  });
   return { noa, setBlock };
 }
