@@ -1,4 +1,4 @@
-import { createIndexer, createWorld, EntityID, EntityIndex } from "@latticexyz/recs";
+import { createIndexer, createWorld, EntityID, EntityIndex, getComponentValue } from "@latticexyz/recs";
 import { setupContracts, setupDevSystems } from "./setup";
 import { createActionSystem } from "@latticexyz/std-client";
 import { GameConfig } from "./config";
@@ -10,11 +10,12 @@ import {
   defineOwnedByComponent,
   defineGameConfigComponent,
   defineRecipeComponent,
+  defineLoadingStateComponent,
 } from "./components";
 import { BlockType } from "./constants";
 import { defineNameComponent } from "./components/NameComponent";
-import { curry } from "lodash";
-import { getBlockAtPosition } from "./api";
+import { getBlockAtPosition as getBlockAtPositionApi } from "./api";
+import { createPerlin } from "@latticexyz/noise";
 
 /**
  * The Network layer is the lowest layer in the client architecture.
@@ -34,6 +35,7 @@ export async function createNetworkLayer(config: GameConfig) {
     OwnedBy: defineOwnedByComponent(world),
     GameConfig: defineGameConfigComponent(world),
     Recipe: defineRecipeComponent(world),
+    LoadingState: defineLoadingStateComponent(world),
   };
 
   // --- SETUP ----------------------------------------------------------------------
@@ -47,11 +49,22 @@ export async function createNetworkLayer(config: GameConfig) {
   const actions = createActionSystem(world, txReduced$);
 
   // --- API ------------------------------------------------------------------------
+  const perlin = await createPerlin();
+
+  function getBlockAtPosition(position: VoxelCoord) {
+    const { withOptimisticUpdates } = actions;
+    const context = {
+      Position: withOptimisticUpdates(components.Position),
+      BlockType: withOptimisticUpdates(components.BlockType),
+    };
+    return getBlockAtPositionApi(context, perlin, position);
+  }
+
   function build(entity: EntityID, coord: VoxelCoord, type: BlockType) {
     // We have to pass an entity and the block type because we're mixing
     // the build system for creative and "survival" mode. Would be cleaner and
     // cheaper to separate, but hackweek
-    const entityIndex = world.entityToIndex.get(entity) || (Number.MAX_SAFE_INTEGER as EntityIndex);
+    const entityIndex = world.entityToIndex.get(entity) || (Math.random() as EntityIndex);
     actions.add({
       id: `build+${coord.x}/${coord.y}/${coord.z}` as EntityID,
       requirement: () => true,
@@ -77,11 +90,16 @@ export async function createNetworkLayer(config: GameConfig) {
     });
   }
 
-  function mine(coord: VoxelCoord) {
+  async function mine(coord: VoxelCoord) {
     const entityAtPos = [...components.Position.getEntitiesWithValue(coord)][0];
-    const blockType = entityAtPos == null ? getBlockAtPosition(components, coord) : 0;
+    const blockType =
+      entityAtPos == null ? getBlockAtPosition(coord) : getComponentValue(components.BlockType, entityAtPos)?.value;
+
     console.log("entity/blocktype", entityAtPos, blockType);
+    if (blockType == null) throw new Error("entity has no block type");
+
     const airEntity = world.registerEntity();
+
     actions.add({
       id: `mine+${coord.x}/${coord.y}/${coord.z}` as EntityID,
       requirement: () => true,
@@ -147,7 +165,7 @@ export async function createNetworkLayer(config: GameConfig) {
     startSync,
     network,
     actions,
-    api: { build, mine, move, craft, name, getBlockAtPosition: curry(getBlockAtPosition)(components) },
+    api: { build, mine, move, craft, name, getBlockAtPosition },
     dev: setupDevSystems(world, encoders, systems),
     config,
   };

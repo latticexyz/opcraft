@@ -26,7 +26,7 @@ import {
 import { computed, IComputedValue } from "mobx";
 import { keccak256, stretch, toEthAddress } from "@latticexyz/utils";
 import ComponentAbi from "@latticexyz/solecs/abi/Component.json";
-import { Contract, ethers, Signer, Wallet } from "ethers";
+import { Contract, Signer, utils, Wallet } from "ethers";
 import { Component as SolecsComponent } from "@latticexyz/solecs";
 import { SystemTypes } from "ri-contracts/types/SystemTypes";
 import { SystemAbis } from "ri-contracts/types/SystemAbis.mjs";
@@ -64,12 +64,6 @@ export async function setupContracts<C extends ContractComponents>(config: GameC
   const networkConfig = getNetworkConfig(config);
   const network = await createNetwork(networkConfig);
   world.registerDisposer(network.dispose);
-
-  console.log(
-    "initial block",
-    config.initialBlockNumber,
-    await network.providers.get().json.getBlock(config.initialBlockNumber)
-  );
 
   const signerOrProvider = computed(() => network.signer.get() || network.providers.get().json);
 
@@ -114,7 +108,7 @@ export async function setupContracts<C extends ContractComponents>(config: GameC
     );
     const tx = await richAccount.sendTransaction({
       to: network.connectedAddress.get(),
-      value: ethers.utils.parseEther("100.0"),
+      value: utils.parseEther("100.0"),
     });
     await tx.wait();
   }
