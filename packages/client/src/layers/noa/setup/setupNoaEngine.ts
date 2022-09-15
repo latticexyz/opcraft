@@ -3,7 +3,7 @@ import { Engine } from "noa-engine";
 import "@babylonjs/core/Meshes/Builders/boxBuilder";
 import * as BABYLON from "@babylonjs/core";
 import { VoxelCoord } from "@latticexyz/utils";
-import { Blocks, Textures } from "../constants";
+import { Blocks, MaterialType, Textures } from "../constants";
 import { BlockType } from "../../network";
 
 export interface APIs {
@@ -42,11 +42,13 @@ export function setupNoaEngine(apis: APIs) {
   // On lower end device we should bring this down to 9 or 11
   noa.world.maxProcessingPerTick = 20;
   noa.world.maxProcessingPerRender = 15;
-
   // Register materials
   for (const [key, textureUrl] of Object.entries(Textures)) {
     noa.registry.registerMaterial(key, undefined, textureUrl);
   }
+  // override the two water materials
+  noa.registry.registerMaterial(MaterialType.TransparentWater, [0.5, 0.5, 0.8, 0.7], undefined, true);
+  noa.registry.registerMaterial(MaterialType.Water, [1, 1, 1, 0.5], "./assets/blocks/10-Water.png", true);
 
   // Register blocks
   for (const [id, block] of Object.entries(Blocks)) {

@@ -14,6 +14,14 @@ export type Material = {
  * array of 3 names: [top, bottom, sides]
  * array of 6 names: [-x, +x, -y, +y, -z, +z]
  */
+type StringOrNull = string | null;
 export type Block = {
-  material: string | [string, string] | [string, string, string] | [string, string, string, string, string, string];
+  material:
+    | StringOrNull
+    | [StringOrNull, StringOrNull]
+    | [StringOrNull, StringOrNull, StringOrNull]
+    | [StringOrNull, StringOrNull, StringOrNull, StringOrNull, StringOrNull, StringOrNull];
+  opaque?: boolean;
+  fluid?: boolean;
+  solid?: boolean;
 };
