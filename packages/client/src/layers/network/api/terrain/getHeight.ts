@@ -1,5 +1,4 @@
-import { perlin } from "@latticexyz/noise";
-import { createSplines } from "@latticexyz/noise/ts/utils";
+import { Perlin, createSplines } from "@latticexyz/noise";
 import { CoordMap, roundTowardsZero, VoxelCoord } from "@latticexyz/utils";
 import { Biome } from "./constants";
 
@@ -44,7 +43,7 @@ export const valleys = createSplines([
   [1, 1],
 ]);
 
-export function getHeight({ x, z }: VoxelCoord, biome: [number, number, number, number]): number {
+export function getHeight({ x, z }: VoxelCoord, biome: [number, number, number, number], perlin: Perlin): number {
   // Check cache
   const flatCoord = { x, y: z };
   const cacheHeight = heightMap.get(flatCoord);

@@ -15,6 +15,7 @@ import {
 import { BlockType } from "./constants";
 import { defineNameComponent } from "./components/NameComponent";
 import { getBlockAtPosition as getBlockAtPositionApi } from "./api";
+import { createPerlin } from "@latticexyz/noise";
 
 /**
  * The Network layer is the lowest layer in the client architecture.
@@ -48,13 +49,15 @@ export async function createNetworkLayer(config: GameConfig) {
   const actions = createActionSystem(world, txReduced$);
 
   // --- API ------------------------------------------------------------------------
+  const perlin = await createPerlin();
+
   function getBlockAtPosition(position: VoxelCoord) {
     const { withOptimisticUpdates } = actions;
     const context = {
       Position: withOptimisticUpdates(components.Position),
       BlockType: withOptimisticUpdates(components.BlockType),
     };
-    return getBlockAtPositionApi(context, position);
+    return getBlockAtPositionApi(context, perlin, position);
   }
 
   function build(entity: EntityID, coord: VoxelCoord, type: BlockType) {
@@ -87,7 +90,7 @@ export async function createNetworkLayer(config: GameConfig) {
     });
   }
 
-  function mine(coord: VoxelCoord) {
+  async function mine(coord: VoxelCoord) {
     const entityAtPos = [...components.Position.getEntitiesWithValue(coord)][0];
     const blockType =
       entityAtPos == null ? getBlockAtPosition(coord) : getComponentValue(components.BlockType, entityAtPos)?.value;

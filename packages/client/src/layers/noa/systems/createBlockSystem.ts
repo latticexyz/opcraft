@@ -18,7 +18,7 @@ export function createBlockSystem(network: NetworkLayer, context: NoaLayer) {
   const OptimisticBlockType = withOptimisticUpdates(BlockType);
 
   // "Exit system"
-  defineComponentSystem(world, OptimisticPosition, ({ value }) => {
+  defineComponentSystem(world, OptimisticPosition, async ({ value }) => {
     if (!value[0] && value[1]) {
       const block = getBlockAtPosition(value[1]);
 

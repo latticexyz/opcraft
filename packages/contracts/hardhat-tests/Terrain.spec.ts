@@ -13,6 +13,7 @@ import {
   valleys,
 } from "../../client/src/layers/network/api/terrain/getHeight";
 import { getTerrain, getTerrainBlock } from "../../client/src/layers/network/api/terrain/getBlockAtPosition";
+import { createPerlin } from "@latticexyz/noise";
 
 const ethers = (hardhat as any).ethers;
 
@@ -50,14 +51,15 @@ describe("LibTerrain", () => {
   before(async () => {
     const Perlin = (await (await ethers.getContractFactory("Perlin")).deploy()).address;
     LibTerrain = await (await ethers.getContractFactory("LibTerrain", { libraries: { Perlin } })).deploy();
+    const perlinTs = await createPerlin();
 
     getBiomeSol = async (coord: VoxelCoord) =>
       (await LibTerrain.getBiome(coord.x, coord.z)).map((b: BigNumber) => toFloat(b));
-    getBiomeTs = (coord: VoxelCoord) => getBiome(coord).map((x) => toPrecision(x, 10));
+    getBiomeTs = (coord: VoxelCoord) => getBiome(coord, perlinTs).map((x) => toPrecision(x, 10));
 
     getHeightSol = async (coord: VoxelCoord) =>
       await LibTerrain.getHeight(coord.x, coord.z, await LibTerrain.getBiome(coord.x, coord.z));
-    getHeightTs = (coord: VoxelCoord) => getHeight(coord, getBiome(coord));
+    getHeightTs = (coord: VoxelCoord) => getHeight(coord, getBiome(coord, perlinTs), perlinTs);
 
     splinesSol["continentalness"] = async (x: BigNumber) => {
       return toFloat(await LibTerrain.continentalness(x));
@@ -90,7 +92,7 @@ describe("LibTerrain", () => {
     };
 
     getTerrainBlockTs = (coord: VoxelCoord) => {
-      const terrain = getTerrain(coord);
+      const terrain = getTerrain(coord, perlinTs);
       return getTerrainBlock(terrain, coord);
     };
 

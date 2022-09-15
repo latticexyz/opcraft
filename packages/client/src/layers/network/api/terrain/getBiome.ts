@@ -1,8 +1,8 @@
-import { perlin } from "@latticexyz/noise";
 import { euclidean, VoxelCoord } from "@latticexyz/utils";
+import { Perlin } from "@latticexyz/noise";
 import { Biomes, BiomeVectors } from "./constants";
 
-export function getBiome({ x, z }: VoxelCoord): [number, number, number, number] {
+export function getBiome({ x, z }: VoxelCoord, perlin: Perlin): [number, number, number, number] {
   const heat = perlin(x + 222, z + 222, 0, 444);
   const humidity = perlin(z, x, 999, 333);
 

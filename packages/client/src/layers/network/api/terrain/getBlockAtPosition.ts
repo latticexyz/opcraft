@@ -1,5 +1,6 @@
 import { Component, getComponentValueStrict, Has, HasValue, runQuery, Type } from "@latticexyz/recs";
 import { VoxelCoord } from "@latticexyz/utils";
+import { Perlin } from "@latticexyz/noise";
 import { BlockType as BlockTypeEnum } from "../../constants";
 import { Biome } from "./constants";
 import { getBiome } from "./getBiome";
@@ -10,9 +11,9 @@ interface Terrain {
   height: number;
 }
 
-export function getTerrain(coord: VoxelCoord): Terrain {
-  const biome = getBiome(coord);
-  const height = getHeight(coord, biome);
+export function getTerrain(coord: VoxelCoord, perlin: Perlin): Terrain {
+  const biome = getBiome(coord, perlin);
+  const height = getHeight(coord, biome, perlin);
   return { biome, height };
 }
 
@@ -38,6 +39,7 @@ export function getBlockAtPosition(
     Position: Component<{ x: Type.Number; y: Type.Number; z: Type.Number }>;
     BlockType: Component<{ value: Type.Number }>;
   },
+  perlin: Perlin,
   coord: VoxelCoord
 ) {
   // First check for user placed block
@@ -52,5 +54,5 @@ export function getBlockAtPosition(
   if (block != null) return getComponentValueStrict(BlockType, block).value;
 
   // If no user placed block is found return the nature block of this position
-  return getTerrainBlock(getTerrain(coord), coord);
+  return getTerrainBlock(getTerrain(coord, perlin), coord);
 }
