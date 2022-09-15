@@ -2,7 +2,7 @@ import { TxQueue } from "@latticexyz/network";
 import { Component, ComponentValue, defineComponent, EntityIndex, Schema, Type, World } from "@latticexyz/recs";
 import { keccak256 } from "@latticexyz/utils";
 import { BigNumber } from "ethers";
-import { SystemTypes } from "ri-contracts/types/SystemTypes";
+import { SystemTypes } from "contracts/types/SystemTypes";
 
 export function setupDevSystems(
   world: World,

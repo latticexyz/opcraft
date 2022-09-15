@@ -8,8 +8,8 @@ import {
   NetworkComponentUpdate,
   createSystemExecutor,
 } from "@latticexyz/network";
-import { World as WorldContract } from "ri-contracts/types/ethers-contracts/World";
-import { abi as WorldAbi } from "ri-contracts/abi/World.json";
+import { World as WorldContract } from "contracts/types/ethers-contracts/World";
+import { abi as WorldAbi } from "contracts/abi/World.json";
 import { bufferTime, filter, Observable, Subject } from "rxjs";
 import {
   Component,
@@ -28,8 +28,8 @@ import { keccak256, stretch, toEthAddress } from "@latticexyz/utils";
 import ComponentAbi from "@latticexyz/solecs/abi/Component.json";
 import { Contract, Signer, utils, Wallet } from "ethers";
 import { Component as SolecsComponent } from "@latticexyz/solecs";
-import { SystemTypes } from "ri-contracts/types/SystemTypes";
-import { SystemAbis } from "ri-contracts/types/SystemAbis.mjs";
+import { SystemTypes } from "contracts/types/SystemTypes";
+import { SystemAbis } from "contracts/types/SystemAbis.mjs";
 import { JsonRpcProvider } from "@ethersproject/providers";
 import { GameConfig, getNetworkConfig } from "../config";
 import { defineStringComponent } from "@latticexyz/std-client";
