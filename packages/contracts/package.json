@@ -1,5 +1,5 @@
 {
-  "name": "ri-contracts",
+  "name": "contracts",
   "license": "MIT",
   "version": "0.2.0",
   "private": true,
@@ -17,8 +17,8 @@
     "test": "yarn test:forge",
     "----- BUILD/DEPLOY -----": "---------------------------",
     "start": "run-p -l hardhat:node deploy:hardhat",
-    "build:force": "yarn codegen && rimraf out && (forge build --force || ~/.foundry/bin/forge build --force) && yarn dist && yarn types",
-    "build": "yarn codegen && (forge build || ~/.foundry/bin/forge build) && yarn dist && yarn types && mud system-types && cp types/SystemAbis.mts types/SystemAbis.mjs",
+    "build:force": "yarn codegen && rimraf out && forge build --force && yarn dist && yarn types",
+    "build": "yarn codegen && forge build && yarn dist && yarn types && mud system-types && cp types/SystemAbis.mts types/SystemAbis.mjs",
     "dist": "rimraf abi && mkdir abi && bash exports.sh && rimraf abi/*.metadata.json",
     "deploy:anvil": "wait-on tcp:8545 && mud deploy --deployerPrivateKey 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
     "deploy:hardhat": "wait-on tcp:8545 && yarn hardhat:resetfee && mud deploy --deployerPrivateKey 0x044C7963E9A89D4F8B64AB23E02E97B2E00DD57FCB60F316AC69B77135003AEF && yarn hardhat:resetfee && yarn types",
