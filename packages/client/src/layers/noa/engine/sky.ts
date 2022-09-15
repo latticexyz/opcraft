@@ -1,16 +1,13 @@
-import { Color3, Mesh, MeshBuilder, Scene, StandardMaterial, Texture, Vector3 } from "@babylonjs/core";
+import { Color3, MeshBuilder, Scene, StandardMaterial, Texture, Vector3 } from "@babylonjs/core";
 import type { Engine } from "noa-engine";
-
-export let cloudMesh: Mesh;
-export let skyMesh: Mesh;
-
 /*
  * Setups clouds in a hacky way
  */
+const CLOUD_HEIGHT = 100;
 
 export function setupClouds(noa: Engine) {
   const scene = noa.rendering.getScene();
-  cloudMesh = MeshBuilder.CreatePlane(
+  const cloudMesh = MeshBuilder.CreatePlane(
     "cloudMesh",
     {
       height: 1.5e3,
@@ -20,7 +17,6 @@ export function setupClouds(noa: Engine) {
   );
 
   const cloudMat = new StandardMaterial("cloud", scene);
-
   const cloudTexture = new Texture(
     "./assets/textures/environment/clouds.png",
     scene,
@@ -42,21 +38,15 @@ export function setupClouds(noa: Engine) {
 
   noa.rendering.addMeshToScene(cloudMesh, false);
 
-  cloudMesh.setPositionWithLocalVector(new Vector3(0, 0, 200));
+  cloudMesh.setPositionWithLocalVector(new Vector3(0, 0, CLOUD_HEIGHT));
 
   let pos = [...noa.camera.getPosition()];
 
   const update = () => {
-    const x = noa.ents.getMeshData(noa.playerEntity);
-    if (x != undefined) {
-      cloudMesh.setParent(x.mesh);
-    }
-
     cloudTexture.vOffset += 0.00001 + (pos[2] - noa.camera.getPosition()[2]) / 10000;
     cloudTexture.uOffset -= (pos[0] - noa.camera.getPosition()[0]) / 10000;
     pos = [...noa.camera.getPosition()];
-
-    cloudMesh.setPositionWithLocalVector(new Vector3(0, 0, 250 - noa.camera.getPosition()[1]));
+    cloudMesh.setPositionWithLocalVector(new Vector3(0, 0, CLOUD_HEIGHT));
   };
 
   noa.on("beforeRender", update);
@@ -72,10 +62,7 @@ export function setupClouds(noa: Engine) {
 
 export function setupSky(noa: Engine) {
   const scene: Scene = noa.rendering.getScene();
-  if (skyMesh != null && !skyMesh.isDisposed) {
-    skyMesh.dispose();
-  }
-  skyMesh = MeshBuilder.CreatePlane(
+  const skyMesh = MeshBuilder.CreatePlane(
     "skyMesh",
     {
       height: 1.2e4,
@@ -105,7 +92,7 @@ export function setupSky(noa: Engine) {
 
   noa.on("beforeRender", update);
 
-  cloudMesh.onDisposeObservable.add(() => {
+  skyMesh.onDisposeObservable.add(() => {
     noa.off("beforeRender", update);
   });
 }
