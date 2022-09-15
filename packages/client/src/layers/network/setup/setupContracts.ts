@@ -90,6 +90,7 @@ export async function setupContracts<C extends ContractComponents>(config: GameC
       chainId: config.chainId,
       disableCache: false,
       checkpointServiceUrl: networkConfig.checkpointServiceUrl,
+      streamServiceUrl: networkConfig.streamServiceUrl,
     });
   }
 

@@ -26,6 +26,7 @@ const defaultParams = {
   wsRpc: "wss://l2.op-bedrock.lattice.xyz",
   initialBlockNumber: "22235",
   checkpoint: "https://ecs-snapshot.op-bedrock.lattice.xyz",
+  stream: undefined,
 };
 
 /**
@@ -45,6 +46,7 @@ async function bootGame() {
     const jsonRpc = params.get("rpc") ?? defaultParams.rpc;
     const wsRpc = params.get("wsRpc") ?? defaultParams.wsRpc; // || (jsonRpc && jsonRpc.replace("http", "ws"));
     const checkpointUrl = params.get("checkpoint") ?? defaultParams.checkpoint;
+    const streamServiceUrl = params.get("stream") ?? defaultParams.stream;
     const peerJsUrl = params.get("peerJs") || undefined;
     const devMode = params.get("dev") === "true";
     const initialBlockNumberString = params.get("initialBlockNumber") ?? defaultParams.initialBlockNumber;
@@ -65,6 +67,7 @@ async function bootGame() {
         peerJsUrl,
         wsRpc,
         checkpointUrl,
+        streamServiceUrl,
         devMode,
         initialBlockNumber,
       };
