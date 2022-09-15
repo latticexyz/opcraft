@@ -97,7 +97,8 @@ export function setupNoaEngine(apis: APIs) {
 
   const scene = noa.rendering.getScene();
   scene.fogMode = BABYLON.Scene.FOGMODE_EXP2;
-  scene.fogDensity = 0.003;
+  // scene.fogDensity = 0.003;
+  scene.fogDensity = 0.0006;
   scene.fogColor = new BABYLON.Color3(0.8, 0.9, 1);
 
   // Register sounds
