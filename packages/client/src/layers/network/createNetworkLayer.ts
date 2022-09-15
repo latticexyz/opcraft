@@ -16,6 +16,8 @@ import { BlockType } from "./constants";
 import { defineNameComponent } from "./components/NameComponent";
 import { getBlockAtPosition as getBlockAtPositionApi } from "./api";
 import { createPerlin } from "@latticexyz/noise";
+import { getTerrain, getTerrainBlock } from "./api/terrain/getBlockAtPosition";
+import { BlockType as BlockTypeEnum } from "./constants";
 
 /**
  * The Network layer is the lowest layer in the client architecture.
@@ -49,6 +51,32 @@ export async function createNetworkLayer(config: GameConfig) {
   const actions = createActionSystem(world, txReduced$);
 
   // --- API ------------------------------------------------------------------------
+  function getWorldGenBlockAtPosition(position: VoxelCoord): BlockType {
+    return getTerrainBlock(getTerrain(position, perlin), position);
+  }
+
+  function getECSBlockAtPosition(position: VoxelCoord): BlockType | null {
+    const { withOptimisticUpdates } = actions;
+    const Position = withOptimisticUpdates(components.Position);
+    const BlockType = withOptimisticUpdates(components.BlockType);
+    const entitiesAtPosition = Position.getEntitiesWithValue(position);
+    let hasAirBlock = false;
+    for (const e of entitiesAtPosition) {
+      const value = getComponentValue(BlockType, e);
+      if (value) {
+        if (value.value !== BlockTypeEnum.Air) {
+          return value.value;
+        } else {
+          hasAirBlock = true;
+        }
+      }
+    }
+    if (hasAirBlock) {
+      return BlockTypeEnum.Air;
+    }
+    return null;
+  }
+
   const perlin = await createPerlin();
 
   function getBlockAtPosition(position: VoxelCoord) {
@@ -165,7 +193,7 @@ export async function createNetworkLayer(config: GameConfig) {
     startSync,
     network,
     actions,
-    api: { build, mine, move, craft, name, getBlockAtPosition },
+    api: { build, mine, move, craft, name, getBlockAtPosition, getECSBlockAtPosition, getWorldGenBlockAtPosition },
     dev: setupDevSystems(world, encoders, systems),
     config,
   };

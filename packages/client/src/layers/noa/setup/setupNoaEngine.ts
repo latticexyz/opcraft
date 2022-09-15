@@ -1,6 +1,7 @@
 import { Engine } from "noa-engine";
 // add a mesh to represent the player, and scale it, etc.
 import "@babylonjs/core/Meshes/Builders/boxBuilder";
+import * as BABYLON from "@babylonjs/core";
 import { VoxelCoord } from "@latticexyz/utils";
 import * as vec3 from "gl-vec3";
 import { Blocks, Textures } from "../constants";
@@ -8,13 +9,20 @@ import { BlockType } from "../../network";
 import { applyModel } from "../engine/model";
 import { Color3 } from "@babylonjs/core";
 
-export function setupNoaEngine(getVoxel: (coord: VoxelCoord) => BlockType) {
+export interface APIs {
+  getWorldGenVoxel: (coord: VoxelCoord) => BlockType;
+  getECSVoxel: (coord: VoxelCoord) => BlockType | null;
+}
+
+export function setupNoaEngine(apis: APIs) {
   const opts = {
-    showFPS: false,
+    debug: true,
+    showFPS: true,
     inverseY: false,
     inverseX: false,
-    chunkAddDistance: [10, 10],
-    chunkRemoveDistance: [10, 10],
+    chunkAddDistance: [20, 3],
+    // 32 is pretty far, but it doesn't increase the memory usage much.
+    chunkRemoveDistance: [20, 15],
     blockTestDistance: 7,
     texturePath: "",
     playerHeight: 1.85,
@@ -29,10 +37,14 @@ export function setupNoaEngine(getVoxel: (coord: VoxelCoord) => BlockType) {
     AOmultipliers: [0.93, 0.8, 0.5],
     reverseAOmultiplier: 1.0,
     preserveDrawingBuffer: true,
-    gravity: [0, -1, 0],
   };
 
   const noa = new Engine(opts);
+  // Note: this is the amount of time, per tick, spent requesting chunks from userland and meshing them
+  // IT DOES NOT INCLUDE TIME SPENT BY THE CLIENT GENEERATING THE CHUNKS
+  // On lower end device we should bring this down to 9 or 11
+  noa.world.maxProcessingPerTick = 20;
+  noa.world.maxProcessingPerRender = 15;
 
   // Register materials
   for (const [key, textureUrl] of Object.entries(Textures)) {
@@ -61,13 +73,16 @@ export function setupNoaEngine(getVoxel: (coord: VoxelCoord) => BlockType) {
     for (let i = 0; i < data.shape[0]; i++) {
       for (let j = 0; j < data.shape[1]; j++) {
         for (let k = 0; k < data.shape[2]; k++) {
-          const blockType = getVoxel({ x: x + i, y: y + j, z: z + k });
-          data.set(i, j, k, blockType);
+          const ecsBlockType = apis.getECSVoxel({ x: x + i, y: y + j, z: z + k });
+          if (ecsBlockType) {
+            data.set(i, j, k, ecsBlockType);
+          } else {
+            const blockType = apis.getWorldGenVoxel({ x: x + i, y: y + j, z: z + k });
+            data.set(i, j, k, blockType);
+          }
         }
       }
     }
-
-    // tell noa the chunk's terrain data is now set
     noa.world.setChunkData(id, data, undefined);
   });
 
@@ -82,12 +97,9 @@ export function setupNoaEngine(getVoxel: (coord: VoxelCoord) => BlockType) {
   });
 
   const scene = noa.rendering.getScene();
-
-  scene.fogMode = 3;
-  scene.fogStart = 500;
-  scene.fogEnd = 4000;
-  scene.fogDensity = 0.000001;
-  scene.fogColor = new Color3(...[0.8, 0.9, 1]);
+  scene.fogMode = BABYLON.Scene.FOGMODE_EXP2;
+  scene.fogDensity = 0.003;
+  scene.fogColor = new BABYLON.Color3(0.8, 0.9, 1);
   applyModel(
     noa,
     noa.playerEntity,
