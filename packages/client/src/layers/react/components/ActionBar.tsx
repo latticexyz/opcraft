@@ -18,6 +18,11 @@ export const INDEX_TO_BLOCK_TYPE: { [key: number]: BlockType } = {
   7: BlockType.Crafting,
   8: BlockType.Stone,
   9: BlockType.Water,
+  10: BlockType.Dirt,
+  11: BlockType.Coal,
+  12: BlockType.Iron,
+  13: BlockType.Gold,
+  14: BlockType.Diamond,
 };
 
 export function registerActionBar() {
@@ -62,7 +67,7 @@ export function registerActionBar() {
         <Center>
           <Wrapper>
             <GUI _x={0} _y={0} _height={22} _width={182} scale={SCALE}></GUI>
-            {[...range(9, 1, 1)].map((i) => (
+            {[...range(14, 1, 1)].map((i) => (
               <Slot pos={i} key={"slot" + i}>
                 <BlockIcon blockType={INDEX_TO_BLOCK_TYPE[i]} scale={SCALE}>
                   {quantityPerType[INDEX_TO_BLOCK_TYPE[i]] ?? 0}

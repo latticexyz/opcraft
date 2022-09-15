@@ -8,8 +8,8 @@ import {
   NetworkComponentUpdate,
   createSystemExecutor,
 } from "@latticexyz/network";
-import { World as WorldContract } from "ri-contracts/types/ethers-contracts/World";
-import { abi as WorldAbi } from "ri-contracts/abi/World.json";
+import { World as WorldContract } from "contracts/types/ethers-contracts/World";
+import { abi as WorldAbi } from "contracts/abi/World.json";
 import { bufferTime, filter, Observable, Subject } from "rxjs";
 import {
   Component,
@@ -26,10 +26,10 @@ import {
 import { computed, IComputedValue } from "mobx";
 import { keccak256, stretch, toEthAddress } from "@latticexyz/utils";
 import ComponentAbi from "@latticexyz/solecs/abi/Component.json";
-import { Contract, ethers, Signer, Wallet } from "ethers";
+import { Contract, Signer, utils, Wallet } from "ethers";
 import { Component as SolecsComponent } from "@latticexyz/solecs";
-import { SystemTypes } from "ri-contracts/types/SystemTypes";
-import { SystemAbis } from "ri-contracts/types/SystemAbis.mjs";
+import { SystemTypes } from "contracts/types/SystemTypes";
+import { SystemAbis } from "contracts/types/SystemAbis.mjs";
 import { JsonRpcProvider } from "@ethersproject/providers";
 import { GameConfig, getNetworkConfig } from "../config";
 import { defineStringComponent } from "@latticexyz/std-client";
@@ -65,12 +65,6 @@ export async function setupContracts<C extends ContractComponents>(config: GameC
   const network = await createNetwork(networkConfig);
   world.registerDisposer(network.dispose);
 
-  console.log(
-    "initial block",
-    config.initialBlockNumber,
-    await network.providers.get().json.getBlock(config.initialBlockNumber)
-  );
-
   const signerOrProvider = computed(() => network.signer.get() || network.providers.get().json);
 
   const { contracts, config: contractsConfig } = await createContracts<{ World: WorldContract }>({
@@ -96,6 +90,7 @@ export async function setupContracts<C extends ContractComponents>(config: GameC
       chainId: config.chainId,
       disableCache: false,
       checkpointServiceUrl: networkConfig.checkpointServiceUrl,
+      streamServiceUrl: networkConfig.streamServiceUrl,
     });
   }
 
@@ -113,7 +108,7 @@ export async function setupContracts<C extends ContractComponents>(config: GameC
     );
     const tx = await richAccount.sendTransaction({
       to: network.connectedAddress.get(),
-      value: ethers.utils.parseEther("100.0"),
+      value: utils.parseEther("100.0"),
     });
     await tx.wait();
   }

@@ -1,20 +1,25 @@
 import { Engine } from "noa-engine";
 // add a mesh to represent the player, and scale it, etc.
 import "@babylonjs/core/Meshes/Builders/boxBuilder";
+import * as BABYLON from "@babylonjs/core";
 import { VoxelCoord } from "@latticexyz/utils";
-import * as vec3 from "gl-vec3";
 import { Blocks, Textures } from "../constants";
 import { BlockType } from "../../network";
-import { applyModel } from "../engine/model";
-import { Color3 } from "@babylonjs/core";
 
-export function setupNoaEngine(getVoxel: (coord: VoxelCoord) => BlockType) {
+export interface APIs {
+  getWorldGenVoxel: (coord: VoxelCoord) => BlockType;
+  getECSVoxel: (coord: VoxelCoord) => BlockType | null;
+}
+
+export function setupNoaEngine(apis: APIs) {
   const opts = {
-    showFPS: false,
+    debug: true,
+    showFPS: true,
     inverseY: false,
     inverseX: false,
-    chunkAddDistance: [5, 5],
-    chunkRemoveDistance: [5, 5],
+    chunkAddDistance: [20, 3],
+    // 32 is pretty far, but it doesn't increase the memory usage much.
+    chunkRemoveDistance: [20, 15],
     blockTestDistance: 7,
     texturePath: "",
     playerHeight: 1.85,
@@ -29,10 +34,14 @@ export function setupNoaEngine(getVoxel: (coord: VoxelCoord) => BlockType) {
     AOmultipliers: [0.93, 0.8, 0.5],
     reverseAOmultiplier: 1.0,
     preserveDrawingBuffer: true,
-    gravity: [0, -14, 0],
   };
 
   const noa = new Engine(opts);
+  // Note: this is the amount of time, per tick, spent requesting chunks from userland and meshing them
+  // IT DOES NOT INCLUDE TIME SPENT BY THE CLIENT GENEERATING THE CHUNKS
+  // On lower end device we should bring this down to 9 or 11
+  noa.world.maxProcessingPerTick = 20;
+  noa.world.maxProcessingPerRender = 15;
 
   // Register materials
   for (const [key, textureUrl] of Object.entries(Textures)) {
@@ -61,18 +70,21 @@ export function setupNoaEngine(getVoxel: (coord: VoxelCoord) => BlockType) {
     for (let i = 0; i < data.shape[0]; i++) {
       for (let j = 0; j < data.shape[1]; j++) {
         for (let k = 0; k < data.shape[2]; k++) {
-          const blockType = getVoxel({ x: x + i, y: y + j, z: z + k });
-          data.set(i, j, k, blockType);
+          const ecsBlockType = apis.getECSVoxel({ x: x + i, y: y + j, z: z + k });
+          if (ecsBlockType) {
+            data.set(i, j, k, ecsBlockType);
+          } else {
+            const blockType = apis.getWorldGenVoxel({ x: x + i, y: y + j, z: z + k });
+            data.set(i, j, k, blockType);
+          }
         }
       }
     }
-
-    // tell noa the chunk's terrain data is now set
     noa.world.setChunkData(id, data, undefined);
   });
 
   // each tick, consume any scroll events and use them to zoom camera
-  noa.on("tick", function (dt) {
+  noa.on("tick", function () {
     const scroll = noa.inputs.state.scrolly;
     if (scroll !== 0) {
       noa.camera.zoomDistance += scroll > 0 ? 1 : -1;
@@ -82,109 +94,14 @@ export function setupNoaEngine(getVoxel: (coord: VoxelCoord) => BlockType) {
   });
 
   const scene = noa.rendering.getScene();
+  scene.fogMode = BABYLON.Scene.FOGMODE_EXP2;
+  scene.fogDensity = 0.003;
+  scene.fogColor = new BABYLON.Color3(0.8, 0.9, 1);
 
-  scene.fogMode = 3;
-  scene.fogStart = 500;
-  scene.fogEnd = 4000;
-  scene.fogDensity = 0.000001;
-  scene.fogColor = new Color3(...[0.8, 0.9, 1]);
-  applyModel(
-    noa,
-    noa.playerEntity,
-    noa.playerEntity.toString(),
-    "./assets/models/player.json",
-    "./assets/skins/steve.png",
-    0,
-    true,
-    "Steve",
-    [1, 1, 1]
-  );
-  const entityEvent = async function () {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    //@ts-ignore
-    const playerModel = noa.ents.getState(noa.playerEntity, "model");
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    //@ts-ignore
-    const playerPos = noa.ents.getState(noa.playerEntity, "position");
-
-    if (playerModel != undefined) {
-      const value = noa.camera.zoomDistance != 0;
-      playerModel.main.visibility = value;
-      const children = playerModel.main.getChildMeshes(false);
-
-      let i;
-      for (i = 0; i < children.length; i++) {
-        children[i].visibility = value;
-      }
-
-      if (value) {
-        updateAnimationOfModel(playerModel, playerPos, noa.camera.getTargetPosition(), playerModel.main);
-        playerModel.main.rotation.y = noa.camera.heading;
-        playerModel.models["els/player.json.part-head"].rotation.x = noa.camera.pitch;
-      }
-    }
-
-    // Object.values(entityList).forEach(async function (id: number) {
-    //   const pos = noa.ents.getState(id, "position");
-    //   const newPos = pos.newPosition;
-    //   const mainMesh = noa.ents.getState(id, "mesh");
-    //   const model = noa.ents.getState(id, "model");
-    //   if (mainMesh != undefined && newPos != undefined && pos.position != undefined) {
-    //     let move = vec3.create();
-    //     vec3.lerp(move, pos.position, newPos, 12 / engine.getFps());
-    //     noa.ents.setPosition(id, move[0], move[1], move[2]);
-    //     updateAnimationOfModel(model, pos, newPos, mainMesh.mesh);
-    //   }
-    // });
-  };
-
-  function updateAnimationOfModel(model: any, pos: any, newPos: any, mainMesh: any) {
-    const posx = pos.position;
-
-    const move = vec3.create();
-    vec3.lerp(move, posx, newPos, 1);
-    const rot = pos.rotation ? pos.rotation : 0;
-    const pitch = pos.pitch ? pos.pitch : 0;
-    const pos2da = [newPos[0], 0, newPos[2]];
-    const pos2db = [posx[0], 0, posx[2]];
-
-    if (model.x == undefined) {
-      model.x = 0;
-      model.y = 0;
-      model.z = false;
-    }
-
-    const sin = Math.sin(model.x);
-    if (vec3.dist(pos2da, pos2db) > 0.05) {
-      model.y = vec3.dist(pos2da, pos2db) / 5;
-      model.x = model.x + model.y;
-      if (Math.abs(sin) > 0.95) model.z = true;
-      else if (Math.abs(sin) < 0.05) model.z = false;
-    } else {
-      const sin2 = parseFloat(sin.toFixed(1));
-      if (sin2 != 0 && !model.z) model.x = model.x - 0.05;
-      if (sin2 != 0 && model.z) model.x = model.x + 0.05;
-    }
-    model.models["els/player.json.part-left_arm"].rotation.x = -sin;
-    model.models["els/player.json.part-right_arm"].rotation.x = sin;
-    model.models["els/player.json.part-left_leg"].rotation.x = -sin;
-    model.models["els/player.json.part-right_leg"].rotation.x = sin;
-
-    if (!mainMesh.rotation.y) mainMesh.rotation.y = 0;
-
-    const oldRot = mainMesh.rotation.y;
-
-    if (rot / 2 - oldRot > 5) mainMesh.rotation.y = rot / 2;
-    else mainMesh.rotation.y = (rot / 2 + oldRot) / 2;
-
-    model.models["els/player.json.part-head"].rotation.x = pitch / 2;
-
-    if (model.nametag != undefined) {
-      model.nametag.rotation.y = noa.camera.heading - mainMesh.rotation.y;
-      model.nametag.rotation.x = noa.camera.pitch;
-    }
-  }
-
-  noa.on("beforeRender", entityEvent);
+  // Register sounds
+  new BABYLON.Sound("theme", "/audio/OP_World_Theme_Mix_1.wav", null, null, {
+    loop: true,
+    autoplay: true,
+  });
   return { noa, setBlock };
 }

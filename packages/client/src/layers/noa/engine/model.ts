@@ -15,7 +15,7 @@ import { getAsset } from "./assets";
 const models: { [key: string]: any } = {};
 const templateModels: { [i: string]: Mesh } = {};
 
-export function defineModelComp(noa: Engine) {
+export function defineModelComponent(noa: Engine) {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   //@ts-ignore
   noa.ents.createComponent({

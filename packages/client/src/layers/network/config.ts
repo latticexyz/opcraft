@@ -7,6 +7,7 @@ export type GameConfig = {
   jsonRpc: string;
   wsRpc?: string;
   checkpointUrl?: string;
+  streamServiceUrl?: string;
   peerJsUrl?: string;
   devMode: boolean;
   initialBlockNumber: number;
@@ -30,5 +31,6 @@ export const getNetworkConfig: (networkConfig: GameConfig) => SetupContractConfi
   privateKey: config.privateKey,
   chainId: config.chainId,
   checkpointServiceUrl: config.checkpointUrl,
+  streamServiceUrl: config.streamServiceUrl,
   initialBlockNumber: config.initialBlockNumber,
 });

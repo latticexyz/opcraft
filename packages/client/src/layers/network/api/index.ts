@@ -1,1 +1,1 @@
-export { getBlockAtPosition } from "./getBlockAtPosition";
+export { getBlockAtPosition } from "./terrain/getBlockAtPosition";

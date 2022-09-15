@@ -7,7 +7,7 @@ export default defineConfig({
     emptyOutDir: true,
     sourcemap: true,
     assetsInlineLimit: 0,
-    target: "es2020",
+    target: "es2022",
   },
   preview: {
     port: 3000,
@@ -20,9 +20,9 @@ export default defineConfig({
   },
   optimizeDeps: {
     esbuildOptions: {
-      target: "es2020",
+      target: "es2022",
     },
-    exclude: ["@latticexyzy/network"],
+    exclude: ["@latticexyz/noise", "buffer"],
   },
   server: {
     fs: {

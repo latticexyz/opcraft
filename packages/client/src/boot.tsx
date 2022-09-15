@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { getComponentValue, removeComponent, setComponent } from "@latticexyz/recs";
-import React from "react";
+import React, { useState } from "react";
 import ReactDOM from "react-dom/client";
 import { Time } from "./utils/time";
 import { createNetworkLayer as createNetworkLayerImport } from "./layers/network";
@@ -20,11 +20,13 @@ let registerUIComponents = registerUIComponentsImport;
 let Engine = EngineImport;
 
 const defaultParams = {
-  chainId: "31337",
-  worldAddress: undefined,
-  rpc: "http://localhost:8545",
-  wsRpc: "ws://localhost:8545",
-  initialBlockNumber: "0",
+  chainId: "901",
+  worldAddress: "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
+  rpc: "https://l2.op-bedrock.lattice.xyz",
+  wsRpc: "wss://l2.op-bedrock.lattice.xyz",
+  initialBlockNumber: "22235",
+  checkpoint: "https://ecs-snapshot.op-bedrock.lattice.xyz",
+  stream: undefined,
 };
 
 /**
@@ -37,16 +39,14 @@ async function bootGame() {
   let initialBoot = true;
 
   async function rebootGame(): Promise<Layers> {
-    // Remove react when starting to reboot layers, reboot react once layers are rebooted
-    mountReact.current(false);
-
     const params = new URLSearchParams(window.location.search);
     const worldAddress = params.get("worldAddress") ?? defaultParams.worldAddress;
     let privateKey = params.get("burnerWalletPrivateKey");
     const chainIdString = params.get("chainId") ?? defaultParams.chainId;
     const jsonRpc = params.get("rpc") ?? defaultParams.rpc;
     const wsRpc = params.get("wsRpc") ?? defaultParams.wsRpc; // || (jsonRpc && jsonRpc.replace("http", "ws"));
-    const checkpointUrl = params.get("checkpoint") || undefined;
+    const checkpointUrl = params.get("checkpoint") ?? defaultParams.checkpoint;
+    const streamServiceUrl = params.get("stream") ?? defaultParams.stream;
     const peerJsUrl = params.get("peerJs") || undefined;
     const devMode = params.get("dev") === "true";
     const initialBlockNumberString = params.get("initialBlockNumber") ?? defaultParams.initialBlockNumber;
@@ -67,6 +67,7 @@ async function bootGame() {
         peerJsUrl,
         wsRpc,
         checkpointUrl,
+        streamServiceUrl,
         devMode,
         initialBlockNumber,
       };
@@ -97,7 +98,8 @@ async function bootGame() {
       layers.network.startSync();
     }
 
-    // Reboot react if layers have changed
+    // Remount react when rebooting layers
+    mountReact.current(false);
     mountReact.current(true);
 
     return layers as Layers;
@@ -154,15 +156,16 @@ async function bootGame() {
 }
 
 const mountReact: { current: (mount: boolean) => void } = { current: () => void 0 };
+const setLayers: { current: (layers: Layers) => void } = { current: () => void 0 };
 
-function bootReact(layers: Layers) {
+function bootReact() {
   const rootElement = document.getElementById("react-root");
   if (!rootElement) return console.warn("React root not found");
 
   const root = ReactDOM.createRoot(rootElement);
 
   function renderEngine() {
-    root.render(<Engine layers={layers} mountReact={mountReact} />);
+    root.render(<Engine setLayers={setLayers} mountReact={mountReact} />);
   }
 
   renderEngine();
@@ -186,6 +189,7 @@ function bootReact(layers: Layers) {
 }
 
 export async function boot() {
-  const { layers } = await bootGame();
-  bootReact(layers as Layers);
+  bootReact();
+  const game = await bootGame();
+  setLayers.current(game.layers as Layers);
 }
