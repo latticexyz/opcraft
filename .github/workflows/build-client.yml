@@ -4,7 +4,7 @@ name: Build client and push to the dist-client branch
 on:
   push:
     branches:
-      - alvrs/opworld
+      - main
 
 jobs:
   build:
