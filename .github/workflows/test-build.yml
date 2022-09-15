@@ -3,6 +3,9 @@ name: Test client build
 
 on:
   push:
+    branches:
+      - "**" # matches every branch
+      - "!main" # excludes main
 
 jobs:
   build:
