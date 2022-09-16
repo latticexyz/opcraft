@@ -20,6 +20,7 @@ export function setupNoaEngine(apis: APIs) {
     chunkAddDistance: [20, 3],
     // 32 is pretty far, but it doesn't increase the memory usage much.
     chunkRemoveDistance: [20, 15],
+    playerStart: [-1543, 13, -826],
     blockTestDistance: 7,
     texturePath: "",
     playerHeight: 1.85,
