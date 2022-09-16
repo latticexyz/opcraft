@@ -2,6 +2,8 @@
 
 An infinite, unstoppable World.
 
+The main branch client is automatically deployed to [opcraft.mud.dev](https://opcraft.mud.dev).
+
 ### Running locally
 
 1. Run `yarn` to install dependencies
