@@ -1,15 +1,13 @@
-import { Mesh, StandardMaterial, Color3, PivotTools, Matrix, Vector3 } from "@babylonjs/core";
+import { Mesh, StandardMaterial, Color3, Vector3 } from "@babylonjs/core";
 import {
   defineSystem,
   EntityIndex,
-  getComponentValue,
   getComponentValueStrict,
   Has,
-  Not,
   UpdateType,
   defineComponentSystem,
 } from "@latticexyz/recs";
-import { getAddressColor } from "@latticexyz/std-client";
+import { getStringColor } from "@latticexyz/std-client";
 import { VoxelCoord } from "@latticexyz/utils";
 import { NetworkLayer } from "../../network";
 import { applyModel } from "../engine/model";
@@ -47,7 +45,7 @@ export function createPlayerPositionSystem(network: NetworkLayer, context: NoaLa
     if (h != null) mesh.scaling.y = h;
 
     const address = "0x00";
-    const color = getAddressColor(address);
+    const color = getStringColor(address);
     const hexString = "#" + color.toString(16);
     const material = new StandardMaterial(address, scene);
     material.alpha = 1;
