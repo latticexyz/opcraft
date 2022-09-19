@@ -88,7 +88,7 @@ export async function setupContracts<C extends ContractComponents>(config: GameC
       worldContract: contractsConfig.World,
       initialBlockNumber: config.initialBlockNumber ?? 0,
       chainId: config.chainId,
-      disableCache: false,
+      disableCache: Boolean(config.devMode),
       checkpointServiceUrl: networkConfig.checkpointServiceUrl,
       streamServiceUrl: networkConfig.streamServiceUrl,
     });

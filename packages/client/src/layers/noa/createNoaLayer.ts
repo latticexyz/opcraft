@@ -10,7 +10,6 @@ import { Singleton } from "./constants";
 import { defineModelComponent } from "./engine/model";
 import { setupClouds, setupSky } from "./engine/sky";
 import { setupNoaEngine } from "./setup";
-import { APIs } from "./setup/setupNoaEngine";
 import { createBlockSystem, createInputSystem, createP2PSystem, createPlayerPositionSystem } from "./systems";
 
 export function createNoaLayer(network: NetworkLayer) {
@@ -27,11 +26,7 @@ export function createNoaLayer(network: NetworkLayer) {
   };
 
   // --- SETUP ----------------------------------------------------------------------
-  const apis: APIs = {
-    getECSVoxel: network.api.getECSBlockAtPosition,
-    getWorldGenVoxel: network.api.getWorldGenBlockAtPosition,
-  };
-  const { noa, setBlock } = setupNoaEngine(apis);
+  const { noa, setBlock } = setupNoaEngine(network.api);
   // Modules
   setupClouds(noa);
   setupSky(noa);

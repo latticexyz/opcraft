@@ -48,32 +48,32 @@ export const Textures = {
   [MaterialType.CraftingBottom]: "./assets/blocks/46-Crafting_Table-2-bottom.png",
 };
 
-export const Blocks: { [key in BlockType]: Block | undefined } = {
-  [BlockType.Air]: undefined,
-  [BlockType.Grass]: { material: [MaterialType.Grass, MaterialType.GrassSide] },
-  [BlockType.Dirt]: { material: MaterialType.Dirt },
-  [BlockType.Log]: { material: [MaterialType.LogTop, MaterialType.Log] },
-  [BlockType.Sand]: { material: MaterialType.Sand },
-  [BlockType.Stone]: { material: MaterialType.Stone },
-  [BlockType.Water]: {
+export const Blocks: { [key in keyof typeof BlockType]: Block | undefined } = {
+  Air: undefined,
+  Grass: { material: [MaterialType.Grass, MaterialType.GrassSide] },
+  Dirt: { material: MaterialType.Dirt },
+  Log: { material: [MaterialType.LogTop, MaterialType.Log] },
+  Sand: { material: MaterialType.Sand },
+  Stone: { material: MaterialType.Stone },
+  Water: {
     material: [MaterialType.Water, MaterialType.TransparentWater, MaterialType.TransparentWater],
     opaque: false,
     fluid: true,
     solid: false,
   },
-  [BlockType.Cobblestone]: { material: MaterialType.Cobblestone },
-  [BlockType.Coal]: { material: MaterialType.Coal },
-  [BlockType.Crafting]: { material: [MaterialType.Crafting, MaterialType.CraftingBottom, MaterialType.CraftingSide] },
-  [BlockType.Iron]: { material: MaterialType.Iron },
-  [BlockType.Gold]: { material: MaterialType.Gold },
-  [BlockType.Diamond]: { material: MaterialType.Diamond },
-  [BlockType.Leaves]: { material: MaterialType.Leaves },
-  [BlockType.Planks]: { material: MaterialType.Planks },
+  Cobblestone: { material: MaterialType.Cobblestone },
+  Coal: { material: MaterialType.Coal },
+  Crafting: { material: [MaterialType.Crafting, MaterialType.CraftingBottom, MaterialType.CraftingSide] },
+  Iron: { material: MaterialType.Iron },
+  Gold: { material: MaterialType.Gold },
+  Diamond: { material: MaterialType.Diamond },
+  Leaves: { material: MaterialType.Leaves },
+  Planks: { material: MaterialType.Planks },
 };
 
 export const Singleton = "Singleton" as EntityID;
 
-export function getBlockIconUrl(blockType: BlockType) {
+export function getBlockIconUrl(blockType: keyof typeof BlockType) {
   const block = Blocks[blockType];
   if (!block) return "";
   const material = Array.isArray(block.material) ? block.material[0] : block.material;

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { getComponentValue, removeComponent, setComponent } from "@latticexyz/recs";
-import React, { useState } from "react";
+import React from "react";
 import ReactDOM from "react-dom/client";
 import { Time } from "./utils/time";
 import { createNetworkLayer as createNetworkLayerImport } from "./layers/network";

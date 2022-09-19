@@ -1,5 +1,6 @@
+import { EntityID } from "@latticexyz/recs";
 import styled from "styled-components";
-import { BlockType } from "../../../network";
+import { BlockIdToType } from "../../../network/constants";
 import { getBlockIconUrl } from "../../../noa/constants";
 
 export const GUI = styled.div<{ _x: number; _y: number; _height: number; _width: number; scale: number }>`
@@ -19,11 +20,11 @@ export const Center = styled.div`
   justify-items: center;
 `;
 
-export const BlockIcon = styled.div<{ blockType: BlockType; scale: number }>`
+export const BlockIcon = styled.div<{ blockID: EntityID; scale: number }>`
   width: ${(p) => 16 * p.scale}px;
   height: ${(p) => 16 * p.scale}px;
   margin: ${(p) => 4 * p.scale}px;
-  background-image: url("${(p) => getBlockIconUrl(p.blockType)}");
+  background-image: url("${(p) => getBlockIconUrl(BlockIdToType[p.blockID])}");
   background-size: 100%;
   image-rendering: pixelated;
   display: grid;

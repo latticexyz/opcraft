@@ -1,6 +1,6 @@
-import { EntityID, getComponentValue, HasValue, runQuery, setComponent } from "@latticexyz/recs";
-import { NetworkLayer, BlockType as BlockTypeEnum } from "../../network";
-import { INDEX_TO_BLOCK_TYPE } from "../../react/components/ActionBar";
+import { getComponentValue, HasValue, runQuery, setComponent } from "@latticexyz/recs";
+import { NetworkLayer, BlockType } from "../../network";
+import { INDEX_TO_BLOCK } from "../../react/components/ActionBar";
 import { NoaLayer } from "../types";
 
 export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
@@ -13,9 +13,10 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
 
   const {
     world,
-    components: { BlockType, OwnedBy, Position },
+    components: { Item, OwnedBy, Position },
     api: { build, mine },
     network: { connectedAddress },
+    actions: { withOptimisticUpdates },
   } = network;
 
   // clear targeted block on on left click
@@ -36,7 +37,7 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
       if (
         runQuery([
           HasValue(Position, { x: targeted[0], y: targeted[1], z: targeted[2] }),
-          HasValue(BlockType, { value: BlockTypeEnum.Crafting }),
+          HasValue(Item, { value: BlockType.Crafting }),
         ]).size > 0
       ) {
         noa.container.setPointerLock(false);
@@ -44,14 +45,17 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
       }
 
       const blockIndex = getComponentValue(SelectedSlot, SingletonEntity)?.value ?? 1;
-      const blockType = INDEX_TO_BLOCK_TYPE[blockIndex];
-      const ownedEntitiesOfType = runQuery([
-        HasValue(OwnedBy, { value: connectedAddress.get() }),
-        HasValue(BlockType, { value: blockType }),
-      ]);
-      const blockEntityIndex = [...ownedEntitiesOfType][0];
-      const blockEntity = blockEntityIndex != null ? world.entities[blockEntityIndex] : ("0x00" as EntityID);
-      build(blockEntity, { x: pos[0], y: pos[1], z: pos[2] }, blockType);
+      const blockID = INDEX_TO_BLOCK[blockIndex];
+      const ownedEntitiesOfType = [
+        ...runQuery([
+          HasValue(withOptimisticUpdates(OwnedBy), { value: connectedAddress.get() }),
+          HasValue(Item, { value: blockID }),
+        ]),
+      ];
+      const blockEntityIndex = ownedEntitiesOfType[0];
+      if (blockEntityIndex == null) return console.warn("no owned block of type", blockID);
+      const blockEntity = world.entities[blockEntityIndex];
+      build(blockEntity, { x: pos[0], y: pos[1], z: pos[2] });
     }
   });
 

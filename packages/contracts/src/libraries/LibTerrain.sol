@@ -3,8 +3,9 @@ pragma solidity >=0.8.0;
 
 import { Perlin } from "noise/Perlin.sol";
 import { ABDKMath64x64 as Math } from "abdk-libraries-solidity/ABDKMath64x64.sol";
-import { Biome, BlockType } from "../constants.sol";
+import { Biome } from "../constants.sol";
 import { VoxelCoord } from "std-contracts/components/VoxelCoordComponent.sol";
+import { AirID, GrassID, DirtID, LogID, SandID, StoneID, WaterID, CobblestoneID, CoalID, CraftingID, IronID, GoldID, DiamondID, LeavesID, PlanksID } from "../prototypes/Blocks.sol";
 
 int128 constant _0 = 0; // 0 * 2**64
 int128 constant _0_3 = 5534023222112865484; // 0.3 * 2**64
@@ -34,10 +35,10 @@ struct Tuple {
 }
 
 library LibTerrain {
-  function getTerrainBlock(VoxelCoord memory coord) public pure returns (BlockType) {
+  function getTerrainBlock(VoxelCoord memory coord) public pure returns (uint256) {
     int128[4] memory biome = getBiome(coord.x, coord.z);
     int32 height = getHeight(coord.x, coord.z, biome);
-    return BlockType(getTerrainBlock(coord.x, coord.y, coord.z, height, biome));
+    return getTerrainBlock(coord.x, coord.y, coord.z, height, biome);
   }
 
   function getTerrainBlock(
@@ -46,10 +47,10 @@ library LibTerrain {
     int32 z,
     int32 height,
     int128[4] memory biome
-  ) public pure returns (uint8) {
+  ) public pure returns (uint256) {
     if (y > height) {
-      if (y >= 0) return uint8(BlockType.Air);
-      return uint8(BlockType.Water);
+      if (y >= 0) return AirID;
+      return WaterID;
     }
 
     int128 maxBiome;
@@ -61,12 +62,12 @@ library LibTerrain {
       }
     }
 
-    if (maxBiome == 0) return uint8(BlockType.Dirt);
-    if (maxBiomeIndex == uint256(Biome.Desert)) return uint8(BlockType.Sand);
-    if (maxBiomeIndex == uint256(Biome.Mountains)) return uint8(BlockType.Stone);
-    if (maxBiomeIndex == uint256(Biome.Savanna)) return uint8(BlockType.Grass);
-    if (maxBiomeIndex == uint256(Biome.Forest)) return uint8(BlockType.Log);
-    return uint8(BlockType.Air);
+    if (maxBiome == 0) return DirtID;
+    if (maxBiomeIndex == uint256(Biome.Desert)) return SandID;
+    if (maxBiomeIndex == uint256(Biome.Mountains)) return StoneID;
+    if (maxBiomeIndex == uint256(Biome.Savanna)) return GrassID;
+    if (maxBiomeIndex == uint256(Biome.Forest)) return LogID;
+    return AirID;
   }
 
   function getHeight(

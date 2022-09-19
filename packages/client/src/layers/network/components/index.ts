@@ -1,4 +1,5 @@
-export { defineBlockTypeComponent } from "./BlockTypeComponent";
+export { defineItemComponent } from "./ItemComponent";
+export { defineItemPrototypeComponent } from "./ItemPrototypeComponent";
 export { definePositionComponent } from "./PositionComponent";
 export { defineOwnedByComponent } from "./OwnedByComponent";
 export { defineGameConfigComponent } from "./GameConfigComponent";

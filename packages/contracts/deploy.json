@@ -1,22 +1,27 @@
 {
   "components": [
-    "PositionComponent",
-    "BlockTypeComponent",
-    "OwnedByComponent",
     "GameConfigComponent",
+    "ItemPrototypeComponent",
+    "ItemComponent",
+    "PositionComponent",
+    "OwnedByComponent",
     "RecipeComponent",
     "NameComponent"
   ],
   "systems": [
     { "name": "ComponentDevSystem", "writeAccess": ["*"] },
     { "name": "BulkSetStateSystem", "writeAccess": ["*"] },
-    { "name": "BuildSystem", "writeAccess": ["PositionComponent", "BlockTypeComponent", "OwnedByComponent"] },
-    { "name": "MineSystem", "writeAccess": ["PositionComponent", "OwnedByComponent", "BlockTypeComponent"] },
-    { "name": "InitSystem", "writeAccess": ["GameConfigComponent", "RecipeComponent"], "initialize": "new bytes(0)" },
+    { "name": "MineSystem", "writeAccess": ["PositionComponent", "OwnedByComponent", "ItemComponent"] },
+    { "name": "BuildSystem", "writeAccess": ["PositionComponent", "OwnedByComponent"] },
     { "name": "MoveSystem", "writeAccess": ["PositionComponent"] },
-    { "name": "CraftingSystem", "writeAccess": ["BlockTypeComponent", "OwnedByComponent"] },
+    { "name": "CraftingSystem", "writeAccess": ["OwnedByComponent"] },
     { "name": "NameSystem", "writeAccess": ["NameComponent"] },
     { "name": "PerlinSystem", "writeAccess": [] },
-    { "name": "TerrainSystem", "writeAccess": [] }
+    { "name": "TerrainSystem", "writeAccess": [] },
+    {
+      "name": "InitSystem",
+      "writeAccess": ["GameConfigComponent", "RecipeComponent", "ItemPrototypeComponent"],
+      "initialize": "new bytes(0)"
+    }
   ]
 }
