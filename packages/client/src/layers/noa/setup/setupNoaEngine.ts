@@ -6,6 +6,8 @@ import { VoxelCoord } from "@latticexyz/utils";
 import { Blocks, MaterialType, Textures } from "../constants";
 import { BlockType, BlockTypeIndex } from "../../network";
 import { EntityID } from "@latticexyz/recs";
+import { NoaBlockType } from "../types";
+import { createPlantMesh } from "./utils";
 
 export interface API {
   getTerrainBlockAtPosition: (coord: VoxelCoord) => EntityID;
@@ -39,25 +41,38 @@ export function setupNoaEngine(api: API) {
   };
 
   const noa = new Engine(opts);
+  const scene = noa.rendering.getScene();
   // Note: this is the amount of time, per tick, spent requesting chunks from userland and meshing them
   // IT DOES NOT INCLUDE TIME SPENT BY THE CLIENT GENEERATING THE CHUNKS
   // On lower end device we should bring this down to 9 or 11
   noa.world.maxProcessingPerTick = 20;
   noa.world.maxProcessingPerRender = 15;
-  // Register materials
+  // Register simple materials
   for (const [key, textureUrl] of Object.entries(Textures)) {
     noa.registry.registerMaterial(key, undefined, textureUrl);
   }
   // override the two water materials
   noa.registry.registerMaterial(MaterialType.TransparentWater, [0.5, 0.5, 0.8, 0.7], undefined, true);
   noa.registry.registerMaterial(MaterialType.Water, [1, 1, 1, 0.5], "./assets/blocks/10-Water.png", true);
-
   // Register blocks
+
   for (const [key, block] of Object.entries(Blocks)) {
     const index = BlockTypeIndex[BlockType[key as keyof typeof BlockType]];
+    const augmentedBlock = { ...block };
     if (!block) continue;
 
-    noa.registry.registerBlock(index, block);
+    // Register mesh for mesh blocks
+    if (block.type === NoaBlockType.MESH) {
+      const texture = Array.isArray(block.material) ? block.material[0] : block.material;
+      if (texture === null) {
+        throw new Error("Can't create a plant block without a material");
+      }
+      const mesh = createPlantMesh(noa, scene, Textures[texture as MaterialType], key, augmentedBlock.frames);
+      augmentedBlock.blockMesh = mesh;
+      delete augmentedBlock.material;
+    }
+
+    noa.registry.registerBlock(index, augmentedBlock);
   }
 
   function setBlock(coord: VoxelCoord | number[], block: EntityID) {
@@ -99,7 +114,6 @@ export function setupNoaEngine(api: API) {
     }
   });
 
-  const scene = noa.rendering.getScene();
   scene.fogMode = BABYLON.Scene.FOGMODE_EXP2;
   // scene.fogDensity = 0.003;
   scene.fogDensity = 0.0006;

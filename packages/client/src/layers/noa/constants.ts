@@ -1,6 +1,6 @@
 import { EntityID } from "@latticexyz/recs";
 import { BlockType } from "../network";
-import { Block } from "./types";
+import { Block, NoaBlockType } from "./types";
 
 export enum MaterialType {
   Grass = "Grass",
@@ -23,6 +23,8 @@ export enum MaterialType {
   Crafting = "Crafting",
   CraftingSide = "CraftingSide",
   CraftingBottom = "CraftingBottom",
+  RedFlower = "RedFlower",
+  Kelp = "Kelp",
 }
 
 export const Textures = {
@@ -46,29 +48,38 @@ export const Textures = {
   [MaterialType.Crafting]: "./assets/blocks/46-Crafting_Table-0-top.png",
   [MaterialType.CraftingSide]: "./assets/blocks/46-Crafting_Table-1-sides.png",
   [MaterialType.CraftingBottom]: "./assets/blocks/46-Crafting_Table-2-bottom.png",
+  [MaterialType.RedFlower]: "./assets/blocks/red_flower.png",
+  [MaterialType.Kelp]: "./assets/blocks/kelp-small.png",
 };
 
 export const Blocks: { [key in keyof typeof BlockType]: Block | undefined } = {
   Air: undefined,
-  Grass: { material: [MaterialType.Grass, MaterialType.GrassSide] },
-  Dirt: { material: MaterialType.Dirt },
-  Log: { material: [MaterialType.LogTop, MaterialType.Log] },
-  Sand: { material: MaterialType.Sand },
-  Stone: { material: MaterialType.Stone },
+  Grass: { type: NoaBlockType.BLOCK, material: [MaterialType.Grass, MaterialType.GrassSide] },
+  Dirt: { type: NoaBlockType.BLOCK, material: MaterialType.Dirt },
+  Log: { type: NoaBlockType.BLOCK, material: [MaterialType.LogTop, MaterialType.Log] },
+  Sand: { type: NoaBlockType.BLOCK, material: MaterialType.Sand },
+  Stone: { type: NoaBlockType.BLOCK, material: MaterialType.Stone },
   Water: {
+    type: NoaBlockType.BLOCK,
     material: [MaterialType.Water, MaterialType.TransparentWater, MaterialType.TransparentWater],
     opaque: false,
     fluid: true,
     solid: false,
   },
-  Cobblestone: { material: MaterialType.Cobblestone },
-  Coal: { material: MaterialType.Coal },
-  Crafting: { material: [MaterialType.Crafting, MaterialType.CraftingBottom, MaterialType.CraftingSide] },
-  Iron: { material: MaterialType.Iron },
-  Gold: { material: MaterialType.Gold },
-  Diamond: { material: MaterialType.Diamond },
-  Leaves: { material: MaterialType.Leaves },
-  Planks: { material: MaterialType.Planks },
+  Cobblestone: { type: NoaBlockType.BLOCK, material: MaterialType.Cobblestone },
+  Coal: { type: NoaBlockType.BLOCK, material: MaterialType.Coal },
+  Crafting: {
+    type: NoaBlockType.BLOCK,
+    material: [MaterialType.Crafting, MaterialType.CraftingBottom, MaterialType.CraftingSide],
+  },
+  Iron: { type: NoaBlockType.BLOCK, material: MaterialType.Iron },
+  Gold: { type: NoaBlockType.BLOCK, material: MaterialType.Gold },
+  Diamond: { type: NoaBlockType.BLOCK, material: MaterialType.Diamond },
+  Leaves: { type: NoaBlockType.BLOCK, material: MaterialType.Leaves },
+  Planks: { type: NoaBlockType.BLOCK, material: MaterialType.Planks },
+
+  RedFlower: { type: NoaBlockType.MESH, material: MaterialType.RedFlower, solid: false, opaque: false },
+  Kelp: { type: NoaBlockType.MESH, material: MaterialType.Kelp, solid: false, opaque: false, frames: 2 },
 };
 
 export const Singleton = "Singleton" as EntityID;

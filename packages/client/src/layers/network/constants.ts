@@ -17,6 +17,8 @@ export const BlockType = {
   Diamond: keccak256("block.Diamond") as EntityID,
   Leaves: keccak256("block.Leaves") as EntityID,
   Planks: keccak256("block.Planks") as EntityID,
+  RedFlower: keccak256("block.RedFlower") as EntityID,
+  Kelp: keccak256("block.Kelp") as EntityID,
 };
 
 console.log("Blocks", BlockType);
