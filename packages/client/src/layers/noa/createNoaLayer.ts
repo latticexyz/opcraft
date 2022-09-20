@@ -8,7 +8,9 @@ import {
 import { defineCraftingTableComponent } from "./components/CraftingTable";
 import { Singleton } from "./constants";
 import { setupHand } from "./engine/hand";
-import { defineModelComponent } from "./engine/model";
+import { registerModelComponent } from "./engine/model";
+import { monkeyPatchMeshComponent } from "./engine/monkeyPatchMeshComponent";
+import { registerRotationComponent } from "./engine/rotationComponent";
 import { setupClouds, setupSky } from "./engine/sky";
 import { setupNoaEngine } from "./setup";
 import { createBlockSystem, createInputSystem, createP2PSystem, createPlayerPositionSystem } from "./systems";
@@ -29,7 +31,9 @@ export function createNoaLayer(network: NetworkLayer) {
   // --- SETUP ----------------------------------------------------------------------
   const { noa, setBlock } = setupNoaEngine(network.api);
   // Modules
-  defineModelComponent(noa);
+  monkeyPatchMeshComponent(noa);
+  registerModelComponent(noa);
+  registerRotationComponent(noa);
   setupClouds(noa);
   setupSky(noa);
   setupHand(noa);

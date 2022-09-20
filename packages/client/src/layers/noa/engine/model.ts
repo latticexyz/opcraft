@@ -14,7 +14,7 @@ import { Engine } from "noa-engine";
 const models: { [key: string]: any } = {};
 const templateModels: { [i: string]: Mesh } = {};
 
-export function defineModelComponent(noa: Engine) {
+export function registerModelComponent(noa: Engine) {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   //@ts-ignore
   noa.ents.createComponent({

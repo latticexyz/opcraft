@@ -1,33 +1,14 @@
 import * as BABYLON from "@babylonjs/core/Legacy/legacy";
-import { Texture, Vector3, Vector4 } from "@babylonjs/core";
+import { Texture, Vector4 } from "@babylonjs/core";
 import { Engine } from "noa-engine";
+import { MaterialType, Textures } from "../constants";
 
 export function setupHand(noa: Engine) {
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  //@ts-ignore
-  noa.entities.removeComponent(noa.playerEntity, noa.entities.names.fadeOnZoom);
-  const toMonkeyPatch = (dt: any, states: any) => {
-    for (let i = 0; i < states.length; i++) {
-      const state = states[i];
-      const id = state.__id;
-      const rpos = noa.ents.getPositionData(id)!._renderPosition!;
-      const yaw = noa.camera.heading;
-      const pitch = noa.camera.pitch;
-      state.mesh.position.copyFromFloats(
-        rpos[0] + state.offset[0],
-        rpos[1] + state.offset[1],
-        rpos[2] + state.offset[2]
-      );
-      state.mesh.rotation.copyFromFloats(pitch, yaw, 0);
-    }
-  };
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  //@ts-ignore
-  noa.entities.components.mesh.renderSystem = toMonkeyPatch;
   const scene = noa.rendering.getScene();
   const core = BABYLON.MeshBuilder.CreateBox("core", { size: 1 }, scene);
   core.visibility = 0;
   const handMaterial = noa.rendering.makeStandardMaterial("handMaterial");
+  const blockMaterial = noa.rendering.makeStandardMaterial("blockMaterial");
   handMaterial.diffuseTexture = new Texture(
     "./assets/skins/steve.png",
     scene,
@@ -36,6 +17,14 @@ export function setupHand(noa: Engine) {
     Texture.NEAREST_SAMPLINGMODE
   );
   handMaterial.diffuseTexture!.hasAlpha = true;
+  // TODO: in order to make it work with blocks that have different faces we need to uv wrap them
+  blockMaterial.diffuseTexture = new Texture(
+    Textures[MaterialType.Cobblestone],
+    scene,
+    true,
+    true,
+    Texture.NEAREST_SAMPLINGMODE
+  );
   const faceUV = new Array(6);
   // from the model.json -> right hand
   const txtSize = [64, 64];
@@ -91,50 +80,97 @@ export function setupHand(noa: Engine) {
     scene
   );
   hand.material = handMaterial;
-  //   hand.rotation.y = -Math.PI / 8;
   hand.rotation.x = -Math.PI / 2;
 
-  const animationBox = new BABYLON.Animation(
+  const block = BABYLON.MeshBuilder.CreateBox(
+    "block",
+    {
+      height: 8 * scale,
+      width: 8 * scale,
+      depth: 8 * scale,
+      //   faceUV: faceUV,
+      wrap: true,
+    },
+    scene
+  );
+  block.material = blockMaterial;
+  block.rotation.x = -0.1;
+  block.rotation.y = -0.8;
+  block.rotation.z = 0.3;
+
+  const animationBoxHand = new BABYLON.Animation(
     "movement",
     "position.y",
     30,
     BABYLON.Animation.ANIMATIONTYPE_FLOAT,
     BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE
   );
-  const Y = -0.6;
+  const animationBoxBlock = new BABYLON.Animation(
+    "movement",
+    "position.y",
+    30,
+    BABYLON.Animation.ANIMATIONTYPE_FLOAT,
+    BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE
+  );
+  const Y_HAND = -0.6;
+  const Y_BLOCK = -0.6;
   const ANIMATION_SCALE = 2;
 
-  const keys = [];
-  keys.push({
+  const keysHand = [];
+
+  keysHand.push({
     frame: 0,
-    value: Y + 0.08 * ANIMATION_SCALE,
+    value: Y_HAND + 0.08 * ANIMATION_SCALE,
   });
-
-  keys.push({
+  keysHand.push({
     frame: 20,
-    value: Y + 0.085 * ANIMATION_SCALE,
+    value: Y_HAND + 0.085 * ANIMATION_SCALE,
   });
-
-  keys.push({
+  keysHand.push({
     frame: 40,
-    value: Y + 0.08 * ANIMATION_SCALE,
+    value: Y_HAND + 0.08 * ANIMATION_SCALE,
   });
-
-  keys.push({
+  keysHand.push({
     frame: 60,
-    value: Y + 0.075 * ANIMATION_SCALE,
+    value: Y_HAND + 0.075 * ANIMATION_SCALE,
   });
-
-  keys.push({
+  keysHand.push({
     frame: 80,
-    value: Y + 0.08 * ANIMATION_SCALE,
+    value: Y_HAND + 0.08 * ANIMATION_SCALE,
   });
 
-  animationBox.setKeys(keys);
-  hand.animations.push(animationBox);
+  const keysBlock = [];
+
+  keysBlock.push({
+    frame: 0,
+    value: Y_BLOCK + 0.08 * ANIMATION_SCALE,
+  });
+  keysBlock.push({
+    frame: 20,
+    value: Y_BLOCK + 0.085 * ANIMATION_SCALE,
+  });
+  keysBlock.push({
+    frame: 40,
+    value: Y_BLOCK + 0.08 * ANIMATION_SCALE,
+  });
+  keysBlock.push({
+    frame: 60,
+    value: Y_BLOCK + 0.075 * ANIMATION_SCALE,
+  });
+  keysBlock.push({
+    frame: 80,
+    value: Y_BLOCK + 0.08 * ANIMATION_SCALE,
+  });
+
+  animationBoxHand.setKeys(keysHand);
+  animationBoxBlock.setKeys(keysBlock);
+  hand.animations.push(animationBoxHand);
+  block.animations.push(animationBoxBlock);
   scene.beginAnimation(hand, 0, 100, true);
+  scene.beginAnimation(block, 0, 100, true);
   noa.rendering.addMeshToScene(core);
   noa.rendering.addMeshToScene(hand);
+  noa.rendering.addMeshToScene(block);
   const eyeOffset = 0.9 * noa.ents.getPositionData(noa.playerEntity)!.height;
   noa.entities.addComponentAgain(noa.playerEntity, "mesh", {
     mesh: core,
@@ -142,5 +178,8 @@ export function setupHand(noa: Engine) {
   });
   const { mesh } = noa.entities.getMeshData(noa.playerEntity);
   hand.setParent(mesh);
-  hand.position.set(0.4, Y, 1.1);
+  hand.position.set(0.4, Y_HAND, 1.1);
+  block.setParent(mesh);
+  block.position.set(0.8, Y_BLOCK, 1.2);
+  hand.visibility = 0;
 }
