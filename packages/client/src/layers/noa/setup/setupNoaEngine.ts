@@ -21,7 +21,7 @@ export function setupNoaEngine(api: API) {
     showFPS: true,
     inverseY: false,
     inverseX: false,
-    chunkAddDistance: [20, 3],
+    chunkAddDistance: [17, 3],
     // 32 is pretty far, but it doesn't increase the memory usage much.
     chunkRemoveDistance: [20, 15],
     playerStart: [-1543, 13, -826],
@@ -46,8 +46,8 @@ export function setupNoaEngine(api: API) {
   // Note: this is the amount of time, per tick, spent requesting chunks from userland and meshing them
   // IT DOES NOT INCLUDE TIME SPENT BY THE CLIENT GENEERATING THE CHUNKS
   // On lower end device we should bring this down to 9 or 11
-  noa.world.maxProcessingPerTick = 20;
-  noa.world.maxProcessingPerRender = 15;
+  noa.world.maxProcessingPerTick = 17;
+  noa.world.maxProcessingPerRender = 12;
   // Register simple materials
   for (const [key, textureUrl] of Object.entries(Textures)) {
     noa.registry.registerMaterial(key, undefined, textureUrl);
