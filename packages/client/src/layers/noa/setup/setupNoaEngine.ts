@@ -124,5 +124,13 @@ export function setupNoaEngine(api: API) {
     loop: true,
     autoplay: true,
   });
+
+  // Change block targeting mechanism
+  noa.blockTargetIdCheck = function (id: number) {
+    if (!!Blocks[id as BlockType] && id != 0) {
+      if (Blocks[id as BlockType]?.fluid == true) return false;
+      return true;
+    } else return false;
+  };
   return { noa, setBlock };
 }
