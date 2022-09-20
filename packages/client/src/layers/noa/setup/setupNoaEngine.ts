@@ -104,16 +104,16 @@ export function setupNoaEngine(api: API) {
     }
     noa.world.setChunkData(id, data, undefined);
   });
-
+  // DEV: uncomment to debug models
   // each tick, consume any scroll events and use them to zoom camera
-  noa.on("tick", function () {
-    const scroll = noa.inputs.state.scrolly;
-    if (scroll !== 0) {
-      noa.camera.zoomDistance += scroll > 0 ? 1 : -1;
-      if (noa.camera.zoomDistance < 0) noa.camera.zoomDistance = 0;
-      if (noa.camera.zoomDistance > 10) noa.camera.zoomDistance = 10;
-    }
-  });
+  // noa.on("tick", function () {
+  //   const scroll = noa.inputs.state.scrolly;
+  //   if (scroll !== 0) {
+  //     noa.camera.zoomDistance += scroll > 0 ? 1 : -1;
+  //     if (noa.camera.zoomDistance < 0) noa.camera.zoomDistance = 0;
+  //     if (noa.camera.zoomDistance > 10) noa.camera.zoomDistance = 10;
+  //   }
+  // });
 
   scene.fogMode = BABYLON.Scene.FOGMODE_EXP2;
   // scene.fogDensity = 0.003;

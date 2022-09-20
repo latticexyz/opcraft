@@ -4,6 +4,7 @@ import type { Engine } from "noa-engine";
  * Setups clouds in a hacky way
  */
 const CLOUD_HEIGHT = 100;
+const SKY_HEIGHT = 110;
 
 export function setupClouds(noa: Engine) {
   const scene = noa.rendering.getScene();
@@ -38,15 +39,14 @@ export function setupClouds(noa: Engine) {
 
   noa.rendering.addMeshToScene(cloudMesh, false);
 
-  cloudMesh.setPositionWithLocalVector(new Vector3(0, 0, CLOUD_HEIGHT));
-
   let pos = [...noa.camera.getPosition()];
 
   const update = () => {
     cloudTexture.vOffset += 0.00001 + (pos[2] - noa.camera.getPosition()[2]) / 10000;
     cloudTexture.uOffset -= (pos[0] - noa.camera.getPosition()[0]) / 10000;
     pos = [...noa.camera.getPosition()];
-    cloudMesh.setPositionWithLocalVector(new Vector3(0, 0, CLOUD_HEIGHT));
+    const rpos = noa.ents.getPositionData(noa.playerEntity)!._renderPosition!;
+    cloudMesh.position.copyFromFloats(rpos[0], rpos[1] + CLOUD_HEIGHT, rpos[2]);
   };
 
   noa.on("beforeRender", update);
@@ -84,10 +84,9 @@ export function setupSky(noa: Engine) {
 
   noa.rendering.addMeshToScene(skyMesh, false);
 
-  skyMesh.setPositionWithLocalVector(new Vector3(0, 0, 500));
-
   const update = () => {
-    skyMesh.setPositionWithLocalVector(new Vector3(0, 0, 500));
+    const rpos = noa.ents.getPositionData(noa.playerEntity)!._renderPosition!;
+    skyMesh.position.copyFromFloats(rpos[0], rpos[1] + SKY_HEIGHT, rpos[2]);
   };
 
   noa.on("beforeRender", update);

@@ -7,6 +7,7 @@ import {
 } from "./components";
 import { defineCraftingTableComponent } from "./components/CraftingTable";
 import { Singleton } from "./constants";
+import { setupHand } from "./engine/hand";
 import { defineModelComponent } from "./engine/model";
 import { setupClouds, setupSky } from "./engine/sky";
 import { setupNoaEngine } from "./setup";
@@ -28,9 +29,10 @@ export function createNoaLayer(network: NetworkLayer) {
   // --- SETUP ----------------------------------------------------------------------
   const { noa, setBlock } = setupNoaEngine(network.api);
   // Modules
+  defineModelComponent(noa);
   setupClouds(noa);
   setupSky(noa);
-  defineModelComponent(noa);
+  setupHand(noa);
 
   // --- API ------------------------------------------------------------------------
   function setCraftingTable(entities: EntityIndex[]) {
