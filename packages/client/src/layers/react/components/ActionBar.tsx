@@ -8,7 +8,7 @@ import { defineQuery, getComponentValue, HasValue } from "@latticexyz/recs";
 import { BlockType } from "../../network";
 
 const SCALE = 3;
-export const INDEX_TO_BLOCK_TYPE: { [key: number]: BlockType } = {
+export const INDEX_TO_BLOCK: { [key: number]: typeof BlockType[keyof typeof BlockType] } = {
   1: BlockType.Grass,
   2: BlockType.Log,
   3: BlockType.Planks,
@@ -38,7 +38,7 @@ export function registerActionBar() {
       const {
         network: {
           network: { connectedAddress },
-          components: { OwnedBy, BlockType },
+          components: { OwnedBy, Item },
         },
         noa: {
           components: { SelectedSlot },
@@ -52,12 +52,12 @@ export function registerActionBar() {
         map(() => {
           return {
             selectedSlot: getComponentValue(SelectedSlot, SingletonEntity)?.value ?? 1,
-            quantityPerType: [...ownedByMeQuery.matching].reduce<number[]>((acc, entity) => {
-              const blockType = getComponentValue(BlockType, entity)?.value;
-              if (blockType == null) return acc;
-              acc[blockType] = (acc[blockType] ?? 0) + 1;
+            quantityPerType: [...ownedByMeQuery.matching].reduce<{ [key: string]: number }>((acc, entity) => {
+              const blockID = getComponentValue(Item, entity)?.value;
+              if (blockID == null) return acc;
+              acc[blockID] = (acc[blockID] ?? 0) + 1;
               return acc;
-            }, []),
+            }, {}),
           };
         })
       );
@@ -69,8 +69,8 @@ export function registerActionBar() {
             <GUI _x={0} _y={0} _height={22} _width={182} scale={SCALE}></GUI>
             {[...range(14, 1, 1)].map((i) => (
               <Slot pos={i} key={"slot" + i}>
-                <BlockIcon blockType={INDEX_TO_BLOCK_TYPE[i]} scale={SCALE}>
-                  {quantityPerType[INDEX_TO_BLOCK_TYPE[i]] ?? 0}
+                <BlockIcon blockID={INDEX_TO_BLOCK[i]} scale={SCALE}>
+                  {quantityPerType[INDEX_TO_BLOCK[i]] ?? 0}
                 </BlockIcon>
               </Slot>
             ))}

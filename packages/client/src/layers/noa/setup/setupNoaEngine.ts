@@ -4,14 +4,15 @@ import "@babylonjs/core/Meshes/Builders/boxBuilder";
 import * as BABYLON from "@babylonjs/core";
 import { VoxelCoord } from "@latticexyz/utils";
 import { Blocks, MaterialType, Textures } from "../constants";
-import { BlockType } from "../../network";
+import { BlockType, BlockTypeIndex } from "../../network";
+import { EntityID } from "@latticexyz/recs";
 
-export interface APIs {
-  getWorldGenVoxel: (coord: VoxelCoord) => BlockType;
-  getECSVoxel: (coord: VoxelCoord) => BlockType | null;
+export interface API {
+  getTerrainBlockAtPosition: (coord: VoxelCoord) => EntityID;
+  getECSBlockAtPosition: (coord: VoxelCoord) => EntityID | undefined;
 }
 
-export function setupNoaEngine(apis: APIs) {
+export function setupNoaEngine(api: API) {
   const opts = {
     debug: true,
     showFPS: true,
@@ -52,17 +53,19 @@ export function setupNoaEngine(apis: APIs) {
   noa.registry.registerMaterial(MaterialType.Water, [1, 1, 1, 0.5], "./assets/blocks/10-Water.png", true);
 
   // Register blocks
-  for (const [id, block] of Object.entries(Blocks)) {
+  for (const [key, block] of Object.entries(Blocks)) {
+    const index = BlockTypeIndex[BlockType[key as keyof typeof BlockType]];
     if (!block) continue;
 
-    noa.registry.registerBlock(id, block);
+    noa.registry.registerBlock(index, block);
   }
 
-  function setBlock(coord: VoxelCoord | number[], block: BlockType) {
+  function setBlock(coord: VoxelCoord | number[], block: EntityID) {
+    const index = BlockTypeIndex[block];
     if ("length" in coord) {
-      noa.setBlock(block, coord[0], coord[1], coord[2]);
+      noa.setBlock(index, coord[0], coord[1], coord[2]);
     } else {
-      noa.setBlock(block, coord.x, coord.y, coord.z);
+      noa.setBlock(index, coord.x, coord.y, coord.z);
     }
   }
 
@@ -73,11 +76,11 @@ export function setupNoaEngine(apis: APIs) {
     for (let i = 0; i < data.shape[0]; i++) {
       for (let j = 0; j < data.shape[1]; j++) {
         for (let k = 0; k < data.shape[2]; k++) {
-          const ecsBlockType = apis.getECSVoxel({ x: x + i, y: y + j, z: z + k });
+          const ecsBlockType = BlockTypeIndex[api.getECSBlockAtPosition({ x: x + i, y: y + j, z: z + k }) as string];
           if (ecsBlockType) {
             data.set(i, j, k, ecsBlockType);
           } else {
-            const blockType = apis.getWorldGenVoxel({ x: x + i, y: y + j, z: z + k });
+            const blockType = BlockTypeIndex[api.getTerrainBlockAtPosition({ x: x + i, y: y + j, z: z + k }) as string];
             data.set(i, j, k, blockType);
           }
         }

@@ -8,47 +8,56 @@ import { getAddressById, addressToEntity } from "solecs/utils.sol";
 
 import { PositionComponent, ID as PositionComponentID, VoxelCoord } from "../components/PositionComponent.sol";
 import { OwnedByComponent, ID as OwnedByComponentID } from "../components/OwnedByComponent.sol";
-import { BlockTypeComponent, ID as BlockTypeComponentID } from "../components/BlockTypeComponent.sol";
-import { BlockType } from "../constants.sol";
+import { ItemComponent, ID as ItemComponentID } from "../components/ItemComponent.sol";
 import { LibTerrain } from "../libraries/LibTerrain.sol";
 
-uint256 constant ID = uint256(keccak256("ember.system.mine"));
+import { AirID, WaterID } from "../prototypes/Blocks.sol";
+
+uint256 constant ID = uint256(keccak256("system.Mine"));
 
 contract MineSystem is System {
   constructor(IWorld _world, address _components) System(_world, _components) {}
 
   function execute(bytes memory arguments) public returns (bytes memory) {
-    (VoxelCoord memory targetPosition, BlockType blockType) = abi.decode(arguments, (VoxelCoord, BlockType));
-    require(blockType != BlockType.Air, "can not mine air");
+    (VoxelCoord memory targetPosition, uint256 blockType) = abi.decode(arguments, (VoxelCoord, uint256));
+    require(blockType != AirID, "can not mine air");
+    require(blockType != WaterID, "can not mine water");
 
+    // Initialize components
     PositionComponent positionComponent = PositionComponent(getAddressById(components, PositionComponentID));
     OwnedByComponent ownedByComponent = OwnedByComponent(getAddressById(components, OwnedByComponentID));
-    BlockTypeComponent blockTypeComponent = BlockTypeComponent(getAddressById(components, BlockTypeComponentID));
+    ItemComponent itemComponent = ItemComponent(getAddressById(components, ItemComponentID));
 
     uint256 entity;
+
+    // Check ECS blocks at coord
     uint256[] memory entitiesAtPosition = positionComponent.getEntitiesWithValue(targetPosition);
 
     if (entitiesAtPosition.length == 0) {
       // If there is no entity at this position, try mining the terrain block at this position
       require(LibTerrain.getTerrainBlock(targetPosition) == blockType, "invalid terrain block type");
-      entity = world.getUniqueEntityId();
-      blockTypeComponent.set(entity, uint32(blockType));
 
-      // Set an air block at this position
+      // Create an ECS block from this coord's terrain block
+      entity = world.getUniqueEntityId();
+      itemComponent.set(entity, blockType);
+
+      // Place an air block at this position
       uint256 airEntity = world.getUniqueEntityId();
-      blockTypeComponent.set(airEntity, uint32(BlockType.Air));
+      itemComponent.set(airEntity, AirID);
       positionComponent.set(airEntity, targetPosition);
     } else {
-      // Else, mine the entity block at this position
-      entity = entitiesAtPosition[0];
-      require(blockTypeComponent.getValue(entity) == uint32(blockType), "invalid block type");
+      // Else, mine the non-air entity block at this position
+      for (uint256 i; i < entitiesAtPosition.length; i++) {
+        if (itemComponent.getValue(entitiesAtPosition[i]) == blockType) entity = entitiesAtPosition[i];
+      }
+      require(entity != 0, "invalid block type");
       positionComponent.remove(entity);
     }
 
     ownedByComponent.set(entity, addressToEntity(msg.sender));
   }
 
-  function executeTyped(VoxelCoord memory targetPosition, uint32 blockType) public returns (bytes memory) {
+  function executeTyped(VoxelCoord memory targetPosition, uint256 blockType) public returns (bytes memory) {
     return execute(abi.encode(targetPosition, blockType));
   }
 }

@@ -8,7 +8,9 @@ import { getAddressById } from "solecs/utils.sol";
 
 import { GameConfigComponent, ID as GameConfigComponentID, GameConfig } from "../components/GameConfigComponent.sol";
 import { RecipeComponent, ID as RecipeComponentID } from "../components/RecipeComponent.sol";
-import { GodID, BlockType, CraftingRecipeID, PlanksRecipeID } from "../constants.sol";
+import { ItemPrototypeComponent, ID as ItemPrototypeComponentID } from "../components/ItemPrototypeComponent.sol";
+import { GodID, CraftingRecipeID, PlanksRecipeID } from "../constants.sol";
+import { defineBlocks } from "../prototypes/Blocks.sol";
 
 uint256 constant ID = uint256(keccak256("ember.system.init"));
 
@@ -16,25 +18,34 @@ contract InitSystem is System {
   constructor(IWorld _world, address _components) System(_world, _components) {}
 
   function execute(bytes memory) public returns (bytes memory) {
+    // Get components
     GameConfigComponent gameConfigComponent = GameConfigComponent(getAddressById(components, GameConfigComponentID));
+    ItemPrototypeComponent itemPrototypeComponent = ItemPrototypeComponent(
+      getAddressById(components, ItemPrototypeComponentID)
+    );
+
+    // Game config
     gameConfigComponent.set(GodID, GameConfig({ creativeMode: true }));
+
+    // Blocks
+    defineBlocks(itemPrototypeComponent);
 
     // Add recipes
     RecipeComponent recipeComponent = RecipeComponent(getAddressById(components, RecipeComponentID));
 
     // Plank to crafting
-    uint32[] memory recipe = new uint32[](10);
-    recipe[0] = uint32(BlockType.Planks);
-    recipe[1] = uint32(BlockType.Planks);
-    recipe[3] = uint32(BlockType.Planks);
-    recipe[4] = uint32(BlockType.Planks);
-    recipe[9] = uint32(BlockType.Crafting);
-    recipeComponent.set(CraftingRecipeID, recipe);
+    // uint32[] memory recipe = new uint32[](10);
+    // recipe[0] = uint32(BlockType.Planks);
+    // recipe[1] = uint32(BlockType.Planks);
+    // recipe[3] = uint32(BlockType.Planks);
+    // recipe[4] = uint32(BlockType.Planks);
+    // recipe[9] = uint32(BlockType.Crafting);
+    // recipeComponent.set(CraftingRecipeID, recipe);
 
-    // Log to plank
-    recipe = new uint32[](10);
-    recipe[0] = uint32(BlockType.Log);
-    recipe[9] = uint32(BlockType.Planks);
-    recipeComponent.set(PlanksRecipeID, recipe);
+    // // Log to plank
+    // recipe = new uint32[](10);
+    // recipe[0] = uint32(BlockType.Log);
+    // recipe[9] = uint32(BlockType.Planks);
+    // recipeComponent.set(PlanksRecipeID, recipe);
   }
 }

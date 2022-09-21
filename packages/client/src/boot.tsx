@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { getComponentValue, removeComponent, setComponent } from "@latticexyz/recs";
-import React, { useState } from "react";
+import React from "react";
 import ReactDOM from "react-dom/client";
 import { Time } from "./utils/time";
 import { createNetworkLayer as createNetworkLayerImport } from "./layers/network";
@@ -21,10 +21,10 @@ let Engine = EngineImport;
 
 const defaultParams = {
   chainId: "901",
-  worldAddress: "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
+  worldAddress: "0xA9e6Bfa2BF53dE88FEb19761D9b2eE2e821bF1Bf",
   rpc: "https://l2.op-bedrock.lattice.xyz",
   wsRpc: "wss://l2.op-bedrock.lattice.xyz",
-  initialBlockNumber: "22235",
+  initialBlockNumber: "351238",
   checkpoint: "https://ecs-snapshot.op-bedrock.lattice.xyz",
   stream: undefined,
 };

@@ -45,8 +45,8 @@ describe("LibTerrain", () => {
   const splinesSol: { [key: string]: (x: BigNumber) => Promise<number> } = {};
   let euclideanSol: (a: [number, number], b: [number, number]) => Promise<number> = async () => 0;
 
-  let getTerrainBlockSol: (coord: VoxelCoord) => Promise<number> = async () => 0;
-  let getTerrainBlockTs: (coord: VoxelCoord) => number = () => 0;
+  let getTerrainBlockSol: (coord: VoxelCoord) => Promise<string> = async () => "0x00";
+  let getTerrainBlockTs: (coord: VoxelCoord) => string = () => "0x00";
 
   before(async () => {
     const Perlin = (await (await ethers.getContractFactory("Perlin")).deploy()).address;
@@ -99,7 +99,9 @@ describe("LibTerrain", () => {
     getTerrainBlockSol = async (coord: VoxelCoord) => {
       const biome = await LibTerrain.getBiome(coord.x, coord.z);
       const height = await LibTerrain.getHeight(coord.x, coord.z, biome);
-      return LibTerrain["getTerrainBlock(int32,int32,int32,int32,int128[4])"](coord.x, coord.y, coord.z, height, biome);
+      return (
+        await LibTerrain["getTerrainBlock(int32,int32,int32,int32,int128[4])"](coord.x, coord.y, coord.z, height, biome)
+      ).toHexString();
     };
   });
 
@@ -260,6 +262,7 @@ describe("LibTerrain", () => {
       ];
 
       for (const coord of coords) {
+        console.log("coord", coord);
         const solBlock = await getTerrainBlockSol(coord);
         const tsBlock = getTerrainBlockTs(coord);
         expect(solBlock).to.eq(tsBlock);

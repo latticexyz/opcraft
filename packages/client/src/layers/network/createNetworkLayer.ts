@@ -1,23 +1,24 @@
-import { createIndexer, createWorld, EntityID, EntityIndex, getComponentValue } from "@latticexyz/recs";
+import { createIndexer, createWorld, EntityID, EntityIndex } from "@latticexyz/recs";
 import { setupContracts, setupDevSystems } from "./setup";
 import { createActionSystem } from "@latticexyz/std-client";
 import { GameConfig } from "./config";
 import { deferred, VoxelCoord } from "@latticexyz/utils";
 import { BigNumber } from "ethers";
 import {
-  defineBlockTypeComponent,
   definePositionComponent,
   defineOwnedByComponent,
   defineGameConfigComponent,
   defineRecipeComponent,
   defineLoadingStateComponent,
+  defineItemComponent,
+  defineItemPrototypeComponent,
 } from "./components";
-import { BlockType } from "./constants";
 import { defineNameComponent } from "./components/NameComponent";
 import { getBlockAtPosition as getBlockAtPositionApi } from "./api";
 import { createPerlin } from "@latticexyz/noise";
-import { getTerrain, getTerrainBlock } from "./api/terrain/getBlockAtPosition";
-import { BlockType as BlockTypeEnum } from "./constants";
+import { getECSBlock, getTerrain, getTerrainBlock } from "./api/terrain/getBlockAtPosition";
+import { BlockType } from "./constants";
+import { GodID } from "@latticexyz/network";
 
 /**
  * The Network layer is the lowest layer in the client architecture.
@@ -32,8 +33,9 @@ export async function createNetworkLayer(config: GameConfig) {
   // --- COMPONENTS -----------------------------------------------------------------
   const components = {
     Position: createIndexer(definePositionComponent(world)),
+    ItemPrototype: defineItemPrototypeComponent(world),
+    Item: defineItemComponent(world),
     Name: defineNameComponent(world),
-    BlockType: defineBlockTypeComponent(world),
     OwnedBy: defineOwnedByComponent(world),
     GameConfig: defineGameConfigComponent(world),
     Recipe: defineRecipeComponent(world),
@@ -51,63 +53,40 @@ export async function createNetworkLayer(config: GameConfig) {
   const actions = createActionSystem(world, txReduced$);
 
   // --- API ------------------------------------------------------------------------
-  function getWorldGenBlockAtPosition(position: VoxelCoord): BlockType {
+
+  const perlin = await createPerlin();
+  const { withOptimisticUpdates } = actions;
+  const terrainContext = {
+    Position: withOptimisticUpdates(components.Position),
+    Item: withOptimisticUpdates(components.Item),
+    world,
+  };
+
+  function getTerrainBlockAtPosition(position: VoxelCoord) {
     return getTerrainBlock(getTerrain(position, perlin), position);
   }
 
-  function getECSBlockAtPosition(position: VoxelCoord): BlockType | null {
-    const { withOptimisticUpdates } = actions;
-    const Position = withOptimisticUpdates(components.Position);
-    const BlockType = withOptimisticUpdates(components.BlockType);
-    const entitiesAtPosition = Position.getEntitiesWithValue(position);
-    let hasAirBlock = false;
-    for (const e of entitiesAtPosition) {
-      const value = getComponentValue(BlockType, e);
-      if (value) {
-        if (value.value !== BlockTypeEnum.Air) {
-          return value.value;
-        } else {
-          hasAirBlock = true;
-        }
-      }
-    }
-    if (hasAirBlock) {
-      return BlockTypeEnum.Air;
-    }
-    return null;
+  function getECSBlockAtPosition(position: VoxelCoord) {
+    return getECSBlock(terrainContext, position);
   }
-
-  const perlin = await createPerlin();
-
   function getBlockAtPosition(position: VoxelCoord) {
-    const { withOptimisticUpdates } = actions;
-    const context = {
-      Position: withOptimisticUpdates(components.Position),
-      BlockType: withOptimisticUpdates(components.BlockType),
-    };
-    return getBlockAtPositionApi(context, perlin, position);
+    return getBlockAtPositionApi(terrainContext, perlin, position);
   }
 
-  function build(entity: EntityID, coord: VoxelCoord, type: BlockType) {
-    // We have to pass an entity and the block type because we're mixing
-    // the build system for creative and "survival" mode. Would be cleaner and
-    // cheaper to separate, but hackweek
-    const entityIndex = world.entityToIndex.get(entity) || (Math.random() as EntityIndex);
+  function build(entity: EntityID, coord: VoxelCoord) {
+    const entityIndex = world.entityToIndex.get(entity);
+    if (entityIndex == null) return console.warn("trying to place unknown entity", entity);
+
     actions.add({
       id: `build+${coord.x}/${coord.y}/${coord.z}` as EntityID,
       requirement: () => true,
-      components: { Position: components.Position, BlockType: components.BlockType, OwnedBy: components.OwnedBy },
-      execute: () => systems["ember.system.build"].executeTyped(BigNumber.from(entity), coord, type),
+      components: { Position: components.Position, Item: components.Item, OwnedBy: components.OwnedBy },
+      execute: () => systems["system.Build"].executeTyped(BigNumber.from(entity), coord, { gasLimit: 450000 }),
       updates: () => [
-        {
-          component: "BlockType",
-          entity: entityIndex,
-          value: { value: type },
-        },
         {
           component: "OwnedBy",
           entity: entityIndex,
-          value: { value: "0x60D" },
+          value: { value: GodID },
         },
         {
           component: "Position",
@@ -119,11 +98,10 @@ export async function createNetworkLayer(config: GameConfig) {
   }
 
   async function mine(coord: VoxelCoord) {
-    const entityAtPos = [...components.Position.getEntitiesWithValue(coord)][0];
-    const blockType =
-      entityAtPos == null ? getBlockAtPosition(coord) : getComponentValue(components.BlockType, entityAtPos)?.value;
+    const ecsBlock = getECSBlockAtPosition(coord);
+    const blockType = ecsBlock ?? getTerrainBlockAtPosition(coord);
 
-    console.log("entity/blocktype", entityAtPos, blockType);
+    console.log("entity/blocktype", blockType);
     if (blockType == null) throw new Error("entity has no block type");
 
     const airEntity = world.registerEntity();
@@ -131,8 +109,8 @@ export async function createNetworkLayer(config: GameConfig) {
     actions.add({
       id: `mine+${coord.x}/${coord.y}/${coord.z}` as EntityID,
       requirement: () => true,
-      components: { Position: components.Position, OwnedBy: components.OwnedBy, BlockType: components.BlockType },
-      execute: () => systems["ember.system.mine"].executeTyped(coord, blockType),
+      components: { Position: components.Position, OwnedBy: components.OwnedBy, Item: components.Item },
+      execute: () => systems["system.Mine"].executeTyped(coord, blockType, { gasLimit: ecsBlock ? 450000 : 1100000 }),
       updates: () => [
         {
           component: "Position",
@@ -140,24 +118,15 @@ export async function createNetworkLayer(config: GameConfig) {
           value: coord,
         },
         {
-          component: "BlockType",
+          component: "Item",
           entity: airEntity,
           value: { value: BlockType.Air },
-        },
-        {
-          component: "OwnedBy",
-          entity: entityAtPos,
-          value: { value: network.connectedAddress.get() },
         },
       ],
     });
   }
 
-  function move(coord: VoxelCoord) {
-    // systems["ember.system.move"].executeTyped(coord);
-  }
-
-  async function craft(ingredients: EntityIndex[], result: BlockType) {
+  async function craft(ingredients: EntityIndex[], result: EntityID) {
     const [resolve, , promise] = deferred();
     actions.add({
       id: `craft+${ingredients.join("/")}` as EntityID,
@@ -193,7 +162,7 @@ export async function createNetworkLayer(config: GameConfig) {
     startSync,
     network,
     actions,
-    api: { build, mine, move, craft, name, getBlockAtPosition, getECSBlockAtPosition, getWorldGenBlockAtPosition },
+    api: { build, mine, craft, name, getBlockAtPosition, getECSBlockAtPosition, getTerrainBlockAtPosition },
     dev: setupDevSystems(world, encoders, systems),
     config,
   };

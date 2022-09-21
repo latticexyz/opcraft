@@ -4,26 +4,26 @@ pragma solidity >=0.8.0;
 import "../MudTest.t.sol";
 import { Perlin } from "noise/Perlin.sol";
 import { TerrainSystem, ID as TerrainSystemID, VoxelCoord } from "../../systems/TerrainSystem.sol";
-import { BlockType } from "../../constants.sol";
+import { StoneID, WaterID, LogID, AirID, GrassID, AirID, SandID } from "../../prototypes/Blocks.sol";
 
 contract TerrainSystemTest is MudTest {
   function testExecute() public {
-    BlockType blockType = TerrainSystem(system(TerrainSystemID)).executeTyped(VoxelCoord(-327, 21, -603));
-    assertEq(uint8(blockType), uint8(BlockType.Stone));
+    uint256 blockType = TerrainSystem(system(TerrainSystemID)).executeTyped(VoxelCoord(-327, 21, -603));
+    assertEq(blockType, StoneID);
 
     blockType = TerrainSystem(system(TerrainSystemID)).executeTyped(VoxelCoord(-377, -1, -632));
-    assertEq(uint8(blockType), uint8(BlockType.Water));
+    assertEq(blockType, WaterID);
 
     blockType = TerrainSystem(system(TerrainSystemID)).executeTyped(VoxelCoord(-377, -1, -631));
-    assertEq(uint8(blockType), uint8(BlockType.Log));
+    assertEq(blockType, LogID);
 
     blockType = TerrainSystem(system(TerrainSystemID)).executeTyped(VoxelCoord(-377, 0, -631));
-    assertEq(uint8(blockType), uint8(BlockType.Air));
+    assertEq(blockType, AirID);
 
     blockType = TerrainSystem(system(TerrainSystemID)).executeTyped(VoxelCoord(-571, 0, -703));
-    assertEq(uint8(blockType), uint8(BlockType.Grass));
+    assertEq(blockType, GrassID);
 
     blockType = TerrainSystem(system(TerrainSystemID)).executeTyped(VoxelCoord(-573, 0, -708));
-    assertEq(uint8(blockType), uint8(BlockType.Sand));
+    assertEq(blockType, SandID);
   }
 }
