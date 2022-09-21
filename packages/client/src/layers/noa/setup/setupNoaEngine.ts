@@ -8,6 +8,7 @@ import { BlockType, BlockTypeIndex } from "../../network";
 import { EntityID } from "@latticexyz/recs";
 import { NoaBlockType } from "../types";
 import { createPlantMesh } from "./utils";
+import { BlockIndexToKey } from "../../network/constants";
 
 export interface API {
   getTerrainBlockAtPosition: (coord: VoxelCoord) => EntityID;
@@ -126,11 +127,9 @@ export function setupNoaEngine(api: API) {
   });
 
   // Change block targeting mechanism
-  noa.blockTargetIdCheck = function (id: number) {
-    if (!!Blocks[id as BlockType] && id != 0) {
-      if (Blocks[id as BlockType]?.fluid == true) return false;
-      return true;
-    } else return false;
+  noa.blockTargetIdCheck = function (index: number) {
+    const key = BlockIndexToKey[index];
+    return key != null && key != "Air" && !Blocks[key]?.fluid;
   };
   return { noa, setBlock };
 }

@@ -20,6 +20,8 @@ uint256 constant GoldID = uint256(keccak256("block.Gold"));
 uint256 constant DiamondID = uint256(keccak256("block.Diamond"));
 uint256 constant LeavesID = uint256(keccak256("block.Leaves"));
 uint256 constant PlanksID = uint256(keccak256("block.Planks"));
+uint256 constant RedFlowerID = uint256(keccak256("block.RedFlower"));
+uint256 constant KelpID = uint256(keccak256("block.Kelp"));
 
 function defineBlocks(ItemPrototypeComponent itemPrototype) {
   itemPrototype.set(AirID);
@@ -37,4 +39,6 @@ function defineBlocks(ItemPrototypeComponent itemPrototype) {
   itemPrototype.set(DiamondID);
   itemPrototype.set(LeavesID);
   itemPrototype.set(PlanksID);
+  itemPrototype.set(RedFlowerID);
+  itemPrototype.set(KelpID);
 }

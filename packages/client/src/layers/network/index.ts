@@ -1,3 +1,3 @@
 export { createNetworkLayer } from "./createNetworkLayer";
 export type { NetworkLayer } from "./types";
-export { BlockType, BlockTypeIndex } from "./constants";
+export { BlockType, BlockIdToIndex as BlockTypeIndex } from "./constants";

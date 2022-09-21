@@ -18,7 +18,7 @@ export function getTerrain(coord: VoxelCoord, perlin: Perlin): Terrain {
 }
 
 export function getTerrainBlock({ height, biome }: Terrain, { y }: VoxelCoord): EntityID {
-  if (y > height) {
+  if (y > height + 1) {
     if (y >= 0) return BlockType.Air;
     return BlockType.Water;
   }
