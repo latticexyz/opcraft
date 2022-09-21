@@ -3,7 +3,7 @@ import { Engine } from "noa-engine";
 import "@babylonjs/core/Meshes/Builders/boxBuilder";
 import * as BABYLON from "@babylonjs/core";
 import { VoxelCoord } from "@latticexyz/utils";
-import { Blocks, MaterialType, Textures } from "../constants";
+import { Blocks, Textures } from "../constants";
 import { BlockType, BlockTypeIndex } from "../../network";
 import { EntityID } from "@latticexyz/recs";
 import { NoaBlockType } from "../types";
@@ -49,12 +49,21 @@ export function setupNoaEngine(api: API) {
   noa.world.maxProcessingPerTick = 17;
   noa.world.maxProcessingPerRender = 12;
   // Register simple materials
-  for (const [key, textureUrl] of Object.entries(Textures)) {
-    noa.registry.registerMaterial(key, undefined, textureUrl);
+  const textures = Object.values(Blocks).reduce<string[]>((materials, block) => {
+    if (!block || !block.material) return materials;
+    const blockMaterials = (Array.isArray(block.material) ? block.material : [block.material]) as string[];
+    if (blockMaterials) materials.push(...blockMaterials);
+    return materials;
+  }, []);
+
+  for (const texture of textures) {
+    noa.registry.registerMaterial(texture, undefined, texture);
   }
+
   // override the two water materials
-  noa.registry.registerMaterial(MaterialType.TransparentWater, [0.5, 0.5, 0.8, 0.7], undefined, true);
-  noa.registry.registerMaterial(MaterialType.Water, [1, 1, 1, 0.5], "./assets/blocks/10-Water.png", true);
+  noa.registry.registerMaterial(Textures.TransparentWater, [0.5, 0.5, 0.8, 0.7], undefined, true);
+  noa.registry.registerMaterial(Textures.Water, [1, 1, 1, 0.5], "./assets/blocks/10-Water.png", true);
+
   // Register blocks
 
   for (const [key, block] of Object.entries(Blocks)) {
@@ -68,7 +77,7 @@ export function setupNoaEngine(api: API) {
       if (texture === null) {
         throw new Error("Can't create a plant block without a material");
       }
-      const mesh = createPlantMesh(noa, scene, Textures[texture as MaterialType], key, augmentedBlock.frames);
+      const mesh = createPlantMesh(noa, scene, texture, key, augmentedBlock.frames);
       augmentedBlock.blockMesh = mesh;
       delete augmentedBlock.material;
     }

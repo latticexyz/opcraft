@@ -10,8 +10,8 @@ import { BlockType } from "../../network";
 const SCALE = 3;
 export const INDEX_TO_BLOCK: { [key: number]: typeof BlockType[keyof typeof BlockType] } = {
   1: BlockType.Grass,
+  3: BlockType.RedFlower,
   2: BlockType.Log,
-  3: BlockType.Planks,
   4: BlockType.Sand,
   5: BlockType.Cobblestone,
   6: BlockType.Leaves,
@@ -67,11 +67,13 @@ export function registerActionBar() {
         <Center>
           <Wrapper>
             <GUI _x={0} _y={0} _height={22} _width={182} scale={SCALE}></GUI>
-            {[...range(14, 1, 1)].map((i) => (
+            {[...range(9, 1, 1)].map((i) => (
               <Slot pos={i} key={"slot" + i}>
-                <BlockIcon blockID={INDEX_TO_BLOCK[i]} scale={SCALE}>
-                  {quantityPerType[INDEX_TO_BLOCK[i]] ?? 0}
-                </BlockIcon>
+                {quantityPerType[INDEX_TO_BLOCK[i]] > 0 ? (
+                  <BlockIcon blockID={INDEX_TO_BLOCK[i]} scale={SCALE}>
+                    {quantityPerType[INDEX_TO_BLOCK[i]] ?? 0}
+                  </BlockIcon>
+                ) : null}
               </Slot>
             ))}
             <Slot pos={selectedSlot}>

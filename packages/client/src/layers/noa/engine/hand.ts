@@ -1,7 +1,7 @@
 import * as BABYLON from "@babylonjs/core";
 import { Texture, Vector4 } from "@babylonjs/core";
 import { Engine } from "noa-engine";
-import { MaterialType, Textures } from "../constants";
+import { Textures } from "../constants";
 
 export function setupHand(noa: Engine) {
   const scene = noa.rendering.getScene();
@@ -18,13 +18,7 @@ export function setupHand(noa: Engine) {
   );
   handMaterial.diffuseTexture!.hasAlpha = true;
   // TODO: in order to make it work with blocks that have different faces we need to uv wrap them
-  blockMaterial.diffuseTexture = new Texture(
-    Textures[MaterialType.Cobblestone],
-    scene,
-    true,
-    true,
-    Texture.NEAREST_SAMPLINGMODE
-  );
+  blockMaterial.diffuseTexture = new Texture(Textures.Cobblestone, scene, true, true, Texture.NEAREST_SAMPLINGMODE);
   const faceUV = new Array(6);
   // from the model.json -> right hand
   const txtSize = [64, 64];
