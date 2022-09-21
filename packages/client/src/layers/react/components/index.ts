@@ -1,4 +1,4 @@
-import { registerComponentBrowser } from "./ComponentBrowser";
+// import { registerComponentBrowser } from "./ComponentBrowser";
 import { registerActionQueue } from "./ActionQueue";
 import { registerCrosshairs } from "./Crosshairs";
 import { registerActionBar } from "./ActionBar";
@@ -7,7 +7,7 @@ import { registerLoadingState } from "./LoadingState";
 
 export function registerUIComponents() {
   registerLoadingState();
-  registerComponentBrowser();
+  // registerComponentBrowser();
   registerActionQueue();
   registerCrosshairs();
   registerActionBar();

@@ -10,12 +10,11 @@ import {
   Vector4,
 } from "@babylonjs/core";
 import { Engine } from "noa-engine";
-import { getAsset } from "./assets";
 
 const models: { [key: string]: any } = {};
 const templateModels: { [i: string]: Mesh } = {};
 
-export function defineModelComponent(noa: Engine) {
+export function registerModelComponent(noa: Engine) {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   //@ts-ignore
   noa.ents.createComponent({
@@ -41,7 +40,7 @@ export async function applyModel(
 ) {
   const scene = noa.rendering.getScene();
   if (models[model] == undefined) {
-    fetch(getAsset(model, "model"))
+    fetch(model)
       .then((response) => response.json())
       .then(async (data) => {
         models[model] = data;
@@ -89,13 +88,6 @@ async function applyModelTo(
 
   // eslint-disable-next-line no-constant-condition
   if (true || eid != noa.playerEntity) {
-    hitboxMesh.setParent(builded.main);
-    hitboxMesh.setPositionWithLocalVector(new Vector3(0, hitbox[1] / 2, 0));
-    hitboxMesh.material = noa.rendering.makeStandardMaterial("");
-    //hitboxMesh.material.wireframe = true;
-    hitboxMesh.isVisible = false;
-    noa.rendering.addMeshToScene(hitboxMesh, false);
-
     noa.entities.addComponentAgain(eid, "mesh", {
       mesh: builded.main,
       offset: offset,
@@ -130,7 +122,7 @@ async function buildModel(noa: Engine, name: string, model: object, texture: str
 
     const mat = noa.rendering.makeStandardMaterial("modelmaterial-" + partName);
     cmesh.material = mat;
-    mat.diffuseTexture = new Texture(getAsset(texture, "texture"), scene, true, true, Texture.NEAREST_SAMPLINGMODE);
+    mat.diffuseTexture = new Texture(texture, scene, true, true, Texture.NEAREST_SAMPLINGMODE);
     mat.diffuseTexture.hasAlpha = true;
     noa.rendering.addMeshToScene(cmesh);
     meshlist.models[partName] = cmesh;
