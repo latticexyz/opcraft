@@ -259,6 +259,8 @@ describe("LibTerrain", () => {
         { x: 10, y: 10, z: 10 },
         { x: 2334, y: -100, z: 1343 },
         { x: 24, y: 0, z: -3243 },
+        { x: -1545, y: 12, z: -825 },
+        { x: -1510, y: 9, z: -726 },
       ];
 
       for (const coord of coords) {

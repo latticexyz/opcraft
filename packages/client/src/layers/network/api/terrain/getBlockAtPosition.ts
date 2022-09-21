@@ -18,7 +18,7 @@ export function getTerrain(coord: VoxelCoord, perlin: Perlin): Terrain {
 }
 
 export function getTerrainBlock({ height, biome }: Terrain, { y }: VoxelCoord): EntityID {
-  if (y > height) {
+  if (y > height + 1) {
     if (y >= 0) return BlockType.Air;
     return BlockType.Water;
   }
@@ -27,9 +27,21 @@ export function getTerrainBlock({ height, biome }: Terrain, { y }: VoxelCoord): 
   const maxBiomeIndex = biome.findIndex((x) => x === Math.max(...biome));
 
   if (maxBiome === 0) return BlockType.Dirt;
-  if (maxBiomeIndex == Biome.Desert) return BlockType.Sand;
+
+  if (maxBiomeIndex == Biome.Desert) {
+    if (y === height + 1) {
+      return BlockType.Kelp;
+    }
+    return BlockType.Sand;
+  }
+
   if (maxBiomeIndex == Biome.Mountains) return BlockType.Stone;
-  if (maxBiomeIndex == Biome.Savanna) return BlockType.Grass;
+  if (maxBiomeIndex == Biome.Savanna) {
+    if (y === height + 1) {
+      return BlockType.RedFlower;
+    }
+    return BlockType.Grass;
+  }
   if (maxBiomeIndex == Biome.Forest) return BlockType.Log;
   return BlockType.Air;
 }

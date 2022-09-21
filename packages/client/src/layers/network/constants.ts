@@ -17,18 +17,33 @@ export const BlockType = {
   Diamond: keccak256("block.Diamond") as EntityID,
   Leaves: keccak256("block.Leaves") as EntityID,
   Planks: keccak256("block.Planks") as EntityID,
+  RedFlower: keccak256("block.RedFlower") as EntityID,
+  Kelp: keccak256("block.Kelp") as EntityID,
 };
 
 console.log("Blocks", BlockType);
 
-export const BlockTypeIndex = Object.values(BlockType).reduce<{ [key: string]: number }>((acc, curr, index) => {
-  acc[curr] = index;
+export const BlockIdToIndex = Object.values(BlockType).reduce<{ [key: string]: number }>((acc, id, index) => {
+  acc[id] = index;
   return acc;
 }, {});
 
-export const BlockIdToType = Object.entries(BlockType).reduce<{ [key: EntityID]: keyof typeof BlockType }>(
-  (acc, [key, value]) => {
-    acc[value] = key as keyof typeof BlockType;
+export const BlockIndexToId = Object.values(BlockType).reduce<{ [key: number]: string }>((acc, id, index) => {
+  acc[index] = id;
+  return acc;
+}, {});
+
+export const BlockIndexToKey = Object.entries(BlockType).reduce<{ [key: number]: keyof typeof BlockType }>(
+  (acc, [key], index) => {
+    acc[index] = key as keyof typeof BlockType;
+    return acc;
+  },
+  {}
+);
+
+export const BlockIdToKey = Object.entries(BlockType).reduce<{ [key: EntityID]: keyof typeof BlockType }>(
+  (acc, [key, id]) => {
+    acc[id] = key as keyof typeof BlockType;
     return acc;
   },
   {}

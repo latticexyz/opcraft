@@ -7,6 +7,11 @@ export type Material = {
   textureUrl?: string;
 };
 
+export enum NoaBlockType {
+  BLOCK,
+  MESH,
+}
+
 /*
  * material: can be:
  * one (String) material name
@@ -21,7 +26,11 @@ export type Block = {
     | [StringOrNull, StringOrNull]
     | [StringOrNull, StringOrNull, StringOrNull]
     | [StringOrNull, StringOrNull, StringOrNull, StringOrNull, StringOrNull, StringOrNull];
+  type: NoaBlockType;
+  frames?: number;
   opaque?: boolean;
   fluid?: boolean;
   solid?: boolean;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  blockMesh?: any;
 };

@@ -5,7 +5,7 @@ import { Perlin } from "noise/Perlin.sol";
 import { ABDKMath64x64 as Math } from "abdk-libraries-solidity/ABDKMath64x64.sol";
 import { Biome } from "../constants.sol";
 import { VoxelCoord } from "std-contracts/components/VoxelCoordComponent.sol";
-import { AirID, GrassID, DirtID, LogID, SandID, StoneID, WaterID, CobblestoneID, CoalID, CraftingID, IronID, GoldID, DiamondID, LeavesID, PlanksID } from "../prototypes/Blocks.sol";
+import { AirID, GrassID, DirtID, LogID, SandID, StoneID, WaterID, CobblestoneID, CoalID, CraftingID, IronID, GoldID, DiamondID, LeavesID, PlanksID, RedFlowerID, KelpID } from "../prototypes/Blocks.sol";
 
 int128 constant _0 = 0; // 0 * 2**64
 int128 constant _0_3 = 5534023222112865484; // 0.3 * 2**64
@@ -42,13 +42,13 @@ library LibTerrain {
   }
 
   function getTerrainBlock(
-    int32 x,
+    int32,
     int32 y,
-    int32 z,
+    int32,
     int32 height,
     int128[4] memory biome
   ) public pure returns (uint256) {
-    if (y > height) {
+    if (y > height + 1) {
       if (y >= 0) return AirID;
       return WaterID;
     }
@@ -63,9 +63,22 @@ library LibTerrain {
     }
 
     if (maxBiome == 0) return DirtID;
-    if (maxBiomeIndex == uint256(Biome.Desert)) return SandID;
+    if (maxBiomeIndex == uint256(Biome.Desert)) {
+      if (y == height + 1) {
+        return KelpID;
+      }
+      return SandID;
+    }
+
     if (maxBiomeIndex == uint256(Biome.Mountains)) return StoneID;
-    if (maxBiomeIndex == uint256(Biome.Savanna)) return GrassID;
+
+    if (maxBiomeIndex == uint256(Biome.Savanna)) {
+      if (y == height + 1) {
+        return RedFlowerID;
+      }
+      return GrassID;
+    }
+
     if (maxBiomeIndex == uint256(Biome.Forest)) return LogID;
     return AirID;
   }
