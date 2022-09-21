@@ -1,4 +1,4 @@
-import * as BABYLON from "@babylonjs/core/Legacy/legacy";
+import * as BABYLON from "@babylonjs/core";
 import { Texture, Vector4 } from "@babylonjs/core";
 import { Engine } from "noa-engine";
 import { MaterialType, Textures } from "../constants";
