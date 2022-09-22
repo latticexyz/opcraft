@@ -4,11 +4,13 @@ import { getComponentValue, HasValue, runQuery } from "@latticexyz/recs";
 import { RECS } from "../../types";
 import { NetworkLayer } from "../../../network";
 import { INDEX_TO_BLOCK } from "../../../react/components/ActionBar";
+import { Material } from "@babylonjs/core";
+import { BlockIdToKey, BlockTypeKey } from "../../../network/constants";
 
 interface State {
   handMesh: BABYLON.Mesh;
   blockMesh: BABYLON.Mesh;
-  blockMaterial: BABYLON.Material;
+  blockMaterials: { [key in BlockTypeKey]?: Material };
   __id: number;
 }
 
@@ -21,7 +23,7 @@ export function registerHandComponent(noa: Engine, recs: RECS, networkLayer: Net
     state: { handMesh: null, blockMesh: null, blockMaterial: null },
     system: function (dt: number, states: State[]) {
       for (let i = 0; i < states.length; i++) {
-        const { handMesh, blockMesh, blockMaterial } = states[i];
+        const { handMesh, blockMesh, blockMaterials } = states[i];
         const id = states[i].__id;
         if (id === noa.playerEntity) {
           // NOTE: for now just animate / change the material of the player hand
@@ -31,7 +33,9 @@ export function registerHandComponent(noa: Engine, recs: RECS, networkLayer: Net
             HasValue(recs.Item, { value: INDEX_TO_BLOCK[selectedSlot] }),
           ]);
           const amount = matchingBlocks.size;
-          if (amount > 0) {
+          const blockTypeKey = BlockIdToKey[INDEX_TO_BLOCK[selectedSlot]];
+          if (amount > 0 && blockMaterials[blockTypeKey] !== undefined) {
+            blockMesh.material = blockMaterials[blockTypeKey]!;
             handMesh.visibility = 0;
             blockMesh.visibility = 1;
           } else {
