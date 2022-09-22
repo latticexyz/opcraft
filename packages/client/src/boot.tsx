@@ -173,7 +173,7 @@ function bootReact() {
 
   if (import.meta.hot) {
     // HMR React engine
-    import.meta.hot.accept("./layers/Renderer/React/engine/Engine.tsx", async (module) => {
+    import.meta.hot.accept("./layers/react/engine/Engine.tsx", async (module) => {
       Engine = module.Engine;
       renderEngine();
     });
@@ -181,7 +181,7 @@ function bootReact() {
 
   if (import.meta.hot) {
     // HMR React components
-    import.meta.hot.accept("./layers/Renderer/React/components/index.ts", async (module) => {
+    import.meta.hot.accept("./layers/react/components/index.ts", async (module) => {
       registerUIComponents = module.registerUIComponents;
       registerUIComponents();
     });
