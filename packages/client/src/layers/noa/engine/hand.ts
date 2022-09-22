@@ -175,5 +175,9 @@ export function setupHand(noa: Engine) {
   hand.position.set(0.4, Y_HAND, 1.1);
   block.setParent(mesh);
   block.position.set(0.8, Y_BLOCK, 1.2);
-  hand.visibility = 0;
+  noa.entities.addComponentAgain(noa.playerEntity, "hand", {
+    handMesh: hand,
+    blockMesh: block,
+    blockMaterial,
+  });
 }

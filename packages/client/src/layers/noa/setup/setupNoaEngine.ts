@@ -6,16 +6,11 @@ import { VoxelCoord } from "@latticexyz/utils";
 import { Blocks, Textures } from "../constants";
 import { BlockType, BlockTypeIndex } from "../../network";
 import { EntityID } from "@latticexyz/recs";
-import { NoaBlockType } from "../types";
+import { API, NoaBlockType, RECS } from "../types";
 import { createPlantMesh } from "./utils";
 import { BlockIndexToKey } from "../../network/constants";
 
-export interface API {
-  getTerrainBlockAtPosition: (coord: VoxelCoord) => EntityID;
-  getECSBlockAtPosition: (coord: VoxelCoord) => EntityID | undefined;
-}
-
-export function setupNoaEngine(api: API) {
+export function setupNoaEngine(api: API, recs: RECS) {
   const opts = {
     debug: true,
     showFPS: true,
