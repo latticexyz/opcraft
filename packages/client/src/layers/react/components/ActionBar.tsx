@@ -6,9 +6,10 @@ import styled from "styled-components";
 import { range } from "@latticexyz/utils";
 import { defineQuery, getComponentValue, HasValue } from "@latticexyz/recs";
 import { BlockType } from "../../network";
+import { BlockTypeKey } from "../../network/constants";
 
 const SCALE = 3;
-export const INDEX_TO_BLOCK: { [key: number]: typeof BlockType[keyof typeof BlockType] } = {
+export const INDEX_TO_BLOCK: { [key: number]: typeof BlockType[BlockTypeKey] } = {
   1: BlockType.Grass,
   3: BlockType.RedFlower,
   2: BlockType.Log,

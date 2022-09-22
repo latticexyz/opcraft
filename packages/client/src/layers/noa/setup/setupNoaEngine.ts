@@ -8,7 +8,7 @@ import { BlockType, BlockTypeIndex } from "../../network";
 import { EntityID } from "@latticexyz/recs";
 import { API, NoaBlockType, RECS } from "../types";
 import { createPlantMesh } from "./utils";
-import { BlockIndexToKey } from "../../network/constants";
+import { BlockIndexToKey, BlockTypeKey } from "../../network/constants";
 
 export function setupNoaEngine(api: API, recs: RECS) {
   const opts = {
@@ -62,7 +62,7 @@ export function setupNoaEngine(api: API, recs: RECS) {
   // Register blocks
 
   for (const [key, block] of Object.entries(Blocks)) {
-    const index = BlockTypeIndex[BlockType[key as keyof typeof BlockType]];
+    const index = BlockTypeIndex[BlockType[key as BlockTypeKey]];
     const augmentedBlock = { ...block };
     if (!block) continue;
 
