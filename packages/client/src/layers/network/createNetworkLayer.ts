@@ -63,7 +63,7 @@ export async function createNetworkLayer(config: GameConfig) {
   };
 
   function getTerrainBlockAtPosition(position: VoxelCoord) {
-    return getTerrainBlock(getTerrain(position, perlin), position);
+    return getTerrainBlock(getTerrain(position, perlin), position, perlin);
   }
 
   function getECSBlockAtPosition(position: VoxelCoord) {

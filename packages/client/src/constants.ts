@@ -1,5 +1,3 @@
-import { EntityID } from "@latticexyz/recs";
-
 export enum Direction {
   Top,
   Right,
