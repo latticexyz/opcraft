@@ -93,7 +93,7 @@ describe("LibTerrain", () => {
 
     getTerrainBlockTs = (coord: VoxelCoord) => {
       const terrain = getTerrain(coord, perlinTs);
-      return getTerrainBlock(terrain, coord);
+      return getTerrainBlock(terrain, coord, perlinTs);
     };
 
     getTerrainBlockSol = async (coord: VoxelCoord) => {
@@ -251,31 +251,44 @@ describe("LibTerrain", () => {
   });
 
   describe("getTerrainBlock", () => {
-    it("should compute the same result as getTerrainBlockTs", async () => {
+    it.only("should compute the same result as getTerrainBlockTs", async () => {
       // Fixed coords
-      const coords = [
-        { x: -23, y: 299, z: -230 },
-        { x: 0, y: 0, z: 0 },
-        { x: 10, y: 10, z: 10 },
-        { x: 2334, y: -100, z: 1343 },
-        { x: 24, y: 0, z: -3243 },
-        { x: -1545, y: 12, z: -825 },
-        { x: -1510, y: 9, z: -726 },
-      ];
+      // const coords = [
+      //   { x: -23, y: 299, z: -230 },
+      //   { x: 0, y: 0, z: 0 },
+      //   { x: 10, y: 10, z: 10 },
+      //   { x: 2334, y: -100, z: 1343 },
+      //   { x: 24, y: 0, z: -3243 },
+      //   { x: -1545, y: 12, z: -825 },
+      //   { x: -1510, y: 9, z: -726 },
+      // ];
 
-      for (const coord of coords) {
-        console.log("coord", coord);
-        const solBlock = await getTerrainBlockSol(coord);
-        const tsBlock = getTerrainBlockTs(coord);
-        expect(solBlock).to.eq(tsBlock);
-      }
+      // for (const coord of coords) {
+      //   console.log("coord", coord);
+      //   const solBlock = await getTerrainBlockSol(coord);
+      //   const tsBlock = getTerrainBlockTs(coord);
+      //   expect(solBlock).to.eq(tsBlock);
+      // }
+
+      const NUM_RANDOM_COORDS = 1000;
 
       // Random coords
-      for (let i = 0; i < 30; i++) {
+      const solResults: Promise<string>[] = [];
+      const tsResults: string[] = [];
+      for (let i = 0; i < NUM_RANDOM_COORDS; i++) {
         const coord = { x: random(1000, -1000), y: random(1000, -1000), z: random(1000, -1000) };
-        const solBlock = await getTerrainBlockSol(coord);
-        const tsBlock = getTerrainBlockTs(coord);
-        expect(solBlock).to.eq(tsBlock);
+        console.log(coord);
+        solResults.push(getTerrainBlockSol(coord));
+        tsResults.push(getTerrainBlockTs(coord));
+      }
+
+      console.log("Awaiting results");
+      const awaitedSolResults = await Promise.all(solResults);
+      console.log("Done awaiting");
+
+      for (let i = 0; i < NUM_RANDOM_COORDS; i++) {
+        console.log("coord", i);
+        expect(awaitedSolResults[i]).to.eq(tsResults[i]);
       }
     });
   });
