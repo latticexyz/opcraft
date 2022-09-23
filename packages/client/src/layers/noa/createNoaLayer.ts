@@ -13,10 +13,8 @@ import { registerRotationComponent } from "./engine/components/rotationComponent
 import { setupClouds, setupSky } from "./engine/sky";
 import { setupNoaEngine } from "./setup";
 import { createBlockSystem, createInputSystem, createP2PSystem, createPlayerPositionSystem } from "./systems";
-import { API } from "./types";
 import { registerHandComponent } from "./engine/components/handComponent";
 import { registerModelComponent } from "./engine/components/modelComponent";
-import { RECS } from "../../types";
 
 export function createNoaLayer(network: NetworkLayer) {
   const world = namespaceWorld(network.world, "noa");
@@ -30,16 +28,14 @@ export function createNoaLayer(network: NetworkLayer) {
     PlayerPosition: definePlayerPositionComponent(world),
     PlayerDirection: definePlayerDirectionComponent(world),
   };
-  const api: API = network.api;
-  const recs: RECS = { ...components, ...network.components, SingletonEntity };
 
   // --- SETUP ----------------------------------------------------------------------
-  const { noa, setBlock } = setupNoaEngine(api);
+  const { noa, setBlock } = setupNoaEngine(network.api);
   // Modules
   monkeyPatchMeshComponent(noa);
   registerModelComponent(noa);
   registerRotationComponent(noa);
-  registerHandComponent(noa, recs, network);
+  registerHandComponent(noa, network, components.SelectedSlot, SingletonEntity);
   setupClouds(noa);
   setupSky(noa);
   setupHand(noa);

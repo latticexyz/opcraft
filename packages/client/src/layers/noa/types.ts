@@ -14,11 +14,6 @@ export enum NoaBlockType {
   MESH,
 }
 
-export interface API {
-  getTerrainBlockAtPosition: (coord: VoxelCoord) => EntityID;
-  getECSBlockAtPosition: (coord: VoxelCoord) => EntityID | undefined;
-}
-
 /*
  * material: can be:
  * one (String) material name
