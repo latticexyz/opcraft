@@ -1,12 +1,13 @@
 import React from "react";
 import { registerUIComponent } from "../engine";
-import { getComponentEntities, getComponentValue, getComponentValueStrict } from "@latticexyz/recs";
+import { getComponentEntities, getComponentValueStrict } from "@latticexyz/recs";
 import { map } from "rxjs";
-import { ActionStateString, ActionState } from "@latticexyz/std-client";
+import { ActionState } from "@latticexyz/std-client";
 import styled from "styled-components";
 import { PendingIcon } from "./icons/PendingIcon";
 import { CheckIcon } from "./icons/CheckIcon";
 import { CloseIcon } from "./icons/CloseIcon";
+import { Blocks } from "../../noa/constants";
 
 const ActionQueueList = styled.div`
   width: 100%;
@@ -198,25 +199,27 @@ export function registerActionQueue() {
 
           {[...getComponentEntities(Action)].map((e) => {
             const actionData = getComponentValueStrict(Action, e);
-            // Horrible hack to get data since I don't know how to query it yet
-            // TODO: figure out how to get structured data
-            // TODO: figure out how to get item being acted on (e.g. mined or placed)
+            const { coord, blockType } = actionData.metadata;
+            const material = blockType && Blocks[blockType]?.material;
+            const blockImage = material && (Array.isArray(material) ? material[0] : material);
+
             const entityId = Action.world.entities[e];
-            const [actionType, position] = entityId.split("+");
-            const [x, y, z] = position.split("/");
+            const [actionType] = entityId.split("+");
             return (
               <ActionQueueItem key={e} className={actionData.state <= ActionState.Executing ? "pending" : ""}>
-                <img src="/assets/blocks/4-Grass_block-side.png" />
+                {blockImage && <img src={blockImage} />}
                 <ActionLabel>
                   <div style={{ color: "#fe0", textTransform: "capitalize" }}>{actionType} tx</div>
                   <div>Grass Block</div>
                 </ActionLabel>
                 <ActionIndicator state={actionData.state} />
-                <ActionPosition>
-                  <div>X: {x}</div>
-                  <div>Y: {y}</div>
-                  <div>Z: {z}</div>
-                </ActionPosition>
+                {coord && (
+                  <ActionPosition>
+                    <div>X: {coord.x}</div>
+                    <div>Y: {coord.y}</div>
+                    <div>Z: {coord.z}</div>
+                  </ActionPosition>
+                )}
               </ActionQueueItem>
             );
           })}
