@@ -67,7 +67,7 @@ export function registerActionQueue() {
           {[...getComponentEntities(Action)].map((e) => {
             const { state, metadata } = getComponentValueStrict(Action, e);
             const { actionType, coord, blockType } = metadata;
-            const icon = (blockType && getBlockIconUrl(blockType)) ?? undefined;
+            const icon = blockType && getBlockIconUrl(blockType);
             return (
               <ActionQueueItemContainer key={e}>
                 <ActionQueueItem state={state} icon={icon} title={`${actionType} tx`} description={blockType} />
