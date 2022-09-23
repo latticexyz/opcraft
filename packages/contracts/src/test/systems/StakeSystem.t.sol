@@ -18,7 +18,7 @@ contract StakeSystemTest is MudTest {
     super.setUp();
     vm.startPrank(deployer);
 
-    // Give a diamond block to alice
+    // Give two diamond blocks to alice
     diamond1 = world.getUniqueEntityId();
     ItemComponent(component(ItemComponentID)).set(diamond1, DiamondID);
     OwnedByComponent(component(OwnedByComponentID)).set(diamond1, addressToEntity(alice));
