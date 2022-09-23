@@ -65,37 +65,6 @@ export function registerActionQueue() {
     ({ Action }) => {
       return (
         <ActionQueueList>
-          <ActionQueueItem state={ActionState.Complete} title="mine tx" />
-          <ActionQueueItem
-            state={ActionState.Complete}
-            icon={"/assets/blocks/4-Grass_block-side.png"}
-            title="mine tx"
-          />
-          <ActionQueueItem
-            state={ActionState.Complete}
-            icon={"/assets/blocks/4-Grass_block-side.png"}
-            title="mine tx"
-            description="Dirt"
-          />
-          <ActionQueueItem
-            state={ActionState.Failed}
-            icon={"/assets/blocks/4-Grass_block-side.png"}
-            title="mine tx"
-            description="Dirt"
-          />
-          <ActionQueueItem
-            state={ActionState.WaitingForTxEvents}
-            icon={"/assets/blocks/4-Grass_block-side.png"}
-            title="mine tx"
-            description="Dirt"
-          />
-          <ActionQueueItem
-            state={ActionState.Executing}
-            icon={"/assets/blocks/4-Grass_block-side.png"}
-            title="mine tx"
-            description="Dirt"
-          />
-
           {[...getComponentEntities(Action)].map((e) => {
             const { state, metadata } = getComponentValueStrict(Action, e);
             const { actionType, coord, blockType } = metadata;
