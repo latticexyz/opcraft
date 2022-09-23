@@ -11,6 +11,7 @@ uint256 constant ID = uint256(keccak256("system.Build"));
 contract BuildSystem is System {
   constructor(IWorld _world, address _components) System(_world, _components) {}
 
+  // TODO: prevent building in protected chunks
   function execute(bytes memory arguments) public returns (bytes memory) {
     (uint256 blockEntity, VoxelCoord memory targetPosition) = abi.decode(arguments, (uint256, VoxelCoord));
 
