@@ -7,7 +7,9 @@
     "OwnedByComponent",
     "RecipeComponent",
     "NameComponent",
-    "OccurrenceComponent"
+    "OccurrenceComponent",
+    "StakeComponent",
+    "ClaimComponent"
   ],
   "systems": [
     { "name": "ComponentDevSystem", "writeAccess": ["*"] },
@@ -17,6 +19,7 @@
     { "name": "CraftingSystem", "writeAccess": ["OwnedByComponent"] },
     { "name": "NameSystem", "writeAccess": ["NameComponent"] },
     { "name": "OccurrenceSystem", "writeAccess": [] },
+    { "name": "StakeSystem", "writeAccess": ["StakeComponent", "OwnedByComponent"] },
     {
       "name": "InitSystem",
       "writeAccess": ["GameConfigComponent", "RecipeComponent", "ItemPrototypeComponent", "OccurrenceComponent"],
