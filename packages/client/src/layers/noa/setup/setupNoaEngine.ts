@@ -8,7 +8,7 @@ import { BlockType, BlockTypeIndex } from "../../network";
 import { EntityID } from "@latticexyz/recs";
 import { NoaBlockType } from "../types";
 import { createPlantMesh } from "./utils";
-import { BlockIndexToKey } from "../../network/constants";
+import { BlockIndexToKey, BlockTypeKey } from "../../network/constants";
 
 export interface API {
   getTerrainBlockAtPosition: (coord: VoxelCoord) => EntityID;
@@ -67,7 +67,7 @@ export function setupNoaEngine(api: API) {
   // Register blocks
 
   for (const [key, block] of Object.entries(Blocks)) {
-    const index = BlockTypeIndex[BlockType[key as keyof typeof BlockType]];
+    const index = BlockTypeIndex[BlockType[key as BlockTypeKey]];
     const augmentedBlock = { ...block };
     if (!block) continue;
 
