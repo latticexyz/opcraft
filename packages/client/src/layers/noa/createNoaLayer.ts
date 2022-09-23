@@ -34,7 +34,7 @@ export function createNoaLayer(network: NetworkLayer) {
   const recs: RECS = { ...components, ...network.components, SingletonEntity };
 
   // --- SETUP ----------------------------------------------------------------------
-  const { noa, setBlock } = setupNoaEngine(api, recs);
+  const { noa, setBlock } = setupNoaEngine(api);
   // Modules
   monkeyPatchMeshComponent(noa);
   registerModelComponent(noa);

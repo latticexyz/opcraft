@@ -6,11 +6,11 @@ import { VoxelCoord } from "@latticexyz/utils";
 import { Blocks, Textures } from "../constants";
 import { BlockType, BlockTypeIndex } from "../../network";
 import { EntityID } from "@latticexyz/recs";
-import { API, NoaBlockType, RECS } from "../types";
+import { API, NoaBlockType } from "../types";
 import { createPlantMesh } from "./utils";
 import { BlockIndexToKey, BlockTypeKey } from "../../network/constants";
 
-export function setupNoaEngine(api: API, recs: RECS) {
+export function setupNoaEngine(api: API) {
   const opts = {
     debug: true,
     showFPS: true,
