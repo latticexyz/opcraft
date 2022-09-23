@@ -23,8 +23,12 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
   noa.inputs.down.on("fire", function () {
     if (noa.targetedBlock) {
       const pos = noa.targetedBlock.position;
-      mine({ x: pos[0], y: pos[1], z: pos[2] });
+      // 2) create a NOA ecs component on the player entity ("miningBlock")
     }
+  });
+
+  noa.inputs.up.on("fire", function () {
+    // 1) if there is a miningBlock component on the player entity, remove it
   });
 
   // place a block on right click
