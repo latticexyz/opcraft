@@ -20,6 +20,7 @@ const ActionQueueList = styled.div`
   padding: 20px;
   font-family: Minecraft;
   font-size: 13px;
+  text-shadow: 1.5px 1.5px 0 #000;
 `;
 
 const ActionQueueItem = styled.div`
@@ -35,6 +36,16 @@ const ActionQueueItem = styled.div`
   transition: opacity 300ms ease-in-out;
   &.pending {
     opacity: 0.4;
+  }
+`;
+
+const ActionImage = styled.div`
+  width: 32px;
+  height: 32px;
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 `;
 
@@ -81,7 +92,7 @@ const ActionPosition = styled.div`
   bottom: 0;
   width: 100px;
   margin-left: 9px;
-  color: #000;
+  color: #fff;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -198,28 +209,25 @@ export function registerActionQueue() {
           </ActionQueueItem> */}
 
           {[...getComponentEntities(Action)].map((e) => {
-            const actionData = getComponentValueStrict(Action, e);
-            const { coord, blockType } = actionData.metadata;
+            const { state, metadata } = getComponentValueStrict(Action, e);
+            const { actionType, coord, blockType } = metadata;
             const material = blockType && Blocks[blockType]?.material;
             const blockImage = material && (Array.isArray(material) ? material[0] : material);
-
-            const entityId = Action.world.entities[e];
-            const [actionType] = entityId.split("+");
             return (
-              <ActionQueueItem key={e} className={actionData.state <= ActionState.Executing ? "pending" : ""}>
-                {blockImage && <img src={blockImage} />}
+              <ActionQueueItem key={e} className={state <= ActionState.Executing ? "pending" : ""}>
+                <ActionImage>{blockImage ? <img src={blockImage} /> : null}</ActionImage>
                 <ActionLabel>
                   <div style={{ color: "#fe0", textTransform: "capitalize" }}>{actionType} tx</div>
-                  <div>Grass Block</div>
+                  <div>{blockType}</div>
                 </ActionLabel>
-                <ActionIndicator state={actionData.state} />
-                {coord && (
+                <ActionIndicator state={state} />
+                {coord ? (
                   <ActionPosition>
                     <div>X: {coord.x}</div>
                     <div>Y: {coord.y}</div>
                     <div>Z: {coord.z}</div>
                   </ActionPosition>
-                )}
+                ) : null}
               </ActionQueueItem>
             );
           })}

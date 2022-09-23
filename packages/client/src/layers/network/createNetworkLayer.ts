@@ -50,7 +50,10 @@ export async function createNetworkLayer(config: GameConfig) {
   );
 
   // --- ACTION SYSTEM --------------------------------------------------------------
-  const actions = createActionSystem<{ coord?: VoxelCoord; blockType?: keyof typeof BlockType }>(world, txReduced$);
+  const actions = createActionSystem<{ actionType: string; coord?: VoxelCoord; blockType?: keyof typeof BlockType }>(
+    world,
+    txReduced$
+  );
 
   // --- API ------------------------------------------------------------------------
 
@@ -81,7 +84,7 @@ export async function createNetworkLayer(config: GameConfig) {
 
     actions.add({
       id: `build+${coord.x}/${coord.y}/${coord.z}` as EntityID,
-      metadata: { coord, blockType },
+      metadata: { actionType: "build", coord, blockType },
       requirement: () => true,
       components: { Position: components.Position, Item: components.Item, OwnedBy: components.OwnedBy },
       execute: () => systems["system.Build"].executeTyped(BigNumber.from(entity), coord, { gasLimit: 450000 }),
@@ -112,7 +115,7 @@ export async function createNetworkLayer(config: GameConfig) {
 
     actions.add({
       id: `mine+${coord.x}/${coord.y}/${coord.z}` as EntityID,
-      metadata: { coord, blockType },
+      metadata: { actionType: "mine", coord, blockType },
       requirement: () => true,
       components: { Position: components.Position, OwnedBy: components.OwnedBy, Item: components.Item },
       execute: () => systems["system.Mine"].executeTyped(coord, blockId, { gasLimit: ecsBlock ? 450000 : 1100000 }),
@@ -137,7 +140,7 @@ export async function createNetworkLayer(config: GameConfig) {
 
     actions.add({
       id: `craft+${ingredients.join("/")}` as EntityID,
-      metadata: { blockType },
+      metadata: { actionType: "craft", blockType },
       requirement: () => true,
       components: {},
       execute: () => {
