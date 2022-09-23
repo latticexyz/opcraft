@@ -15,6 +15,11 @@ function getStakeEntity(Coord memory chunk, address entity) returns (uint256) {
   return uint256(keccak256(abi.encode(chunk.x, chunk.y, entity)));
 }
 
+function getStakeInChunk(StakeComponent stakeComponent, uint256 stakeEntity) returns (uint256) {
+  bytes memory currentStakeBytes = stakeComponent.getRawValue(stakeEntity);
+  uint256 currentStake = currentStakeBytes.length == 0 ? 0 : abi.decode(currentStakeBytes, (uint256));
+}
+
 contract StakeSystem is System {
   constructor(IWorld _world, address _components) System(_world, _components) {}
 
@@ -37,8 +42,7 @@ contract StakeSystem is System {
 
     // Increase stake in this chunk
     uint256 stakeEntity = getStakeEntity(chunk, msg.sender);
-    bytes memory currentStakeBytes = stakeComponent.getRawValue(stakeEntity);
-    uint256 currentStake = currentStakeBytes.length == 0 ? 0 : abi.decode(currentStakeBytes, (uint256));
+    uint256 currentStake = getStakeInChunk(stakeComponent, stakeEntity);
 
     stakeComponent.set(stakeEntity, currentStake + 1);
   }

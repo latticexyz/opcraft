@@ -20,6 +20,7 @@
     { "name": "NameSystem", "writeAccess": ["NameComponent"] },
     { "name": "OccurrenceSystem", "writeAccess": [] },
     { "name": "StakeSystem", "writeAccess": ["StakeComponent", "OwnedByComponent"] },
+    { "name": "ClaimSystem", "writeAccess": ["ClaimComponent"] },
     {
       "name": "InitSystem",
       "writeAccess": ["GameConfigComponent", "RecipeComponent", "ItemPrototypeComponent", "OccurrenceComponent"],
