@@ -4,6 +4,18 @@ import { Engine } from "noa-engine";
 import { BlockTypeKey } from "../../network/constants";
 import { UVWraps } from "../constants";
 import { HAND_COMPONENT } from "./components/handComponent";
+export const X_HAND = 0.4;
+export const X_BLOCK = 0.7;
+export const Y_HAND = -0.6;
+export const Y_BLOCK = -0.6;
+export const Z_HAND = 1.1;
+export const Z_BLOCK = 1.2;
+export const ANIMATION_SCALE_IDLE = 2;
+export const ANIMATION_SCALE_MINING = 20;
+export const IDLE_ANIMATION_BOX_HAND = createIdleAnimation(Y_HAND);
+export const IDLE_ANIMATION_BOX_BLOCK = createIdleAnimation(Y_BLOCK);
+export const MINING_ANIMATION_BOX_HAND = createMiningAnimation(Z_HAND);
+export const MINING_ANIMATION_BOX_BLOCK = createMiningAnimation(Z_BLOCK);
 
 export function setupHand(noa: Engine) {
   const scene = noa.rendering.getScene();
@@ -18,49 +30,12 @@ export function setupHand(noa: Engine) {
     Texture.NEAREST_SAMPLINGMODE
   );
   handMaterial.diffuseTexture!.hasAlpha = true;
-  const handFaceUV = new Array(6);
   // from the model.json -> right hand
   const handTextureSize = [64, 64];
   const handSize = [4, 12, 4];
   const handScale = 0.07;
   const handOffset = [40, 16];
-  handFaceUV[0] = new Vector4(
-    (handOffset[0] + handSize[2]) / handTextureSize[0],
-    (handTextureSize[1] - handSize[1] - handSize[2] - handOffset[1]) / handTextureSize[1],
-    (handSize[2] + handSize[0] + handOffset[0]) / handTextureSize[0],
-    (handTextureSize[1] - handSize[2] - handOffset[1]) / handTextureSize[1]
-  );
-  handFaceUV[1] = new Vector4(
-    (handOffset[0] + handSize[2] * 2 + handSize[0]) / handTextureSize[0],
-    (handTextureSize[1] - handSize[1] - handSize[2] - handOffset[1]) / handTextureSize[1],
-    (handSize[2] * 2 + handSize[0] * 2 + handOffset[0]) / handTextureSize[0],
-    (handTextureSize[1] - handSize[2] - handOffset[1]) / handTextureSize[1]
-  );
-  handFaceUV[2] = new Vector4(
-    handOffset[0] / handTextureSize[0],
-    (handTextureSize[1] - handSize[1] - handSize[2] - handOffset[1]) / handTextureSize[1],
-    (handOffset[0] + handSize[2]) / handTextureSize[0],
-    (handTextureSize[1] - handSize[2] - handOffset[1]) / handTextureSize[1]
-  );
-  handFaceUV[3] = new Vector4(
-    (handOffset[0] + handSize[2] + handSize[0]) / handTextureSize[0],
-    (handTextureSize[1] - handSize[1] - handSize[2] - handOffset[1]) / handTextureSize[1],
-    (handSize[2] + handSize[0] * 2 + handOffset[0]) / handTextureSize[0],
-    (handTextureSize[1] - handSize[2] - handOffset[1]) / handTextureSize[1]
-  );
-  handFaceUV[4] = new Vector4(
-    (handSize[0] + handSize[2] + handOffset[0]) / handTextureSize[0],
-    (handTextureSize[1] - handSize[2] - handOffset[1]) / handTextureSize[1],
-    (handOffset[0] + handSize[2]) / handTextureSize[0],
-    (handTextureSize[1] - handOffset[1]) / handTextureSize[1]
-  );
-  handFaceUV[5] = new Vector4(
-    (handSize[0] * 2 + handSize[2] + handOffset[0]) / handTextureSize[0],
-    (handTextureSize[1] - handSize[2] - handOffset[1]) / handTextureSize[1],
-    (handOffset[0] + handSize[2] + handSize[0]) / handTextureSize[0],
-    (handTextureSize[1] - handOffset[1]) / handTextureSize[1]
-  );
-
+  const handFaceUV = createFaceUV(handOffset, handSize, handTextureSize);
   const hand = BABYLON.MeshBuilder.CreateBox(
     "hand",
     {
@@ -74,6 +49,7 @@ export function setupHand(noa: Engine) {
   );
   hand.material = handMaterial;
   hand.rotation.x = -Math.PI / 2;
+
   const blockMaterials: { [key in BlockTypeKey]?: BABYLON.Material } = {};
   for (const key of Object.keys(UVWraps) as BlockTypeKey[]) {
     if (UVWraps[key] !== undefined) {
@@ -85,48 +61,11 @@ export function setupHand(noa: Engine) {
     }
   }
   const BLOCK_SIZE = 16;
-  const blockFaceUV = new Array(6);
   const blockTextureSize = [BLOCK_SIZE * 4, BLOCK_SIZE * 2];
   const blockSize = [BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE];
   const blockScale = 0.07;
   const blockOffset = [0, 0];
-
-  blockFaceUV[0] = new Vector4(
-    (blockOffset[0] + blockSize[2]) / blockTextureSize[0],
-    (blockTextureSize[1] - blockSize[1] - blockSize[2] - blockOffset[1]) / blockTextureSize[1],
-    (blockSize[2] + blockSize[0] + blockOffset[0]) / blockTextureSize[0],
-    (blockTextureSize[1] - blockSize[2] - blockOffset[1]) / blockTextureSize[1]
-  );
-  blockFaceUV[1] = new Vector4(
-    (blockOffset[0] + blockSize[2] * 2 + blockSize[0]) / blockTextureSize[0],
-    (blockTextureSize[1] - blockSize[1] - blockSize[2] - blockOffset[1]) / blockTextureSize[1],
-    (blockSize[2] * 2 + blockSize[0] * 2 + blockOffset[0]) / blockTextureSize[0],
-    (blockTextureSize[1] - blockSize[2] - blockOffset[1]) / blockTextureSize[1]
-  );
-  blockFaceUV[2] = new Vector4(
-    blockOffset[0] / blockTextureSize[0],
-    (blockTextureSize[1] - blockSize[1] - blockSize[2] - blockOffset[1]) / blockTextureSize[1],
-    (blockOffset[0] + blockSize[2]) / blockTextureSize[0],
-    (blockTextureSize[1] - blockSize[2] - blockOffset[1]) / blockTextureSize[1]
-  );
-  blockFaceUV[3] = new Vector4(
-    (blockOffset[0] + blockSize[2] + blockSize[0]) / blockTextureSize[0],
-    (blockTextureSize[1] - blockSize[1] - blockSize[2] - blockOffset[1]) / blockTextureSize[1],
-    (blockSize[2] + blockSize[0] * 2 + blockOffset[0]) / blockTextureSize[0],
-    (blockTextureSize[1] - blockSize[2] - blockOffset[1]) / blockTextureSize[1]
-  );
-  blockFaceUV[4] = new Vector4(
-    (blockSize[0] + blockSize[2] + blockOffset[0]) / blockTextureSize[0],
-    (blockTextureSize[1] - blockSize[2] - blockOffset[1]) / blockTextureSize[1],
-    (blockOffset[0] + blockSize[2]) / blockTextureSize[0],
-    (blockTextureSize[1] - blockOffset[1]) / blockTextureSize[1]
-  );
-  blockFaceUV[5] = new Vector4(
-    (blockSize[0] * 2 + blockSize[2] + blockOffset[0]) / blockTextureSize[0],
-    (blockTextureSize[1] - blockSize[2] - blockOffset[1]) / blockTextureSize[1],
-    (blockOffset[0] + blockSize[2] + blockSize[0]) / blockTextureSize[0],
-    (blockTextureSize[1] - blockOffset[1]) / blockTextureSize[1]
-  );
+  const blockFaceUV = createFaceUV(blockOffset, blockSize, blockTextureSize);
 
   const block = BABYLON.MeshBuilder.CreateBox(
     "block",
@@ -143,74 +82,8 @@ export function setupHand(noa: Engine) {
   block.rotation.y = -0.8;
   block.rotation.z = 0.3;
 
-  const animationBoxHand = new BABYLON.Animation(
-    "movement",
-    "position.y",
-    30,
-    BABYLON.Animation.ANIMATIONTYPE_FLOAT,
-    BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE
-  );
-  const animationBoxBlock = new BABYLON.Animation(
-    "movement",
-    "position.y",
-    30,
-    BABYLON.Animation.ANIMATIONTYPE_FLOAT,
-    BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE
-  );
-  const Y_HAND = -0.6;
-  const Y_BLOCK = -0.6;
-  const ANIMATION_SCALE = 2;
-
-  const keysHand = [];
-
-  keysHand.push({
-    frame: 0,
-    value: Y_HAND + 0.08 * ANIMATION_SCALE,
-  });
-  keysHand.push({
-    frame: 20,
-    value: Y_HAND + 0.085 * ANIMATION_SCALE,
-  });
-  keysHand.push({
-    frame: 40,
-    value: Y_HAND + 0.08 * ANIMATION_SCALE,
-  });
-  keysHand.push({
-    frame: 60,
-    value: Y_HAND + 0.075 * ANIMATION_SCALE,
-  });
-  keysHand.push({
-    frame: 80,
-    value: Y_HAND + 0.08 * ANIMATION_SCALE,
-  });
-
-  const keysBlock = [];
-
-  keysBlock.push({
-    frame: 0,
-    value: Y_BLOCK + 0.08 * ANIMATION_SCALE,
-  });
-  keysBlock.push({
-    frame: 20,
-    value: Y_BLOCK + 0.085 * ANIMATION_SCALE,
-  });
-  keysBlock.push({
-    frame: 40,
-    value: Y_BLOCK + 0.08 * ANIMATION_SCALE,
-  });
-  keysBlock.push({
-    frame: 60,
-    value: Y_BLOCK + 0.075 * ANIMATION_SCALE,
-  });
-  keysBlock.push({
-    frame: 80,
-    value: Y_BLOCK + 0.08 * ANIMATION_SCALE,
-  });
-
-  animationBoxHand.setKeys(keysHand);
-  animationBoxBlock.setKeys(keysBlock);
-  hand.animations.push(animationBoxHand);
-  block.animations.push(animationBoxBlock);
+  hand.animations.push(IDLE_ANIMATION_BOX_HAND);
+  block.animations.push(IDLE_ANIMATION_BOX_BLOCK);
   scene.beginAnimation(hand, 0, 100, true);
   scene.beginAnimation(block, 0, 100, true);
   noa.rendering.addMeshToScene(core);
@@ -223,12 +96,120 @@ export function setupHand(noa: Engine) {
   });
   const { mesh } = noa.entities.getMeshData(noa.playerEntity);
   hand.setParent(mesh);
-  hand.position.set(0.4, Y_HAND, 1.1);
+  hand.position.set(X_HAND, Y_HAND, Z_HAND);
   block.setParent(mesh);
-  block.position.set(0.8, Y_BLOCK, 1.2);
+  block.position.set(X_BLOCK, Y_BLOCK, Z_BLOCK);
   noa.entities.addComponentAgain(noa.playerEntity, HAND_COMPONENT, {
     handMesh: hand,
     blockMesh: block,
     blockMaterials,
   });
+}
+
+function createFaceUV(offset: number[], size: number[], textureSize: number[]): Vector4[] {
+  const faceUV = new Array(6);
+  faceUV[0] = new Vector4(
+    (offset[0] + size[2]) / textureSize[0],
+    (textureSize[1] - size[1] - size[2] - offset[1]) / textureSize[1],
+    (size[2] + size[0] + offset[0]) / textureSize[0],
+    (textureSize[1] - size[2] - offset[1]) / textureSize[1]
+  );
+  faceUV[1] = new Vector4(
+    (offset[0] + size[2] * 2 + size[0]) / textureSize[0],
+    (textureSize[1] - size[1] - size[2] - offset[1]) / textureSize[1],
+    (size[2] * 2 + size[0] * 2 + offset[0]) / textureSize[0],
+    (textureSize[1] - size[2] - offset[1]) / textureSize[1]
+  );
+  faceUV[2] = new Vector4(
+    offset[0] / textureSize[0],
+    (textureSize[1] - size[1] - size[2] - offset[1]) / textureSize[1],
+    (offset[0] + size[2]) / textureSize[0],
+    (textureSize[1] - size[2] - offset[1]) / textureSize[1]
+  );
+  faceUV[3] = new Vector4(
+    (offset[0] + size[2] + size[0]) / textureSize[0],
+    (textureSize[1] - size[1] - size[2] - offset[1]) / textureSize[1],
+    (size[2] + size[0] * 2 + offset[0]) / textureSize[0],
+    (textureSize[1] - size[2] - offset[1]) / textureSize[1]
+  );
+  faceUV[4] = new Vector4(
+    (size[0] + size[2] + offset[0]) / textureSize[0],
+    (textureSize[1] - size[2] - offset[1]) / textureSize[1],
+    (offset[0] + size[2]) / textureSize[0],
+    (textureSize[1] - offset[1]) / textureSize[1]
+  );
+  faceUV[5] = new Vector4(
+    (size[0] * 2 + size[2] + offset[0]) / textureSize[0],
+    (textureSize[1] - size[2] - offset[1]) / textureSize[1],
+    (offset[0] + size[2] + size[0]) / textureSize[0],
+    (textureSize[1] - offset[1]) / textureSize[1]
+  );
+  return faceUV;
+}
+
+function createIdleAnimation(offset: number) {
+  const keys = [];
+  keys.push({
+    frame: 0,
+    value: offset + 0.08 * ANIMATION_SCALE_IDLE,
+  });
+  keys.push({
+    frame: 20,
+    value: offset + 0.085 * ANIMATION_SCALE_IDLE,
+  });
+  keys.push({
+    frame: 40,
+    value: offset + 0.08 * ANIMATION_SCALE_IDLE,
+  });
+  keys.push({
+    frame: 60,
+    value: offset + 0.075 * ANIMATION_SCALE_IDLE,
+  });
+  keys.push({
+    frame: 80,
+    value: offset + 0.08 * ANIMATION_SCALE_IDLE,
+  });
+  const animationBox = new BABYLON.Animation(
+    "idle",
+    "position.y",
+    30,
+    BABYLON.Animation.ANIMATIONTYPE_FLOAT,
+    BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE
+  );
+  animationBox.setKeys(keys);
+  return animationBox;
+}
+
+function createMiningAnimation(offset: number) {
+  const keys = [];
+  keys.push({
+    frame: 0,
+    value: offset,
+  });
+  keys.push({
+    frame: 20,
+    value: offset + 0.005 * ANIMATION_SCALE_MINING,
+  });
+  keys.push({
+    frame: 40,
+    value: offset,
+  });
+  keys.push({
+    frame: 60,
+    value: offset - 0.005 * ANIMATION_SCALE_MINING,
+  });
+  keys.push({
+    frame: 80,
+    value: offset,
+  });
+  const animationBox = new BABYLON.Animation(
+    "mining",
+    "position.z",
+    300,
+    BABYLON.Animation.ANIMATIONTYPE_FLOAT,
+    BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE
+  );
+
+  animationBox.setKeys(keys);
+  return animationBox;
 }
