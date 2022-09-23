@@ -270,7 +270,7 @@ describe("LibTerrain", () => {
       //   expect(solBlock).to.eq(tsBlock);
       // }
 
-      const NUM_RANDOM_COORDS = 1000;
+      const NUM_RANDOM_COORDS = 10;
 
       // Random coords
       const solResults: Promise<string>[] = [];

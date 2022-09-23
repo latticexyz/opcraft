@@ -71,7 +71,7 @@ export const Blocks: { [key in keyof typeof BlockType]: Block | undefined } = {
   Planks: { type: NoaBlockType.BLOCK, material: Textures.Planks },
   Wool: { type: NoaBlockType.BLOCK, material: Textures.Wool },
   Snow: { type: NoaBlockType.BLOCK, material: Textures.Snow },
-  Cray: { type: NoaBlockType.BLOCK, material: Textures.Cray },
+  Clay: { type: NoaBlockType.BLOCK, material: Textures.Cray },
   Bedrock: { type: NoaBlockType.BLOCK, material: Textures.Bedrock },
   RedFlower: { type: NoaBlockType.MESH, material: Textures.RedFlower, solid: false, opaque: false },
   OrangeFlower: { type: NoaBlockType.MESH, material: Textures.OrangeFlower, solid: false, opaque: false },

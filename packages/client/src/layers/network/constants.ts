@@ -34,7 +34,7 @@ export const BlockType = {
   Kelp: keccak256("block.Kelp") as EntityID,
   Wool: keccak256("block.Wool") as EntityID,
   Snow: keccak256("block.Snow") as EntityID,
-  Cray: keccak256("block.Cray") as EntityID,
+  Clay: keccak256("block.Clay") as EntityID,
   Bedrock: keccak256("block.Bedrock") as EntityID,
 };
 
