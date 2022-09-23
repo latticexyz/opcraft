@@ -13,9 +13,10 @@ import { registerRotationComponent } from "./engine/components/rotationComponent
 import { setupClouds, setupSky } from "./engine/sky";
 import { setupNoaEngine } from "./setup";
 import { createBlockSystem, createInputSystem, createP2PSystem, createPlayerPositionSystem } from "./systems";
-import { API, RECS } from "./types";
+import { API } from "./types";
 import { registerHandComponent } from "./engine/components/handComponent";
 import { registerModelComponent } from "./engine/components/modelComponent";
+import { RECS } from "../../types";
 
 export function createNoaLayer(network: NetworkLayer) {
   const world = namespaceWorld(network.world, "noa");
