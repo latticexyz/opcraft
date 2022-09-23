@@ -7,7 +7,7 @@ import { Blocks, Textures } from "../constants";
 import { BlockType, BlockTypeIndex } from "../../network";
 import { EntityID } from "@latticexyz/recs";
 import { NoaBlockType } from "../types";
-import { createPlantMesh } from "./utils";
+import { createMeshBlock } from "./utils";
 import { BlockIndexToKey, BlockTypeKey } from "../../network/constants";
 
 export interface API {
@@ -77,7 +77,7 @@ export function setupNoaEngine(api: API) {
       if (texture === null) {
         throw new Error("Can't create a plant block without a material");
       }
-      const mesh = createPlantMesh(noa, scene, texture, key, augmentedBlock.frames);
+      const mesh = createMeshBlock(noa, scene, texture, key, augmentedBlock.frames);
       augmentedBlock.blockMesh = mesh;
       delete augmentedBlock.material;
     }

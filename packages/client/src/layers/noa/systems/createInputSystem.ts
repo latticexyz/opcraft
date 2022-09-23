@@ -1,6 +1,7 @@
 import { getComponentValue, HasValue, runQuery, setComponent } from "@latticexyz/recs";
 import { NetworkLayer, BlockType } from "../../network";
 import { INDEX_TO_BLOCK } from "../../react/components/ActionBar";
+import { MiningBlockComponent, MINING_BLOCK_COMPONENT } from "../engine/components/miningBlockComponent";
 import { NoaLayer } from "../types";
 
 export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
@@ -23,12 +24,37 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
   noa.inputs.down.on("fire", function () {
     if (noa.targetedBlock) {
       const pos = noa.targetedBlock.position;
-      // 2) create a NOA ecs component on the player entity ("miningBlock")
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      //@ts-ignore
+      const miningComponent: MiningBlockComponent = noa.entities.getState(noa.playerEntity, MINING_BLOCK_COMPONENT);
+      if (miningComponent.active) {
+        return;
+      }
+      miningComponent.active = true;
+      miningComponent.block = { x: pos[0], y: pos[1], z: pos[2] };
     }
   });
 
   noa.inputs.up.on("fire", function () {
-    // 1) if there is a miningBlock component on the player entity, remove it
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    //@ts-ignore
+    const miningComponent: MiningBlockComponent = noa.entities.getState(noa.playerEntity, MINING_BLOCK_COMPONENT);
+    miningComponent.active = false;
+  });
+
+  noa.on("targetBlockChanged", (targetedBlock: { position: number[] }) => {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    //@ts-ignore
+    const miningComponent: MiningBlockComponent = noa.entities.getState(noa.playerEntity, MINING_BLOCK_COMPONENT);
+    if (!targetedBlock) {
+      return;
+    }
+    const {
+      position: [x, y, z],
+    } = targetedBlock;
+    if (miningComponent.block.x !== x || miningComponent.block.y !== y || miningComponent.block.z !== z) {
+      miningComponent.active = false;
+    }
   });
 
   // place a block on right click

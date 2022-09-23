@@ -15,6 +15,7 @@ import { setupNoaEngine } from "./setup";
 import { createBlockSystem, createInputSystem, createP2PSystem, createPlayerPositionSystem } from "./systems";
 import { registerHandComponent } from "./engine/components/handComponent";
 import { registerModelComponent } from "./engine/components/modelComponent";
+import { MINING_BLOCK_COMPONENT, registerMiningBlockComponent } from "./engine/components/miningBlockComponent";
 
 export function createNoaLayer(network: NetworkLayer) {
   const world = namespaceWorld(network.world, "noa");
@@ -36,9 +37,11 @@ export function createNoaLayer(network: NetworkLayer) {
   registerModelComponent(noa);
   registerRotationComponent(noa);
   registerHandComponent(noa, network, components.SelectedSlot, SingletonEntity);
+  registerMiningBlockComponent(noa, network);
   setupClouds(noa);
   setupSky(noa);
   setupHand(noa);
+  noa.entities.addComponentAgain(noa.playerEntity, MINING_BLOCK_COMPONENT, {});
 
   // --- API ------------------------------------------------------------------------
   function setCraftingTable(entities: EntityIndex[]) {

@@ -7,12 +7,14 @@ import { Material } from "@babylonjs/core";
 import { BlockIdToKey, BlockTypeKey } from "../../../network/constants";
 import { defineSelectedSlotComponent } from "../../components";
 
-interface State {
+export interface HandComponent {
   handMesh: BABYLON.Mesh;
   blockMesh: BABYLON.Mesh;
   blockMaterials: { [key in BlockTypeKey]?: Material };
   __id: number;
 }
+
+export const HAND_COMPONENT = "HAND_COMPONENT";
 
 export function registerHandComponent(
   noa: Engine,
@@ -24,9 +26,9 @@ export function registerHandComponent(
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   //@ts-ignore
   noa.ents.createComponent({
-    name: "hand",
+    name: HAND_COMPONENT,
     state: { handMesh: null, blockMesh: null, blockMaterial: null },
-    system: function (dt: number, states: State[]) {
+    system: function (dt: number, states: HandComponent[]) {
       for (let i = 0; i < states.length; i++) {
         const { handMesh, blockMesh, blockMaterials } = states[i];
         const id = states[i].__id;

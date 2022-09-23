@@ -3,6 +3,7 @@ import { Texture, Vector4 } from "@babylonjs/core";
 import { Engine } from "noa-engine";
 import { BlockTypeKey } from "../../network/constants";
 import { UVWraps } from "../constants";
+import { HAND_COMPONENT } from "./components/handComponent";
 
 export function setupHand(noa: Engine) {
   const scene = noa.rendering.getScene();
@@ -225,7 +226,7 @@ export function setupHand(noa: Engine) {
   hand.position.set(0.4, Y_HAND, 1.1);
   block.setParent(mesh);
   block.position.set(0.8, Y_BLOCK, 1.2);
-  noa.entities.addComponentAgain(noa.playerEntity, "hand", {
+  noa.entities.addComponentAgain(noa.playerEntity, HAND_COMPONENT, {
     handMesh: hand,
     blockMesh: block,
     blockMaterials,
