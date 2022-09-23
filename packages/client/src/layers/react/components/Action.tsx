@@ -79,6 +79,7 @@ const ActionContainer = styled.div`
   }
 `;
 
+// TODO: handle other action states
 const ActionStatusIcon = ({ state }: { state: ActionState }) => {
   switch (state) {
     case ActionState.Complete:

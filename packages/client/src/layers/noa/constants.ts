@@ -71,9 +71,9 @@ export const Blocks: { [key in keyof typeof BlockType]: Block | undefined } = {
 
 export const Singleton = "Singleton" as EntityID;
 
-export function getBlockIconUrl(blockType: keyof typeof BlockType) {
+export function getBlockIconUrl(blockType: keyof typeof BlockType): string | undefined {
   const block = Blocks[blockType];
-  if (!block) return "";
+  if (!block) return;
   const material = Array.isArray(block.material) ? block.material[0] : block.material;
-  return material;
+  return material ?? undefined;
 }

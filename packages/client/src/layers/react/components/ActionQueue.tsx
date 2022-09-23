@@ -2,9 +2,8 @@ import React from "react";
 import { registerUIComponent } from "../engine";
 import { getComponentEntities, getComponentValueStrict } from "@latticexyz/recs";
 import { map } from "rxjs";
-import { ActionState } from "@latticexyz/std-client";
 import styled from "styled-components";
-import { Blocks } from "../../noa/constants";
+import { getBlockIconUrl } from "../../noa/constants";
 import { Action as ActionQueueItem } from "./Action";
 
 const ActionQueueList = styled.div`
@@ -68,11 +67,10 @@ export function registerActionQueue() {
           {[...getComponentEntities(Action)].map((e) => {
             const { state, metadata } = getComponentValueStrict(Action, e);
             const { actionType, coord, blockType } = metadata;
-            const material = blockType && Blocks[blockType]?.material;
-            const blockImage = (material && (Array.isArray(material) ? material[0] : material)) ?? undefined;
+            const icon = (blockType && getBlockIconUrl(blockType)) ?? undefined;
             return (
               <ActionQueueItemContainer key={e}>
-                <ActionQueueItem state={state} icon={blockImage} title={`${actionType} tx`} description={blockType} />
+                <ActionQueueItem state={state} icon={icon} title={`${actionType} tx`} description={blockType} />
                 {/* TODO: conditionally render this for debugging? */}
                 {coord ? (
                   <ActionPosition>
