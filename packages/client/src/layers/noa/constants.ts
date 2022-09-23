@@ -1,5 +1,5 @@
 import { EntityID } from "@latticexyz/recs";
-import { BlockType } from "../network";
+import { BlockTypeKey } from "../network/constants";
 import { Block, NoaBlockType } from "./types";
 
 export const Textures = {
@@ -39,7 +39,27 @@ export const Textures = {
   Kelp: "./assets/blocks/kelp-small.png",
 };
 
-export const Blocks: { [key in keyof typeof BlockType]: Block | undefined } = {
+export const UVWraps: { [key in BlockTypeKey]: string | undefined } = {
+  Air: undefined,
+  Grass: "./assets/uv-wraps/grass.png",
+  Dirt: undefined,
+  Log: undefined,
+  Sand: "./assets/uv-wraps/sand.png",
+  Stone: "./assets/uv-wraps/stone.png",
+  Water: undefined,
+  Cobblestone: "./assets/uv-wraps/cobblestone.png",
+  Coal: undefined,
+  Crafting: undefined,
+  Iron: undefined,
+  Gold: undefined,
+  Diamond: undefined,
+  Leaves: undefined,
+  Planks: undefined,
+  RedFlower: undefined,
+  Kelp: undefined,
+};
+
+export const Blocks: { [key in BlockTypeKey]: Block | undefined } = {
   Air: undefined,
   Grass: { type: NoaBlockType.BLOCK, material: [Textures.Grass, Textures.GrassSide] },
   Dirt: { type: NoaBlockType.BLOCK, material: Textures.Dirt },
@@ -71,7 +91,7 @@ export const Blocks: { [key in keyof typeof BlockType]: Block | undefined } = {
 
 export const Singleton = "Singleton" as EntityID;
 
-export function getBlockIconUrl(blockType: keyof typeof BlockType) {
+export function getBlockIconUrl(blockType: BlockTypeKey) {
   const block = Blocks[blockType];
   if (!block) return "";
   const material = Array.isArray(block.material) ? block.material[0] : block.material;

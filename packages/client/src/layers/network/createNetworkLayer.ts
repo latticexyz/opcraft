@@ -36,7 +36,7 @@ export async function createNetworkLayer(config: GameConfig) {
     ItemPrototype: defineItemPrototypeComponent(world),
     Item: defineItemComponent(world),
     Name: defineNameComponent(world),
-    OwnedBy: defineOwnedByComponent(world),
+    OwnedBy: createIndexer(defineOwnedByComponent(world)),
     GameConfig: defineGameConfigComponent(world),
     Recipe: defineRecipeComponent(world),
     LoadingState: defineLoadingStateComponent(world),

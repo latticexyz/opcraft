@@ -21,7 +21,7 @@ export const BlockType = {
   Kelp: keccak256("block.Kelp") as EntityID,
 };
 
-console.log("Blocks", BlockType);
+export type BlockTypeKey = keyof typeof BlockType;
 
 export const BlockIdToIndex = Object.values(BlockType).reduce<{ [key: string]: number }>((acc, id, index) => {
   acc[id] = index;
@@ -33,18 +33,15 @@ export const BlockIndexToId = Object.values(BlockType).reduce<{ [key: number]: s
   return acc;
 }, {});
 
-export const BlockIndexToKey = Object.entries(BlockType).reduce<{ [key: number]: keyof typeof BlockType }>(
+export const BlockIndexToKey = Object.entries(BlockType).reduce<{ [key: number]: BlockTypeKey }>(
   (acc, [key], index) => {
-    acc[index] = key as keyof typeof BlockType;
+    acc[index] = key as BlockTypeKey;
     return acc;
   },
   {}
 );
 
-export const BlockIdToKey = Object.entries(BlockType).reduce<{ [key: EntityID]: keyof typeof BlockType }>(
-  (acc, [key, id]) => {
-    acc[id] = key as keyof typeof BlockType;
-    return acc;
-  },
-  {}
-);
+export const BlockIdToKey = Object.entries(BlockType).reduce<{ [key: EntityID]: BlockTypeKey }>((acc, [key, id]) => {
+  acc[id] = key as BlockTypeKey;
+  return acc;
+}, {});
