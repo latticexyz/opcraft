@@ -13,7 +13,7 @@ The main branch client is automatically deployed to [opcraft.mud.dev](https://op
 
 ### Running locally with HMR
 
-Vite + HMR doesn't fully work and React changes will cause a full page reload unless we take a few extra steps to link packages locally.
+Parcel + HMR doesn't fully work and React changes will cause a full page reload unless we take a few extra steps to link packages locally and use Vite for bundling.
 
 1. Clone [mud](https://github.com/latticexyz/mud) repo locally (next to your opcraft dir)
 2. Run `yarn && yarn link:packages` from within mud repo to install its deps and link packages
