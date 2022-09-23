@@ -11,31 +11,61 @@ import { DiamondID } from "../../prototypes/Blocks.sol";
 import { addressToEntity } from "solecs/utils.sol";
 
 contract StakeSystemTest is MudTest {
-  uint256 diamond;
+  uint256 diamond1;
+  uint256 diamond2;
 
   function setUp() public override {
     super.setUp();
     vm.startPrank(deployer);
 
     // Give a diamond block to alice
-    diamond = world.getUniqueEntityId();
-    ItemComponent(component(ItemComponentID)).set(diamond, DiamondID);
-    OwnedByComponent(component(OwnedByComponentID)).set(diamond, addressToEntity(alice));
+    diamond1 = world.getUniqueEntityId();
+    ItemComponent(component(ItemComponentID)).set(diamond1, DiamondID);
+    OwnedByComponent(component(OwnedByComponentID)).set(diamond1, addressToEntity(alice));
+
+    diamond2 = world.getUniqueEntityId();
+    ItemComponent(component(ItemComponentID)).set(diamond2, DiamondID);
+    OwnedByComponent(component(OwnedByComponentID)).set(diamond2, addressToEntity(alice));
 
     vm.stopPrank();
   }
 
-  function testExecute() public {
+  function testStake() public {
     vm.startPrank(alice);
     Coord memory chunk = Coord(10, 10);
 
     // Call the stake system
-    StakeSystem(system(StakeSystemID)).executeTyped(diamond, chunk);
+    StakeSystem(system(StakeSystemID)).executeTyped(diamond1, chunk);
 
     // Assert the new stake of allice is 1
     uint256 stakeEntity = getStakeEntity(chunk, alice);
     uint256 stake = StakeComponent(component(StakeComponentID)).getValue(stakeEntity);
     assertEq(stake, 1);
+
+    // Call the stake system again
+    StakeSystem(system(StakeSystemID)).executeTyped(diamond2, chunk);
+
+    // Assert the new stake of allice is 2
+    stake = StakeComponent(component(StakeComponentID)).getValue(stakeEntity);
+    assertEq(stake, 2);
+
+    vm.stopPrank();
+  }
+
+  function testFailStake() public {
+    vm.startPrank(alice);
+    Coord memory chunk = Coord(10, 10);
+
+    // Call the stake system
+    StakeSystem(system(StakeSystemID)).executeTyped(diamond1, chunk);
+
+    // Assert the new stake of allice is 1
+    uint256 stakeEntity = getStakeEntity(chunk, alice);
+    uint256 stake = StakeComponent(component(StakeComponentID)).getValue(stakeEntity);
+    assertEq(stake, 1);
+
+    // Call the stake system again with the same diamond -> this should fail
+    StakeSystem(system(StakeSystemID)).executeTyped(diamond1, chunk);
 
     vm.stopPrank();
   }
@@ -45,7 +75,7 @@ contract StakeSystemTest is MudTest {
     Coord memory chunk = Coord(10, 10);
 
     // Calling the stake system with a block you don't own should fail
-    StakeSystem(system(StakeSystemID)).executeTyped(diamond, chunk);
+    StakeSystem(system(StakeSystemID)).executeTyped(diamond1, chunk);
 
     vm.stopPrank();
   }

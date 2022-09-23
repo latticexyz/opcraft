@@ -17,7 +17,7 @@ function getStakeEntity(Coord memory chunk, address entity) returns (uint256) {
 
 function getStakeInChunk(StakeComponent stakeComponent, uint256 stakeEntity) returns (uint256) {
   bytes memory currentStakeBytes = stakeComponent.getRawValue(stakeEntity);
-  uint256 currentStake = currentStakeBytes.length == 0 ? 0 : abi.decode(currentStakeBytes, (uint256));
+  return currentStakeBytes.length == 0 ? 0 : abi.decode(currentStakeBytes, (uint256));
 }
 
 contract StakeSystem is System {
