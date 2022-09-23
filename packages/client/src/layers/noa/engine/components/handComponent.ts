@@ -6,8 +6,15 @@ import { INDEX_TO_BLOCK } from "../../../react/components/ActionBar";
 import { Material } from "@babylonjs/core";
 import { BlockIdToKey, BlockTypeKey } from "../../../network/constants";
 import { defineSelectedSlotComponent } from "../../components";
+import {
+  IDLE_ANIMATION_BOX_BLOCK,
+  IDLE_ANIMATION_BOX_HAND,
+  MINING_ANIMATION_BOX_BLOCK,
+  MINING_ANIMATION_BOX_HAND,
+} from "../hand";
 
 export interface HandComponent {
+  isMining: boolean;
   handMesh: BABYLON.Mesh;
   blockMesh: BABYLON.Mesh;
   blockMaterials: { [key in BlockTypeKey]?: Material };
@@ -27,10 +34,10 @@ export function registerHandComponent(
   //@ts-ignore
   noa.ents.createComponent({
     name: HAND_COMPONENT,
-    state: { handMesh: null, blockMesh: null, blockMaterial: null },
+    state: { isMining: false, handMesh: null, blockMesh: null, blockMaterial: null },
     system: function (dt: number, states: HandComponent[]) {
       for (let i = 0; i < states.length; i++) {
-        const { handMesh, blockMesh, blockMaterials } = states[i];
+        const { handMesh, isMining, blockMesh, blockMaterials } = states[i];
         const id = states[i].__id;
         if (id === noa.playerEntity) {
           // NOTE: for now just animate / change the material of the player hand
@@ -49,6 +56,28 @@ export function registerHandComponent(
           } else {
             handMesh.visibility = 1;
             blockMesh.visibility = 0;
+          }
+          console.log(isMining && handMesh.animations[0].name.includes("idle"));
+          if (isMining && handMesh.animations[0].name.includes("idle")) {
+            handMesh.animations.pop();
+            handMesh.animations.push(MINING_ANIMATION_BOX_HAND);
+            blockMesh.animations.pop();
+            blockMesh.animations.push(MINING_ANIMATION_BOX_BLOCK);
+            const scene = noa.rendering.getScene();
+            scene.stopAnimation(handMesh);
+            scene.stopAnimation(blockMesh);
+            scene.beginAnimation(handMesh, 0, 100, true);
+            scene.beginAnimation(blockMesh, 0, 100, true);
+          } else if (!isMining && handMesh.animations[0].name.includes("mining")) {
+            handMesh.animations.pop();
+            handMesh.animations.push(IDLE_ANIMATION_BOX_HAND);
+            blockMesh.animations.pop();
+            blockMesh.animations.push(IDLE_ANIMATION_BOX_BLOCK);
+            const scene = noa.rendering.getScene();
+            scene.stopAnimation(handMesh);
+            scene.stopAnimation(blockMesh);
+            scene.beginAnimation(handMesh, 0, 100, true);
+            scene.beginAnimation(blockMesh, 0, 100, true);
           }
         }
       }
