@@ -39,7 +39,7 @@ export const Textures = {
   BlueFlower: "./assets/blocks/59-blue_flower.png",
   GreenFlower: "./assets/blocks/60-green_flower.png",
   BlackFlower: "./assets/blocks/61-black_flower.png",
-  GrassPlant: "./assets/blocks/grass.png",
+  GrassPlant: "./assets/blocks/dark_grass.png",
   Kelp: "./assets/blocks/kelp-small.png",
   Bedrock: "./assets/blocks/44-Obsidian.png",
 };
