@@ -35,27 +35,24 @@ export function getTerrain(coord: VoxelCoord, perlin: Perlin): Terrain {
 }
 
 function getChunkCoord({ x, z }: VoxelCoord) {
-  return {
-    x: roundTowardsZero(x / STRUCTURE_CHUNK),
+  const chunkCoord = {
+    x: Math.floor(x / STRUCTURE_CHUNK),
     y: 0,
-    z: roundTowardsZero(z / STRUCTURE_CHUNK),
+    z: Math.floor(z / STRUCTURE_CHUNK),
   };
+  return chunkCoord;
 }
 
-function getChunkHash(coord: VoxelCoord) {
+export function getChunkHash(coord: VoxelCoord) {
   const { x, z } = getChunkCoord(coord);
   return getCoordHash(x, z);
 }
 
 export function getBiomeHash(coord: VoxelCoord, biome: Biome) {
-  return getCoordHash(roundTowardsZero(coord.x / 300) + roundTowardsZero(coord.z / 300), biome);
+  return getCoordHash(Math.floor(coord.x / 300) + Math.floor(coord.z / 300), biome);
 }
 
-function getChunkOffsetAndHeight(
-  coord: VoxelCoord,
-  biome: [number, number, number, number],
-  perlin: Perlin
-): { offset: VoxelCoord; height: number } {
+function getChunkOffsetAndHeight(coord: VoxelCoord, perlin: Perlin): { offset: VoxelCoord; height: number } {
   const chunkCoord = getChunkCoord(coord);
 
   const centerCoord = {
@@ -63,7 +60,8 @@ function getChunkOffsetAndHeight(
     y: 0,
     z: chunkCoord.z * STRUCTURE_CHUNK + STRUCTURE_CHUNK_CENTER,
   };
-  const height = getHeight(centerCoord, biome, perlin);
+
+  const { height } = getTerrain(centerCoord, perlin);
 
   const offset = {
     x: coord.x - chunkCoord.x * STRUCTURE_CHUNK,
@@ -168,7 +166,7 @@ function accessState<K extends keyof TerrainState>(state: TerrainState, prop: K)
   }
 
   if (prop === "chunkOffset" || prop === "chunkHeight") {
-    const { height, offset } = getChunkOffsetAndHeight(coord, biomeVector, perlin);
+    const { height, offset } = getChunkOffsetAndHeight(coord, perlin);
     state.chunkHeight = height;
     state.chunkOffset = offset;
   }

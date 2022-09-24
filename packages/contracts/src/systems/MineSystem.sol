@@ -15,6 +15,7 @@ import { AirID, WaterID } from "../prototypes/Blocks.sol";
 
 uint256 constant ID = uint256(keccak256("system.Mine"));
 
+// TODO: Min/Max chunk height
 contract MineSystem is System {
   constructor(IWorld _world, address _components) System(_world, _components) {}
 

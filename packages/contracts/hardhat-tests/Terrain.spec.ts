@@ -14,6 +14,7 @@ import {
 } from "../../client/src/layers/network/api/terrain/getHeight";
 import {
   getBiomeHash,
+  getChunkHash,
   getCoordHash,
   getTerrain,
   getTerrainBlock,
@@ -267,6 +268,16 @@ describe("LibTerrain", () => {
     });
   });
 
+  describe("getChunkHash", () => {
+    it("should compute the same result as getCoordHash on the client", async () => {
+      const coord = { x: 2483, y: 9, z: -1447 };
+      const tsHash = getChunkHash(coord);
+      const solChunk = await LibTerrain.getChunkCoord(coord.x, coord.z);
+      const solHash = await LibTerrain.getCoordHash(solChunk[0], solChunk[1]);
+      expect(tsHash).to.eq(solHash);
+    });
+  });
+
   describe("getBiomeHash", () => {
     it("should compute the same result as getBiomeHash on the client", async () => {
       const coord = { x: 5341, y: 8, z: -2862 };
@@ -279,7 +290,7 @@ describe("LibTerrain", () => {
 
   const CHECK_RANDOM_COORDS = false;
   describe("getTerrainBlock", () => {
-    it("should compute the same result as getTerrainBlockTs", async () => {
+    it.only("should compute the same result as getTerrainBlockTs", async () => {
       // Fixed coords
       console.log("Check fixed coords");
       const coords = [
@@ -292,7 +303,7 @@ describe("LibTerrain", () => {
         { x: -9977, y: -15, z: -9312 }, // Clay
         { x: 7336, y: 8, z: 9925 }, // GrassPlant
         { x: -7839, y: 57, z: 8037 }, // Snow
-        { x: 1402, y: 13, z: 3338 }, // Leaves
+        { x: 1402, y: 13, z: 3338 }, // Wool
         { x: 4323, y: 4, z: 278 }, // Log
         { x: -1233, y: -260, z: -3420 }, // Bedrock
         { x: 1820, y: 0, z: 4369 }, // Kelp
@@ -310,6 +321,16 @@ describe("LibTerrain", () => {
         { x: 5471, y: 27, z: 7677 }, // GreenFlower
         { x: 5668, y: 9, z: 1835 }, // OrangeFlower
         { x: 5435, y: 5, z: -7440 }, // BlackFlower
+        { x: 2483, y: 9, z: -1447 }, // Log
+        { x: -1547, y: 8, z: -822 }, // Dirt
+        { x: -1547, y: 9, z: -822 }, // Grass
+        { x: -1547, y: 10, z: -822 }, // Log
+        { x: -1547, y: 11, z: -822 }, // Log
+        { x: -1547, y: 12, z: -822 }, // Log
+        { x: -1547, y: 13, z: -822 }, // Log
+        { x: -1547, y: 14, z: -822 }, // Leaves
+        { x: -1547, y: 15, z: -822 }, // Air
+        { x: -1548, y: 13, z: -822 }, // Leaves
       ];
 
       for (const coord of coords) {
@@ -328,7 +349,7 @@ describe("LibTerrain", () => {
       }
 
       if (!CHECK_RANDOM_COORDS) return;
-      const NUM_RANDOM_COORDS = 1000;
+      const NUM_RANDOM_COORDS = 100000;
 
       const acc: { [key in keyof typeof BlockType]: number } = mapObject(BlockType, () => 0);
 

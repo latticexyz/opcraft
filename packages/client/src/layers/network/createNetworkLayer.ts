@@ -17,7 +17,7 @@ import { defineNameComponent } from "./components/NameComponent";
 import { getBlockAtPosition as getBlockAtPositionApi } from "./api";
 import { createPerlin } from "@latticexyz/noise";
 import { getECSBlock, getTerrain, getTerrainBlock } from "./api/terrain/getBlockAtPosition";
-import { BlockType } from "./constants";
+import { BlockIdToKey, BlockType } from "./constants";
 import { GodID } from "@latticexyz/network";
 
 /**
@@ -81,7 +81,7 @@ export async function createNetworkLayer(config: GameConfig) {
       id: `build+${coord.x}/${coord.y}/${coord.z}` as EntityID,
       requirement: () => true,
       components: { Position: components.Position, Item: components.Item, OwnedBy: components.OwnedBy },
-      execute: () => systems["system.Build"].executeTyped(BigNumber.from(entity), coord, { gasLimit: 450000 }),
+      execute: () => systems["system.Build"].executeTyped(BigNumber.from(entity), coord, { gasLimit: 450_000 }),
       updates: () => [
         {
           component: "OwnedBy",
@@ -100,6 +100,7 @@ export async function createNetworkLayer(config: GameConfig) {
   async function mine(coord: VoxelCoord) {
     const ecsBlock = getECSBlockAtPosition(coord);
     const blockType = ecsBlock ?? getTerrainBlockAtPosition(coord);
+    console.log("Block at coord", coord, BlockIdToKey[blockType]);
 
     console.log("entity/blocktype", blockType);
     if (blockType == null) throw new Error("entity has no block type");
@@ -110,7 +111,7 @@ export async function createNetworkLayer(config: GameConfig) {
       id: `mine+${coord.x}/${coord.y}/${coord.z}` as EntityID,
       requirement: () => true,
       components: { Position: components.Position, OwnedBy: components.OwnedBy, Item: components.Item },
-      execute: () => systems["system.Mine"].executeTyped(coord, blockType, { gasLimit: ecsBlock ? 450000 : 1100000 }),
+      execute: () => systems["system.Mine"].executeTyped(coord, blockType),
       updates: () => [
         {
           component: "Position",
