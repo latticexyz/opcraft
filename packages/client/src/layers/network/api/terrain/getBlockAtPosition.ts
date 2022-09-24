@@ -1,5 +1,5 @@
 import { Component, EntityID, getComponentValue, getEntitiesWithValue, Type, World } from "@latticexyz/recs";
-import { CoordMap, VoxelCoord } from "@latticexyz/utils";
+import { CoordMap, roundTowardsZero, VoxelCoord } from "@latticexyz/utils";
 import { Perlin } from "@latticexyz/noise";
 import { BlockType } from "../../constants";
 import { Biome } from "./constants";
@@ -7,7 +7,7 @@ import { getBiome } from "./getBiome";
 import { getHeight } from "./getHeight";
 import { keccak256Coord } from "@latticexyz/utils";
 import { BigNumber } from "ethers";
-import { getStructureBlock, STRUCTURE_CHUNK, tree, woolTree } from "./structures";
+import { getStructureBlock, STRUCTURE_CHUNK, STRUCTURE_CHUNK_CENTER, Tree, WoolTree } from "./structures";
 
 interface Terrain {
   biome: [number, number, number, number];
@@ -16,13 +16,13 @@ interface Terrain {
 
 const hashCache = new CoordMap<number>();
 
-function getCoordHash(x: number, y = 0) {
+export function getCoordHash(x: number, y = 0) {
   const coord = { x, y };
   const cacheHash = hashCache.get(coord);
   if (cacheHash != null) return cacheHash;
 
   // TODO: make this faster by using keccak-wasm
-  const hash = BigNumber.from(keccak256Coord(coord)).mod(1024).toNumber() / 1024;
+  const hash = BigNumber.from(keccak256Coord(coord)).mod(1024).toNumber();
 
   hashCache.set(coord, hash);
   return hash;
@@ -36,9 +36,9 @@ export function getTerrain(coord: VoxelCoord, perlin: Perlin): Terrain {
 
 function getChunkCoord({ x, z }: VoxelCoord) {
   return {
-    x: Math.floor(x / STRUCTURE_CHUNK),
+    x: roundTowardsZero(x / STRUCTURE_CHUNK),
     y: 0,
-    z: Math.floor(z / STRUCTURE_CHUNK),
+    z: roundTowardsZero(z / STRUCTURE_CHUNK),
   };
 }
 
@@ -47,18 +47,21 @@ function getChunkHash(coord: VoxelCoord) {
   return getCoordHash(x, z);
 }
 
+export function getBiomeHash(coord: VoxelCoord, biome: Biome) {
+  return getCoordHash(roundTowardsZero(coord.x / 300) + roundTowardsZero(coord.z / 300), biome);
+}
+
 function getChunkOffsetAndHeight(
   coord: VoxelCoord,
   biome: [number, number, number, number],
   perlin: Perlin
 ): { offset: VoxelCoord; height: number } {
-  const center = Math.floor(STRUCTURE_CHUNK / 2) + 1;
   const chunkCoord = getChunkCoord(coord);
 
   const centerCoord = {
-    x: chunkCoord.x * STRUCTURE_CHUNK + center,
+    x: chunkCoord.x * STRUCTURE_CHUNK + STRUCTURE_CHUNK_CENTER,
     y: 0,
-    z: chunkCoord.z * STRUCTURE_CHUNK + center,
+    z: chunkCoord.z * STRUCTURE_CHUNK + STRUCTURE_CHUNK_CENTER,
   };
   const height = getHeight(centerCoord, biome, perlin);
 
@@ -105,9 +108,10 @@ export function getBlockAtPosition(
   return getECSBlock(context, coord) ?? getTerrainBlock(getTerrain(coord, perlin), coord, perlin);
 }
 
-type ComputationState = {
+type TerrainState = {
   coord: VoxelCoord;
-  terrain: Terrain;
+  biomeVector: [number, number, number, number];
+  height: number;
   perlin: Perlin;
   biome?: number;
   coordHash2D?: number;
@@ -119,8 +123,8 @@ type ComputationState = {
   distanceFromHeight?: number;
 };
 
-export function getTerrainBlock(terrain: Terrain, coord: VoxelCoord, perlin: Perlin): EntityID {
-  const state: ComputationState = { terrain, coord, perlin };
+export function getTerrainBlock({ biome: biomeVector, height }: Terrain, coord: VoxelCoord, perlin: Perlin): EntityID {
+  const state: TerrainState = { biomeVector, height, coord, perlin };
   return (
     Bedrock(state) ||
     Water(state) ||
@@ -138,17 +142,13 @@ export function getTerrainBlock(terrain: Terrain, coord: VoxelCoord, perlin: Per
   );
 }
 
-function accessState<K extends keyof ComputationState>(
-  state: ComputationState,
-  prop: K
-): NonNullable<ComputationState[K]> {
+function accessState<K extends keyof TerrainState>(state: TerrainState, prop: K): NonNullable<TerrainState[K]> {
   let value = state[prop];
   if (value != null) return value;
-  const { coord, terrain, perlin } = state;
+  const { coord, biomeVector, height, perlin } = state;
 
   if (prop === "biome") {
-    const { biome } = terrain;
-    state.biome = biome.findIndex((x) => x === Math.max(...biome));
+    state.biome = biomeVector.findIndex((x) => x === Math.max(...biomeVector));
   }
 
   if (prop === "coordHash2D") {
@@ -164,17 +164,17 @@ function accessState<K extends keyof ComputationState>(
   }
 
   if (prop === "biomeHash") {
-    state.biomeHash = getCoordHash(Math.floor(coord.x / 300) + Math.floor(coord.y / 300), accessState(state, "biome"));
+    state.biomeHash = getBiomeHash(coord, accessState(state, "biome"));
   }
 
   if (prop === "chunkOffset" || prop === "chunkHeight") {
-    const { height, offset } = getChunkOffsetAndHeight(coord, terrain.biome, perlin);
+    const { height, offset } = getChunkOffsetAndHeight(coord, biomeVector, perlin);
     state.chunkHeight = height;
     state.chunkOffset = offset;
   }
 
   if (prop === "distanceFromHeight") {
-    state.distanceFromHeight = terrain.height - coord.y;
+    state.distanceFromHeight = height - coord.y;
   }
 
   value = state[prop];
@@ -182,22 +182,22 @@ function accessState<K extends keyof ComputationState>(
   return value;
 }
 
-function Water({ coord: { y }, terrain: { height } }: ComputationState): EntityID | undefined {
+function Water({ coord: { y }, height }: TerrainState): EntityID | undefined {
   if (y < 0 && y >= height) return BlockType.Water;
 }
 
-function Air({ coord: { y }, terrain: { height } }: ComputationState): EntityID | undefined {
+function Air({ coord: { y }, height }: TerrainState): EntityID | undefined {
   if (y >= height + 2 * STRUCTURE_CHUNK) return BlockType.Air;
 }
 
-function Bedrock({ coord: { y } }: ComputationState): EntityID | undefined {
+function Bedrock({ coord: { y } }: TerrainState): EntityID | undefined {
   if (y < -255) return BlockType.Bedrock;
 }
 
-function Sand(state: ComputationState): EntityID | undefined {
+function Sand(state: TerrainState): EntityID | undefined {
   const {
     coord: { y },
-    terrain: { height },
+    height,
   } = state;
 
   if (y >= height) return;
@@ -211,10 +211,10 @@ function Sand(state: ComputationState): EntityID | undefined {
   if (biome === Biome.Forest && distanceFromHeight <= 2) return BlockType.Sand;
 }
 
-function Diamond(state: ComputationState): EntityID | undefined {
+function Diamond(state: TerrainState): EntityID | undefined {
   const {
     coord: { y },
-    terrain: { height },
+    height,
   } = state;
 
   if (y >= height) return;
@@ -223,26 +223,27 @@ function Diamond(state: ComputationState): EntityID | undefined {
   if ([Biome.Savanna, Biome.Forest, Biome.Desert].includes(biome) && y >= -20) return;
 
   const hash1 = accessState(state, "coordHash2D");
-  if (hash1 > 0.005) return;
+  if (hash1 > 5) return;
 
   const hash2 = accessState(state, "coordHash1D");
-  if (hash2 <= 0.005) return BlockType.Diamond;
+  if (hash2 <= 5) return BlockType.Diamond;
 }
 
-function Snow(state: ComputationState): EntityID | undefined {
+function Snow(state: TerrainState): EntityID | undefined {
   const {
     coord: { y },
-    terrain: { height, biome },
+    height,
+    biomeVector,
   } = state;
 
   if (y >= height) return;
-  if ((y > 55 || biome[Biome.Mountains] > 0.6) && y === height - 1) return BlockType.Snow;
+  if ((y > 55 || biomeVector[Biome.Mountains] > 0.6) && y === height - 1) return BlockType.Snow;
 }
 
-function Stone(state: ComputationState): EntityID | undefined {
+function Stone(state: TerrainState): EntityID | undefined {
   const {
     coord: { y },
-    terrain: { height },
+    height,
   } = state;
 
   if (y >= height) return;
@@ -253,10 +254,10 @@ function Stone(state: ComputationState): EntityID | undefined {
   return BlockType.Stone;
 }
 
-function Clay(state: ComputationState): EntityID | undefined {
+function Clay(state: TerrainState): EntityID | undefined {
   const {
     coord: { y },
-    terrain: { height },
+    height,
   } = state;
 
   if (y >= height) return;
@@ -266,10 +267,10 @@ function Clay(state: ComputationState): EntityID | undefined {
   if (biome === Biome.Savanna && y < 2 && distanceFromHeight <= 6) return BlockType.Clay;
 }
 
-function Grass(state: ComputationState): EntityID | undefined {
+function Grass(state: TerrainState): EntityID | undefined {
   const {
     coord: { y },
-    terrain: { height },
+    height,
   } = state;
 
   if (y >= height) return;
@@ -278,10 +279,10 @@ function Grass(state: ComputationState): EntityID | undefined {
   if ([Biome.Savanna, Biome.Forest].includes(biome) && y === height - 1) return BlockType.Grass;
 }
 
-function Dirt(state: ComputationState): EntityID | undefined {
+function Dirt(state: TerrainState): EntityID | undefined {
   const {
     coord: { y },
-    terrain: { height },
+    height,
   } = state;
 
   if (y >= height) return;
@@ -290,10 +291,10 @@ function Dirt(state: ComputationState): EntityID | undefined {
   if ([Biome.Savanna, Biome.Forest].includes(biome)) return BlockType.Dirt;
 }
 
-function SmallPlant(state: ComputationState): EntityID | undefined {
+function SmallPlant(state: TerrainState): EntityID | undefined {
   const {
     coord: { y },
-    terrain: { height },
+    height,
   } = state;
 
   if (y !== height) return;
@@ -302,38 +303,38 @@ function SmallPlant(state: ComputationState): EntityID | undefined {
   const biome = accessState(state, "biome");
 
   if (biome === Biome.Desert) {
-    if (hash >= 0.005 && hash < 0.01) return BlockType.GreenFlower;
-    if (hash > 0.99) return BlockType.Kelp;
+    if (hash < 5) return BlockType.GreenFlower;
+    if (hash > 990) return BlockType.Kelp;
   }
 
   if (biome === Biome.Savanna) {
-    if (hash >= 0.005 && hash < 0.01) return BlockType.RedFlower;
-    if (hash >= 0.01 && hash < 0.015) return BlockType.OrangeFlower;
-    if (hash >= 0.015 && hash < 0.02) return BlockType.MagentaFlower;
-    if (hash >= 0.025 && hash < 0.03) return BlockType.LimeFlower;
-    if (hash >= 0.035 && hash < 0.04) return BlockType.PinkFlower;
-    if (hash >= 0.045 && hash < 0.05) return BlockType.CyanFlower;
-    if (hash >= 0.055 && hash < 0.06) return BlockType.PurpleFlower;
-    if (hash >= 0.9) return BlockType.GrassPlant;
+    if (hash < 5) return BlockType.RedFlower;
+    if (hash < 10) return BlockType.OrangeFlower;
+    if (hash < 15) return BlockType.MagentaFlower;
+    if (hash < 20) return BlockType.LimeFlower;
+    if (hash < 25) return BlockType.PinkFlower;
+    if (hash < 30) return BlockType.CyanFlower;
+    if (hash < 35) return BlockType.PurpleFlower;
+    if (hash >= 900) return BlockType.GrassPlant;
   }
 
   if (biome === Biome.Forest) {
-    if (hash >= 0.005 && hash < 0.01) return BlockType.BlueFlower;
-    if (hash >= 0.01 && hash < 0.015) return BlockType.LightGrayFlower;
-    if (hash >= 0.95) return BlockType.GrassPlant;
+    if (hash < 5) return BlockType.BlueFlower;
+    if (hash < 10) return BlockType.LightGrayFlower;
+    if (hash < 15) return BlockType.GrassPlant;
   }
 
   if (biome === Biome.Mountains) {
-    if (y > 55 && hash >= 0.005 && hash < 0.01) return BlockType.GrayFlower;
-    if (y <= 55 && hash >= 0.01 && hash < 0.015) return BlockType.LightBlueFlower;
-    if (y <= 55 && hash >= 0.015 && hash < 0.02) return BlockType.BlackFlower;
+    if (y > 55 && hash < 5) return BlockType.GrayFlower;
+    if (y <= 55 && hash < 10) return BlockType.LightBlueFlower;
+    if (y <= 55 && hash < 15) return BlockType.BlackFlower;
   }
 }
 
-function Structure(state: ComputationState) {
+function Structure(state: TerrainState) {
   const {
     coord: { y },
-    terrain: { height },
+    height,
   } = state;
 
   if (y < height || y < 2) return;
@@ -343,23 +344,27 @@ function Structure(state: ComputationState) {
 
   const hash = accessState(state, "chunkHash");
 
-  if (biome === Biome.Savanna && hash < 0.05) {
+  if (biome === Biome.Savanna && hash < 50) {
     const chunkHeight = accessState(state, "chunkHeight");
     if (chunkHeight <= 0) return;
     const chunkOffset = accessState(state, "chunkOffset");
     const biomeHash = accessState(state, "biomeHash");
     const structure =
-      hash < biomeHash * 0.025 ? getStructureBlock(woolTree, chunkOffset) : getStructureBlock(tree, chunkOffset);
+      hash < roundTowardsZero(biomeHash / 40)
+        ? getStructureBlock(WoolTree, chunkOffset)
+        : getStructureBlock(Tree, chunkOffset);
     if (structure) return structure;
   }
 
-  if (biome === Biome.Forest && hash < 0.2) {
+  if (biome === Biome.Forest && hash < 200) {
     const chunkHeight = accessState(state, "chunkHeight");
     if (chunkHeight <= 0) return;
     const chunkOffset = accessState(state, "chunkOffset");
     const biomeHash = accessState(state, "biomeHash");
     const structure =
-      hash < biomeHash * 0.1 ? getStructureBlock(woolTree, chunkOffset) : getStructureBlock(tree, chunkOffset);
+      hash < roundTowardsZero(biomeHash / 10)
+        ? getStructureBlock(WoolTree, chunkOffset)
+        : getStructureBlock(Tree, chunkOffset);
     if (structure) return structure;
   }
 }

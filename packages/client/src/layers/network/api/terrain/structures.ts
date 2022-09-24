@@ -3,6 +3,7 @@ import { BlockType } from "../../constants";
 import { Structure } from "../../types";
 
 export const STRUCTURE_CHUNK = 5;
+export const STRUCTURE_CHUNK_CENTER = Math.floor(STRUCTURE_CHUNK / 2) + 1;
 
 function getEmptyStructure(): Structure {
   return [
@@ -72,8 +73,8 @@ function getWoolTree(): Structure {
   return s;
 }
 
-export const tree = getTree();
-export const woolTree = getWoolTree();
+export const Tree = getTree();
+export const WoolTree = getWoolTree();
 
 // Structure models
 export function getStructureBlock(structure: Structure, { x, y, z }: VoxelCoord) {
