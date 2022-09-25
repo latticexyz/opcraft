@@ -19,7 +19,7 @@ const ActionContainer = styled.div`
   border-radius: 3px;
   display: flex;
 
-  gap: 12px;
+  gap: 10px;
   padding: 8px;
   position: relative;
 

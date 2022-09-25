@@ -15,25 +15,25 @@ const ActionQueueList = styled.div`
   justify-content: flex-end;
   gap: 6px;
   padding: 20px;
-`;
 
-const ActionQueueItemContainer = styled.div`
-  position: relative;
-`;
+  .ActionQueueItem {
+    position: relative;
+  }
 
-const ActionPosition = styled.div`
-  position: absolute;
-  left: 100%;
-  top: 0;
-  bottom: 0;
-  width: 100px;
-  margin-left: 9px;
-  color: #fff;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 4px;
-  font-size: 14px;
+  .ActionQueueItemPosition {
+    position: absolute;
+    left: 100%;
+    top: 0;
+    bottom: 0;
+    width: 100px;
+    margin-left: 6px;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    font-size: 14px;
+  }
 `;
 
 export function registerActionQueue() {
@@ -66,17 +66,17 @@ export function registerActionQueue() {
             const { actionType, coord, blockType } = metadata;
             const icon = blockType && getBlockIconUrl(blockType);
             return (
-              <ActionQueueItemContainer key={e}>
+              <div key={e} className="ActionQueueItem">
                 <ActionQueueItem state={state} icon={icon} title={`${actionType} tx`} description={blockType} />
                 {/* TODO: conditionally render this for debugging? */}
                 {coord ? (
-                  <ActionPosition>
+                  <div className="ActionQueueItemPosition">
                     <div>X: {coord.x}</div>
                     <div>Y: {coord.y}</div>
                     <div>Z: {coord.z}</div>
-                  </ActionPosition>
+                  </div>
                 ) : null}
-              </ActionQueueItemContainer>
+              </div>
             );
           })}
         </ActionQueueList>
