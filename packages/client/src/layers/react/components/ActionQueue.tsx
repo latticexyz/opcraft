@@ -10,14 +10,11 @@ const ActionQueueList = styled.div`
   width: 240px;
   height: 100%;
   display: flex;
-  gap: 6px;
   flex-grow: 1;
   flex-direction: column;
   justify-content: flex-end;
+  gap: 6px;
   padding: 20px;
-  font-family: "Lattice Pixel";
-  font-size: 13px;
-  text-shadow: 1.5px 1.5px 0 #000;
 `;
 
 const ActionQueueItemContainer = styled.div`
@@ -36,7 +33,7 @@ const ActionPosition = styled.div`
   flex-direction: column;
   justify-content: center;
   gap: 4px;
-  font-size: 10px;
+  font-size: 14px;
 `;
 
 export function registerActionQueue() {

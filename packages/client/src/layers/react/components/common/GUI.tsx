@@ -30,5 +30,5 @@ export const BlockIcon = styled.div<{ blockID: EntityID; scale: number }>`
   display: grid;
   justify-items: center;
   align-items: center;
-  font-size: 24px;
+  font-size: 20px;
 `;
