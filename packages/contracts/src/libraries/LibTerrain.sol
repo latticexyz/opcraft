@@ -37,7 +37,7 @@ struct Tuple {
 // Divide with rounding down like Math.floor(a/b), not rounding towards zero
 function div(int32 a, int32 b) pure returns (int32) {
   int32 result = a / b;
-  int32 floor = result < 0 && (a % b != 0) ? int32(1) : int32(0);
+  int32 floor = (a < 0 || b < 0) && !(a < 0 && b < 0) && (a % b != 0) ? int32(1) : int32(0);
   return result - floor;
 }
 
@@ -125,16 +125,16 @@ library LibTerrain {
     blockID = Sand(y, height, biome, distanceFromHeight);
     if (blockID != 0) return blockID;
 
-    blockID = Stone(y, height, biome);
-    if (blockID != 0) return blockID;
-
-    blockID = Clay(y, height, biome, distanceFromHeight);
-    if (blockID != 0) return blockID;
-
     blockID = Snow(y, height, biomeVector[uint256(Biome.Mountains)]);
     if (blockID != 0) return blockID;
 
     blockID = Grass(y, height, biome);
+    if (blockID != 0) return blockID;
+
+    blockID = Stone(y, height, biome);
+    if (blockID != 0) return blockID;
+
+    blockID = Clay(y, height, biome, distanceFromHeight);
     if (blockID != 0) return blockID;
 
     blockID = Dirt(y, height, biome);
@@ -429,7 +429,10 @@ library LibTerrain {
     uint8 biome
   ) internal pure returns (uint256) {
     if (y >= height) return 0;
+    if (y < 0) return 0;
+
     if ((biome == uint8(Biome.Savanna) || biome == uint8(Biome.Forest)) && y == height - 1) return GrassID;
+    if (biome == uint8(Biome.Mountains) && y < 40 && y == height - 1) return GrassID;
   }
 
   function Dirt(

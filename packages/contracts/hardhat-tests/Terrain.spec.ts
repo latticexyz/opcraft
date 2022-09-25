@@ -280,17 +280,22 @@ describe("LibTerrain", () => {
 
   describe("getBiomeHash", () => {
     it("should compute the same result as getBiomeHash on the client", async () => {
-      const coord = { x: 5341, y: 8, z: -2862 };
-      const biome = Biome.Desert;
-      const tsHash = getBiomeHash(coord, biome);
-      const solHash = await LibTerrain.getBiomeHash(coord.x, coord.z, biome);
-      expect(tsHash).to.eq(solHash);
+      const coords = [
+        { x: 5341, y: 8, z: -2862 },
+        { x: -206, y: 3, z: 448 },
+      ];
+      for (const coord of coords) {
+        const biome = Biome.Desert;
+        const tsHash = getBiomeHash(coord, biome);
+        const solHash = await LibTerrain.getBiomeHash(coord.x, coord.z, biome);
+        expect(tsHash).to.eq(solHash);
+      }
     });
   });
 
   const CHECK_RANDOM_COORDS = false;
   describe("getTerrainBlock", () => {
-    it.only("should compute the same result as getTerrainBlockTs", async () => {
+    it("should compute the same result as getTerrainBlockTs", async () => {
       // Fixed coords
       console.log("Check fixed coords");
       const coords = [
@@ -331,6 +336,7 @@ describe("LibTerrain", () => {
         { x: -1547, y: 14, z: -822 }, // Leaves
         { x: -1547, y: 15, z: -822 }, // Air
         { x: -1548, y: 13, z: -822 }, // Leaves
+        { x: -206, y: 3, z: 448 }, // Wool
       ];
 
       for (const coord of coords) {
@@ -349,7 +355,7 @@ describe("LibTerrain", () => {
       }
 
       if (!CHECK_RANDOM_COORDS) return;
-      const NUM_RANDOM_COORDS = 100000;
+      const NUM_RANDOM_COORDS = 10000;
 
       const acc: { [key in keyof typeof BlockType]: number } = mapObject(BlockType, () => 0);
 

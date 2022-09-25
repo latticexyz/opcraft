@@ -1,5 +1,5 @@
 import { Component, EntityID, getComponentValue, getEntitiesWithValue, Type, World } from "@latticexyz/recs";
-import { CoordMap, roundTowardsZero, VoxelCoord } from "@latticexyz/utils";
+import { CoordMap, VoxelCoord } from "@latticexyz/utils";
 import { Perlin } from "@latticexyz/noise";
 import { BlockType } from "../../constants";
 import { Biome } from "./constants";
@@ -129,10 +129,10 @@ export function getTerrainBlock({ biome: biomeVector, height }: Terrain, coord: 
     Air(state) ||
     Diamond(state) ||
     Sand(state) ||
-    Stone(state) ||
-    Clay(state) ||
     Snow(state) ||
     Grass(state) ||
+    Stone(state) ||
+    Clay(state) ||
     Dirt(state) ||
     Structure(state) ||
     SmallPlant(state) ||
@@ -272,9 +272,11 @@ function Grass(state: TerrainState): EntityID | undefined {
   } = state;
 
   if (y >= height) return;
+  if (y < 0) return;
 
   const biome = accessState(state, "biome");
   if ([Biome.Savanna, Biome.Forest].includes(biome) && y === height - 1) return BlockType.Grass;
+  if (biome === Biome.Mountains && y < 40 && y === height - 1) return BlockType.Grass;
 }
 
 function Dirt(state: TerrainState): EntityID | undefined {
@@ -348,7 +350,7 @@ function Structure(state: TerrainState) {
     const chunkOffset = accessState(state, "chunkOffset");
     const biomeHash = accessState(state, "biomeHash");
     const structure =
-      hash < roundTowardsZero(biomeHash / 40)
+      hash < Math.floor(biomeHash / 40)
         ? getStructureBlock(WoolTree, chunkOffset)
         : getStructureBlock(Tree, chunkOffset);
     if (structure) return structure;
@@ -360,7 +362,7 @@ function Structure(state: TerrainState) {
     const chunkOffset = accessState(state, "chunkOffset");
     const biomeHash = accessState(state, "biomeHash");
     const structure =
-      hash < roundTowardsZero(biomeHash / 10)
+      hash < Math.floor(biomeHash / 10)
         ? getStructureBlock(WoolTree, chunkOffset)
         : getStructureBlock(Tree, chunkOffset);
     if (structure) return structure;
