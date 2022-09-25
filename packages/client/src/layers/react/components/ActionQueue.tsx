@@ -15,7 +15,7 @@ const ActionQueueList = styled.div`
   flex-direction: column;
   justify-content: flex-end;
   padding: 20px;
-  font-family: Minecraft;
+  font-family: "Lattice Pixel";
   font-size: 13px;
   text-shadow: 1.5px 1.5px 0 #000;
 `;
