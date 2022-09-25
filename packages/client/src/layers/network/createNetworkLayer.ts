@@ -12,6 +12,7 @@ import {
   defineLoadingStateComponent,
   defineItemComponent,
   defineItemPrototypeComponent,
+  defineOccurrenceComponent,
 } from "./components";
 import { defineNameComponent } from "./components/NameComponent";
 import { getBlockAtPosition as getBlockAtPositionApi } from "./api";
@@ -40,6 +41,7 @@ export async function createNetworkLayer(config: GameConfig) {
     GameConfig: defineGameConfigComponent(world),
     Recipe: defineRecipeComponent(world),
     LoadingState: defineLoadingStateComponent(world),
+    Occurrence: defineOccurrenceComponent(world),
   };
 
   // --- SETUP ----------------------------------------------------------------------

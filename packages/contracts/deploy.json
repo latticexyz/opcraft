@@ -6,21 +6,21 @@
     "PositionComponent",
     "OwnedByComponent",
     "RecipeComponent",
-    "NameComponent"
+    "NameComponent",
+    "OccurrenceComponent"
   ],
   "systems": [
     { "name": "ComponentDevSystem", "writeAccess": ["*"] },
     { "name": "BulkSetStateSystem", "writeAccess": ["*"] },
     { "name": "MineSystem", "writeAccess": ["PositionComponent", "OwnedByComponent", "ItemComponent"] },
     { "name": "BuildSystem", "writeAccess": ["PositionComponent", "OwnedByComponent"] },
-    { "name": "MoveSystem", "writeAccess": ["PositionComponent"] },
     { "name": "CraftingSystem", "writeAccess": ["OwnedByComponent"] },
     { "name": "NameSystem", "writeAccess": ["NameComponent"] },
     { "name": "PerlinSystem", "writeAccess": [] },
-    { "name": "TerrainSystem", "writeAccess": [] },
+    { "name": "OccurrenceSystem", "writeAccess": [] },
     {
       "name": "InitSystem",
-      "writeAccess": ["GameConfigComponent", "RecipeComponent", "ItemPrototypeComponent"],
+      "writeAccess": ["GameConfigComponent", "RecipeComponent", "ItemPrototypeComponent", "OccurrenceComponent"],
       "initialize": "new bytes(0)"
     }
   ]

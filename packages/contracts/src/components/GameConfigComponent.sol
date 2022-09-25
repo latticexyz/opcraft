@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0;
 import "solecs/Component.sol";
 
-uint256 constant ID = uint256(keccak256("ember.component.gameConfig"));
+uint256 constant ID = uint256(keccak256("component.GameConfig"));
 
 struct GameConfig {
   bool creativeMode;

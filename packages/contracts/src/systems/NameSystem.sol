@@ -8,7 +8,7 @@ import { getAddressById, addressToEntity } from "solecs/utils.sol";
 
 import { NameComponent, ID as NameComponentID } from "../components/NameComponent.sol";
 
-uint256 constant ID = uint256(keccak256("ember.system.name"));
+uint256 constant ID = uint256(keccak256("system.Name"));
 
 contract NameSystem is System {
   constructor(IWorld _world, address _components) System(_world, _components) {}
