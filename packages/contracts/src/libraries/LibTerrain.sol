@@ -491,7 +491,7 @@ library LibTerrain {
     int32 height,
     uint8 biome
   ) internal pure returns (uint256) {
-    if (y < height || y < 2) return 0;
+    if (y < height || y < 0) return 0;
 
     if (biome == uint8(Biome.Mountains) || biome == uint8(Biome.Desert)) return 0;
 

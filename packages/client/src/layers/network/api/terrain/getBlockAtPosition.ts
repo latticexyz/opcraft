@@ -337,7 +337,7 @@ function Structure(state: TerrainState) {
     height,
   } = state;
 
-  if (y < height || y < 2) return;
+  if (y < height || y < 0) return;
 
   const biome = accessState(state, "biome");
   if ([Biome.Mountains, Biome.Desert].includes(biome)) return;
