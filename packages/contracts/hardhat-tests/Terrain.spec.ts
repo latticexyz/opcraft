@@ -12,17 +12,13 @@ import {
   mountains,
   valleys,
 } from "../../client/src/layers/network/api/terrain/getHeight";
-import {
-  getBiomeHash,
-  getChunkHash,
-  getCoordHash,
-  getTerrain,
-  getTerrainBlock,
-} from "../../client/src/layers/network/api/terrain/getBlockAtPosition";
+import { getTerrainBlock } from "../../client/src/layers/network/api/terrain/getBlockAtPosition";
 import { createPerlin } from "@latticexyz/noise";
 import { BlockIdToKey, BlockType } from "../../client/src/layers/network/constants";
 import { EntityID } from "@latticexyz/recs";
 import { Biome } from "../../client/src/layers/network/api/terrain/constants";
+import { getTerrain } from "../../client/src/layers/network/api";
+import { getCoordHash, getChunkHash, getBiomeHash } from "../../client/src/layers/network/api/terrain/utils";
 
 const ethers = (hardhat as any).ethers;
 
