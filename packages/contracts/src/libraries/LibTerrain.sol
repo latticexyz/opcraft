@@ -355,7 +355,7 @@ library LibTerrain {
   // Block occurrence functions
   //////////////////////////////////////////////////////////////////////////////////////
 
-  function Air(VoxelCoord memory coord) public pure returns (uint256) {
+  function Air(VoxelCoord memory coord) internal pure returns (uint256) {
     int128[4] memory biomeValues = getBiome(coord.x, coord.z);
     int32 height = getHeight(coord.x, coord.z, biomeValues);
     return Air(coord.y, height);
@@ -365,7 +365,7 @@ library LibTerrain {
     if (y >= height + 2 * STRUCTURE_CHUNK) return AirID;
   }
 
-  function Water(VoxelCoord memory coord) public pure returns (uint256) {
+  function Water(VoxelCoord memory coord) internal pure returns (uint256) {
     int128[4] memory biomeValues = getBiome(coord.x, coord.z);
     int32 height = getHeight(coord.x, coord.z, biomeValues);
     return Water(coord.y, height);
@@ -375,7 +375,7 @@ library LibTerrain {
     if (y < 0 && y >= height) return WaterID;
   }
 
-  function Bedrock(VoxelCoord memory coord) public pure returns (uint256) {
+  function Bedrock(VoxelCoord memory coord) internal pure returns (uint256) {
     return Bedrock(coord.y);
   }
 
@@ -383,7 +383,7 @@ library LibTerrain {
     if (y < -255) return BedrockID;
   }
 
-  function Sand(VoxelCoord memory coord) public pure returns (uint256) {
+  function Sand(VoxelCoord memory coord) internal pure returns (uint256) {
     int128[4] memory biomeValues = getBiome(coord.x, coord.z);
     int32 height = getHeight(coord.x, coord.z, biomeValues);
     uint8 biome = getMaxBiome(biomeValues);
@@ -406,7 +406,7 @@ library LibTerrain {
     if (biome == uint8(Biome.Forest) && distanceFromHeight <= 2) return SandID;
   }
 
-  function Diamond(VoxelCoord memory coord) public pure returns (uint256) {
+  function Diamond(VoxelCoord memory coord) internal pure returns (uint256) {
     int128[4] memory biomeValues = getBiome(coord.x, coord.z);
     int32 height = getHeight(coord.x, coord.z, biomeValues);
     uint8 biome = getMaxBiome(biomeValues);
@@ -432,7 +432,7 @@ library LibTerrain {
     if (hash <= 5) return DiamondID;
   }
 
-  function Snow(VoxelCoord memory coord) public pure returns (uint256) {
+  function Snow(VoxelCoord memory coord) internal pure returns (uint256) {
     int128[4] memory biomeValues = getBiome(coord.x, coord.z);
     int32 height = getHeight(coord.x, coord.z, biomeValues);
     return Snow(coord.y, height, biomeValues[uint8(Biome.Mountains)]);
@@ -447,7 +447,7 @@ library LibTerrain {
     if ((y > 55 || mountainBiome > _0_6) && y == height - 1) return SnowID;
   }
 
-  function Stone(VoxelCoord memory coord) public pure returns (uint256) {
+  function Stone(VoxelCoord memory coord) internal pure returns (uint256) {
     int128[4] memory biomeValues = getBiome(coord.x, coord.z);
     int32 height = getHeight(coord.x, coord.z, biomeValues);
     uint8 biome = getMaxBiome(biomeValues);
@@ -467,7 +467,7 @@ library LibTerrain {
     return StoneID;
   }
 
-  function Clay(VoxelCoord memory coord) public pure returns (uint256) {
+  function Clay(VoxelCoord memory coord) internal pure returns (uint256) {
     int128[4] memory biomeValues = getBiome(coord.x, coord.z);
     int32 height = getHeight(coord.x, coord.z, biomeValues);
     uint8 biome = getMaxBiome(biomeValues);
@@ -484,7 +484,7 @@ library LibTerrain {
     if (biome == uint8(Biome.Savanna) && y < 2 && distanceFromHeight <= 6) return ClayID;
   }
 
-  function Grass(VoxelCoord memory coord) public pure returns (uint256) {
+  function Grass(VoxelCoord memory coord) internal pure returns (uint256) {
     int128[4] memory biomeValues = getBiome(coord.x, coord.z);
     int32 height = getHeight(coord.x, coord.z, biomeValues);
     uint8 biome = getMaxBiome(biomeValues);
@@ -503,7 +503,7 @@ library LibTerrain {
     if (biome == uint8(Biome.Mountains) && y < 40 && y == height - 1) return GrassID;
   }
 
-  function Dirt(VoxelCoord memory coord) public pure returns (uint256) {
+  function Dirt(VoxelCoord memory coord) internal pure returns (uint256) {
     int128[4] memory biomeValues = getBiome(coord.x, coord.z);
     int32 height = getHeight(coord.x, coord.z, biomeValues);
     uint8 biome = getMaxBiome(biomeValues);
@@ -519,7 +519,7 @@ library LibTerrain {
     if (biome == uint8(Biome.Savanna) || biome == uint8(Biome.Forest)) return DirtID;
   }
 
-  function SmallPlant(VoxelCoord memory coord) public pure returns (uint256) {
+  function SmallPlant(VoxelCoord memory coord) internal pure returns (uint256) {
     int128[4] memory biomeValues = getBiome(coord.x, coord.z);
     int32 height = getHeight(coord.x, coord.z, biomeValues);
     uint8 biome = getMaxBiome(biomeValues);
@@ -566,7 +566,7 @@ library LibTerrain {
     }
   }
 
-  function Structure(VoxelCoord memory coord) public pure returns (uint256) {
+  function Structure(VoxelCoord memory coord) internal pure returns (uint256) {
     int128[4] memory biomeValues = getBiome(coord.x, coord.z);
     int32 height = getHeight(coord.x, coord.z, biomeValues);
     uint8 biome = getMaxBiome(biomeValues);
