@@ -4,6 +4,6 @@ import { defineStringComponent } from "@latticexyz/std-client";
 export function defineNameComponent(world: World) {
   return defineStringComponent(world, {
     id: "Name",
-    metadata: { contractId: "ember.component.name" },
+    metadata: { contractId: "component.Name" },
   });
 }

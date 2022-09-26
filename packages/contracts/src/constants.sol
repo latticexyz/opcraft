@@ -11,6 +11,7 @@ enum Biome {
 
 uint256 constant GodID = 0x60D;
 
-// Recipes
-uint256 constant PlanksRecipeID = uint256(keccak256("ember.recipe.planks"));
-uint256 constant CraftingRecipeID = uint256(keccak256("ember.recipe.crafting"));
+int32 constant STRUCTURE_CHUNK = 5;
+int32 constant STRUCTURE_CHUNK_CENTER = STRUCTURE_CHUNK / 2 + 1;
+
+int32 constant CHUNK = 16;

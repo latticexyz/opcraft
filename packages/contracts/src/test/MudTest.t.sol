@@ -33,7 +33,7 @@ contract MudTest is DSTest {
     return getAddressById(systems, id);
   }
 
-  function setUp() public {
+  function setUp() public virtual {
     world = deploy.deploy(address(0), address(0), false);
     components = world.components();
     systems = world.systems();

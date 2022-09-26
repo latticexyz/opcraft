@@ -4,6 +4,6 @@ import { defineVoxelCoordComponent } from "@latticexyz/std-client";
 export function definePositionComponent(world: World) {
   return defineVoxelCoordComponent(world, {
     id: "Position",
-    metadata: { contractId: "ember.component.position" },
+    metadata: { contractId: "component.Position" },
   });
 }

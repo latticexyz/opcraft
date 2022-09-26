@@ -6,7 +6,7 @@ export function defineGameConfigComponent(world: World) {
     { creativeMode: Type.Boolean },
     {
       id: "GameConfig",
-      metadata: { contractId: "ember.component.gameConfig" },
+      metadata: { contractId: "component.GameConfig" },
     }
   );
 }
