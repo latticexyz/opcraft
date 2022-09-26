@@ -1409,14 +1409,14 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
-"@latticexyz/cli@0.16.1":
-  version "0.16.1"
-  resolved "https://registry.yarnpkg.com/@latticexyz/cli/-/cli-0.16.1.tgz#80a6916a4cfba90721e07305a998e1e9baaa3d16"
-  integrity sha512-9CHBgdV7tAEaPBe2gePSlYZrkSRFoi5Yh1OsFP6XJAGw5Y/Enru5QdrBpwdFFgg/dB8erdm9lf/lzGt1gHGboA==
+"@latticexyz/cli@0.16.2":
+  version "0.16.2"
+  resolved "https://registry.yarnpkg.com/@latticexyz/cli/-/cli-0.16.2.tgz#af360b7785f8d7a0e9cb8f95d615ef01cae29cbe"
+  integrity sha512-zffKsz5QNes2Mk3rklgfVsPJkHwUFa1HItCPS+bbxQ597Em8r+H3DIGOlYFO3jtoLR4rMtq0lvVe+utnG63Ynw==
   dependencies:
-    "@latticexyz/solecs" "^0.16.1"
-    "@latticexyz/std-contracts" "^0.16.1"
-    "@latticexyz/utils" "^0.16.1"
+    "@latticexyz/solecs" "^0.16.2"
+    "@latticexyz/std-contracts" "^0.16.2"
+    "@latticexyz/utils" "^0.16.2"
     chalk "^5.0.1"
     clear "^0.1.0"
     commander "^9.2.0"
@@ -1439,61 +1439,61 @@
     uuid "^8.3.2"
     yargs "^17.5.1"
 
-"@latticexyz/ecs-browser@0.16.1":
-  version "0.16.1"
-  resolved "https://registry.yarnpkg.com/@latticexyz/ecs-browser/-/ecs-browser-0.16.1.tgz#bb8848b2f97bf1be734a84039e30f972148745ec"
-  integrity sha512-PxtBIR+jdV7OLUkuZ9KK7vcfjE25Q8JA9gNG8t+1hEwfITpJanTmXFIgxh754eRKcMg3UwFXEMT0qE2LJtKeXg==
+"@latticexyz/ecs-browser@0.16.2":
+  version "0.16.2"
+  resolved "https://registry.yarnpkg.com/@latticexyz/ecs-browser/-/ecs-browser-0.16.2.tgz#52a30694a01204f35fb583889af12939a6220f61"
+  integrity sha512-cfwxGdg2Az27zdgZQI9I+pepe7JUdbd/VdJkQ4z4uj9sda6MyeUQ8DXwN0EEWbQePK0G2jHWIEKhIGWrpqX8dQ==
 
-"@latticexyz/network@0.16.1":
-  version "0.16.1"
-  resolved "https://registry.yarnpkg.com/@latticexyz/network/-/network-0.16.1.tgz#5a6ac29cf7d500bd54ca2b949c70784590909450"
-  integrity sha512-8QdOooNnhMA0jHxU7TS8CluaFmn8zhF3ClSVwjvtToQfJ5edQvQoRozQuJes1sQ9hyQYTST/xApFj1FITKkzTA==
+"@latticexyz/network@0.16.2":
+  version "0.16.2"
+  resolved "https://registry.yarnpkg.com/@latticexyz/network/-/network-0.16.2.tgz#6e67b5554a5e01d6de615ba354d11f951a6f9ec6"
+  integrity sha512-wrVmXQLXVk+ApsSbj0MiHGdATwKZ8+OP/4XmQU8bQ5MPSfOw8llI7ubrHydGFqPNm/uIlWeKSxhA+q5p9YJG6Q==
 
-"@latticexyz/noise@0.16.1":
-  version "0.16.1"
-  resolved "https://registry.yarnpkg.com/@latticexyz/noise/-/noise-0.16.1.tgz#38648ed273eec80f56e400e8adb1433304d97cda"
-  integrity sha512-TatGcGgTcXNOUmL/35wqYw6JNx5FpKO+C6D/UbGq4eTTrUFpYSV6ylzQKurYgdPlxVX4+/UcdkjaxVq9w1jK6w==
+"@latticexyz/noise@0.16.2":
+  version "0.16.2"
+  resolved "https://registry.yarnpkg.com/@latticexyz/noise/-/noise-0.16.2.tgz#a73f8384a2cf27227f75ac1c4ba3a8b666845fda"
+  integrity sha512-3migUX8hlaBXt6/Lp6q9pv7rvshZwqbECNAv0CuYo42KXqKGEHwFWUUzW+uOoqhpWsj0sdcBGzv4O0BQEk55QA==
   dependencies:
     "@types/big-integer" "^0.0.31"
 
-"@latticexyz/phaserx@0.16.1":
-  version "0.16.1"
-  resolved "https://registry.yarnpkg.com/@latticexyz/phaserx/-/phaserx-0.16.1.tgz#de48f193e671aa8b8927775ba768e95b2c78f32b"
-  integrity sha512-3WcNIfGhV21NRj/S6ZYMmgL/urrDhvsBo8Gq6L4a/p0uVF2QQEw+vesQL5i1Iq6NdMoXgcQ1FmDIMarBMXvpZw==
+"@latticexyz/phaserx@0.16.2":
+  version "0.16.2"
+  resolved "https://registry.yarnpkg.com/@latticexyz/phaserx/-/phaserx-0.16.2.tgz#eca5b8b8064454c490902cf4ccd9afbb86b03c05"
+  integrity sha512-UBP0o5U5wAd0g9nT02H27TLvsMS967obb1DPwt9or3aaRu3VgkTNRUr67jToLnijsZTcNOUQEVJG+B86ti4n3Q==
   dependencies:
     "@use-gesture/vanilla" "10.2.9"
 
-"@latticexyz/recs@0.16.1":
-  version "0.16.1"
-  resolved "https://registry.yarnpkg.com/@latticexyz/recs/-/recs-0.16.1.tgz#82e346f920d225005b797eaaa27e7a8384ef910f"
-  integrity sha512-x2lDbSSgP76mx1sGxecnJkJcA7jQ1Nj7/VV8WYeSC1Fvr0jb6Frnt3LaBgmC8YQFI8j/Y83XbQ729Y258YZzHw==
+"@latticexyz/recs@0.16.2":
+  version "0.16.2"
+  resolved "https://registry.yarnpkg.com/@latticexyz/recs/-/recs-0.16.2.tgz#d7a7c6407bb309dbe4bcaf6b7b0f7775cefa2578"
+  integrity sha512-j4+OUl/Y/puVFHVTjteiu/Rh8Oc93MdklxTppMJYUu4uNlD5RVXzSLg8mTojCHv0XBDpWtzrB79E+WXfm5RFiw==
   dependencies:
     react-syntax-highlighter "^15.5.0"
 
-"@latticexyz/services@0.16.1":
-  version "0.16.1"
-  resolved "https://registry.yarnpkg.com/@latticexyz/services/-/services-0.16.1.tgz#b11fc2dce76d6a2236994380b76f54bfd6a447cb"
-  integrity sha512-dKqOiLPIi7drmKI9bDATi3E6Y5aC5UQ3+rbaaLFsmVf2Y64EqH3rqjzzcaS5n9gQ5Lbnp6EeZNkZMdH722ZJwg==
+"@latticexyz/services@0.16.2":
+  version "0.16.2"
+  resolved "https://registry.yarnpkg.com/@latticexyz/services/-/services-0.16.2.tgz#4be84e79361f59479254ece316bdd691f5a68ca0"
+  integrity sha512-K4EnHQ7Gxb3HyYuHjvA0/iKYEUv8RamZSE4MTDnSklJIP93Uc2xb80GOec13RuxzdFWuiBbZ5fr+e4rw285Zkw==
 
-"@latticexyz/solecs@0.16.1", "@latticexyz/solecs@^0.16.1":
-  version "0.16.1"
-  resolved "https://registry.yarnpkg.com/@latticexyz/solecs/-/solecs-0.16.1.tgz#951e97b726ec54ad1cda37f9b07719da08f83811"
-  integrity sha512-87ZZQg/hP+ZAmAZCwN6r4B3dNGe4QmvxhWLxq3+sqiRc3KbOHdDGQ42pryXzI9Gmfy9rkCnFYWxkFH+YPIMQ0Q==
+"@latticexyz/solecs@0.16.2", "@latticexyz/solecs@^0.16.2":
+  version "0.16.2"
+  resolved "https://registry.yarnpkg.com/@latticexyz/solecs/-/solecs-0.16.2.tgz#f0d0577f5297472829cd583aee05f637844c0d7a"
+  integrity sha512-x8fCaHNI3mlz6uERD3KNB+lDDB70sizBlko2CDBNLwiqsn6G2iQDImYgwgJQfOzKH+BftK8+9N3taQjZ6HK2Eg==
 
-"@latticexyz/std-client@0.16.1":
-  version "0.16.1"
-  resolved "https://registry.yarnpkg.com/@latticexyz/std-client/-/std-client-0.16.1.tgz#6a901c56a82c27a7255f8210717c911ed8b4285d"
-  integrity sha512-cWQIDBfV4OPunQSWhAZpj+mHSB5SB7gvS7iXFDSFEbPgPY3Wog8BEfAlrwjGKacyIid0KDLqO4BBxLKWLcRzrg==
+"@latticexyz/std-client@0.16.2":
+  version "0.16.2"
+  resolved "https://registry.yarnpkg.com/@latticexyz/std-client/-/std-client-0.16.2.tgz#aeeeb44459afbd8a4a75be3da88f526d965e6641"
+  integrity sha512-YtFxDqggd+FQiGXNDq0xMaJs0L69JZ67JQcCWqAqznL/U9B9qVy7mxtYb7cBfjWDEsBsPFAyiaFhH+GiRq/oog==
 
-"@latticexyz/std-contracts@0.16.1", "@latticexyz/std-contracts@^0.16.1":
-  version "0.16.1"
-  resolved "https://registry.yarnpkg.com/@latticexyz/std-contracts/-/std-contracts-0.16.1.tgz#38e49c4d8d7049fa9cbbb027fe0d7e6c3aa934c7"
-  integrity sha512-/yxOAs6w1Y0ilBg6pF0JbQi78ehI/p/2NVmLZIdDg5Ydljp9Xm6b5vazJdBZfD8LJUlqI6PdbxnsHyLEAUNr7Q==
+"@latticexyz/std-contracts@0.16.2", "@latticexyz/std-contracts@^0.16.2":
+  version "0.16.2"
+  resolved "https://registry.yarnpkg.com/@latticexyz/std-contracts/-/std-contracts-0.16.2.tgz#0edc6174146a654ff037e0db46c3d9cd13bfe853"
+  integrity sha512-+7aTYAVdMOgxq2v8YsuGaGdZmpiX53iCtKwDsu6cYdpy/NCMG1DPLJ+yEIEMFWS1keyscyeEyBLNs+o7od4VZg==
 
-"@latticexyz/utils@0.16.1", "@latticexyz/utils@^0.16.1":
-  version "0.16.1"
-  resolved "https://registry.yarnpkg.com/@latticexyz/utils/-/utils-0.16.1.tgz#ffee2ba7789bed7da6752e703c90ce44f5f18310"
-  integrity sha512-hwdByCDIilpwV5RcSGME/PBYv22FyAke6UfTJY/B9Xx07bbiALzrmlb4L3KCej3UDT38ZVbUtiSCB3IBKzh2dA==
+"@latticexyz/utils@0.16.2", "@latticexyz/utils@^0.16.2":
+  version "0.16.2"
+  resolved "https://registry.yarnpkg.com/@latticexyz/utils/-/utils-0.16.2.tgz#650798f174772cab219453c78ab36a32c88de9eb"
+  integrity sha512-sp2Fr1FPgkM1sk7P75uc2lauTnmECqVKadDE8qxwNTxSQifmKQgeHv70tzb7m9SQyI1zfeQGPByv9TrLX6eTZQ==
 
 "@lerna/add@4.0.0":
   version "4.0.0"
@@ -7480,9 +7480,9 @@ dpdm@^3.9.0:
     typescript "^4.7.4"
     yargs "^17.5.1"
 
-"ds-test@git+https://github.com/dapphub/ds-test.git#9310e879db8ba3ea6d5c6489a579118fd264a3f5":
+"ds-test@https://github.com/dapphub/ds-test.git#9310e879db8ba3ea6d5c6489a579118fd264a3f5":
   version "0.0.0"
-  resolved "git+https://github.com/dapphub/ds-test.git#9310e879db8ba3ea6d5c6489a579118fd264a3f5"
+  resolved "https://github.com/dapphub/ds-test.git#9310e879db8ba3ea6d5c6489a579118fd264a3f5"
 
 "ds-test@https://github.com/dapphub/ds-test.git#c7a36fb236f298e04edf28e2fee385b80f53945f":
   version "0.0.0"
@@ -8924,13 +8924,13 @@ forever-agent@~0.6.1:
   resolved "https://registry.yarnpkg.com/forever-agent/-/forever-agent-0.6.1.tgz#fbc71f0c41adeb37f96c577ad1ed42d8fdacca91"
   integrity sha512-j0KLYPhm6zeac4lz3oJ3o65qvgQCcPubiyotZrXqEaG4hNagNYO8qdlUrX5vwqv9ohqeT/Z3j6+yW067yWWdUw==
 
-"forge-std@git+https://github.com/foundry-rs/forge-std.git#6b4ca42943f093642bac31783b08aa52a5a6ff64":
-  version "0.0.0"
-  resolved "git+https://github.com/foundry-rs/forge-std.git#6b4ca42943f093642bac31783b08aa52a5a6ff64"
-
 "forge-std@https://github.com/foundry-rs/forge-std.git#4d36e3f7e2168c8155c641eb0f80e85cd584bd1c":
   version "0.0.0"
   resolved "https://github.com/foundry-rs/forge-std.git#4d36e3f7e2168c8155c641eb0f80e85cd584bd1c"
+
+"forge-std@https://github.com/foundry-rs/forge-std.git#6b4ca42943f093642bac31783b08aa52a5a6ff64":
+  version "0.0.0"
+  resolved "https://github.com/foundry-rs/forge-std.git#6b4ca42943f093642bac31783b08aa52a5a6ff64"
 
 form-data@^3.0.0:
   version "3.0.1"
@@ -16034,9 +16034,9 @@ solidity-comments-extractor@^0.0.7:
   resolved "https://registry.yarnpkg.com/solidity-comments-extractor/-/solidity-comments-extractor-0.0.7.tgz#99d8f1361438f84019795d928b931f4e5c39ca19"
   integrity sha512-wciNMLg/Irp8OKGrh3S2tfvZiZ0NEyILfcRCXCD4mp7SgK/i9gzLfhY2hY7VMCQJ3kH9UB9BzNdibIVMchzyYw==
 
-"solmate@git+https://github.com/Rari-Capital/solmate.git#9cf1428245074e39090dceacb0c28b1f684f584c":
+"solmate@https://github.com/Rari-Capital/solmate.git#9cf1428245074e39090dceacb0c28b1f684f584c":
   version "6.5.0"
-  resolved "git+https://github.com/Rari-Capital/solmate.git#9cf1428245074e39090dceacb0c28b1f684f584c"
+  resolved "https://github.com/Rari-Capital/solmate.git#9cf1428245074e39090dceacb0c28b1f684f584c"
 
 sort-keys-length@^1.0.0:
   version "1.0.1"
