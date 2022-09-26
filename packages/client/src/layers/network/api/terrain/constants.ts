@@ -14,3 +14,6 @@ export const BiomeVectors: { [key in Biome]: [number, number] } = {
   [Biome.Forest]: [1, 0],
   [Biome.Savanna]: [1, 1],
 };
+
+export const STRUCTURE_CHUNK = 5;
+export const STRUCTURE_CHUNK_CENTER = Math.floor(STRUCTURE_CHUNK / 2) + 1;

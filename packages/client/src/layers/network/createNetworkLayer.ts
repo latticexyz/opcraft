@@ -15,10 +15,9 @@ import {
   defineOccurrenceComponent,
 } from "./components";
 import { defineNameComponent } from "./components/NameComponent";
-import { getBlockAtPosition as getBlockAtPositionApi } from "./api";
+import { getBlockAtPosition as getBlockAtPositionApi, getECSBlock, getTerrain, getTerrainBlock } from "./api";
 import { createPerlin } from "@latticexyz/noise";
-import { getECSBlock, getTerrain, getTerrainBlock } from "./api/terrain/getBlockAtPosition";
-import { BlockIdToKey, BlockType } from "./constants";
+import { BlockType } from "./constants";
 import { GodID } from "@latticexyz/network";
 
 /**
@@ -102,9 +101,7 @@ export async function createNetworkLayer(config: GameConfig) {
   async function mine(coord: VoxelCoord) {
     const ecsBlock = getECSBlockAtPosition(coord);
     const blockType = ecsBlock ?? getTerrainBlockAtPosition(coord);
-    console.log("Block at coord", coord, BlockIdToKey[blockType]);
 
-    console.log("entity/blocktype", blockType);
     if (blockType == null) throw new Error("entity has no block type");
 
     const airEntity = world.registerEntity();
@@ -149,10 +146,6 @@ export async function createNetworkLayer(config: GameConfig) {
     });
 
     return promise;
-  }
-
-  function name(name: string) {
-    systems["ember.system.name"].executeTyped(name);
   }
 
   // --- CONTEXT --------------------------------------------------------------------

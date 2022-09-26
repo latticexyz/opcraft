@@ -1,9 +1,7 @@
 import { VoxelCoord } from "@latticexyz/utils";
 import { BlockType } from "../../constants";
 import { Structure } from "../../types";
-
-export const STRUCTURE_CHUNK = 5;
-export const STRUCTURE_CHUNK_CENTER = Math.floor(STRUCTURE_CHUNK / 2) + 1;
+import { STRUCTURE_CHUNK } from "./constants";
 
 function getEmptyStructure(): Structure {
   return [
