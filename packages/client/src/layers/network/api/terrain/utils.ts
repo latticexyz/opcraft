@@ -4,7 +4,7 @@ import { BigNumber } from "ethers";
 import { Biome, STRUCTURE_CHUNK, STRUCTURE_CHUNK_CENTER } from "./constants";
 import { getBiome } from "./getBiome";
 import { getHeight } from "./getHeight";
-import { TerrainState } from "./types";
+import { Terrain, TerrainState } from "./types";
 
 const hashCache = new CoordMap<number>();
 
@@ -13,7 +13,6 @@ export function getCoordHash(x: number, y = 0) {
   const cacheHash = hashCache.get(coord);
   if (cacheHash != null) return cacheHash;
 
-  // TODO: make this faster by using keccak-wasm
   const hash = BigNumber.from(keccak256Coord(coord)).mod(1024).toNumber();
 
   hashCache.set(coord, hash);

@@ -15,7 +15,6 @@ import { AirID, WaterID } from "../prototypes/Blocks.sol";
 
 uint256 constant ID = uint256(keccak256("system.Mine"));
 
-// TODO: Min/Max chunk height
 contract MineSystem is System {
   constructor(IWorld _world, address _components) System(_world, _components) {}
 
@@ -23,7 +22,7 @@ contract MineSystem is System {
     (VoxelCoord memory coord, uint256 blockType) = abi.decode(arguments, (VoxelCoord, uint256));
     require(blockType != AirID, "can not mine air");
     require(blockType != WaterID, "can not mine water");
-    require(coord.y < 256 && coord.y > -256, "out of chunk bounds");
+    require(coord.y < 256 && coord.y >= -256, "out of chunk bounds");
 
     // Initialize components
     PositionComponent positionComponent = PositionComponent(getAddressById(components, PositionComponentID));

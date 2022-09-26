@@ -6,7 +6,7 @@ import { MineSystem, ID as MineSystemID } from "../../systems/MineSystem.sol";
 import { ItemComponent, ID as ItemComponentID } from "../../components/ItemComponent.sol";
 import { OwnedByComponent, ID as OwnedByComponentID } from "../../components/OwnedByComponent.sol";
 import { PositionComponent, ID as PositionComponentID, VoxelCoord } from "../../components/PositionComponent.sol";
-import { SandID, DiamondID, AirID, StoneID, WaterID } from "../../prototypes/Blocks.sol";
+import { SandID, DiamondID, AirID, StoneID, WaterID, BedrockID } from "../../prototypes/Blocks.sol";
 import { addressToEntity } from "solecs/utils.sol";
 
 contract MineSystemTest is MudTest {
@@ -127,8 +127,8 @@ contract MineSystemTest is MudTest {
   function testFailOutOfBounds() public {
     vm.startPrank(alice);
     MineSystem mineSystem = MineSystem(system(MineSystemID));
-    VoxelCoord memory coord = VoxelCoord({ x: -1598, y: -256, z: 4650 });
-    uint256 minedEntity = mineSystem.executeTyped(coord, StoneID);
+    VoxelCoord memory coord = VoxelCoord({ x: -1598, y: -257, z: 4650 });
+    uint256 minedEntity = mineSystem.executeTyped(coord, BedrockID);
     vm.stopPrank();
   }
 

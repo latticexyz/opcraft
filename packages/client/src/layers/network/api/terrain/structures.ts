@@ -13,7 +13,7 @@ function getEmptyStructure(): Structure {
   ];
 }
 
-function getTree(): Structure {
+function defineTree(): Structure {
   const s = getEmptyStructure();
 
   // Trunk
@@ -40,7 +40,7 @@ function getTree(): Structure {
   return s;
 }
 
-function getWoolTree(): Structure {
+function defineWoolTree(): Structure {
   const s = getEmptyStructure();
 
   // Trunk
@@ -71,10 +71,9 @@ function getWoolTree(): Structure {
   return s;
 }
 
-export const Tree = getTree();
-export const WoolTree = getWoolTree();
+export const Tree = defineTree();
+export const WoolTree = defineWoolTree();
 
-// Structure models
 export function getStructureBlock(structure: Structure, { x, y, z }: VoxelCoord) {
   if (x < 0 || y < 0 || z < 0 || x >= STRUCTURE_CHUNK || y >= STRUCTURE_CHUNK || z >= STRUCTURE_CHUNK) return undefined;
   return structure[x][y][z];
