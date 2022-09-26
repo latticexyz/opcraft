@@ -32,7 +32,6 @@ export function createP2PSystem(network: NetworkLayer, context: NoaLayer) {
 
   function onMessage(message: any) {
     const [entity, x, y, z, dx, dy, dz] = message.data;
-    console.log("Setting player position for", entity, { x, y, z });
 
     if (entity !== playerEntity) {
       setComponent(PlayerPosition, entity, { x, y, z });

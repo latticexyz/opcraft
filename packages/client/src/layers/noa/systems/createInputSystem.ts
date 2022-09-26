@@ -1,6 +1,8 @@
 import { getComponentValue, HasValue, runQuery, setComponent } from "@latticexyz/recs";
 import { NetworkLayer, BlockType } from "../../network";
 import { INDEX_TO_BLOCK } from "../../react/components/ActionBar";
+import { HandComponent, HAND_COMPONENT } from "../engine/components/handComponent";
+import { MiningBlockComponent, MINING_BLOCK_COMPONENT } from "../engine/components/miningBlockComponent";
 import { NoaLayer } from "../types";
 
 export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
@@ -24,7 +26,48 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
   noa.inputs.down.on("fire", function () {
     if (noa.targetedBlock) {
       const pos = noa.targetedBlock.position;
-      mine({ x: pos[0], y: pos[1], z: pos[2] });
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      //@ts-ignore
+      const miningComponent: MiningBlockComponent = noa.entities.getState(noa.playerEntity, MINING_BLOCK_COMPONENT);
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      //@ts-ignore
+      const handComponent: HandComponent = noa.entities.getState(noa.playerEntity, HAND_COMPONENT);
+      if (miningComponent.active) {
+        return;
+      }
+      miningComponent.active = true;
+      handComponent.isMining = true;
+      miningComponent.block = { x: pos[0], y: pos[1], z: pos[2] };
+    }
+  });
+
+  noa.inputs.up.on("fire", function () {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    //@ts-ignore
+    const miningComponent: MiningBlockComponent = noa.entities.getState(noa.playerEntity, MINING_BLOCK_COMPONENT);
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    //@ts-ignore
+    const handComponent: HandComponent = noa.entities.getState(noa.playerEntity, HAND_COMPONENT);
+    miningComponent.active = false;
+    handComponent.isMining = false;
+  });
+
+  noa.on("targetBlockChanged", (targetedBlock: { position: number[] }) => {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    //@ts-ignore
+    const miningComponent: MiningBlockComponent = noa.entities.getState(noa.playerEntity, MINING_BLOCK_COMPONENT);
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    //@ts-ignore
+    const handComponent: HandComponent = noa.entities.getState(noa.playerEntity, HAND_COMPONENT);
+    if (!targetedBlock) {
+      return;
+    }
+    const {
+      position: [x, y, z],
+    } = targetedBlock;
+    if (miningComponent.block.x !== x || miningComponent.block.y !== y || miningComponent.block.z !== z) {
+      miningComponent.active = false;
+      handComponent.isMining = false;
     }
   });
 
