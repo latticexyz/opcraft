@@ -6,7 +6,6 @@ import { getAddressById } from "solecs/utils.sol";
 import { ItemPrototypeComponent, ID as ItemPrototypeComponentID } from "../components/ItemPrototypeComponent.sol";
 import { OccurrenceComponent, ID as OccurrenceComponentID, FunctionSelector } from "../components/OccurrenceComponent.sol";
 import { OccurrenceSystem, ID as OccurrenceSystemID } from "../systems/OccurrenceSystem.sol";
-import { console } from "forge-std/console.sol";
 
 uint256 constant AirID = uint256(keccak256("block.Air"));
 uint256 constant GrassID = uint256(keccak256("block.Grass"));
@@ -44,138 +43,138 @@ uint256 constant ClayID = uint256(keccak256("block.Clay"));
 uint256 constant BedrockID = uint256(keccak256("block.Bedrock"));
 
 function defineBlocks(
-  ItemPrototypeComponent itemPrototype,
+  ItemPrototypeComponent itemPrototypeComponent,
   OccurrenceComponent occurrenceComponent,
   OccurrenceSystem occurrenceSystem
 ) {
-  itemPrototype.set(GrassID);
+  itemPrototypeComponent.set(GrassID);
   occurrenceComponent.set(GrassID, FunctionSelector(address(occurrenceSystem), occurrenceSystem.Grass.selector));
 
-  itemPrototype.set(DirtID);
+  itemPrototypeComponent.set(DirtID);
   occurrenceComponent.set(DirtID, FunctionSelector(address(occurrenceSystem), occurrenceSystem.Dirt.selector));
 
-  itemPrototype.set(LogID);
+  itemPrototypeComponent.set(LogID);
   occurrenceComponent.set(LogID, FunctionSelector(address(occurrenceSystem), occurrenceSystem.Log.selector));
 
-  itemPrototype.set(StoneID);
+  itemPrototypeComponent.set(StoneID);
   occurrenceComponent.set(StoneID, FunctionSelector(address(occurrenceSystem), occurrenceSystem.Stone.selector));
 
-  itemPrototype.set(SandID);
+  itemPrototypeComponent.set(SandID);
   occurrenceComponent.set(SandID, FunctionSelector(address(occurrenceSystem), occurrenceSystem.Sand.selector));
 
-  itemPrototype.set(WaterID);
+  itemPrototypeComponent.set(WaterID);
   occurrenceComponent.set(WaterID, FunctionSelector(address(occurrenceSystem), occurrenceSystem.Water.selector));
 
-  itemPrototype.set(DiamondID);
+  itemPrototypeComponent.set(DiamondID);
   occurrenceComponent.set(DiamondID, FunctionSelector(address(occurrenceSystem), occurrenceSystem.Diamond.selector));
 
-  itemPrototype.set(LeavesID);
+  itemPrototypeComponent.set(LeavesID);
   occurrenceComponent.set(LeavesID, FunctionSelector(address(occurrenceSystem), occurrenceSystem.Leaves.selector));
 
-  itemPrototype.set(WoolID);
+  itemPrototypeComponent.set(WoolID);
   occurrenceComponent.set(WoolID, FunctionSelector(address(occurrenceSystem), occurrenceSystem.Wool.selector));
 
-  itemPrototype.set(SnowID);
+  itemPrototypeComponent.set(SnowID);
   occurrenceComponent.set(SnowID, FunctionSelector(address(occurrenceSystem), occurrenceSystem.Snow.selector));
 
-  itemPrototype.set(ClayID);
+  itemPrototypeComponent.set(ClayID);
   occurrenceComponent.set(ClayID, FunctionSelector(address(occurrenceSystem), occurrenceSystem.Clay.selector));
 
-  itemPrototype.set(BedrockID);
+  itemPrototypeComponent.set(BedrockID);
   occurrenceComponent.set(BedrockID, FunctionSelector(address(occurrenceSystem), occurrenceSystem.Bedrock.selector));
 
-  itemPrototype.set(RedFlowerID);
+  itemPrototypeComponent.set(RedFlowerID);
   occurrenceComponent.set(
     RedFlowerID,
     FunctionSelector(address(occurrenceSystem), occurrenceSystem.RedFlower.selector)
   );
 
-  itemPrototype.set(GrassPlantID);
+  itemPrototypeComponent.set(GrassPlantID);
   occurrenceComponent.set(
     GrassPlantID,
     FunctionSelector(address(occurrenceSystem), occurrenceSystem.GrassPlant.selector)
   );
 
-  itemPrototype.set(OrangeFlowerID);
+  itemPrototypeComponent.set(OrangeFlowerID);
   occurrenceComponent.set(
     OrangeFlowerID,
     FunctionSelector(address(occurrenceSystem), occurrenceSystem.OrangeFlower.selector)
   );
 
-  itemPrototype.set(MagentaFlowerID);
+  itemPrototypeComponent.set(MagentaFlowerID);
   occurrenceComponent.set(
     MagentaFlowerID,
     FunctionSelector(address(occurrenceSystem), occurrenceSystem.MagentaFlower.selector)
   );
 
-  itemPrototype.set(LightBlueFlowerID);
+  itemPrototypeComponent.set(LightBlueFlowerID);
   occurrenceComponent.set(
     LightBlueFlowerID,
     FunctionSelector(address(occurrenceSystem), occurrenceSystem.LightBlueFlower.selector)
   );
 
-  itemPrototype.set(LimeFlowerID);
+  itemPrototypeComponent.set(LimeFlowerID);
   occurrenceComponent.set(
     LimeFlowerID,
     FunctionSelector(address(occurrenceSystem), occurrenceSystem.LimeFlower.selector)
   );
 
-  itemPrototype.set(PinkFlowerID);
+  itemPrototypeComponent.set(PinkFlowerID);
   occurrenceComponent.set(
     PinkFlowerID,
     FunctionSelector(address(occurrenceSystem), occurrenceSystem.PinkFlower.selector)
   );
 
-  itemPrototype.set(GrayFlowerID);
+  itemPrototypeComponent.set(GrayFlowerID);
   occurrenceComponent.set(
     GrayFlowerID,
     FunctionSelector(address(occurrenceSystem), occurrenceSystem.GrayFlower.selector)
   );
 
-  itemPrototype.set(LightGrayFlowerID);
+  itemPrototypeComponent.set(LightGrayFlowerID);
   occurrenceComponent.set(
     LightGrayFlowerID,
     FunctionSelector(address(occurrenceSystem), occurrenceSystem.LightGrayFlower.selector)
   );
 
-  itemPrototype.set(CyanFlowerID);
+  itemPrototypeComponent.set(CyanFlowerID);
   occurrenceComponent.set(
     CyanFlowerID,
     FunctionSelector(address(occurrenceSystem), occurrenceSystem.CyanFlower.selector)
   );
 
-  itemPrototype.set(PurpleFlowerID);
+  itemPrototypeComponent.set(PurpleFlowerID);
   occurrenceComponent.set(
     PurpleFlowerID,
     FunctionSelector(address(occurrenceSystem), occurrenceSystem.PurpleFlower.selector)
   );
 
-  itemPrototype.set(BlueFlowerID);
+  itemPrototypeComponent.set(BlueFlowerID);
   occurrenceComponent.set(
     BlueFlowerID,
     FunctionSelector(address(occurrenceSystem), occurrenceSystem.BlueFlower.selector)
   );
 
-  itemPrototype.set(GreenFlowerID);
+  itemPrototypeComponent.set(GreenFlowerID);
   occurrenceComponent.set(
     GreenFlowerID,
     FunctionSelector(address(occurrenceSystem), occurrenceSystem.GreenFlower.selector)
   );
 
-  itemPrototype.set(BlackFlowerID);
+  itemPrototypeComponent.set(BlackFlowerID);
   occurrenceComponent.set(
     BlackFlowerID,
     FunctionSelector(address(occurrenceSystem), occurrenceSystem.BlackFlower.selector)
   );
 
-  itemPrototype.set(KelpID);
+  itemPrototypeComponent.set(KelpID);
   occurrenceComponent.set(KelpID, FunctionSelector(address(occurrenceSystem), occurrenceSystem.Kelp.selector));
 
-  itemPrototype.set(AirID);
-  itemPrototype.set(CobblestoneID);
-  itemPrototype.set(CoalID);
-  itemPrototype.set(CraftingID);
-  itemPrototype.set(IronID);
-  itemPrototype.set(GoldID);
-  itemPrototype.set(PlanksID);
+  itemPrototypeComponent.set(AirID);
+  itemPrototypeComponent.set(CobblestoneID);
+  itemPrototypeComponent.set(CoalID);
+  itemPrototypeComponent.set(CraftingID);
+  itemPrototypeComponent.set(IronID);
+  itemPrototypeComponent.set(GoldID);
+  itemPrototypeComponent.set(PlanksID);
 }

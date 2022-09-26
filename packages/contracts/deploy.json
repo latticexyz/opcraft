@@ -16,7 +16,7 @@
     { "name": "BulkSetStateSystem", "writeAccess": ["*"] },
     { "name": "MineSystem", "writeAccess": ["PositionComponent", "OwnedByComponent", "ItemComponent"] },
     { "name": "BuildSystem", "writeAccess": ["PositionComponent", "OwnedByComponent"] },
-    { "name": "CraftingSystem", "writeAccess": ["OwnedByComponent"] },
+    { "name": "CraftSystem", "writeAccess": ["OwnedByComponent", "ItemComponent"] },
     { "name": "NameSystem", "writeAccess": ["NameComponent"] },
     { "name": "OccurrenceSystem", "writeAccess": [] },
     { "name": "StakeSystem", "writeAccess": ["StakeComponent", "OwnedByComponent"] },
