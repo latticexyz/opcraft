@@ -1,8 +1,8 @@
-import { createIndexer, createWorld, EntityID, EntityIndex, getComponentValue } from "@latticexyz/recs";
+import { createIndexer, createWorld, EntityID, getComponentValue } from "@latticexyz/recs";
 import { setupContracts, setupDevSystems } from "./setup";
 import { createActionSystem } from "@latticexyz/std-client";
 import { GameConfig } from "./config";
-import { deferred, VoxelCoord } from "@latticexyz/utils";
+import { VoxelCoord } from "@latticexyz/utils";
 import { BigNumber } from "ethers";
 import {
   definePositionComponent,
@@ -32,15 +32,20 @@ export async function createNetworkLayer(config: GameConfig) {
 
   // --- COMPONENTS -----------------------------------------------------------------
   const components = {
-    Position: createIndexer(definePositionComponent(world)),
+    Position: definePositionComponent(world),
     ItemPrototype: defineItemPrototypeComponent(world),
     Item: defineItemComponent(world),
     Name: defineNameComponent(world),
-    OwnedBy: createIndexer(defineOwnedByComponent(world)),
+    OwnedBy: defineOwnedByComponent(world),
     GameConfig: defineGameConfigComponent(world),
     Recipe: defineRecipeComponent(world),
     LoadingState: defineLoadingStateComponent(world),
     Occurrence: defineOccurrenceComponent(world),
+  };
+
+  const indexers = {
+    Position: createIndexer(components.Position),
+    OwnedBy: createIndexer(components.OwnedBy),
   };
 
   // --- SETUP ----------------------------------------------------------------------
@@ -61,7 +66,7 @@ export async function createNetworkLayer(config: GameConfig) {
   const perlin = await createPerlin();
   const { withOptimisticUpdates } = actions;
   const terrainContext = {
-    Position: withOptimisticUpdates(components.Position),
+    Position: withOptimisticUpdates(indexers.Position),
     Item: withOptimisticUpdates(components.Item),
     world,
   };
@@ -88,7 +93,7 @@ export async function createNetworkLayer(config: GameConfig) {
       metadata: { actionType: "build", coord, blockType },
       requirement: () => true,
       components: { Position: components.Position, Item: components.Item, OwnedBy: components.OwnedBy },
-      execute: () => systems["system.Build"].executeTyped(BigNumber.from(entity), coord, { gasLimit: 450_000 }),
+      execute: () => systems["system.Build"].executeTyped(BigNumber.from(entity), coord),
       updates: () => [
         {
           component: "OwnedBy",
@@ -134,31 +139,6 @@ export async function createNetworkLayer(config: GameConfig) {
     });
   }
 
-  async function craft(ingredients: EntityIndex[], result: EntityID) {
-    const [resolve, , promise] = deferred();
-    const blockType = BlockIdToKey[result];
-
-    actions.add({
-      id: `craft+${ingredients.join("/")}` as EntityID,
-      metadata: { actionType: "craft", blockType },
-      requirement: () => true,
-      components: {},
-      execute: () => {
-        const tx = systems["ember.system.craft"].executeTyped(
-          ingredients.map((i) => BigNumber.from(world.entities[i])),
-          BigNumber.from(result),
-          { gasLimit: 1_000_000 }
-        );
-        // Hacky af, improve this
-        tx.then((r) => r.wait().then(resolve));
-        return tx;
-      },
-      updates: () => [],
-    });
-
-    return promise;
-  }
-
   // --- CONTEXT --------------------------------------------------------------------
   const context = {
     world,
@@ -169,9 +149,10 @@ export async function createNetworkLayer(config: GameConfig) {
     startSync,
     network,
     actions,
-    api: { build, mine, craft, name, getBlockAtPosition, getECSBlockAtPosition, getTerrainBlockAtPosition },
+    api: { build, mine, getBlockAtPosition, getECSBlockAtPosition, getTerrainBlockAtPosition },
     dev: setupDevSystems(world, encoders, systems),
     config,
+    indexers,
   };
 
   return context;

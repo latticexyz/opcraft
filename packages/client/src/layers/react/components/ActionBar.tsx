@@ -40,6 +40,7 @@ export function registerActionBar() {
         network: {
           network: { connectedAddress },
           components: { OwnedBy, Item },
+          actions: { withOptimisticUpdates },
         },
         noa: {
           components: { SelectedSlot },
@@ -47,7 +48,7 @@ export function registerActionBar() {
         },
       } = layers;
 
-      const ownedByMeQuery = defineQuery([HasValue(OwnedBy, { value: connectedAddress.get() })]);
+      const ownedByMeQuery = defineQuery([HasValue(withOptimisticUpdates(OwnedBy), { value: connectedAddress.get() })]);
 
       return merge(of(0), ownedByMeQuery.update$, SelectedSlot.update$).pipe(
         map(() => {

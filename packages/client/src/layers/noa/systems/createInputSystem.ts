@@ -13,7 +13,8 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
 
   const {
     world,
-    components: { Item, OwnedBy, Position },
+    components: { Item, OwnedBy },
+    indexers: { Position },
     api: { build, mine },
     network: { connectedAddress },
     actions: { withOptimisticUpdates },
