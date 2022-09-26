@@ -4,8 +4,9 @@ pragma solidity >=0.8.0;
 import { Perlin } from "noise/Perlin.sol";
 import { ABDKMath64x64 as Math } from "abdk-libraries-solidity/ABDKMath64x64.sol";
 import { Biome, STRUCTURE_CHUNK, STRUCTURE_CHUNK_CENTER } from "../constants.sol";
-import { VoxelCoord } from "std-contracts/components/VoxelCoordComponent.sol";
 import { AirID, GrassID, DirtID, LogID, StoneID, SandID, WaterID, CobblestoneID, CoalID, CraftingID, IronID, GoldID, DiamondID, LeavesID, PlanksID, RedFlowerID, GrassPlantID, OrangeFlowerID, MagentaFlowerID, LightBlueFlowerID, LimeFlowerID, PinkFlowerID, GrayFlowerID, LightGrayFlowerID, CyanFlowerID, PurpleFlowerID, BlueFlowerID, GreenFlowerID, BlackFlowerID, KelpID, WoolID, SnowID, ClayID, BedrockID } from "../prototypes/Blocks.sol";
+import { VoxelCoord } from "../types.sol";
+import { div } from "../utils.sol";
 
 int128 constant _0 = 0; // 0 * 2**64
 int128 constant _0_3 = 5534023222112865484; // 0.3 * 2**64
@@ -32,13 +33,6 @@ int128 constant _16 = 16 * 2**64;
 struct Tuple {
   int128 x;
   int128 y;
-}
-
-// Divide with rounding down like Math.floor(a/b), not rounding towards zero
-function div(int32 a, int32 b) pure returns (int32) {
-  int32 result = a / b;
-  int32 floor = (a < 0 || b < 0) && !(a < 0 && b < 0) && (a % b != 0) ? int32(1) : int32(0);
-  return result - floor;
 }
 
 library LibTerrain {

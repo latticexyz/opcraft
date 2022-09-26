@@ -6,12 +6,14 @@ import { IUint256Component } from "solecs/interfaces/IUint256Component.sol";
 import { IComponent } from "solecs/interfaces/IComponent.sol";
 import { getAddressById, addressToEntity } from "solecs/utils.sol";
 
-import { PositionComponent, ID as PositionComponentID, VoxelCoord } from "../components/PositionComponent.sol";
+import { PositionComponent, ID as PositionComponentID } from "../components/PositionComponent.sol";
 import { OwnedByComponent, ID as OwnedByComponentID } from "../components/OwnedByComponent.sol";
 import { ItemComponent, ID as ItemComponentID } from "../components/ItemComponent.sol";
 import { OccurrenceComponent, ID as OccurrenceComponentID, staticcallFunctionSelector } from "../components/OccurrenceComponent.sol";
-
+import { ClaimComponent, ID as ClaimComponentID, Claim } from "../components/ClaimComponent.sol";
+import { getClaimAtCoord } from "../systems/ClaimSystem.sol";
 import { AirID, WaterID } from "../prototypes/Blocks.sol";
+import { VoxelCoord } from "../types.sol";
 
 uint256 constant ID = uint256(keccak256("system.Mine"));
 
@@ -29,11 +31,16 @@ contract MineSystem is System {
     OwnedByComponent ownedByComponent = OwnedByComponent(getAddressById(components, OwnedByComponentID));
     ItemComponent itemComponent = ItemComponent(getAddressById(components, ItemComponentID));
     OccurrenceComponent occurrenceComponent = OccurrenceComponent(getAddressById(components, OccurrenceComponentID));
+    ClaimComponent claimComponent = ClaimComponent(getAddressById(components, ClaimComponentID));
 
-    uint256 entity;
+    // Check claim in chunk
+    uint256 claimer = getClaimAtCoord(claimComponent, coord).claimer;
+    require(claimer == 0 || claimer == addressToEntity(msg.sender), "can not mine in claimed chunk");
 
     // Check ECS blocks at coord
     uint256[] memory entitiesAtPosition = positionComponent.getEntitiesWithValue(coord);
+
+    uint256 entity;
 
     if (entitiesAtPosition.length == 0) {
       // If there is no entity at this position, try mining the terrain block at this position
