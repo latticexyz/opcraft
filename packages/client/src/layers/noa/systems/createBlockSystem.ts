@@ -9,7 +9,8 @@ export function createBlockSystem(network: NetworkLayer, context: NoaLayer) {
 
   const {
     world,
-    components: { Position, Item },
+    components: { Item },
+    indexers: { Position },
     actions: { withOptimisticUpdates },
     api: { getBlockAtPosition },
   } = network;

@@ -21,10 +21,10 @@ let Engine = EngineImport;
 
 const defaultParams = {
   chainId: "901",
-  worldAddress: "0x73C68f1f41e4890D06Ba3e71b9E9DfA555f1fb46",
+  worldAddress: "0x687bB6c57915aa2529EfC7D2a26668855e022fAE",
   rpc: "https://l2.op-bedrock.lattice.xyz",
   wsRpc: "wss://l2.op-bedrock.lattice.xyz",
-  initialBlockNumber: "361305",
+  initialBlockNumber: "589657",
   checkpoint: "https://ecs-snapshot.op-bedrock.lattice.xyz",
   stream: undefined,
 };

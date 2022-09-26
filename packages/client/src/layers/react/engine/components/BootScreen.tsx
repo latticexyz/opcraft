@@ -9,7 +9,7 @@ export const BootScreen: React.FC<{ initialOpacity?: number }> = ({ children, in
   return (
     <Container>
       <img src="/img/mud.png" style={{ opacity }}></img>
-      <div>{children || <>$nbsp;</>}</div>
+      <div>{children || <>&nbsp;</>}</div>
     </Container>
   );
 };

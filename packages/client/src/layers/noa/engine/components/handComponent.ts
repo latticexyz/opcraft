@@ -20,7 +20,8 @@ export function registerHandComponent(
   SelectedSlot: ReturnType<typeof defineSelectedSlotComponent>,
   SingletonEntity: EntityIndex
 ) {
-  const { OwnedBy, Item } = networkLayer.components;
+  const { OwnedBy } = networkLayer.indexers;
+  const { Item } = networkLayer.components;
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   //@ts-ignore
   noa.ents.createComponent({
