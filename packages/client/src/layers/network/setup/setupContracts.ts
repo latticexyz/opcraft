@@ -7,6 +7,7 @@ import {
   createEncoder,
   NetworkComponentUpdate,
   createSystemExecutor,
+  isNetworkComponentUpdateEvent,
 } from "@latticexyz/network";
 import { World as WorldContract } from "contracts/types/ethers-contracts/World";
 import { abi as WorldAbi } from "contracts/abi/World.json";
@@ -94,7 +95,12 @@ export async function setupContracts<C extends ContractComponents>(config: GameC
     });
   }
 
-  const { txReduced$ } = applyNetworkUpdates(world, components, ecsEvent$, mappings);
+  const { txReduced$ } = applyNetworkUpdates(
+    world,
+    components,
+    ecsEvent$.pipe(filter(isNetworkComponentUpdateEvent)),
+    mappings
+  );
 
   const encoders = createEncoders(world, ComponentsRegistry, signerOrProvider);
 
