@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { euclidean, random, VoxelCoord } from "@latticexyz/utils";
+import { euclidean, mapObject, random, VoxelCoord } from "@latticexyz/utils";
 import { expect } from "chai";
 import { BigNumber } from "ethers";
 import hardhat from "hardhat";
@@ -12,8 +12,13 @@ import {
   mountains,
   valleys,
 } from "../../client/src/layers/network/api/terrain/getHeight";
-import { getTerrain, getTerrainBlock } from "../../client/src/layers/network/api/terrain/getBlockAtPosition";
+import { getTerrainBlock } from "../../client/src/layers/network/api/terrain/getBlockAtPosition";
 import { createPerlin } from "@latticexyz/noise";
+import { BlockIdToKey, BlockType } from "../../client/src/layers/network/constants";
+import { EntityID } from "@latticexyz/recs";
+import { Biome } from "../../client/src/layers/network/api/terrain/constants";
+import { getTerrain } from "../../client/src/layers/network/api";
+import { getCoordHash, getChunkHash, getBiomeHash } from "../../client/src/layers/network/api/terrain/utils";
 
 const ethers = (hardhat as any).ethers;
 
@@ -45,8 +50,8 @@ describe("LibTerrain", () => {
   const splinesSol: { [key: string]: (x: BigNumber) => Promise<number> } = {};
   let euclideanSol: (a: [number, number], b: [number, number]) => Promise<number> = async () => 0;
 
-  let getTerrainBlockSol: (coord: VoxelCoord) => Promise<string> = async () => "0x00";
-  let getTerrainBlockTs: (coord: VoxelCoord) => string = () => "0x00";
+  let getTerrainBlockSol: (coord: VoxelCoord) => Promise<string> = async () => "not setup";
+  let getTerrainBlockTs: (coord: VoxelCoord) => string = () => "not setup";
 
   before(async () => {
     const Perlin = (await (await ethers.getContractFactory("Perlin")).deploy()).address;
@@ -93,7 +98,7 @@ describe("LibTerrain", () => {
 
     getTerrainBlockTs = (coord: VoxelCoord) => {
       const terrain = getTerrain(coord, perlinTs);
-      return getTerrainBlock(terrain, coord);
+      return getTerrainBlock(terrain, coord, perlinTs);
     };
 
     getTerrainBlockSol = async (coord: VoxelCoord) => {
@@ -250,33 +255,180 @@ describe("LibTerrain", () => {
     });
   });
 
+  describe("getCoordHash", () => {
+    it("should compute the same result as getCoordHash on the client", async () => {
+      const coord = { x: 5341, y: 8, z: -2862 };
+      const tsHash = getCoordHash(coord.x, coord.z);
+      const solHash = await LibTerrain.getCoordHash(coord.x, coord.z);
+      expect(tsHash).to.eq(solHash);
+    });
+  });
+
+  describe("getChunkHash", () => {
+    it("should compute the same result as getCoordHash on the client", async () => {
+      const coord = { x: 2483, y: 9, z: -1447 };
+      const tsHash = getChunkHash(coord);
+      const solChunk = await LibTerrain.getChunkCoord(coord.x, coord.z);
+      const solHash = await LibTerrain.getCoordHash(solChunk[0], solChunk[1]);
+      expect(tsHash).to.eq(solHash);
+    });
+  });
+
+  describe("getBiomeHash", () => {
+    it("should compute the same result as getBiomeHash on the client", async () => {
+      const coords = [
+        { x: 5341, y: 8, z: -2862 },
+        { x: -206, y: 3, z: 448 },
+      ];
+      for (const coord of coords) {
+        const biome = Biome.Desert;
+        const tsHash = getBiomeHash(coord, biome);
+        const solHash = await LibTerrain.getBiomeHash(coord.x, coord.z, biome);
+        expect(tsHash).to.eq(solHash);
+      }
+    });
+  });
+
+  const CHECK_RANDOM_COORDS = false;
   describe("getTerrainBlock", () => {
     it("should compute the same result as getTerrainBlockTs", async () => {
       // Fixed coords
+      console.log("Check fixed coords");
       const coords = [
-        { x: -23, y: 299, z: -230 },
-        { x: 0, y: 0, z: 0 },
-        { x: 10, y: 10, z: 10 },
-        { x: 2334, y: -100, z: 1343 },
-        { x: 24, y: 0, z: -3243 },
-        { x: -1545, y: 12, z: -825 },
-        { x: -1510, y: 9, z: -726 },
+        { x: -1598, y: 10, z: 4650 }, // Sand
+        { x: 3275, y: 20, z: 4363 }, // Air
+        { x: -5691, y: -2, z: 3607 }, // Dirt
+        { x: 7589, y: -22, z: 6838 }, // Stone
+        { x: -6903, y: 15, z: -9143 }, // Grass
+        { x: 5974, y: -13, z: 8968 }, // Water
+        { x: -9977, y: -15, z: -9312 }, // Clay
+        { x: 7336, y: 8, z: 9925 }, // GrassPlant
+        { x: -7839, y: 57, z: 8037 }, // Snow
+        { x: 1402, y: 13, z: 3338 }, // Wool
+        { x: 4323, y: 4, z: 278 }, // Log
+        { x: -1233, y: -260, z: -3420 }, // Bedrock
+        { x: 1820, y: 0, z: 4369 }, // Kelp
+        { x: 1454, y: 10, z: 6252 }, // PinkFlower
+        { x: 8006, y: 10, z: 1677 }, // Diamond
+        { x: 2573, y: 8, z: -8277 }, // PurpleFlower
+        { x: 78, y: 44, z: 1715 }, // LightBlueFlower
+        { x: 6994, y: 10, z: 3434 }, // MagentaFlower
+        { x: -838, y: 15, z: -8044 }, // BlueFlower
+        { x: -3451, y: 13, z: 7986 }, // CyanFlower
+        { x: -5879, y: 22, z: -5889 }, // LightGrayFlower
+        { x: 9417, y: 10, z: 9424 }, // RedFlower
+        { x: 9049, y: 59, z: 4909 }, // GrayFlower
+        { x: 8012, y: 12, z: -8047 }, // LimeFlower
+        { x: 5471, y: 27, z: 7677 }, // GreenFlower
+        { x: 5668, y: 9, z: 1835 }, // OrangeFlower
+        { x: 5435, y: 5, z: -7440 }, // BlackFlower
+        { x: 2483, y: 9, z: -1447 }, // Log
+        { x: -1547, y: 8, z: -822 }, // Dirt
+        { x: -1547, y: 9, z: -822 }, // Grass
+        { x: -1547, y: 10, z: -822 }, // Log
+        { x: -1547, y: 11, z: -822 }, // Log
+        { x: -1547, y: 12, z: -822 }, // Log
+        { x: -1547, y: 13, z: -822 }, // Log
+        { x: -1547, y: 14, z: -822 }, // Leaves
+        { x: -1547, y: 15, z: -822 }, // Air
+        { x: -1548, y: 13, z: -822 }, // Leaves
+        { x: -206, y: 3, z: 448 }, // Wool
       ];
 
       for (const coord of coords) {
-        console.log("coord", coord);
-        const solBlock = await getTerrainBlockSol(coord);
-        const tsBlock = getTerrainBlockTs(coord);
-        expect(solBlock).to.eq(tsBlock);
+        const solResult = await getTerrainBlockSol(coord);
+        const tsResult = getTerrainBlockTs(coord);
+
+        const type = BlockIdToKey[tsResult as EntityID];
+        console.log(coord, ", //", type);
+
+        try {
+          expect(solResult).to.eq(tsResult);
+        } catch (e) {
+          console.log("Error at", coord);
+          throw e;
+        }
       }
 
-      // Random coords
-      for (let i = 0; i < 30; i++) {
-        const coord = { x: random(1000, -1000), y: random(1000, -1000), z: random(1000, -1000) };
-        const solBlock = await getTerrainBlockSol(coord);
-        const tsBlock = getTerrainBlockTs(coord);
-        expect(solBlock).to.eq(tsBlock);
+      if (!CHECK_RANDOM_COORDS) return;
+      const NUM_RANDOM_COORDS = 10000;
+
+      const acc: { [key in keyof typeof BlockType]: number } = mapObject(BlockType, () => 0);
+
+      console.log("Check random coords on surface level");
+      // Random coords on surface level (for flowers)
+      for (let i = 0; i < NUM_RANDOM_COORDS; i++) {
+        const x = random(10000, -10000);
+        const z = random(10000, -10000);
+        const y = getHeightTs({ x, y: 0, z });
+        const coord = { x, y, z };
+        const solResult = await getTerrainBlockSol(coord);
+        const tsResult = getTerrainBlockTs(coord);
+
+        // Log the location of the first block type that was found
+        const type = BlockIdToKey[tsResult as EntityID];
+        acc[type]++;
+        if (acc[type] === 1) {
+          console.log(coord, ", //", type);
+        }
+
+        try {
+          expect(solResult).to.eq(tsResult);
+        } catch (e) {
+          console.log("Error at", coord);
+          throw e;
+        }
       }
-    });
+
+      console.log("Check random coords one below surface level");
+      // Random coords on surface level (for flowers)
+      for (let i = 0; i < NUM_RANDOM_COORDS; i++) {
+        const x = random(10000, -10000);
+        const z = random(10000, -10000);
+        const y = getHeightTs({ x, y: 0, z }) - 1;
+        const coord = { x, y, z };
+        const solResult = await getTerrainBlockSol(coord);
+        const tsResult = getTerrainBlockTs(coord);
+
+        // Log the location of the first block type that was found
+        const type = BlockIdToKey[tsResult as EntityID];
+        acc[type]++;
+        if (acc[type] === 1) {
+          console.log(coord, ", //", type);
+        }
+
+        try {
+          expect(solResult).to.eq(tsResult);
+        } catch (e) {
+          console.log("Error at", coord);
+          throw e;
+        }
+      }
+
+      console.log("Check random coords");
+      // Random coords on surface level (for flowers)
+      for (let i = 0; i < NUM_RANDOM_COORDS; i++) {
+        const x = random(10000, -10000);
+        const y = random(100, -260);
+        const z = random(10000, -10000);
+        const coord = { x, y, z };
+        const solResult = await getTerrainBlockSol(coord);
+        const tsResult = getTerrainBlockTs(coord);
+
+        // Log the location of the first block type that was found
+        const type = BlockIdToKey[tsResult as EntityID];
+        acc[type]++;
+        if (acc[type] === 1) {
+          console.log(coord, ", //", type);
+        }
+
+        try {
+          expect(solResult).to.eq(tsResult);
+        } catch (e) {
+          console.log("Error at", coord);
+          throw e;
+        }
+      }
+    }).timeout(Number.MAX_SAFE_INTEGER);
   });
 });

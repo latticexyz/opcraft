@@ -62,7 +62,8 @@ export function setupNoaEngine(api: API) {
 
   // override the two water materials
   noa.registry.registerMaterial(Textures.TransparentWater, [0.5, 0.5, 0.8, 0.7], undefined, true);
-  noa.registry.registerMaterial(Textures.Water, [1, 1, 1, 0.5], "./assets/blocks/10-Water.png", true);
+  noa.registry.registerMaterial(Textures.Water, [1, 1, 1, 0.5], Textures.Water, true);
+  noa.registry.registerMaterial(Textures.Leaves, undefined, Textures.Leaves, true);
 
   // Register blocks
 

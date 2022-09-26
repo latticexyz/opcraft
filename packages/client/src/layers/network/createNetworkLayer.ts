@@ -12,11 +12,11 @@ import {
   defineLoadingStateComponent,
   defineItemComponent,
   defineItemPrototypeComponent,
+  defineOccurrenceComponent,
 } from "./components";
 import { defineNameComponent } from "./components/NameComponent";
-import { getBlockAtPosition as getBlockAtPositionApi } from "./api";
+import { getBlockAtPosition as getBlockAtPositionApi, getECSBlock, getTerrain, getTerrainBlock } from "./api";
 import { createPerlin } from "@latticexyz/noise";
-import { getECSBlock, getTerrain, getTerrainBlock } from "./api/terrain/getBlockAtPosition";
 import { BlockType } from "./constants";
 import { GodID } from "@latticexyz/network";
 
@@ -40,6 +40,7 @@ export async function createNetworkLayer(config: GameConfig) {
     GameConfig: defineGameConfigComponent(world),
     Recipe: defineRecipeComponent(world),
     LoadingState: defineLoadingStateComponent(world),
+    Occurrence: defineOccurrenceComponent(world),
   };
 
   // --- SETUP ----------------------------------------------------------------------
@@ -63,7 +64,7 @@ export async function createNetworkLayer(config: GameConfig) {
   };
 
   function getTerrainBlockAtPosition(position: VoxelCoord) {
-    return getTerrainBlock(getTerrain(position, perlin), position);
+    return getTerrainBlock(getTerrain(position, perlin), position, perlin);
   }
 
   function getECSBlockAtPosition(position: VoxelCoord) {
@@ -81,7 +82,7 @@ export async function createNetworkLayer(config: GameConfig) {
       id: `build+${coord.x}/${coord.y}/${coord.z}` as EntityID,
       requirement: () => true,
       components: { Position: components.Position, Item: components.Item, OwnedBy: components.OwnedBy },
-      execute: () => systems["system.Build"].executeTyped(BigNumber.from(entity), coord, { gasLimit: 450000 }),
+      execute: () => systems["system.Build"].executeTyped(BigNumber.from(entity), coord, { gasLimit: 450_000 }),
       updates: () => [
         {
           component: "OwnedBy",
@@ -101,7 +102,6 @@ export async function createNetworkLayer(config: GameConfig) {
     const ecsBlock = getECSBlockAtPosition(coord);
     const blockType = ecsBlock ?? getTerrainBlockAtPosition(coord);
 
-    console.log("entity/blocktype", blockType);
     if (blockType == null) throw new Error("entity has no block type");
 
     const airEntity = world.registerEntity();
@@ -110,7 +110,7 @@ export async function createNetworkLayer(config: GameConfig) {
       id: `mine+${coord.x}/${coord.y}/${coord.z}` as EntityID,
       requirement: () => true,
       components: { Position: components.Position, OwnedBy: components.OwnedBy, Item: components.Item },
-      execute: () => systems["system.Mine"].executeTyped(coord, blockType, { gasLimit: ecsBlock ? 450000 : 1100000 }),
+      execute: () => systems["system.Mine"].executeTyped(coord, blockType),
       updates: () => [
         {
           component: "Position",
@@ -146,10 +146,6 @@ export async function createNetworkLayer(config: GameConfig) {
     });
 
     return promise;
-  }
-
-  function name(name: string) {
-    systems["ember.system.name"].executeTyped(name);
   }
 
   // --- CONTEXT --------------------------------------------------------------------

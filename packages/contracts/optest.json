@@ -1,0 +1,7 @@
+{
+  "chainId": 19536,
+  "chainBlockTime": 2,
+  "chainGasLimit": 25000000,
+  "rpc": "https://lattice-1-sequencer.bedrock-goerli.optimism.io",
+  "wsRpc": ""
+}

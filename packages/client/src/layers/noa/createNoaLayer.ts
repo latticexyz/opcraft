@@ -1,4 +1,5 @@
 import { EntityIndex, getComponentValue, namespaceWorld, removeComponent, setComponent } from "@latticexyz/recs";
+import { random } from "@latticexyz/utils";
 import { NetworkLayer } from "../network";
 import {
   definePlayerDirectionComponent,
@@ -56,6 +57,15 @@ export function createNoaLayer(network: NetworkLayer) {
     removeComponent(components.CraftingTable, SingletonEntity);
   }
 
+  function teleportRandom() {
+    const coord = {
+      x: random(10000, -10000),
+      y: 150,
+      z: random(10000, -10000),
+    };
+    noa.entities.setPosition(noa.playerEntity, coord.x, coord.y, coord.z);
+  }
+
   const context = {
     world,
     components,
@@ -64,7 +74,7 @@ export function createNoaLayer(network: NetworkLayer) {
       connections: [],
     },
     noa,
-    api: { setBlock, setCraftingTable, clearCraftingTable, setCraftingTableIndex },
+    api: { setBlock, setCraftingTable, clearCraftingTable, setCraftingTableIndex, teleportRandom },
     SingletonEntity,
   };
 
