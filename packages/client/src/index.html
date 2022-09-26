@@ -1,17 +1,33 @@
 <html>
   <head>
     <title>Phaser Renderer for next-client</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk&display=swap" rel="stylesheet" />
     <style>
+      @font-face {
+        font-family: "Lattice Pixel";
+        /* this relative url gets resolved by parcel to the correct absolute url */
+        src: url("./public/assets/fonts/Lattice_Pixel_Font.woff2");
+        font-weight: normal;
+        font-style: normal;
+      }
       * {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
-        font-family: sans-serif;
+      }
+      body {
+        font-family: "Lattice Pixel";
+        font-size: 16px;
+        line-height: 0.625;
+        color: #fff;
+        text-shadow: 1.5px 1.5px 0 #000;
+      }
+      #noa-canvas {
+        outline: none;
       }
     </style>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk&display=swap" rel="stylesheet" />
   </head>
   <body>
     <script type="module" src="./index.ts"></script>

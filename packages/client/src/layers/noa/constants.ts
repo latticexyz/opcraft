@@ -112,9 +112,8 @@ export const Blocks: { [key in BlockTypeKey]: Block | undefined } = {
 
 export const Singleton = "Singleton" as EntityID;
 
-export function getBlockIconUrl(blockType: BlockTypeKey) {
+export function getBlockIconUrl(blockType: BlockTypeKey): string | undefined {
   const block = Blocks[blockType];
-  if (!block) return "";
-  const material = Array.isArray(block.material) ? block.material[0] : block.material;
-  return material;
+  if (!block) return;
+  return Array.isArray(block.material) ? block.material[0] : block.material;
 }

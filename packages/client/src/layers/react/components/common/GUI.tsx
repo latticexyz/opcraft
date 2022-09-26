@@ -24,11 +24,11 @@ export const BlockIcon = styled.div<{ blockID: EntityID; scale: number }>`
   width: ${(p) => 16 * p.scale}px;
   height: ${(p) => 16 * p.scale}px;
   margin: ${(p) => 4 * p.scale}px;
-  background-image: url("${(p) => getBlockIconUrl(BlockIdToKey[p.blockID])}");
+  background-image: url("${(p) => getBlockIconUrl(BlockIdToKey[p.blockID]) ?? ""}");
   background-size: 100%;
   image-rendering: pixelated;
   display: grid;
   justify-items: center;
   align-items: center;
-  font-size: 24px;
+  font-size: 20px;
 `;

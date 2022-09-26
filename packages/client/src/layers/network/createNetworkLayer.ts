@@ -1,4 +1,4 @@
-import { createIndexer, createWorld, EntityID, EntityIndex } from "@latticexyz/recs";
+import { createIndexer, createWorld, EntityID, EntityIndex, getComponentValue } from "@latticexyz/recs";
 import { setupContracts, setupDevSystems } from "./setup";
 import { createActionSystem } from "@latticexyz/std-client";
 import { GameConfig } from "./config";
@@ -17,7 +17,7 @@ import {
 import { defineNameComponent } from "./components/NameComponent";
 import { getBlockAtPosition as getBlockAtPositionApi, getECSBlock, getTerrain, getTerrainBlock } from "./api";
 import { createPerlin } from "@latticexyz/noise";
-import { BlockType } from "./constants";
+import { BlockIdToKey, BlockType } from "./constants";
 import { GodID } from "@latticexyz/network";
 
 /**
@@ -51,7 +51,10 @@ export async function createNetworkLayer(config: GameConfig) {
   );
 
   // --- ACTION SYSTEM --------------------------------------------------------------
-  const actions = createActionSystem(world, txReduced$);
+  const actions = createActionSystem<{ actionType: string; coord?: VoxelCoord; blockType?: keyof typeof BlockType }>(
+    world,
+    txReduced$
+  );
 
   // --- API ------------------------------------------------------------------------
 
@@ -77,9 +80,12 @@ export async function createNetworkLayer(config: GameConfig) {
   function build(entity: EntityID, coord: VoxelCoord) {
     const entityIndex = world.entityToIndex.get(entity);
     if (entityIndex == null) return console.warn("trying to place unknown entity", entity);
+    const blockId = getComponentValue(components.Item, entityIndex)?.value;
+    const blockType = blockId != null ? BlockIdToKey[blockId as EntityID] : undefined;
 
     actions.add({
       id: `build+${coord.x}/${coord.y}/${coord.z}` as EntityID,
+      metadata: { actionType: "build", coord, blockType },
       requirement: () => true,
       components: { Position: components.Position, Item: components.Item, OwnedBy: components.OwnedBy },
       execute: () => systems["system.Build"].executeTyped(BigNumber.from(entity), coord, { gasLimit: 450_000 }),
@@ -100,17 +106,19 @@ export async function createNetworkLayer(config: GameConfig) {
 
   async function mine(coord: VoxelCoord) {
     const ecsBlock = getECSBlockAtPosition(coord);
-    const blockType = ecsBlock ?? getTerrainBlockAtPosition(coord);
+    const blockId = ecsBlock ?? getTerrainBlockAtPosition(coord);
 
-    if (blockType == null) throw new Error("entity has no block type");
+    if (blockId == null) throw new Error("entity has no block type");
+    const blockType = BlockIdToKey[blockId];
 
     const airEntity = world.registerEntity();
 
     actions.add({
       id: `mine+${coord.x}/${coord.y}/${coord.z}` as EntityID,
+      metadata: { actionType: "mine", coord, blockType },
       requirement: () => true,
       components: { Position: components.Position, OwnedBy: components.OwnedBy, Item: components.Item },
-      execute: () => systems["system.Mine"].executeTyped(coord, blockType),
+      execute: () => systems["system.Mine"].executeTyped(coord, blockId),
       updates: () => [
         {
           component: "Position",
@@ -128,8 +136,11 @@ export async function createNetworkLayer(config: GameConfig) {
 
   async function craft(ingredients: EntityIndex[], result: EntityID) {
     const [resolve, , promise] = deferred();
+    const blockType = BlockIdToKey[result];
+
     actions.add({
       id: `craft+${ingredients.join("/")}` as EntityID,
+      metadata: { actionType: "craft", blockType },
       requirement: () => true,
       components: {},
       execute: () => {

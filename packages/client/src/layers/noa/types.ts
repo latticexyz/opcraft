@@ -21,13 +21,8 @@ export enum NoaBlockType {
  * array of 3 names: [top, bottom, sides]
  * array of 6 names: [-x, +x, -y, +y, -z, +z]
  */
-type StringOrNull = string | null;
 export type Block = {
-  material:
-    | StringOrNull
-    | [StringOrNull, StringOrNull]
-    | [StringOrNull, StringOrNull, StringOrNull]
-    | [StringOrNull, StringOrNull, StringOrNull, StringOrNull, StringOrNull, StringOrNull];
+  material: string | [string, string] | [string, string, string] | [string, string, string, string, string, string];
   type: NoaBlockType;
   frames?: number;
   opaque?: boolean;

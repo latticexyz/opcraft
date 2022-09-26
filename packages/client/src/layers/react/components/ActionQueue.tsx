@@ -2,13 +2,45 @@ import React from "react";
 import { registerUIComponent } from "../engine";
 import { getComponentEntities, getComponentValueStrict } from "@latticexyz/recs";
 import { map } from "rxjs";
-import { ActionStateString, ActionState } from "@latticexyz/std-client";
+import styled from "styled-components";
+import { getBlockIconUrl } from "../../noa/constants";
+import { Action as ActionQueueItem } from "./Action";
+
+const ActionQueueList = styled.div`
+  width: 240px;
+  height: 100%;
+  display: flex;
+  flex-grow: 1;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 6px;
+  padding: 20px;
+
+  .ActionQueueItem {
+    position: relative;
+  }
+
+  .ActionQueueItemPosition {
+    position: absolute;
+    left: 100%;
+    top: 0;
+    bottom: 0;
+    width: 100px;
+    margin-left: 6px;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    font-size: 14px;
+  }
+`;
 
 export function registerActionQueue() {
   registerUIComponent(
     "ActionQueue",
     {
-      rowStart: 4,
+      rowStart: 6,
       rowEnd: 12,
       colStart: 1,
       colEnd: 3,
@@ -28,18 +60,26 @@ export function registerActionQueue() {
     },
     ({ Action }) => {
       return (
-        <div>
-          <p>Actions:</p>
+        <ActionQueueList>
           {[...getComponentEntities(Action)].map((e) => {
-            const actionData = getComponentValueStrict(Action, e);
-            const state = ActionStateString[actionData.state as ActionState];
+            const { state, metadata } = getComponentValueStrict(Action, e);
+            const { actionType, coord, blockType } = metadata;
+            const icon = blockType && getBlockIconUrl(blockType);
             return (
-              <p key={`action${e}`}>
-                {Action.world.entities[e]}: {state}
-              </p>
+              <div key={e} className="ActionQueueItem">
+                <ActionQueueItem state={state} icon={icon} title={`${actionType} tx`} description={blockType} />
+                {/* TODO: conditionally render this for debugging? */}
+                {coord ? (
+                  <div className="ActionQueueItemPosition">
+                    <div>X: {coord.x}</div>
+                    <div>Y: {coord.y}</div>
+                    <div>Z: {coord.z}</div>
+                  </div>
+                ) : null}
+              </div>
             );
           })}
-        </div>
+        </ActionQueueList>
       );
     }
   );
