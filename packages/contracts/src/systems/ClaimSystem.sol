@@ -6,8 +6,9 @@ import { getAddressById, addressToEntity } from "solecs/utils.sol";
 import { StakeComponent, ID as StakeComponentID } from "../components/StakeComponent.sol";
 import { ClaimComponent, ID as ClaimComponentID, Claim } from "../components/ClaimComponent.sol";
 import { getStakeInChunk, getStakeEntity } from "../systems/StakeSystem.sol";
-import { Coord } from "../types.sol";
+import { Coord, VoxelCoord } from "../types.sol";
 import { DiamondID } from "../prototypes/Blocks.sol";
+import { getChunkCoord } from "../utils.sol";
 
 uint256 constant ID = uint256(keccak256("system.Claim"));
 
@@ -18,6 +19,10 @@ function getChunkEntity(Coord memory chunk) returns (uint256) {
 function getClaimInChunk(ClaimComponent claimComponent, Coord memory chunk) returns (Claim memory) {
   bytes memory currentClaimBytes = claimComponent.getRawValue(getChunkEntity(chunk));
   return currentClaimBytes.length == 0 ? Claim(0, 0) : abi.decode(currentClaimBytes, (Claim));
+}
+
+function getClaimAtCoord(ClaimComponent claimComponent, VoxelCoord memory coord) returns (Claim memory) {
+  return getClaimInChunk(claimComponent, getChunkCoord(coord));
 }
 
 contract ClaimSystem is System {

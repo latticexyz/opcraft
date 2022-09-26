@@ -2,12 +2,16 @@
 pragma solidity >=0.8.0;
 
 import "../MudTest.t.sol";
+import { addressToEntity } from "solecs/utils.sol";
 import { MineSystem, ID as MineSystemID } from "../../systems/MineSystem.sol";
 import { ItemComponent, ID as ItemComponentID } from "../../components/ItemComponent.sol";
 import { OwnedByComponent, ID as OwnedByComponentID } from "../../components/OwnedByComponent.sol";
-import { PositionComponent, ID as PositionComponentID, VoxelCoord } from "../../components/PositionComponent.sol";
+import { PositionComponent, ID as PositionComponentID } from "../../components/PositionComponent.sol";
+import { ClaimComponent, ID as ClaimComponentID, Claim } from "../../components/ClaimComponent.sol";
 import { SandID, DiamondID, AirID, StoneID, WaterID, BedrockID } from "../../prototypes/Blocks.sol";
-import { addressToEntity } from "solecs/utils.sol";
+import { getChunkEntity } from "../../systems/ClaimSystem.sol";
+import { Coord, VoxelCoord } from "../../types.sol";
+import { getChunkCoord } from "../../utils.sol";
 
 contract MineSystemTest is MudTest {
   function testMineTerrain() public {
@@ -146,6 +150,52 @@ contract MineSystemTest is MudTest {
 
     VoxelCoord memory coord = VoxelCoord({ x: 5974, y: -13, z: 8968 }); // Water
     uint256 minedEntity = mineSystem.executeTyped(coord, WaterID);
+    vm.stopPrank();
+  }
+
+  function testClaimed() public {
+    VoxelCoord memory coord = VoxelCoord({ x: -1598, y: 10, z: 4650 }); // Sand
+
+    // Set claim in chunk to alice
+    vm.startPrank(deployer);
+    ClaimComponent claimComponent = ClaimComponent(component(ClaimComponentID));
+    Coord memory chunk = getChunkCoord(coord);
+    uint256 chunkEntity = getChunkEntity(chunk);
+    claimComponent.set(chunkEntity, Claim(10, addressToEntity(alice)));
+    vm.stopPrank();
+
+    vm.startPrank(alice);
+    MineSystem mineSystem = MineSystem(system(MineSystemID));
+    ItemComponent itemComponent = ItemComponent(component(ItemComponentID));
+    OwnedByComponent ownedByComponent = OwnedByComponent(component(OwnedByComponentID));
+
+    uint256 minedEntity = mineSystem.executeTyped(coord, SandID);
+
+    assertEq(itemComponent.getValue(minedEntity), SandID);
+    assertEq(ownedByComponent.getValue(minedEntity), addressToEntity(alice));
+    vm.stopPrank();
+  }
+
+  function testFailClaimed() public {
+    VoxelCoord memory coord = VoxelCoord({ x: -1598, y: 10, z: 4650 }); // Sand
+
+    // Set claim in chunk to bob
+    vm.startPrank(deployer);
+    ClaimComponent claimComponent = ClaimComponent(component(ClaimComponentID));
+    Coord memory chunk = getChunkCoord(coord);
+    uint256 chunkEntity = getChunkEntity(chunk);
+    claimComponent.set(chunkEntity, Claim(10, addressToEntity(bob)));
+    vm.stopPrank();
+
+    vm.startPrank(alice);
+    MineSystem mineSystem = MineSystem(system(MineSystemID));
+    ItemComponent itemComponent = ItemComponent(component(ItemComponentID));
+    OwnedByComponent ownedByComponent = OwnedByComponent(component(OwnedByComponentID));
+
+    uint256 minedEntity = mineSystem.executeTyped(coord, SandID);
+
+    assertEq(itemComponent.getValue(minedEntity), SandID);
+    assertEq(ownedByComponent.getValue(minedEntity), addressToEntity(alice));
     vm.stopPrank();
   }
 }
