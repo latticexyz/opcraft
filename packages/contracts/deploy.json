@@ -16,7 +16,6 @@
     { "name": "BuildSystem", "writeAccess": ["PositionComponent", "OwnedByComponent"] },
     { "name": "CraftingSystem", "writeAccess": ["OwnedByComponent"] },
     { "name": "NameSystem", "writeAccess": ["NameComponent"] },
-    { "name": "PerlinSystem", "writeAccess": [] },
     { "name": "OccurrenceSystem", "writeAccess": [] },
     {
       "name": "InitSystem",

@@ -6,7 +6,7 @@ import { LibTerrain } from "../../libraries/LibTerrain.sol";
 import { VoxelCoord } from "std-contracts/components/VoxelCoordComponent.sol";
 
 contract LibTerrainTest is DSTest {
-  function testGaslimit() public {
+  function testGetTerrainBlock() public {
     LibTerrain.getTerrainBlock(VoxelCoord(10, 10, 10));
   }
 }

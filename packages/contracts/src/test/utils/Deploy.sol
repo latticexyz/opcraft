@@ -26,7 +26,7 @@ contract Deploy is DSTest {
     bool _reuseComponents
   ) public returns (World) {
     deployer = _deployer == address(0) ? utils.getNextUserAddress() : _deployer;
-    vm.startPrank(_deployer);
+    vm.startPrank(deployer);
     DeployResult memory result = LibDeploy.deploy(deployer, _world, _reuseComponents);
     vm.stopPrank();
     world = result.world;

@@ -65,9 +65,10 @@ contract MineSystem is System {
     }
 
     ownedByComponent.set(entity, addressToEntity(msg.sender));
+    return abi.encode(entity);
   }
 
-  function executeTyped(VoxelCoord memory coord, uint256 blockType) public returns (bytes memory) {
-    return execute(abi.encode(coord, blockType));
+  function executeTyped(VoxelCoord memory coord, uint256 blockType) public returns (uint256 minedEntity) {
+    return abi.decode(execute(abi.encode(coord, blockType)), (uint256));
   }
 }
