@@ -10,7 +10,7 @@ import { ClaimComponent, ID as ClaimComponentID } from "../../components/ClaimCo
 import { addressToEntity } from "solecs/utils.sol";
 
 contract ClaimSystemTest is MudTest {
-  Coord internal chunk = Coord(10, 10);
+  Coord internal chunk = Coord(12, -13);
 
   function setUp() public override {
     super.setUp();

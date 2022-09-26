@@ -30,6 +30,15 @@ contract StakeSystemTest is MudTest {
     vm.stopPrank();
   }
 
+  function testGetStakeEntityUnique() public {
+    assertTrue(getStakeEntity(Coord(0, 0), address(0)) != getStakeEntity(Coord(1, 1), address(0)));
+    assertTrue(getStakeEntity(Coord(1, -1), address(0)) != getStakeEntity(Coord(1, 1), address(0)));
+    assertTrue(getStakeEntity(Coord(1, -1), address(0)) != getStakeEntity(Coord(-1, 1), address(0)));
+    assertTrue(getStakeEntity(Coord(1, -1), address(0)) != getStakeEntity(Coord(-1, -1), address(0)));
+    assertTrue(getStakeEntity(Coord(-1, 1), address(0)) != getStakeEntity(Coord(2**31 - 1, 1), address(0)));
+    assertTrue(getStakeEntity(Coord(-2**31, 1), address(0)) != getStakeEntity(Coord(2**31 - 1, 1), address(0)));
+  }
+
   function testStake() public {
     vm.startPrank(alice);
     Coord memory chunk = Coord(10, 10);

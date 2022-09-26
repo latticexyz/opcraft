@@ -11,8 +11,9 @@ import { DiamondID } from "../prototypes/Blocks.sol";
 
 uint256 constant ID = uint256(keccak256("system.Stake"));
 
+// Stake entity = concat(address | chunk.x | chunk.y)
 function getStakeEntity(Coord memory chunk, address entity) returns (uint256) {
-  return uint256(keccak256(abi.encode(chunk.x, chunk.y, entity)));
+  return uint256((uint256(uint160(entity)) << 64) | (uint64(uint32(chunk.x)) << 32) | uint32(chunk.y));
 }
 
 function getStakeInChunk(StakeComponent stakeComponent, uint256 stakeEntity) returns (uint256) {

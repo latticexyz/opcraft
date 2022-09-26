@@ -12,8 +12,9 @@ import { getChunkCoord } from "../utils.sol";
 
 uint256 constant ID = uint256(keccak256("system.Claim"));
 
+// Chunk entity = concat(chunk.x | chunk.y)
 function getChunkEntity(Coord memory chunk) returns (uint256) {
-  return uint256(keccak256(abi.encode(chunk)));
+  return uint256((uint64(uint32(chunk.x)) << 32) | uint32(chunk.y));
 }
 
 function getClaimInChunk(ClaimComponent claimComponent, Coord memory chunk) returns (Claim memory) {
