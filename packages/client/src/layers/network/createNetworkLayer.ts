@@ -45,11 +45,6 @@ export async function createNetworkLayer(config: GameConfig) {
     Occurrence: defineOccurrenceComponent(world),
   };
 
-  const indexers = {
-    Position: createIndexer(components.Position),
-    OwnedBy: createIndexer(components.OwnedBy),
-  };
-
   // --- SETUP ----------------------------------------------------------------------
   const { txQueue, systems, txReduced$, network, startSync, encoders } = await setupMUDNetwork<
     typeof components,
@@ -69,13 +64,17 @@ export async function createNetworkLayer(config: GameConfig) {
     txReduced$
   );
 
+  // Add indexers and optimistic updates
+  const { withOptimisticUpdates } = actions;
+  components.Position = createIndexer(withOptimisticUpdates(components.Position));
+  components.OwnedBy = createIndexer(withOptimisticUpdates(components.OwnedBy));
+
   // --- API ------------------------------------------------------------------------
 
   const perlin = await createPerlin();
-  const { withOptimisticUpdates } = actions;
   const terrainContext = {
-    Position: withOptimisticUpdates(indexers.Position),
-    Item: withOptimisticUpdates(components.Item),
+    Position: components.Position,
+    Item: components.Item,
     world,
   };
 
@@ -179,7 +178,6 @@ export async function createNetworkLayer(config: GameConfig) {
     api: { build, mine, getBlockAtPosition, getECSBlockAtPosition, getTerrainBlockAtPosition },
     dev: setupDevSystems(world, encoders, systems),
     config,
-    indexers,
     relayer,
   };
 
