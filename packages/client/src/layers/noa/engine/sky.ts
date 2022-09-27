@@ -3,8 +3,8 @@ import type { Engine } from "noa-engine";
 /*
  * Setups clouds in a hacky way
  */
-const CLOUD_HEIGHT = 100;
-const SKY_HEIGHT = 110;
+const CLOUD_HEIGHT = 120.5;
+const SKY_HEIGHT = 20;
 
 export function setupClouds(noa: Engine) {
   const scene = noa.rendering.getScene();
@@ -16,6 +16,7 @@ export function setupClouds(noa: Engine) {
     },
     scene
   );
+  cloudMesh.applyFog = false;
 
   const cloudMat = new StandardMaterial("cloud", scene);
   const cloudTexture = new Texture(
@@ -45,8 +46,11 @@ export function setupClouds(noa: Engine) {
     cloudTexture.vOffset += 0.00001 + (pos[2] - noa.camera.getPosition()[2]) / 10000;
     cloudTexture.uOffset -= (pos[0] - noa.camera.getPosition()[0]) / 10000;
     pos = [...noa.camera.getPosition()];
-    const rpos = noa.ents.getPositionData(noa.playerEntity)!._renderPosition!;
-    cloudMesh.position.copyFromFloats(rpos[0], rpos[1] + CLOUD_HEIGHT, rpos[2]);
+    const local: number[] = [];
+    const [playerX, _, playerZ] = noa.ents.getPositionData(noa.playerEntity)!.position!;
+    const [__, y] = noa.globalToLocal([playerX, CLOUD_HEIGHT, playerZ], [0, 0, 0], local);
+    const [x, ___, z] = noa.ents.getPositionData(noa.playerEntity)!._renderPosition!;
+    cloudMesh.position.copyFromFloats(x, y, z);
   };
 
   noa.on("beforeRender", update);
@@ -76,17 +80,19 @@ export function setupSky(noa: Engine) {
   skyMat.emissiveColor = new Color3(0.2, 0.3, 0.7);
   skyMat.diffuseColor = skyMat.emissiveColor;
 
-  skyMesh.infiniteDistance = true;
-  skyMesh.renderingGroupId;
+  skyMesh.renderingGroupId = -1;
   skyMesh.material = skyMat;
+  skyMesh.applyFog = true;
 
   skyMesh.rotation.x = -Math.PI / 2;
 
   noa.rendering.addMeshToScene(skyMesh, false);
 
   const update = () => {
-    const rpos = noa.ents.getPositionData(noa.playerEntity)!._renderPosition!;
-    skyMesh.position.copyFromFloats(rpos[0], rpos[1] + SKY_HEIGHT, rpos[2]);
+    const local: number[] = [];
+    const [playerX, playerY, playerZ] = noa.ents.getPositionData(noa.playerEntity)!.position!;
+    const [x, y, z] = noa.globalToLocal([playerX, playerY, playerZ], [0, 0, 0], local);
+    skyMesh.position.copyFromFloats(x, y + SKY_HEIGHT, z);
   };
 
   noa.on("beforeRender", update);

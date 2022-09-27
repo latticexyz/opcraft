@@ -15,22 +15,32 @@ export interface API {
   getECSBlockAtPosition: (coord: VoxelCoord) => EntityID | undefined;
 }
 
+// 4 is very fast
+// 8 still runs extremely well
+// 12 might be "high" setting
+// 16 is the limit before performance issues
+const CHUNK_RENDER_DISTANCE = 12;
+const CHUNK_SIZE = 16;
+const SKY_COLOR = [0.7, 0.8, 1];
+const MIN_CHUNK = 2;
+const MIN_HEIGHT = MIN_CHUNK * CHUNK_SIZE;
+
 export function setupNoaEngine(api: API) {
   const opts = {
     debug: true,
     showFPS: true,
     inverseY: false,
     inverseX: false,
-    chunkAddDistance: [17, 3],
-    // 32 is pretty far, but it doesn't increase the memory usage much.
-    chunkRemoveDistance: [20, 15],
+    chunkAddDistance: [CHUNK_RENDER_DISTANCE + 3, CHUNK_RENDER_DISTANCE + 3],
+    chunkRemoveDistance: [CHUNK_RENDER_DISTANCE + 8, CHUNK_RENDER_DISTANCE + 8],
+    chunkSize: CHUNK_SIZE,
     playerStart: [-1543, 13, -826],
     blockTestDistance: 7,
     texturePath: "",
     playerHeight: 1.85,
     playerWidth: 0.6,
     playerAutoStep: 1,
-    clearColor: [0.8, 0.9, 1],
+    clearColor: SKY_COLOR,
     ambientColor: [1, 1, 1],
     lightDiffuse: [1, 1, 1],
     lightSpecular: [1, 1, 1],
@@ -41,12 +51,15 @@ export function setupNoaEngine(api: API) {
     preserveDrawingBuffer: true,
   };
 
+  // Hack Babylon in order to have a -1 rendering group for the sky (to be always drawn behind everything else)
+  BABYLON.RenderingManager.MIN_RENDERINGGROUPS = -1;
+
   const noa = new Engine(opts);
   const scene = noa.rendering.getScene();
   // Note: this is the amount of time, per tick, spent requesting chunks from userland and meshing them
   // IT DOES NOT INCLUDE TIME SPENT BY THE CLIENT GENEERATING THE CHUNKS
   // On lower end device we should bring this down to 9 or 11
-  noa.world.maxProcessingPerTick = 17;
+  noa.world.maxProcessingPerTick = 16;
   noa.world.maxProcessingPerRender = 12;
   // Register simple materials
   const textures = Object.values(Blocks).reduce<string[]>((materials, block) => {
@@ -99,6 +112,10 @@ export function setupNoaEngine(api: API) {
     // `id` - a unique string id for the chunk
     // `data` - an `ndarray` of voxel ID data (see: https://github.com/scijs/ndarray)
     // `x, y, z` - world coords of the corner of the chunk
+    if (y < -MIN_HEIGHT) {
+      noa.world.setChunkData(id, data, undefined);
+      return;
+    }
     for (let i = 0; i < data.shape[0]; i++) {
       for (let j = 0; j < data.shape[1]; j++) {
         for (let k = 0; k < data.shape[2]; k++) {
@@ -125,10 +142,12 @@ export function setupNoaEngine(api: API) {
   //   }
   // });
 
-  scene.fogMode = BABYLON.Scene.FOGMODE_EXP2;
+  scene.fogMode = BABYLON.Scene.FOGMODE_LINEAR;
+  scene.fogStart = CHUNK_RENDER_DISTANCE * CHUNK_SIZE;
+  scene.fogEnd = CHUNK_RENDER_DISTANCE * CHUNK_SIZE + CHUNK_SIZE * 2;
   // scene.fogDensity = 0.003;
-  scene.fogDensity = 0.0006;
-  scene.fogColor = new BABYLON.Color3(0.8, 0.9, 1);
+  // scene.fogDensity = 0.0006;
+  scene.fogColor = new BABYLON.Color3(...SKY_COLOR);
 
   // Register sounds
   new BABYLON.Sound("theme", "/audio/OP_World_Theme_Mix_1.mp3", null, null, {

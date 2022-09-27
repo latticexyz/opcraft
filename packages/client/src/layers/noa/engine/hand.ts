@@ -47,6 +47,7 @@ export function setupHand(noa: Engine) {
     },
     scene
   );
+  hand.renderingGroupId = 3;
   hand.material = handMaterial;
   hand.rotation.x = -Math.PI / 2;
 
@@ -78,6 +79,7 @@ export function setupHand(noa: Engine) {
     },
     scene
   );
+  block.renderingGroupId = 3;
   block.rotation.x = -0.1;
   block.rotation.y = -0.8;
   block.rotation.z = 0.3;
