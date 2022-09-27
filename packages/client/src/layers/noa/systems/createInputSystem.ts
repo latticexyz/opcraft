@@ -10,7 +10,7 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
     noa,
     components: { SelectedSlot, UI },
     SingletonEntity,
-    api: { setCraftingTable },
+    api: { setCraftingTable, toggleInventory },
   } = context;
 
   const {
@@ -102,9 +102,6 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
     }
   });
 
-  // add a key binding for "E" to do the same as alt-fire
-  noa.inputs.bind("alt-fire", "E");
-
   // Control selected slot with keys 1-9
   noa.inputs.bind("slot", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "P", "O", "I", "U");
 
@@ -119,5 +116,10 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
   noa.inputs.down.on("componentbrowser", () => {
     const showComponentBrowser = getComponentValue(UI, SingletonEntity)?.showComponentBrowser;
     updateComponent(UI, SingletonEntity, { showComponentBrowser: !showComponentBrowser });
+  });
+
+  noa.inputs.bind("inventory", "E");
+  noa.inputs.down.on("inventory", () => {
+    toggleInventory();
   });
 }

@@ -10,6 +10,7 @@ import { Engine as EngineImport } from "./layers/react/engine/Engine";
 import { registerUIComponents as registerUIComponentsImport } from "./layers/react/components";
 import { Wallet } from "ethers";
 import { enableLogger } from "@latticexyz/utils";
+import { ReloadEvent } from "./layers/react/engine";
 
 enableLogger();
 
@@ -190,6 +191,11 @@ function bootReact() {
     // HMR React components
     import.meta.hot.accept("./layers/react/components/index.ts", async (module) => {
       registerUIComponents = module.registerUIComponents;
+      registerUIComponents();
+    });
+
+    document.addEventListener(ReloadEvent.type, async () => {
+      registerUIComponents = (await import("./layers/react/components")).registerUIComponents;
       registerUIComponents();
     });
   }

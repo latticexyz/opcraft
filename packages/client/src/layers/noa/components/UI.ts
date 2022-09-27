@@ -5,6 +5,7 @@ export function defineUIComponent(world: World) {
     world,
     {
       showComponentBrowser: Type.Boolean,
+      showInventory: Type.Boolean,
     },
     { id: "UI" }
   );

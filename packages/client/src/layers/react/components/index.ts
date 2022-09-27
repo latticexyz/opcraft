@@ -4,6 +4,8 @@ import { registerCrosshairs } from "./Crosshairs";
 import { registerActionBar } from "./ActionBar";
 import { registerCrafting } from "./Crafting";
 import { registerLoadingState } from "./LoadingState";
+import { registerInventory } from "./Inventory";
+export * from "./common";
 
 export function registerUIComponents() {
   registerLoadingState();
@@ -12,4 +14,5 @@ export function registerUIComponents() {
   registerCrosshairs();
   registerActionBar();
   registerCrafting();
+  registerInventory();
 }

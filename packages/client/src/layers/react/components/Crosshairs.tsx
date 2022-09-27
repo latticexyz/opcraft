@@ -1,6 +1,6 @@
 import React from "react";
 import { registerUIComponent } from "../engine";
-import { of } from "rxjs";
+import { concat, map, of } from "rxjs";
 import styled from "styled-components";
 
 export function registerCrosshairs() {
@@ -12,7 +12,8 @@ export function registerCrosshairs() {
       colStart: 1,
       colEnd: 13,
     },
-    () => of(1),
+    (layers) =>
+      concat(of(1), layers.noa.components.UI.update$.pipe(map((e) => (e.value[0]?.showInventory ? null : true)))),
     () => {
       return <Cross>+</Cross>;
     }

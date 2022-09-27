@@ -1,4 +1,11 @@
-import { EntityIndex, getComponentValue, namespaceWorld, removeComponent, setComponent } from "@latticexyz/recs";
+import {
+  EntityIndex,
+  getComponentValue,
+  namespaceWorld,
+  removeComponent,
+  setComponent,
+  updateComponent,
+} from "@latticexyz/recs";
 import { random } from "@latticexyz/utils";
 import { NetworkLayer } from "../network";
 import {
@@ -45,7 +52,7 @@ export function createNoaLayer(network: NetworkLayer) {
   setupSky(noa);
   setupHand(noa);
   noa.entities.addComponentAgain(noa.playerEntity, MINING_BLOCK_COMPONENT, {});
-  setComponent(components.UI, SingletonEntity, { showComponentBrowser: false });
+  setComponent(components.UI, SingletonEntity, { showComponentBrowser: false, showInventory: false });
 
   // --- API ------------------------------------------------------------------------
   function setCraftingTable(entities: EntityIndex[]) {
@@ -72,6 +79,12 @@ export function createNoaLayer(network: NetworkLayer) {
     noa.entities.setPosition(noa.playerEntity, coord.x, coord.y, coord.z);
   }
 
+  function toggleInventory(open?: boolean) {
+    open = open ?? !getComponentValue(components.UI, SingletonEntity)?.showInventory;
+    noa.container.setPointerLock(!open);
+    updateComponent(components.UI, SingletonEntity, { showInventory: open });
+  }
+
   const context = {
     world,
     components,
@@ -80,7 +93,7 @@ export function createNoaLayer(network: NetworkLayer) {
       connections: [],
     },
     noa,
-    api: { setBlock, setCraftingTable, clearCraftingTable, setCraftingTableIndex, teleportRandom },
+    api: { setBlock, setCraftingTable, clearCraftingTable, setCraftingTableIndex, teleportRandom, toggleInventory },
     SingletonEntity,
   };
 

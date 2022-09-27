@@ -1,7 +1,7 @@
 import React from "react";
 import { registerUIComponent } from "../engine";
 import { map, merge, of } from "rxjs";
-import { BlockIcon, Center, GUI } from "./common/GUI";
+import { BlockIcon, Center, GUI } from "./common";
 import styled from "styled-components";
 import { range } from "@latticexyz/utils";
 import { defineQuery, getComponentValue, HasValue } from "@latticexyz/recs";
