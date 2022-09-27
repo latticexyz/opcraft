@@ -120,7 +120,7 @@ export function setupNoaEngine(api: API) {
       for (let j = 0; j < data.shape[1]; j++) {
         for (let k = 0; k < data.shape[2]; k++) {
           const ecsBlockType = BlockTypeIndex[api.getECSBlockAtPosition({ x: x + i, y: y + j, z: z + k }) as string];
-          if (ecsBlockType) {
+          if (ecsBlockType !== undefined) {
             data.set(i, j, k, ecsBlockType);
           } else {
             const blockType = BlockTypeIndex[api.getTerrainBlockAtPosition({ x: x + i, y: y + j, z: z + k }) as string];
