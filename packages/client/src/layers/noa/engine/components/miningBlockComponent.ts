@@ -3,6 +3,7 @@ import { Engine } from "noa-engine";
 import * as glvec3 from "gl-vec3";
 import { NetworkLayer } from "../../../network";
 import { VoxelCoord } from "@latticexyz/utils";
+import { Textures } from "../../constants";
 
 export interface MiningBlockComponent {
   breakingBlockMeshes: BABYLON.Mesh[];
@@ -27,6 +28,12 @@ const NORMALS = [
   [-1, 0, 0],
 ];
 
+const PARTICLE_SIZE = 0.1;
+const NUMBER_OF_PARTICLES = 10;
+const PARTICLES_GRAVITY = -0.01;
+const PARTICLES_LIFETIME = 100;
+const PARTICLE_TEXTURE = Textures.Stone;
+
 const BREAKING = [
   "./assets/textures/destroy-0.png",
   "./assets/textures/destroy-1.png",
@@ -39,17 +46,35 @@ const BREAKING = [
 ];
 
 export function registerMiningBlockComponent(noa: Engine, networkLayer: NetworkLayer) {
+  const scene = noa.rendering.getScene();
   const TEXTURES = BREAKING.map((textureUrl) => {
-    const texture = new BABYLON.Texture(
-      textureUrl,
-      noa.rendering.getScene(),
-      true,
-      true,
-      BABYLON.Texture.NEAREST_SAMPLINGMODE
-    );
+    const texture = new BABYLON.Texture(textureUrl, scene, true, true, BABYLON.Texture.NEAREST_SAMPLINGMODE);
     texture.hasAlpha = true;
     return texture;
   });
+  const particleMaterial = new BABYLON.StandardMaterial("particle", scene);
+  const particleTexture = new BABYLON.Texture(
+    PARTICLE_TEXTURE,
+    scene,
+    true,
+    true,
+    BABYLON.Texture.NEAREST_SAMPLINGMODE
+  );
+  particleMaterial.diffuseTexture = particleTexture;
+  particleMaterial.freeze();
+
+  const faceUV = new Array(6);
+
+  for (let i = 0; i < 6; i++) {
+    faceUV[i] = new BABYLON.Vector4(0, 0, 0, 0);
+  }
+
+  const options = {
+    size: PARTICLE_SIZE,
+    faceUV: faceUV,
+  };
+  const particleModel = BABYLON.MeshBuilder.CreateBox("box", options, scene);
+
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   //@ts-ignore
   noa.ents.createComponent({
@@ -112,6 +137,7 @@ export function registerMiningBlockComponent(noa: Engine, networkLayer: NetworkL
           if (progress > 0.99) {
             states[i].active = false;
             networkLayer.api.mine(block);
+            createExplosion(noa, block, particleModel, particleMaterial);
           }
         } else if (breakingBlockMeshes[0].isEnabled()) {
           for (const breakingBlockMesh of breakingBlockMeshes) {
@@ -124,4 +150,70 @@ export function registerMiningBlockComponent(noa: Engine, networkLayer: NetworkL
       }
     },
   });
+}
+
+function createExplosion(
+  noa: Engine,
+  block: VoxelCoord,
+  particleModel: BABYLON.Mesh,
+  particleMaterial: BABYLON.Material
+) {
+  const sps = new BABYLON.SolidParticleSystem("sps", noa.rendering.getScene());
+  sps.addShape(particleModel, NUMBER_OF_PARTICLES);
+  const s = sps.buildMesh();
+  s.material = particleMaterial;
+  for (let i = 0; i < NUMBER_OF_PARTICLES; i++) {
+    sps.particles[i].position.x = 0;
+    sps.particles[i].position.y = 0;
+    sps.particles[i].position.z = 0;
+
+    sps.particles[i].velocity.x = 0.1 * (Math.random() - 0.5);
+    sps.particles[i].velocity.y = 0.2 * Math.random();
+    sps.particles[i].velocity.z = 0.1 * (Math.random() - 0.5);
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    //@ts-ignore
+    sps.particles[i].rand = 1 / (1 + Math.random()) / 10;
+  }
+
+  sps.updateParticle = function (p) {
+    p.velocity.y += PARTICLES_GRAVITY;
+    p.position.x += p.velocity.x;
+    p.position.y += p.velocity.y;
+    p.position.z += p.velocity.z;
+    let random = 0;
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    //@ts-ignore
+    random = p.rand;
+    // rotate
+    p.rotation.x += p.velocity.z * random;
+    p.rotation.y += p.velocity.x * random;
+    p.rotation.z += p.velocity.y * random;
+
+    return p;
+  };
+
+  // Init sps
+  sps.setParticles(); // set them
+  sps.refreshVisibleSize(); // compute the bounding box
+  sps.computeParticleColor = false; // the colors won't change
+  sps.computeParticleTexture = false; // nor the texture now
+  let count = 0;
+  const update = () => {
+    sps.setParticles();
+    count++;
+    if (count > PARTICLES_LIFETIME) {
+      sps.dispose();
+      noa.off("beforeRender", update);
+    }
+  };
+  noa.on("beforeRender", update);
+
+  sps.afterUpdateParticles = function () {
+    this.refreshVisibleSize();
+  };
+
+  noa.rendering.addMeshToScene(s, false);
+  const local: number[] = [];
+  const [x, y, z] = noa.globalToLocal([block.x, block.y + 0.5, block.z], [0, 0, 0], local);
+  s.position.copyFromFloats(x + 0.5, y, z + 0.5);
 }
