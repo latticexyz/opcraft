@@ -5,8 +5,9 @@ import {
   definePlayerDirectionComponent,
   definePlayerPositionComponent,
   defineSelectedSlotComponent,
+  defineCraftingTableComponent,
+  defineUIComponent,
 } from "./components";
-import { defineCraftingTableComponent } from "./components/CraftingTable";
 import { Singleton } from "./constants";
 import { setupHand } from "./engine/hand";
 import { monkeyPatchMeshComponent } from "./engine/components/monkeyPatchMeshComponent";
@@ -29,6 +30,7 @@ export function createNoaLayer(network: NetworkLayer) {
     CraftingTable: defineCraftingTableComponent(world),
     PlayerPosition: definePlayerPositionComponent(world),
     PlayerDirection: definePlayerDirectionComponent(world),
+    UI: defineUIComponent(world),
   };
 
   // --- SETUP ----------------------------------------------------------------------
@@ -43,6 +45,7 @@ export function createNoaLayer(network: NetworkLayer) {
   setupSky(noa);
   setupHand(noa);
   noa.entities.addComponentAgain(noa.playerEntity, MINING_BLOCK_COMPONENT, {});
+  setComponent(components.UI, SingletonEntity, { showComponentBrowser: false });
 
   // --- API ------------------------------------------------------------------------
   function setCraftingTable(entities: EntityIndex[]) {

@@ -1,4 +1,4 @@
-import { getComponentValue, HasValue, runQuery, setComponent } from "@latticexyz/recs";
+import { getComponentValue, HasValue, runQuery, setComponent, updateComponent } from "@latticexyz/recs";
 import { NetworkLayer, BlockType } from "../../network";
 import { INDEX_TO_BLOCK } from "../../react/components/ActionBar";
 import { HandComponent, HAND_COMPONENT } from "../engine/components/handComponent";
@@ -8,7 +8,7 @@ import { NoaLayer } from "../types";
 export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
   const {
     noa,
-    components: { SelectedSlot },
+    components: { SelectedSlot, UI },
     SingletonEntity,
     api: { setCraftingTable },
   } = context;
@@ -17,7 +17,7 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
     world,
     components: { Item, OwnedBy },
     indexers: { Position },
-    api: { build, mine },
+    api: { build },
     network: { connectedAddress },
     actions: { withOptimisticUpdates },
   } = network;
@@ -108,10 +108,17 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
 
   // Control selected slot with keys 1-9
   noa.inputs.bind("slot", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "P", "O", "I", "U");
+
   noa.inputs.down.on("slot", (e) => {
     console.log(e.key);
     const mappings: { [key: number | string]: number } = { 0: 10, P: 11, O: 12, I: 13, U: 14 };
     const key = mappings[e.key as string | number] ?? Number(e.key);
     setComponent(SelectedSlot, SingletonEntity, { value: key });
+  });
+
+  noa.inputs.bind("componentbrowser", "`");
+  noa.inputs.down.on("componentbrowser", () => {
+    const showComponentBrowser = getComponentValue(UI, SingletonEntity)?.showComponentBrowser;
+    updateComponent(UI, SingletonEntity, { showComponentBrowser: !showComponentBrowser });
   });
 }
