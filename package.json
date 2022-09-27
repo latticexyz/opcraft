@@ -9,7 +9,8 @@
   "private": true,
   "workspaces": {
     "packages": [
-      "packages/*"
+      "packages/client",
+      "packages/contracts"
     ]
   },
   "devDependencies": {
