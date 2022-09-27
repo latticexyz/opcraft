@@ -4,6 +4,5 @@ dist
 cypress/videos
 cypress/screenshots
 cypress/reports
-.yarn/install-state.gz
+.pnpm/install-state.gz
 .DS_Store
-.yarn-error.log

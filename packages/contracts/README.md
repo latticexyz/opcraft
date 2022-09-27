@@ -2,7 +2,7 @@
 
 ### Upgrading Facets
 
-Run `yarn hardhat:deploy:upgrade` to only upgrade Diamond contracts.
+Run `pnpm hardhat:deploy:upgrade` to only upgrade Diamond contracts.
 
 ### Adding new functions
 

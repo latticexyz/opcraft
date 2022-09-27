@@ -21,7 +21,7 @@ jobs:
           version: nightly
 
       - name: Install dependencies
-        run: yarn install --network-concurrency 1
+        run: pnpm install --network-concurrency 1
 
       - name: Build client
-        run: yarn workspace client run build
+        run: pnpm workspace client run build

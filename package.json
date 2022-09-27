@@ -7,11 +7,6 @@
     "url": "https://github.com/latticexyz/opcraft.git"
   },
   "private": true,
-  "workspaces": {
-    "packages": [
-      "packages/*"
-    ]
-  },
   "devDependencies": {
     "@commitlint/cli": "^16.2.4",
     "@commitlint/config-conventional": "^16.2.4",
@@ -32,22 +27,21 @@
     }
   },
   "scripts": {
-    "prepare": "husky install && (forge --version || yarn foundryup) && yarn lerna run prepare",
+    "preinstall": "npx only-allow pnpm",
+    "prepare": "husky install && (forge --version || pnpm foundryup)",
     "commit": "cz",
     "prettier:check": "prettier --check 'packages/**/*.ts'",
     "prettier": "prettier --write 'packages/**/*.ts'",
     "lint": "eslint . --ext .ts",
-    "lerna:release": "lerna version --conventional-commits --yes",
-    "lerna:publish": "lerna publish --no-private --force-publish",
-    "start:ri": "run-pty % yarn workspace contracts run start % yarn workspace client run start",
-    "start": "run-pty % yarn start:contracts % yarn start:client",
-    "start:client": "wait-on tcp:8545 && yarn workspace client run start",
-    "start:contracts": "yarn workspace contracts run start",
-    "link:mud": "for i in node_modules/@latticexyz/*; do yarn link @latticexyz/$(basename $i); done",
-    "unlink:mud": "for i in node_modules/@latticexyz/*; do yarn unlink @latticexyz/$(basename $i); done && yarn install --force",
+    "start:ri": "run-pty % pnpm --filter @latticexyz/contracts run start % pnpm --filter @latticexyz/client run start",
+    "start": "run-pty % pnpm start:contracts % pnpm start:client",
+    "start:client": "wait-on tcp:8545 && pnpm --filter @latticexyz/client run start",
+    "start:contracts": "pnpm --filter @latticexyz/contracts run start",
+    "link:mud": "for i in node_modules/@latticexyz/*; do pnpm link @latticexyz/$(basename $i); done",
+    "unlink:mud": "for i in node_modules/@latticexyz/*; do pnpm unlink @latticexyz/$(basename $i); done && pnpm install --force",
     "yalc:mud": "for i in node_modules/@latticexyz/*; do yalc add @latticexyz/$(basename $i); done",
-    "unyalc:mud": "for i in node_modules/@latticexyz/*; do yalc remove @latticexyz/$(basename $i); done && yarn install --force",
-    "test": "yarn workspaces run test",
+    "unyalc:mud": "for i in node_modules/@latticexyz/*; do yalc remove @latticexyz/$(basename $i); done && pnpm install --force",
+    "test": "pnpm -r test",
     "foundryup": "curl -L https://foundry.paradigm.xyz | bash && bash ~/.foundry/bin/foundryup"
   },
   "lint-staged": {
