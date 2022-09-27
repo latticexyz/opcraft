@@ -58,7 +58,6 @@ export function registerHandComponent(
             handMesh.visibility = 1;
             blockMesh.visibility = 0;
           }
-          console.log(isMining && handMesh.animations[0].name.includes("idle"));
           if (isMining && handMesh.animations[0].name.includes("idle")) {
             handMesh.animations.pop();
             handMesh.animations.push(MINING_ANIMATION_BOX_HAND);
