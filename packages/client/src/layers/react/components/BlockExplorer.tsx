@@ -1,6 +1,6 @@
-import { NetworkComponentUpdate } from "@latticexyz/network";
+import { isNetworkComponentUpdateEvent, NetworkComponentUpdate } from "@latticexyz/network";
 import React from "react";
-import { scan } from "rxjs";
+import { filter, scan } from "rxjs";
 import { BlockIdToKey } from "../../network/constants";
 import { registerUIComponent } from "../engine";
 
@@ -24,7 +24,7 @@ export function registerBlockExplorer() {
       } = layers;
 
       // Group stream of component update events by block number
-      return ecsEvent$.pipe(
+      return ecsEvent$.pipe(filter(isNetworkComponentUpdateEvent)).pipe(
         scan<NetworkComponentUpdate, Record<string, Record<string, NetworkComponentUpdate[]>>>((acc, curr) => {
           const { blockNumber, txHash } = curr;
           // const entityIndex = world.entityToIndex.get(curr.entity);
