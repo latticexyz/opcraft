@@ -1,57 +1,127 @@
-import { Color3, MeshBuilder, Scene, StandardMaterial, Texture, Vector3 } from "@babylonjs/core";
+import { Color3, Matrix, MeshBuilder, Scene, StandardMaterial, Texture } from "@babylonjs/core";
+import * as BABYLON from "@babylonjs/core";
 import type { Engine } from "noa-engine";
 /*
  * Setups clouds in a hacky way
  */
-const CLOUD_HEIGHT = 100;
-const SKY_HEIGHT = 110;
+const CLOUD_HEIGHT = 90.5;
+const SKY_HEIGHT = 40;
 
 export function setupClouds(noa: Engine) {
-  const scene = noa.rendering.getScene();
-  const cloudMesh = MeshBuilder.CreatePlane(
-    "cloudMesh",
-    {
-      height: 1.5e3,
-      width: 1.5e3,
-    },
-    scene
-  );
+  // Parameters
+  const size = 12;
+  const widthNb = 100;
+  const heightNb = 100;
+  const numberOfParticles = widthNb * heightNb;
 
-  const cloudMat = new StandardMaterial("cloud", scene);
-  const cloudTexture = new Texture(
+  const scene = noa.rendering.getScene();
+  const mat = new BABYLON.StandardMaterial("mat1", scene);
+  const cloudTexture = new BABYLON.Texture(
     "./assets/textures/environment/clouds.png",
     scene,
     true,
     true,
     Texture.NEAREST_SAMPLINGMODE
   );
-  cloudTexture.hasAlpha = true;
-  cloudTexture.vScale = 0.75;
-  cloudTexture.uScale = 0.75;
+  mat.emissiveColor = new Color3(1, 1, 1);
+  mat.diffuseTexture = cloudTexture;
+  mat.diffuseTexture.hasAlpha = true;
+  mat.specularColor = new BABYLON.Color3(0.2, 0.2, 0.2);
+  mat.backFaceCulling = false;
+  mat.freeze();
 
-  cloudMat.diffuseTexture = cloudTexture;
-  cloudMat.opacityTexture = cloudTexture;
-  cloudMat.backFaceCulling = false;
-  cloudMat.emissiveColor = new Color3(1, 1, 1);
+  const faceUV = new Array(6);
 
-  cloudMesh.rotation.x = -Math.PI / 2;
-  cloudMesh.material = cloudMat;
+  for (let i = 0; i < 6; i++) {
+    faceUV[i] = new BABYLON.Vector4(0, 0, 0, 0);
+  }
 
-  noa.rendering.addMeshToScene(cloudMesh, false);
+  const options = {
+    size: size,
+    faceUV: faceUV,
+  };
 
-  let pos = [...noa.camera.getPosition()];
+  const model = BABYLON.MeshBuilder.CreateBox("box", options, scene);
+
+  // SPS
+  const sps = new BABYLON.SolidParticleSystem("sps", scene);
+  sps.addShape(model, numberOfParticles);
+  model.dispose();
+  const s = sps.buildMesh();
+  s.material = mat;
+
+  // Tmp internal vars
+  sps.vars.target = BABYLON.Vector3.Zero();
+  sps.vars.tmp = BABYLON.Vector3.Zero();
+  sps.vars.totalWidth = size * widthNb;
+  sps.vars.totalHeight = size * heightNb;
+  sps.vars.shiftx = -sps.vars.totalWidth / 2;
+  sps.vars.shifty = -sps.vars.totalHeight / 2;
+
+  // SPS initializator : just set the particle along a wall
+  let p = 0;
+  for (let j = 0; j < heightNb; j++) {
+    for (let i = 0; i < widthNb; i++) {
+      // let's position the quads on a grid
+      sps.particles[p].position.x = i * size + sps.vars.shiftx;
+      sps.particles[p].position.y = j * size + sps.vars.shifty;
+      sps.particles[p].position.z = 0;
+
+      // let's set the texture per quad
+      sps.particles[p].uvs.x = (i * size) / sps.vars.totalWidth;
+      sps.particles[p].uvs.y = (j * size) / sps.vars.totalHeight;
+      sps.particles[p].uvs.z = ((i + 1) * size) / sps.vars.totalWidth;
+      sps.particles[p].uvs.w = ((j + 1) * size) / sps.vars.totalHeight;
+
+      // increment the particle index
+      p++;
+    }
+  }
+
+  const pl = new BABYLON.DirectionalLight("pl", new BABYLON.Vector3(0, 1, 0), scene);
+  pl.intensity = 0.5;
+  pl.diffuse = new BABYLON.Color3(1, 1, 1);
+  pl.specular = BABYLON.Color3.Black();
+
+  // Init sps
+  sps.setParticles(); // set them
+  sps.refreshVisibleSize(); // compute the bounding box
+  sps.computeParticleColor = false; // the colors won't change
+  sps.computeParticleTexture = false; // nor the texture now
+  s.rotation.x = -Math.PI / 2;
+
+  noa.rendering.addMeshToScene(s, false);
+
+  const [playerX, _, playerZ] = noa.ents.getPositionData(noa.playerEntity)!.position!;
+  const cloudCenter = [playerX, playerZ];
+  let currentRadian = 0;
 
   const update = () => {
-    cloudTexture.vOffset += 0.00001 + (pos[2] - noa.camera.getPosition()[2]) / 10000;
-    cloudTexture.uOffset -= (pos[0] - noa.camera.getPosition()[0]) / 10000;
-    pos = [...noa.camera.getPosition()];
-    const rpos = noa.ents.getPositionData(noa.playerEntity)!._renderPosition!;
-    cloudMesh.position.copyFromFloats(rpos[0], rpos[1] + CLOUD_HEIGHT, rpos[2]);
+    const local: number[] = [];
+    const wrappedRadian = currentRadian - Math.floor(currentRadian / (Math.PI * 2)) * (Math.PI * 2);
+    const cloudPosition = [
+      cloudCenter[0] + Math.sin(wrappedRadian) * 100,
+      cloudCenter[1] + Math.cos(wrappedRadian) * 100,
+    ];
+    currentRadian += 0.0001;
+    const [x, y, z] = noa.globalToLocal([cloudPosition[0], CLOUD_HEIGHT, cloudPosition[1]], [0, 0, 0], local);
+    const [currentPlayerX, _, currentPlayerZ] = noa.ents.getPositionData(noa.playerEntity)!.position!;
+    s.position.copyFromFloats(x, y, z);
+    // move clouds towards player
+    const diffX = currentPlayerX - cloudCenter[0];
+    const diffZ = currentPlayerZ - cloudCenter[1];
+    const distance = Math.sqrt(diffX ** 2 + diffZ ** 2);
+    const speedVector = [
+      0.00001 * Math.sign(diffX) * Math.sqrt(distance),
+      0.00001 * Math.sign(diffZ) * Math.sqrt(distance),
+    ];
+    cloudCenter[0] += speedVector[0];
+    cloudCenter[1] += speedVector[1];
   };
 
   noa.on("beforeRender", update);
 
-  cloudMesh.onDisposeObservable.add(() => {
+  s.onDisposeObservable.add(() => {
     noa.off("beforeRender", update);
   });
 }
@@ -76,17 +146,19 @@ export function setupSky(noa: Engine) {
   skyMat.emissiveColor = new Color3(0.2, 0.3, 0.7);
   skyMat.diffuseColor = skyMat.emissiveColor;
 
-  skyMesh.infiniteDistance = true;
-  skyMesh.renderingGroupId;
+  skyMesh.renderingGroupId = -1;
   skyMesh.material = skyMat;
+  skyMesh.applyFog = true;
 
   skyMesh.rotation.x = -Math.PI / 2;
 
   noa.rendering.addMeshToScene(skyMesh, false);
 
   const update = () => {
-    const rpos = noa.ents.getPositionData(noa.playerEntity)!._renderPosition!;
-    skyMesh.position.copyFromFloats(rpos[0], rpos[1] + SKY_HEIGHT, rpos[2]);
+    const local: number[] = [];
+    const [playerX, playerY, playerZ] = noa.ents.getPositionData(noa.playerEntity)!.position!;
+    const [x, y, z] = noa.globalToLocal([playerX, playerY, playerZ], [0, 0, 0], local);
+    skyMesh.position.copyFromFloats(x, y + SKY_HEIGHT, z);
   };
 
   noa.on("beforeRender", update);
