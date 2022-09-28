@@ -130,7 +130,7 @@ export async function createNetworkLayer(config: GameConfig) {
       metadata: { actionType: "mine", coord, blockType },
       requirement: () => true,
       components: { Position: components.Position, OwnedBy: components.OwnedBy, Item: components.Item },
-      execute: () => systems["system.Mine"].executeTyped(coord, blockId),
+      execute: () => systems["system.Mine"].executeTyped(coord, blockId, { gasLimit: 1700000 }),
       updates: () => [
         {
           component: "Position",
