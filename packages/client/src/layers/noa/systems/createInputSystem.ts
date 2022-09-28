@@ -72,6 +72,7 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
 
   // place a block on right click
   noa.inputs.down.on("alt-fire", function () {
+    console.log("alt-fire");
     if (noa.targetedBlock) {
       const pos = noa.targetedBlock.adjacent;
       const targeted = noa.targetedBlock.position;
@@ -119,6 +120,7 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
   });
 
   noa.inputs.bind("inventory", "E");
+  noa.inputs.unbind("alt-fire", "E");
   noa.inputs.down.on("inventory", () => {
     toggleInventory();
   });
