@@ -8,6 +8,7 @@ export type GameConfig = {
   wsRpc?: string;
   checkpointUrl?: string;
   streamServiceUrl?: string;
+  relayerServiceUrl?: string;
   peerJsUrl?: string;
   devMode: boolean;
   initialBlockNumber: number;

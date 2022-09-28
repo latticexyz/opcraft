@@ -18,7 +18,7 @@ import { defineNameComponent } from "./components/NameComponent";
 import { getBlockAtPosition as getBlockAtPositionApi, getECSBlock, getTerrain, getTerrainBlock } from "./api";
 import { createPerlin } from "@latticexyz/noise";
 import { BlockIdToKey, BlockType } from "./constants";
-import { GodID } from "@latticexyz/network";
+import { createRelayerStream, GodID } from "@latticexyz/network";
 
 /**
  * The Network layer is the lowest layer in the client architecture.
@@ -54,6 +54,13 @@ export async function createNetworkLayer(config: GameConfig) {
     world,
     components
   );
+
+  const playerAddress = network.connectedAddress.get();
+  const relayer =
+    config.relayerServiceUrl && playerAddress
+      ? await createRelayerStream(config.relayerServiceUrl, playerAddress)
+      : null;
+  relayer && world.registerDisposer(relayer.dispose);
 
   // --- ACTION SYSTEM --------------------------------------------------------------
   const actions = createActionSystem<{ actionType: string; coord?: VoxelCoord; blockType?: keyof typeof BlockType }>(
@@ -153,6 +160,7 @@ export async function createNetworkLayer(config: GameConfig) {
     dev: setupDevSystems(world, encoders, systems),
     config,
     indexers,
+    relayer,
   };
 
   return context;
