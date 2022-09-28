@@ -73,11 +73,15 @@ export async function setupContracts<C extends ContractComponents>(config: GameC
     signerOrProvider,
   });
 
-  const { txQueue, dispose: disposeTxQueue } = createTxQueue(contracts, network, { devMode: config.devMode });
+  const { txQueue, dispose: disposeTxQueue } = createTxQueue(contracts, network, {
+    devMode: config.devMode,
+    concurrency: 4,
+  });
   world.registerDisposer(disposeTxQueue);
 
   const systems = createSystemExecutor<SystemTypes>(world, network, SystemsRegistry, SystemAbis, {
     devMode: config.devMode,
+    concurrency: 4,
   });
 
   // Create sync worker

@@ -28,6 +28,7 @@ const defaultParams = {
   checkpoint: "https://ecs-snapshot.op-bedrock.lattice.xyz",
   stream: undefined,
   relayer: "https://ecs-relay.op-bedrock.lattice.xyz",
+  blockTime: "1000",
 };
 
 /**
@@ -53,6 +54,8 @@ async function bootGame() {
     const devMode = params.get("dev") === "true";
     const initialBlockNumberString = params.get("initialBlockNumber") ?? defaultParams.initialBlockNumber;
     const initialBlockNumber = initialBlockNumberString ? parseInt(initialBlockNumberString) : 0;
+    const blockTimeString = params.get("blockTime") ?? defaultParams.blockTime;
+    const blockTime = blockTimeString ? parseInt(blockTimeString) : 1000;
 
     if (!privateKey) {
       privateKey = localStorage.getItem("burnerWallet") || Wallet.createRandom().privateKey;
@@ -72,6 +75,7 @@ async function bootGame() {
         streamServiceUrl,
         relayerServiceUrl,
         devMode,
+        blockTime,
         initialBlockNumber,
       };
     }
