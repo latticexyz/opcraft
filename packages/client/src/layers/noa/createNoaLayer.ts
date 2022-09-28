@@ -13,7 +13,7 @@ import { monkeyPatchMeshComponent } from "./engine/components/monkeyPatchMeshCom
 import { registerRotationComponent } from "./engine/components/rotationComponent";
 import { setupClouds, setupSky } from "./engine/sky";
 import { setupNoaEngine } from "./setup";
-import { createBlockSystem, createInputSystem, createP2PSystem, createPlayerPositionSystem } from "./systems";
+import { createBlockSystem, createInputSystem, createPlayerPositionSystem, createRelayerSystem } from "./systems";
 import { registerHandComponent } from "./engine/components/handComponent";
 import { registerModelComponent } from "./engine/components/modelComponent";
 import { MINING_BLOCK_COMPONENT, registerMiningBlockComponent } from "./engine/components/miningBlockComponent";
@@ -85,7 +85,7 @@ export function createNoaLayer(network: NetworkLayer) {
   createInputSystem(network, context);
   createBlockSystem(network, context);
   createPlayerPositionSystem(network, context);
-  createP2PSystem(network, context);
+  createRelayerSystem(network, context);
 
   return context;
 }

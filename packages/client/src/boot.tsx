@@ -3,7 +3,7 @@ import { getComponentValue, removeComponent, setComponent } from "@latticexyz/re
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { Time } from "./utils/time";
-import { createNetworkLayer as createNetworkLayerImport } from "./layers/network";
+import { createNetworkLayer as createNetworkLayerImport, GameConfig } from "./layers/network";
 import { createNoaLayer as createNoaLayerImport } from "./layers/noa";
 import { Layers } from "./types";
 import { Engine as EngineImport } from "./layers/react/engine/Engine";
@@ -27,6 +27,7 @@ const defaultParams = {
   initialBlockNumber: "589657",
   checkpoint: "https://ecs-snapshot.op-bedrock.lattice.xyz",
   stream: undefined,
+  relayer: undefined,
 };
 
 /**
@@ -47,6 +48,7 @@ async function bootGame() {
     const wsRpc = params.get("wsRpc") ?? defaultParams.wsRpc; // || (jsonRpc && jsonRpc.replace("http", "ws"));
     const checkpointUrl = params.get("checkpoint") ?? defaultParams.checkpoint;
     const streamServiceUrl = params.get("stream") ?? defaultParams.stream;
+    const relayerServiceUrl = params.get("relayer") ?? defaultParams.relayer;
     const peerJsUrl = params.get("peerJs") || undefined;
     const devMode = params.get("dev") === "true";
     const initialBlockNumberString = params.get("initialBlockNumber") ?? defaultParams.initialBlockNumber;
@@ -57,7 +59,7 @@ async function bootGame() {
       localStorage.setItem("burnerWallet", privateKey);
     }
 
-    let networkLayerConfig;
+    let networkLayerConfig: GameConfig | undefined;
     if (worldAddress && privateKey && chainIdString && jsonRpc) {
       networkLayerConfig = {
         worldAddress,
@@ -68,6 +70,7 @@ async function bootGame() {
         wsRpc,
         checkpointUrl,
         streamServiceUrl,
+        relayerServiceUrl,
         devMode,
         initialBlockNumber,
       };
