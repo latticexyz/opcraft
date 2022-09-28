@@ -100,7 +100,7 @@ export async function createNetworkLayer(config: GameConfig) {
       metadata: { actionType: "build", coord, blockType },
       requirement: () => true,
       components: { Position: components.Position, Item: components.Item, OwnedBy: components.OwnedBy },
-      execute: () => systems["system.Build"].executeTyped(BigNumber.from(entity), coord),
+      execute: () => systems["system.Build"].executeTyped(BigNumber.from(entity), coord, { gasLimit: 1_700_000 }),
       updates: () => [
         {
           component: "OwnedBy",
@@ -130,7 +130,8 @@ export async function createNetworkLayer(config: GameConfig) {
       metadata: { actionType: "mine", coord, blockType },
       requirement: () => true,
       components: { Position: components.Position, OwnedBy: components.OwnedBy, Item: components.Item },
-      execute: () => systems["system.Mine"].executeTyped(coord, blockId, { gasLimit: 1700000 }),
+      // TODO: find tighter bound for gas limit (gas requirement is different for ecs blocks and different terrain blocks)
+      execute: () => systems["system.Mine"].executeTyped(coord, blockId, { gasLimit: 1_700_000 }),
       updates: () => [
         {
           component: "Position",
