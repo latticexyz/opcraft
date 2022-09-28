@@ -27,7 +27,7 @@ const defaultParams = {
   initialBlockNumber: "589657",
   checkpoint: "https://ecs-snapshot.op-bedrock.lattice.xyz",
   stream: undefined,
-  relayer: undefined,
+  relayer: "https://ecs-relay.op-bedrock.lattice.xyz",
 };
 
 /**
