@@ -15,40 +15,36 @@ type BlockSummary = {
 
 const BlockExplorerContainer = styled.div`
   display: flex;
-  gap: 8px;
+  flex-direction: column;
+  align-items: start;
+  gap: 2px;
   padding: 12px;
 
   .BlockExplorer-Block {
-    position: relative;
-    display: grid;
-    grid-template-columns: repeat(3, 30px);
-    grid-template-rows: repeat(3, 30px);
-    gap: 4px;
-    padding: 2px;
-    border: 2px solid rgba(0, 0, 0, 0.5);
-    border-radius: 8px;
+    display: flex;
+    height: 24px;
+    gap: 8px;
+    padding: 4px;
+    border-radius: 4px;
+    align-items: center;
+    background-color: rgba(31, 31, 31, 0.5);
   }
   .BlockExplorer-BlockNumber {
-    position: absolute;
-    bottom: 100%;
-    left: 0;
-    right: 0;
-    text-align: center;
+    font-variant-numeric: tabular-nums;
   }
   .BlockExplorer-Entity {
     position: relative;
   }
   .BlockExplorer-Entity img {
-    width: 100%;
     height: 100%;
     aspect-ratio: 1;
     object-fit: cover;
-    border: 2px solid rgba(0, 0, 0, 0.5);
-    border-radius: 4px;
+    border-radius: 2px;
   }
   .BlockExplorer-EntityCount {
     position: absolute;
-    inset: 0;
+    bottom: 0;
+    right: 0;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -61,7 +57,8 @@ export function registerBlockExplorer() {
     {
       rowStart: 1,
       rowEnd: 3,
-      colStart: 1,
+      // TODO: move this back after we get the mute button out of the way
+      colStart: 2,
       colEnd: 8,
     },
     (layers) => {
@@ -137,7 +134,7 @@ export function registerBlockExplorer() {
             return summary;
           }, {})
         )
-        .pipe(map((summary) => Object.fromEntries(Object.entries(summary).slice(-5))));
+        .pipe(map((summary) => Object.fromEntries(Object.entries(summary).slice(-10))));
     },
     (summary) => {
       return (
