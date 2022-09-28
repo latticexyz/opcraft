@@ -28,7 +28,7 @@ export const getNetworkConfig: (networkConfig: GameConfig) => SetupContractConfi
     jsonRpcUrl: config.jsonRpc,
     wsRpcUrl: config.wsRpc,
     options: {
-      batch: config.devMode ? false : true,
+      batch: false,
       pollingInterval: 1000,
     },
   },

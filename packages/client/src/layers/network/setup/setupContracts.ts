@@ -75,7 +75,6 @@ export async function setupContracts<C extends ContractComponents>(config: GameC
 
   const { txQueue, dispose: disposeTxQueue } = createTxQueue(contracts, network, {
     devMode: config.devMode,
-    concurrency: 4,
   });
   world.registerDisposer(disposeTxQueue);
 

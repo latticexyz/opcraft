@@ -63,7 +63,7 @@ export function registerActionQueue() {
         <ActionQueueList>
           {[...getComponentEntities(Action)].map((e) => {
             const { state, metadata } = getComponentValueStrict(Action, e);
-            const { actionType, coord, blockType } = metadata;
+            const { actionType, coord, blockType } = metadata || {};
             const icon = blockType && getBlockIconUrl(blockType);
             return (
               <div key={e} className="ActionQueueItem">

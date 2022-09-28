@@ -1,5 +1,5 @@
 import React from "react";
-import { ActionState } from "@latticexyz/std-client";
+import { ActionState, ActionStateString } from "@latticexyz/std-client";
 import styled from "styled-components";
 import { PendingIcon } from "./icons/PendingIcon";
 import { CheckIcon } from "./icons/CheckIcon";
@@ -105,6 +105,7 @@ export const Action = ({ state, icon, title, description }: Props) => (
     </div>
     <div className="ActionStatus">
       <ActionStatusIcon state={state} />
+      {ActionStateString[state]}
     </div>
   </ActionContainer>
 );
