@@ -42,7 +42,7 @@ export function createRelayerSystem(network: NetworkLayer, context: NoaLayer) {
     return;
   }
 
-  // TODO: add proper chunk logic
+  // TODO: add proper chunking logic
   relayer.subscribe("chunk(0,0)");
 
   function setPosition(position: number[], direction: number[]) {
@@ -69,7 +69,6 @@ export function createRelayerSystem(network: NetworkLayer, context: NoaLayer) {
       position: [x, y, z],
       direction: [dx, dy, dz],
     } = decodeMessage(data);
-    console.log("[RELAYER]", address, x, y, z, dx, dy, dz);
     if (address === connectedAddress.get()) return;
 
     const entity = world.registerEntity({ id: address as EntityID });
