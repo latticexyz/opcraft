@@ -7,51 +7,67 @@ import { registerUIComponent } from "../engine";
 import styled from "styled-components";
 import { getBlockIconUrl } from "../../noa/constants";
 
+type BlockAction = {
+  action: "mine" | "build";
+  blockType: BlockTypeKey;
+};
+
 type BlockSummary = {
-  [blockNumber: string]: {
-    [blockType in BlockTypeKey]?: number;
-  };
+  [blockNumber: string]: BlockAction[];
 };
 
 const BlockExplorerContainer = styled.div`
   display: flex;
-  gap: 8px;
+  justify-content: flex-end;
+  flex-direction: row-reverse;
   padding: 12px;
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(31, 31, 31, 0.6) 0%, rgba(31, 31, 31, 0) 75%);
 
   .BlockExplorer-Block {
+    border-left: 2px solid rgba(31, 31, 31, 0.3);
     position: relative;
-    display: grid;
-    grid-template-columns: repeat(3, 30px);
-    grid-template-rows: repeat(3, 30px);
-    gap: 4px;
-    padding: 2px;
-    border: 2px solid rgba(0, 0, 0, 0.5);
-    border-radius: 8px;
+    margin-top: 1em;
   }
   .BlockExplorer-BlockNumber {
     position: absolute;
-    bottom: 100%;
-    left: 0;
-    right: 0;
-    text-align: center;
+    top: -1em;
+    left: -2px;
+    border-left: 2px solid rgba(31, 31, 31, 0.3);
+    height: 1em;
+    padding-left: 4px;
+    font-size: 0.8rem;
   }
-  .BlockExplorer-Entity {
+  .BlockExplorer-Actions {
+    height: 30px;
+    display: flex;
+    padding: 0 1px;
+  }
+  .BlockExplorer-Action {
     position: relative;
+    margin: 0 1px;
   }
-  .BlockExplorer-Entity img {
-    width: 100%;
+  .BlockExplorer-Action img {
     height: 100%;
     aspect-ratio: 1;
     object-fit: cover;
-    border: 2px solid rgba(0, 0, 0, 0.5);
-    border-radius: 4px;
+    border-radius: 2px;
   }
-  .BlockExplorer-EntityCount {
+  .BlockExplorer-ActionIcon::before {
     position: absolute;
     inset: 0;
     display: flex;
     justify-content: center;
     align-items: center;
+    font-size: 1.2rem;
+  }
+  .BlockExplorer-ActionIcon--mine::before {
+    content: "-";
+    color: hsl(0, 100%, 80%);
+  }
+  .BlockExplorer-ActionIcon--build::before {
+    content: "+";
+    color: hsl(100, 100%, 80%);
   }
 `;
 
@@ -62,7 +78,7 @@ export function registerBlockExplorer() {
       rowStart: 1,
       rowEnd: 3,
       colStart: 1,
-      colEnd: 8,
+      colEnd: 13,
     },
     (layers) => {
       const {
@@ -76,84 +92,97 @@ export function registerBlockExplorer() {
       } = layers;
 
       // Group stream of component update events by block number
-      return merge(blockNumber$, ecsEvent$.pipe(filter(isNetworkComponentUpdateEvent)))
-        .pipe(
-          scan<NetworkComponentUpdate | number, BlockSummary>((summary, update) => {
-            // Block number
-            if (typeof update === "number") {
-              return summary[update] ? summary : { ...summary, [update]: {} };
+      return merge(blockNumber$, ecsEvent$.pipe(filter(isNetworkComponentUpdateEvent))).pipe(
+        scan<NetworkComponentUpdate | number, BlockSummary>((summary, update) => {
+          // Block number
+          if (typeof update === "number") {
+            return summary[update] ? summary : { ...summary, [update]: [] };
+          }
+
+          // otherwise it's a NetworkComponentUpdate
+          const { blockNumber, txHash } = update;
+          // We're only visualizing the stream of new blocks so skip backfill
+          if (txHash === "worker" || txHash === "cache") return summary;
+
+          const actions: ReadonlyArray<BlockAction> = summary[blockNumber] ?? [];
+          const componentKey = mappings[update.component];
+
+          // Item component updates correspond to a mined terrain block
+          if (componentKey === "Item") {
+            console.log("mined terrain block");
+            const { value } = update.value as ComponentValue<SchemaOf<typeof Item>>;
+            return {
+              ...summary,
+              [blockNumber]: [
+                ...actions,
+                {
+                  action: "mine",
+                  blockType: BlockIdToKey[value as EntityID],
+                },
+              ],
+            };
+          }
+
+          // Position component updates correspond to a mined or placed ECS block
+          if (componentKey === "Position") {
+            const entityIndex = world.entityToIndex.get(update.entity);
+            const blockType = entityIndex != null ? getComponentValue(Item, entityIndex)?.value : undefined;
+            if (!blockType) {
+              // console.warn("Received Position update of unknown entity", update.entity);
+              return summary;
             }
 
-            // otherwise it's a NetworkComponentUpdate
-            const { blockNumber, txHash } = update;
-            // We're only visualizing the stream of new blocks so skip backfill
-            if (txHash === "worker" || txHash === "cache") return summary;
-
-            const block = {
-              ...(summary[blockNumber] || {}),
-            };
-            const componentKey = mappings[update.component];
-
-            // Item component updates correspond to a mined terrain block
-            if (componentKey === "Item") {
-              console.log("mined terrain block");
-              const { value } = update.value as ComponentValue<SchemaOf<typeof Item>>;
-              block[BlockIdToKey[value as EntityID]] = (block[BlockIdToKey[value as EntityID]] || 0) + 1;
+            // If the update includes a position, it corresponds to a placed block
+            if (update.value) {
+              console.log("placed block");
               return {
                 ...summary,
-                [blockNumber]: block,
+                [blockNumber]: [
+                  ...actions,
+                  {
+                    action: "build",
+                    blockType: BlockIdToKey[blockType as EntityID],
+                  },
+                ],
               };
             }
-
-            // Position component updates correspond to a mined or placed ECS block
-            if (componentKey === "Position") {
-              const entityIndex = world.entityToIndex.get(update.entity);
-              const blockType = entityIndex != null ? getComponentValue(Item, entityIndex)?.value : undefined;
-              if (!blockType) {
-                // console.warn("Received Position update of unknown entity", update.entity);
-                return summary;
-              }
-
-              // If the update includes a position, it corresponds to a placed block
-              if (update.value) {
-                console.log("placed block");
-                block[BlockIdToKey[blockType as EntityID]] = (block[BlockIdToKey[blockType as EntityID]] || 0) + 1;
-                return {
-                  ...summary,
-                  [blockNumber]: block,
-                };
-              }
-              // otherwise it corresponds to a mined ecs block
-              else {
-                console.log("mined ecs block");
-                block[BlockIdToKey[blockType as EntityID]] = (block[BlockIdToKey[blockType as EntityID]] || 0) + 1;
-                return {
-                  ...summary,
-                  [blockNumber]: block,
-                };
-              }
+            // otherwise it corresponds to a mined ecs block
+            else {
+              console.log("mined ecs block");
+              return {
+                ...summary,
+                [blockNumber]: [
+                  ...actions,
+                  {
+                    action: "mine",
+                    blockType: BlockIdToKey[blockType as EntityID],
+                  },
+                ],
+              };
             }
+          }
 
-            return summary;
-          }, {})
-        )
-        .pipe(map((summary) => Object.fromEntries(Object.entries(summary).slice(-5))));
+          return summary;
+        }, {})
+      );
     },
     (summary) => {
       return (
         <BlockExplorerContainer>
-          {Object.entries(summary).map(([blockNumber, counts]) => (
+          {Object.entries(summary).map(([blockNumber, actions]) => (
             <div key={blockNumber} className="BlockExplorer-Block">
-              <div className="BlockExplorer-BlockNumber">#{blockNumber}</div>
-              {Object.entries(counts).map(([blockType, count]) => {
-                if (blockType === "Air") return null;
-                return (
-                  <div key={blockType} className="BlockExplorer-Entity">
-                    <img src={getBlockIconUrl(blockType as BlockTypeKey)} />
-                    <div className="BlockExplorer-EntityCount">{count}</div>
-                  </div>
-                );
-              })}
+              {parseInt(blockNumber) % 16 === 0 ? <div className="BlockExplorer-BlockNumber">{blockNumber}</div> : null}
+              <div className="BlockExplorer-Actions">
+                {actions.map(({ action, blockType }, i) => {
+                  if (blockType === "Air") return null;
+                  return (
+                    <div key={i} className={`BlockExplorer-Action BlockExplorer-Action--${action}`}>
+                      <img src={getBlockIconUrl(blockType)} />
+                      <div className={`BlockExplorer-ActionIcon BlockExplorer-ActionIcon--${action}`} />
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           ))}
         </BlockExplorerContainer>
