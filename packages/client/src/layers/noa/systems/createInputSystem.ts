@@ -71,6 +71,8 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
   });
 
   // place a block on right click
+  noa.inputs.unbind("alt-fire"); // Unbind to remove the default binding of "E"
+  noa.inputs.bind("alt-fire", "<mouse 3>");
   noa.inputs.down.on("alt-fire", function () {
     console.log("alt-fire");
     if (noa.targetedBlock) {
@@ -120,7 +122,7 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
   });
 
   noa.inputs.bind("inventory", "E");
-  noa.inputs.unbind("alt-fire", "E");
+  // noa.inputs.unbind("alt-fire", "E");
   noa.inputs.down.on("inventory", () => {
     toggleInventory();
   });
