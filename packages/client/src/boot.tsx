@@ -26,7 +26,7 @@ const defaultParams = {
   wsRpc: "wss://l2.op-bedrock.lattice.xyz",
   initialBlockNumber: "589657",
   checkpoint: "https://ecs-snapshot.op-bedrock.lattice.xyz",
-  stream: undefined,
+  stream: "https://ecs-stream.op-bedrock.lattice.xyz",
   relayer: "https://ecs-relay.op-bedrock.lattice.xyz",
   blockTime: "1000",
 };
