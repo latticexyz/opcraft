@@ -1,10 +1,10 @@
 import React from "react";
 import { registerUIComponent } from "../engine";
-import { filter, map, merge, withLatestFrom } from "rxjs";
+import { combineLatest, concat, map, of, scan } from "rxjs";
 import styled from "styled-components";
 import { BlockIcon, Center } from "./common";
 import { range } from "@latticexyz/utils";
-import { EntityID, getComponentValue, getEntitiesWithValue } from "@latticexyz/recs";
+import { defineQuery, EntityID, getComponentValue, Has, HasValue, UpdateType } from "@latticexyz/recs";
 
 // This gives us 36 inventory slots. As of now there are 34 types of items, so it should fit.
 const INVENTORY_WIDTH = 9;
@@ -14,15 +14,15 @@ export function registerInventory() {
   registerUIComponent(
     "Inventory",
     {
+      rowStart: 12,
+      rowEnd: 13,
       colStart: 1,
       colEnd: 13,
-      rowStart: 1,
-      rowEnd: 13,
     },
     (layers) => {
       const {
         network: {
-          components: { OwnedBy },
+          components: { OwnedBy, Item },
           network: { connectedAddress },
         },
         noa: {
@@ -30,35 +30,42 @@ export function registerInventory() {
         },
       } = layers;
 
-      const address = connectedAddress.get();
-      const ownedByMe$ = OwnedBy.update$.pipe(filter((e) => [e.value[0]?.value, e.value[1]?.value].includes(address)));
-      const showInventory$ = UI.update$.pipe(map((e) => ({ layers, show: e.value[0]?.showInventory })));
+      const ownedByMeQuery = defineQuery([HasValue(OwnedBy, { value: connectedAddress.get() }), Has(Item)], {
+        runOnInit: true,
+      });
 
-      return merge(ownedByMe$, showInventory$).pipe(
-        withLatestFrom(showInventory$),
-        map(([, b]) => b)
+      const ownedByMe$ = ownedByMeQuery.update$.pipe(
+        scan((acc, curr) => {
+          console.log("update", curr);
+          console.log("entity", curr.entity);
+          const blockID = getComponentValue(Item, curr.entity)?.value;
+          console.log("blockid", blockID);
+          if (!blockID) return acc;
+          acc[blockID] = acc[blockID] || 0;
+          if (curr.type === UpdateType.Exit) {
+            acc[blockID]--;
+            return acc;
+          }
+
+          acc[blockID]++;
+          return acc;
+        }, {} as { [key: string]: number })
       );
+
+      const showInventory$ = concat(
+        of({ layers, show: true }),
+        UI.update$.pipe(map((e) => ({ layers, show: e.value[0]?.showInventory })))
+      );
+
+      return combineLatest([ownedByMe$, showInventory$]);
     },
-    ({ layers, show }) => {
+    ([ownedByMe, { layers, show }]) => {
       const {
-        network: {
-          components: { OwnedBy, Item },
-          network: { connectedAddress },
-        },
         noa: {
           api: { toggleInventory },
         },
       } = layers;
-      const ownedByMeQuery = getEntitiesWithValue(OwnedBy, { value: connectedAddress.get() });
-
-      const quantityPerType = Object.entries(
-        [...ownedByMeQuery].reduce<{ [key: string]: number }>((acc, entity) => {
-          const blockID = getComponentValue(Item, entity)?.value;
-          if (blockID == null) return acc;
-          acc[blockID] = (acc[blockID] ?? 0) + 1;
-          return acc;
-        }, {})
-      );
+      const quantityPerType = Object.entries(ownedByMe);
 
       console.log("Ownes", quantityPerType);
 
@@ -66,33 +73,72 @@ export function registerInventory() {
         toggleInventory(false);
       }
 
-      return show ? (
-        <Center>
-          <Background onClick={close} />
-          <Border color={"#999999"} style={{ zIndex: 1 }}>
-            <Wrapper>
-              {[...range(INVENTORY_WIDTH * INVENTORY_HEIGHT)].map((i) => (
-                <Border key={"slot" + i} color={"lightgray"}>
-                  <Border color={"#999999"}>
-                    <Slot>
-                      {quantityPerType[i] ? (
-                        <>
-                          <BlockIcon blockID={quantityPerType[i][0] as EntityID} scale={3.6}>
-                            <Quantity>{quantityPerType[i][1]}</Quantity>
-                          </BlockIcon>
-                        </>
-                      ) : null}
-                    </Slot>
-                  </Border>
-                </Border>
-              ))}
-            </Wrapper>
+      const Inventory = [...range(INVENTORY_WIDTH * (INVENTORY_HEIGHT - 1))]
+        .map((i) => i + INVENTORY_WIDTH)
+        .map((i) => (
+          <Border key={"slot" + i} color={"lightgray"}>
+            <Border color={"#999999"}>
+              <Slot>
+                {quantityPerType[i] ? (
+                  <>
+                    <BlockIcon blockID={quantityPerType[i][0] as EntityID} scale={3.6}>
+                      <Quantity>{quantityPerType[i][1]}</Quantity>
+                    </BlockIcon>
+                  </>
+                ) : null}
+              </Slot>
+            </Border>
           </Border>
+        ));
+
+      const ActionBar = (
+        <Center>
+          <Wrapper>
+            {[...range(INVENTORY_WIDTH)].map((i) => (
+              <Border key={"slot" + i} color={"lightgray"}>
+                <Border color={"#999999"}>
+                  <Slot>
+                    {quantityPerType[i] ? (
+                      <>
+                        <BlockIcon blockID={quantityPerType[i][0] as EntityID} scale={3.6}>
+                          <Quantity>{quantityPerType[i][1]}</Quantity>
+                        </BlockIcon>
+                      </>
+                    ) : null}
+                  </Slot>
+                </Border>
+              </Border>
+            ))}
+          </Wrapper>
         </Center>
-      ) : null;
+      );
+
+      return (
+        <>
+          {show ? (
+            <Absolute>
+              <Center>
+                <Background onClick={close} />
+                <Border color={"#999999"} style={{ zIndex: 1 }}>
+                  <Wrapper>{Inventory}</Wrapper>
+                </Border>
+              </Center>
+            </Absolute>
+          ) : null}
+          {ActionBar}
+        </>
+      );
     }
   );
 }
+
+const Absolute = styled.div`
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  top: 0;
+  left: 0;
+`;
 
 const Wrapper = styled.div`
   background-color: rgb(0 0 0 / 40%);
@@ -101,6 +147,7 @@ const Wrapper = styled.div`
   align-items: center;
   pointer-events: all;
   border: 5px lightgray solid;
+  z-index: 10;
 `;
 
 const Background = styled.div`
