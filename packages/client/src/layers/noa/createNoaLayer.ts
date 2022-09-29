@@ -22,7 +22,13 @@ import { monkeyPatchMeshComponent } from "./engine/components/monkeyPatchMeshCom
 import { registerRotationComponent } from "./engine/components/rotationComponent";
 import { setupClouds, setupSky } from "./engine/sky";
 import { setupNoaEngine } from "./setup";
-import { createBlockSystem, createInputSystem, createPlayerPositionSystem, createRelayerSystem } from "./systems";
+import {
+  createBlockSystem,
+  createInputSystem,
+  createInventoryIndexSystem,
+  createPlayerPositionSystem,
+  createRelayerSystem,
+} from "./systems";
 import { registerHandComponent } from "./engine/components/handComponent";
 import { registerModelComponent } from "./engine/components/modelComponent";
 import { MINING_BLOCK_COMPONENT, registerMiningBlockComponent } from "./engine/components/miningBlockComponent";
@@ -55,7 +61,10 @@ export function createNoaLayer(network: NetworkLayer) {
   setupSky(noa);
   setupHand(noa);
   noa.entities.addComponentAgain(noa.playerEntity, MINING_BLOCK_COMPONENT, {});
+
+  // Set initial values
   setComponent(components.UI, SingletonEntity, { showComponentBrowser: false, showInventory: false });
+  setComponent(components.SelectedSlot, SingletonEntity, { value: 1 });
 
   // --- API ------------------------------------------------------------------------
   function setCraftingTable(entities: EntityIndex[]) {
@@ -105,6 +114,7 @@ export function createNoaLayer(network: NetworkLayer) {
   createBlockSystem(network, context);
   createPlayerPositionSystem(network, context);
   createRelayerSystem(network, context);
+  createInventoryIndexSystem(network, context);
 
   return context;
 }

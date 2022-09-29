@@ -4,10 +4,15 @@ import styled from "styled-components";
 import { BlockIcon } from "./BlockIcon";
 import { Border } from "./Border";
 
-export const Slot: React.FC<{ blockID?: EntityID; quantity?: number }> = ({ blockID, quantity }) => (
-  <Border color={"lightgray"}>
+export const Slot: React.FC<{ blockID?: EntityID; quantity?: number; onClick?: () => void; selected?: boolean }> = ({
+  blockID,
+  quantity,
+  onClick,
+  selected,
+}) => (
+  <Border color={selected ? "green" : "lightgray"}>
     <Border color={"#999999"}>
-      <Inner>
+      <Inner onClick={onClick}>
         {blockID ? (
           <BlockIcon blockID={blockID} scale={3.6}>
             {quantity != null ? <Quantity>{quantity}</Quantity> : null}

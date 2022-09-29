@@ -38,7 +38,6 @@ export function registerInventory() {
         },
         noa: {
           components: { UI, InventoryIndex },
-          world,
         },
       } = layers;
 
@@ -46,44 +45,35 @@ export function registerInventory() {
         runOnInit: true,
       });
 
-      // Setting the initial inventory index
-      ownedByMeQuery.update$.pipe(map((e) => e.entity)).subscribe((entity) => {
-        const blockID = getComponentValue(Item, entity)?.value as EntityID | undefined;
-        const blockIndex = blockID && world.entityToIndex.get(blockID);
-        if (blockIndex != null && !hasComponent(InventoryIndex, blockIndex)) {
-          const values = [...InventoryIndex.values.value.values()]; // lol
-          for (let i = 0; i < INVENTORY_HEIGHT * INVENTORY_WIDTH; i++) {
-            if (!values.includes(i)) {
-              return setComponent(InventoryIndex, blockIndex, { value: i });
+      const ownedByMe$ = concat<{ [key: string]: number }[]>(
+        of({}),
+        ownedByMeQuery.update$.pipe(
+          scan((acc, curr) => {
+            console.log("update", curr);
+            console.log("entity", curr.entity);
+            const blockID = getComponentValue(Item, curr.entity)?.value;
+            console.log("blockid", blockID);
+            if (!blockID) return { ...acc };
+            acc[blockID] = acc[blockID] || 0;
+            if (curr.type === UpdateType.Exit) {
+              acc[blockID]--;
+              return { ...acc };
             }
-          }
-        }
-      });
 
-      const ownedByMe$ = ownedByMeQuery.update$.pipe(
-        scan((acc, curr) => {
-          console.log("update", curr);
-          console.log("entity", curr.entity);
-          const blockID = getComponentValue(Item, curr.entity)?.value;
-          console.log("blockid", blockID);
-          if (!blockID) return { ...acc };
-          acc[blockID] = acc[blockID] || 0;
-          if (curr.type === UpdateType.Exit) {
-            acc[blockID]--;
+            acc[blockID]++;
             return { ...acc };
-          }
-
-          acc[blockID]++;
-          return { ...acc };
-        }, {} as { [key: string]: number })
+          }, {} as { [key: string]: number })
+        )
       );
 
       const showInventory$ = concat(
-        of({ layers, show: true }),
+        of({ layers, show: false }),
         UI.update$.pipe(map((e) => ({ layers, show: e.value[0]?.showInventory })))
       );
 
-      return combineLatest([ownedByMe$, showInventory$, InventoryIndex.update$]);
+      const inventoryIndex$ = concat(of(0), InventoryIndex.update$.pipe(map((e) => e.entity)));
+
+      return combineLatest([ownedByMe$, showInventory$, inventoryIndex$]);
     },
     ([ownedByMe, { layers, show }]) => {
       const {
@@ -101,7 +91,15 @@ export function registerInventory() {
       const Slots = [...range(INVENTORY_HEIGHT * INVENTORY_WIDTH)].map((i) => {
         const blockIndex: EntityIndex | undefined = [...getEntitiesWithValue(InventoryIndex, { value: i })][0];
         const blockID = blockIndex != null ? world.entities[blockIndex] : undefined;
-        return <Slot key={"slot" + i} blockID={blockID} quantity={blockID && ownedByMe[blockID]} />;
+        const quantity = blockID && ownedByMe[blockID];
+        return (
+          <Slot
+            key={"slot" + i}
+            blockID={quantity ? blockID : undefined}
+            quantity={quantity || undefined}
+            onClick={() => console.log("clicked slot", i)}
+          />
+        );
       });
 
       const Inventory = (
