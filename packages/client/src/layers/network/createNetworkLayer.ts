@@ -54,7 +54,7 @@ export async function createNetworkLayer(config: GameConfig) {
   const { txQueue, systems, txReduced$, network, startSync, encoders } = await setupMUDNetwork<
     typeof components,
     SystemTypes
-  >(getNetworkConfig(config), world, components, SystemAbis);
+  >(getNetworkConfig(config), world, components, SystemAbis, { initialGasPrice: 2_000_000 });
 
   const playerAddress = network.connectedAddress.get();
   const relayer =
