@@ -67,8 +67,6 @@ export function registerInventory() {
       } = layers;
       const quantityPerType = Object.entries(ownedByMe);
 
-      console.log("Ownes", quantityPerType);
-
       function close() {
         toggleInventory(false);
       }
