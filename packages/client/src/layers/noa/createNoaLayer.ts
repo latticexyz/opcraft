@@ -1,4 +1,5 @@
 import {
+  createIndexer,
   EntityIndex,
   getComponentValue,
   namespaceWorld,
@@ -25,6 +26,7 @@ import { createBlockSystem, createInputSystem, createPlayerPositionSystem, creat
 import { registerHandComponent } from "./engine/components/handComponent";
 import { registerModelComponent } from "./engine/components/modelComponent";
 import { MINING_BLOCK_COMPONENT, registerMiningBlockComponent } from "./engine/components/miningBlockComponent";
+import { defineInventoryIndexComponent } from "./components/InventoryIndex";
 
 export function createNoaLayer(network: NetworkLayer) {
   const world = namespaceWorld(network.world, "noa");
@@ -38,6 +40,7 @@ export function createNoaLayer(network: NetworkLayer) {
     PlayerPosition: definePlayerPositionComponent(world),
     PlayerDirection: definePlayerDirectionComponent(world),
     UI: defineUIComponent(world),
+    InventoryIndex: createIndexer(defineInventoryIndexComponent(world)),
   };
 
   // --- SETUP ----------------------------------------------------------------------

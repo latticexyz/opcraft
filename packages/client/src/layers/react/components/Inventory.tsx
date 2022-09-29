@@ -4,7 +4,18 @@ import { combineLatest, concat, map, of, scan } from "rxjs";
 import styled from "styled-components";
 import { BlockIcon, Center } from "./common";
 import { range } from "@latticexyz/utils";
-import { defineQuery, EntityID, getComponentValue, Has, HasValue, UpdateType } from "@latticexyz/recs";
+import {
+  defineQuery,
+  EntityID,
+  EntityIndex,
+  getComponentValue,
+  getEntitiesWithValue,
+  Has,
+  hasComponent,
+  HasValue,
+  setComponent,
+  UpdateType,
+} from "@latticexyz/recs";
 
 // This gives us 36 inventory slots. As of now there are 34 types of items, so it should fit.
 const INVENTORY_WIDTH = 9;
@@ -26,12 +37,27 @@ export function registerInventory() {
           network: { connectedAddress },
         },
         noa: {
-          components: { UI },
+          components: { UI, InventoryIndex },
+          world,
         },
       } = layers;
 
       const ownedByMeQuery = defineQuery([HasValue(OwnedBy, { value: connectedAddress.get() }), Has(Item)], {
         runOnInit: true,
+      });
+
+      // Setting the initial inventory index
+      ownedByMeQuery.update$.pipe(map((e) => e.entity)).subscribe((entity) => {
+        const blockID = getComponentValue(Item, entity)?.value as EntityID | undefined;
+        const blockIndex = blockID && world.entityToIndex.get(blockID);
+        if (blockIndex != null && !hasComponent(InventoryIndex, blockIndex)) {
+          const values = [...InventoryIndex.values.value.values()]; // lol
+          for (let i = 0; i < INVENTORY_HEIGHT * INVENTORY_WIDTH; i++) {
+            if (!values.includes(i)) {
+              return setComponent(InventoryIndex, blockIndex, { value: i });
+            }
+          }
+        }
       });
 
       const ownedByMe$ = ownedByMeQuery.update$.pipe(
@@ -57,15 +83,16 @@ export function registerInventory() {
         UI.update$.pipe(map((e) => ({ layers, show: e.value[0]?.showInventory })))
       );
 
-      return combineLatest([ownedByMe$, showInventory$]);
+      return combineLatest([ownedByMe$, showInventory$, InventoryIndex.update$]);
     },
     ([ownedByMe, { layers, show }]) => {
       const {
         noa: {
+          world,
           api: { toggleInventory },
+          components: { InventoryIndex },
         },
       } = layers;
-      const quantityPerType = Object.entries(ownedByMe);
 
       function close() {
         toggleInventory(false);
@@ -73,40 +100,51 @@ export function registerInventory() {
 
       const Inventory = [...range(INVENTORY_WIDTH * (INVENTORY_HEIGHT - 1))]
         .map((i) => i + INVENTORY_WIDTH)
-        .map((i) => (
-          <Border key={"slot" + i} color={"lightgray"}>
-            <Border color={"#999999"}>
-              <Slot>
-                {quantityPerType[i] ? (
-                  <>
-                    <BlockIcon blockID={quantityPerType[i][0] as EntityID} scale={3.6}>
-                      <Quantity>{quantityPerType[i][1]}</Quantity>
-                    </BlockIcon>
-                  </>
-                ) : null}
-              </Slot>
+        .map((i) => {
+          const blockIndex: EntityIndex | undefined = [...getEntitiesWithValue(InventoryIndex, { value: i })][0];
+          const blockID = blockIndex != null ? world.entities[blockIndex] : undefined;
+
+          return (
+            // TODO: move to component
+            <Border key={"slot" + i} color={"lightgray"}>
+              <Border color={"#999999"}>
+                <Slot>
+                  {blockID && ownedByMe[blockID] ? (
+                    <>
+                      <BlockIcon blockID={blockID} scale={3.6}>
+                        <Quantity>{ownedByMe[blockID]}</Quantity>
+                      </BlockIcon>
+                    </>
+                  ) : null}
+                </Slot>
+              </Border>
             </Border>
-          </Border>
-        ));
+          );
+        });
 
       const ActionBar = (
         <Center>
           <Wrapper>
-            {[...range(INVENTORY_WIDTH)].map((i) => (
-              <Border key={"slot" + i} color={"lightgray"}>
-                <Border color={"#999999"}>
-                  <Slot>
-                    {quantityPerType[i] ? (
-                      <>
-                        <BlockIcon blockID={quantityPerType[i][0] as EntityID} scale={3.6}>
-                          <Quantity>{quantityPerType[i][1]}</Quantity>
-                        </BlockIcon>
-                      </>
-                    ) : null}
-                  </Slot>
+            {[...range(INVENTORY_WIDTH)].map((i) => {
+              const blockIndex: EntityIndex | undefined = [...getEntitiesWithValue(InventoryIndex, { value: i })][0];
+              const blockID = blockIndex != null ? world.entities[blockIndex] : undefined;
+
+              return (
+                <Border key={"slot" + i} color={"lightgray"}>
+                  <Border color={"#999999"}>
+                    <Slot>
+                      {blockID && ownedByMe[blockID] ? (
+                        <>
+                          <BlockIcon blockID={blockID} scale={3.6}>
+                            <Quantity>{ownedByMe[blockID]}</Quantity>
+                          </BlockIcon>
+                        </>
+                      ) : null}
+                    </Slot>
+                  </Border>
                 </Border>
-              </Border>
-            ))}
+              );
+            })}
           </Wrapper>
         </Center>
       );
