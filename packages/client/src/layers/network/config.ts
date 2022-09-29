@@ -1,4 +1,4 @@
-import { NetworkConfig, SyncWorkerConfig } from "@latticexyz/network";
+import { SetupContractConfig } from "@latticexyz/std-client";
 
 export type GameConfig = {
   worldAddress: string;
@@ -12,21 +12,22 @@ export type GameConfig = {
   peerJsUrl?: string;
   devMode: boolean;
   initialBlockNumber: number;
+  blockTime: number;
 };
-
-export type SetupContractConfig = NetworkConfig & Omit<SyncWorkerConfig, "worldContract" | "mappings">;
 
 export const getNetworkConfig: (networkConfig: GameConfig) => SetupContractConfig = (config) => ({
   clock: {
-    period: 1000,
+    period: config.blockTime,
     initialTime: 0,
-    syncInterval: 5000,
+    syncInterval: 60_000,
   },
   provider: {
+    chainId: config.chainId,
     jsonRpcUrl: config.jsonRpc,
     wsRpcUrl: config.wsRpc,
     options: {
       batch: false,
+      pollingInterval: 1000,
     },
   },
   privateKey: config.privateKey,
@@ -34,4 +35,6 @@ export const getNetworkConfig: (networkConfig: GameConfig) => SetupContractConfi
   checkpointServiceUrl: config.checkpointUrl,
   streamServiceUrl: config.streamServiceUrl,
   initialBlockNumber: config.initialBlockNumber,
+  worldAddress: config.worldAddress,
+  devMode: config.devMode,
 });
