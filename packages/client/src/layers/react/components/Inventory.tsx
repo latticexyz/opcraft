@@ -6,9 +6,9 @@ import { BlockIcon, Center } from "./common";
 import { range } from "@latticexyz/utils";
 import { EntityID, getComponentValue, getEntitiesWithValue } from "@latticexyz/recs";
 
-// const SCALE = 3;
+// This gives us 36 inventory slots. As of now there are 34 types of items, so it should fit.
 const INVENTORY_WIDTH = 9;
-const INVENTORY_HEIGHT = 3;
+const INVENTORY_HEIGHT = 4;
 
 export function registerInventory() {
   registerUIComponent(
@@ -77,8 +77,9 @@ export function registerInventory() {
                     <Slot>
                       {quantityPerType[i] ? (
                         <>
-                          <BlockIcon blockID={quantityPerType[i][0] as EntityID} scale={3}></BlockIcon>
-                          <p>{quantityPerType[i][1]}</p>
+                          <BlockIcon blockID={quantityPerType[i][0] as EntityID} scale={3.6}>
+                            <Quantity>{quantityPerType[i][1]}</Quantity>
+                          </BlockIcon>
                         </>
                       ) : null}
                     </Slot>
@@ -122,6 +123,15 @@ const Slot = styled.div`
 
 const Border = styled.div<{ color: string }>`
   border: 3px ${(p) => p.color} solid;
+`;
+
+const Quantity = styled.div`
+  width: 100%;
+  height: 100%;
+  display: grid;
+  justify-content: end;
+  align-content: end;
+  padding: 7px 3px;
 `;
 
 // const Grid = styled.div`

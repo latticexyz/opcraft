@@ -15,7 +15,6 @@ export const GUI = styled.div<{ _x: number; _y: number; _height: number; _width:
 export const BlockIcon = styled.div<{ blockID: EntityID; scale: number }>`
   width: ${(p) => 16 * p.scale}px;
   height: ${(p) => 16 * p.scale}px;
-  margin: ${(p) => 4 * p.scale}px;
   background-image: url("${(p) => getBlockIconUrl(BlockIdToKey[p.blockID]) ?? ""}");
   background-size: 100%;
   image-rendering: pixelated;

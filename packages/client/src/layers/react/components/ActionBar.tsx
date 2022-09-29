@@ -72,7 +72,7 @@ export function registerActionBar() {
             {[...range(9, 1, 1)].map((i) => (
               <Slot pos={i} key={"slot" + i}>
                 {quantityPerType[INDEX_TO_BLOCK[i]] > 0 ? (
-                  <BlockIcon blockID={INDEX_TO_BLOCK[i]} scale={SCALE}>
+                  <BlockIcon blockID={INDEX_TO_BLOCK[i]} scale={SCALE} style={{ margin: `${4 * SCALE}px` }}>
                     {quantityPerType[INDEX_TO_BLOCK[i]] ?? 0}
                   </BlockIcon>
                 ) : null}
