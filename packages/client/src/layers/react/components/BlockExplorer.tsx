@@ -9,14 +9,16 @@ import { getBlockIconUrl } from "../../noa/constants";
 
 type BlockSummary = {
   [blockNumber: string]: {
-    [blockType in BlockTypeKey]?: number;
+    startBlock: number;
+    endBlock: number;
+    entities: { [blockType in BlockTypeKey]?: number };
   };
 };
 
 const BlockExplorerContainer = styled.div`
   display: flex;
   gap: 8px;
-  padding: 12px;
+  padding: 32px 12px;
 
   .BlockExplorer-Block {
     position: relative;
@@ -24,9 +26,8 @@ const BlockExplorerContainer = styled.div`
     grid-template-columns: repeat(3, 30px);
     grid-template-rows: repeat(3, 30px);
     gap: 4px;
-    padding: 2px;
-    border: 2px solid rgba(0, 0, 0, 0.5);
-    border-radius: 8px;
+    padding: 4px;
+    background: rgba(31, 31, 31, 0.4);
   }
   .BlockExplorer-BlockNumber {
     position: absolute;
@@ -34,6 +35,10 @@ const BlockExplorerContainer = styled.div`
     left: 0;
     right: 0;
     text-align: center;
+    color: #000;
+    text-shadow: none;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 4px;
   }
   .BlockExplorer-Entity {
     position: relative;
@@ -43,8 +48,8 @@ const BlockExplorerContainer = styled.div`
     height: 100%;
     aspect-ratio: 1;
     object-fit: cover;
-    border: 2px solid rgba(0, 0, 0, 0.5);
-    border-radius: 4px;
+    box-shadow: 1.5px 1.5px 0 0 #000;
+    background-color: rgba(31, 31, 31, 0.6);
   }
   .BlockExplorer-EntityCount {
     position: absolute;
@@ -54,6 +59,10 @@ const BlockExplorerContainer = styled.div`
     align-items: center;
   }
 `;
+
+const blockNumberToBucket = (blockNumber: number) => {
+  return Math.floor(blockNumber / 64) * 64;
+};
 
 export function registerBlockExplorer() {
   registerUIComponent(
@@ -81,27 +90,45 @@ export function registerBlockExplorer() {
           scan<NetworkComponentUpdate | number, BlockSummary>((summary, update) => {
             // Block number
             if (typeof update === "number") {
-              return summary[update] ? summary : { ...summary, [update]: {} };
+              const bucketNumber = blockNumberToBucket(update);
+              return {
+                ...summary,
+                [bucketNumber]: {
+                  ...(summary[bucketNumber] || {
+                    startBlock: update,
+                    endBlock: update,
+                    entities: {},
+                  }),
+                  endBlock: update,
+                },
+              };
             }
 
             // otherwise it's a NetworkComponentUpdate
             const { blockNumber, txHash } = update;
+            const bucketNumber = blockNumberToBucket(blockNumber);
             // We're only visualizing the stream of new blocks so skip backfill
             if (txHash === "worker" || txHash === "cache") return summary;
 
             const block = {
-              ...(summary[blockNumber] || {}),
+              ...(summary[bucketNumber] || {
+                startBlock: blockNumber,
+                endBlock: blockNumber,
+                entities: {},
+              }),
             };
+            block.endBlock = blockNumber;
             const componentKey = mappings[update.component];
 
             // Item component updates correspond to a mined terrain block
             if (componentKey === "Item") {
               console.log("mined terrain block");
               const { value } = update.value as ComponentValue<SchemaOf<typeof Item>>;
-              block[BlockIdToKey[value as EntityID]] = (block[BlockIdToKey[value as EntityID]] || 0) + 1;
+              block.entities[BlockIdToKey[value as EntityID]] =
+                (block.entities[BlockIdToKey[value as EntityID]] || 0) + 1;
               return {
                 ...summary,
-                [blockNumber]: block,
+                [bucketNumber]: block,
               };
             }
 
@@ -117,19 +144,21 @@ export function registerBlockExplorer() {
               // If the update includes a position, it corresponds to a placed block
               if (update.value) {
                 console.log("placed block");
-                block[BlockIdToKey[blockType as EntityID]] = (block[BlockIdToKey[blockType as EntityID]] || 0) + 1;
+                block.entities[BlockIdToKey[blockType as EntityID]] =
+                  (block.entities[BlockIdToKey[blockType as EntityID]] || 0) + 1;
                 return {
                   ...summary,
-                  [blockNumber]: block,
+                  [bucketNumber]: block,
                 };
               }
               // otherwise it corresponds to a mined ecs block
               else {
                 console.log("mined ecs block");
-                block[BlockIdToKey[blockType as EntityID]] = (block[BlockIdToKey[blockType as EntityID]] || 0) + 1;
+                block.entities[BlockIdToKey[blockType as EntityID]] =
+                  (block.entities[BlockIdToKey[blockType as EntityID]] || 0) + 1;
                 return {
                   ...summary,
-                  [blockNumber]: block,
+                  [bucketNumber]: block,
                 };
               }
             }
@@ -140,22 +169,30 @@ export function registerBlockExplorer() {
         .pipe(map((summary) => Object.fromEntries(Object.entries(summary).slice(-5))));
     },
     (summary) => {
+      console.log("summary", summary);
       return (
         <BlockExplorerContainer>
-          {Object.entries(summary).map(([blockNumber, counts]) => (
-            <div key={blockNumber} className="BlockExplorer-Block">
-              <div className="BlockExplorer-BlockNumber">#{blockNumber}</div>
-              {Object.entries(counts).map(([blockType, count]) => {
-                if (blockType === "Air") return null;
-                return (
-                  <div key={blockType} className="BlockExplorer-Entity">
-                    <img src={getBlockIconUrl(blockType as BlockTypeKey)} />
-                    <div className="BlockExplorer-EntityCount">{count}</div>
-                  </div>
-                );
-              })}
-            </div>
-          ))}
+          {Object.entries(summary).map(([blockNumber, block]) => {
+            const diff = block.endBlock - block.startBlock;
+            return (
+              <div key={blockNumber} className="BlockExplorer-Block">
+                <div className="BlockExplorer-BlockNumber">
+                  #{block.startBlock}+{diff}
+                </div>
+                {block.entities
+                  ? Object.entries(block.entities).map(([blockType, count]) => {
+                      if (blockType === "Air") return null;
+                      return (
+                        <div key={blockType} className="BlockExplorer-Entity">
+                          <img src={getBlockIconUrl(blockType as BlockTypeKey)} />
+                          <div className="BlockExplorer-EntityCount">{count}</div>
+                        </div>
+                      );
+                    })
+                  : null}
+              </div>
+            );
+          })}
         </BlockExplorerContainer>
       );
     }
