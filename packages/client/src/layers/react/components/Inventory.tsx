@@ -2,7 +2,7 @@ import React from "react";
 import { registerUIComponent } from "../engine";
 import { combineLatest, concat, map, of, scan } from "rxjs";
 import styled from "styled-components";
-import { BlockIcon, Center } from "./common";
+import { Border, Center, Slot } from "./common";
 import { range } from "@latticexyz/utils";
 import {
   defineQuery,
@@ -66,15 +66,15 @@ export function registerInventory() {
           console.log("entity", curr.entity);
           const blockID = getComponentValue(Item, curr.entity)?.value;
           console.log("blockid", blockID);
-          if (!blockID) return acc;
+          if (!blockID) return { ...acc };
           acc[blockID] = acc[blockID] || 0;
           if (curr.type === UpdateType.Exit) {
             acc[blockID]--;
-            return acc;
+            return { ...acc };
           }
 
           acc[blockID]++;
-          return acc;
+          return { ...acc };
         }, {} as { [key: string]: number })
       );
 
@@ -98,69 +98,36 @@ export function registerInventory() {
         toggleInventory(false);
       }
 
-      const Inventory = [...range(INVENTORY_WIDTH * (INVENTORY_HEIGHT - 1))]
-        .map((i) => i + INVENTORY_WIDTH)
-        .map((i) => {
-          const blockIndex: EntityIndex | undefined = [...getEntitiesWithValue(InventoryIndex, { value: i })][0];
-          const blockID = blockIndex != null ? world.entities[blockIndex] : undefined;
+      const Slots = [...range(INVENTORY_HEIGHT * INVENTORY_WIDTH)].map((i) => {
+        const blockIndex: EntityIndex | undefined = [...getEntitiesWithValue(InventoryIndex, { value: i })][0];
+        const blockID = blockIndex != null ? world.entities[blockIndex] : undefined;
+        return <Slot key={"slot" + i} blockID={blockID} quantity={blockID && ownedByMe[blockID]} />;
+      });
 
-          return (
-            // TODO: move to component
-            <Border key={"slot" + i} color={"lightgray"}>
-              <Border color={"#999999"}>
-                <Slot>
-                  {blockID && ownedByMe[blockID] ? (
-                    <>
-                      <BlockIcon blockID={blockID} scale={3.6}>
-                        <Quantity>{ownedByMe[blockID]}</Quantity>
-                      </BlockIcon>
-                    </>
-                  ) : null}
-                </Slot>
-              </Border>
+      const Inventory = (
+        <Absolute>
+          <Center>
+            <Background onClick={close} />
+            <Border color={"#999999"} style={{ zIndex: 1 }}>
+              <Wrapper>
+                {[...range(INVENTORY_WIDTH * (INVENTORY_HEIGHT - 1))]
+                  .map((i) => i + INVENTORY_WIDTH)
+                  .map((i) => Slots[i])}
+              </Wrapper>
             </Border>
-          );
-        });
+          </Center>
+        </Absolute>
+      );
 
       const ActionBar = (
         <Center>
-          <Wrapper>
-            {[...range(INVENTORY_WIDTH)].map((i) => {
-              const blockIndex: EntityIndex | undefined = [...getEntitiesWithValue(InventoryIndex, { value: i })][0];
-              const blockID = blockIndex != null ? world.entities[blockIndex] : undefined;
-
-              return (
-                <Border key={"slot" + i} color={"lightgray"}>
-                  <Border color={"#999999"}>
-                    <Slot>
-                      {blockID && ownedByMe[blockID] ? (
-                        <>
-                          <BlockIcon blockID={blockID} scale={3.6}>
-                            <Quantity>{ownedByMe[blockID]}</Quantity>
-                          </BlockIcon>
-                        </>
-                      ) : null}
-                    </Slot>
-                  </Border>
-                </Border>
-              );
-            })}
-          </Wrapper>
+          <Wrapper>{[...range(INVENTORY_WIDTH)].map((i) => Slots[i])}</Wrapper>
         </Center>
       );
 
       return (
         <>
-          {show ? (
-            <Absolute>
-              <Center>
-                <Background onClick={close} />
-                <Border color={"#999999"} style={{ zIndex: 1 }}>
-                  <Wrapper>{Inventory}</Wrapper>
-                </Border>
-              </Center>
-            </Absolute>
-          ) : null}
+          {show ? Inventory : null}
           {ActionBar}
         </>
       );
@@ -193,48 +160,3 @@ const Background = styled.div`
   width: 100%;
   pointer-events: all;
 `;
-
-const Slot = styled.div`
-  width: 64px;
-  height: 64px;
-  display: grid;
-  justify-items: center;
-  align-items: center;
-  font-size: 20px;
-  border: 3px #626262 solid;
-`;
-
-const Border = styled.div<{ color: string }>`
-  border: 3px ${(p) => p.color} solid;
-`;
-
-const Quantity = styled.div`
-  width: 100%;
-  height: 100%;
-  display: grid;
-  justify-content: end;
-  align-content: end;
-  padding: 7px 3px;
-`;
-
-// const Grid = styled.div`
-//   display: grid;
-//   grid-template-rows: repeat(3, 1fr);
-//   grid-template-columns: repeat(3, 1fr);
-// `;
-
-// const Slot = styled.div<{ pos: number }>`
-//   position: absolute;
-//   left: ${(p) => (p.pos - 1) * SCALE * 20}px;
-//   top: 0;
-// `;
-
-// const Block = styled(BlockIcon)`
-//   position: absolute;
-//   left: 0;
-//   top: 0;
-// `;
-
-// const SlotWrapper = styled.div`
-//   position: relative;
-// `;
