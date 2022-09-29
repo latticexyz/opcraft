@@ -4,15 +4,16 @@ import styled from "styled-components";
 import { BlockIcon } from "./BlockIcon";
 import { Border } from "./Border";
 
-export const Slot: React.FC<{ blockID?: EntityID; quantity?: number; onClick?: () => void; selected?: boolean }> = ({
-  blockID,
-  quantity,
-  onClick,
-  selected,
-}) => (
+export const Slot: React.FC<{
+  blockID?: EntityID;
+  quantity?: number;
+  onClick?: () => void;
+  selected?: boolean;
+  disabled?: boolean;
+}> = ({ blockID, quantity, onClick, selected, disabled }) => (
   <Border color={selected ? "green" : "lightgray"}>
     <Border color={"#999999"}>
-      <Inner onClick={onClick}>
+      <Inner onClick={onClick} disabled={disabled}>
         {blockID ? (
           <BlockIcon blockID={blockID} scale={3.6}>
             {quantity != null ? <Quantity>{quantity}</Quantity> : null}
@@ -23,7 +24,7 @@ export const Slot: React.FC<{ blockID?: EntityID; quantity?: number; onClick?: (
   </Border>
 );
 
-const Inner = styled.div`
+const Inner = styled.div<{ disabled?: boolean }>`
   width: 64px;
   height: 64px;
   display: grid;
@@ -31,6 +32,7 @@ const Inner = styled.div`
   align-items: center;
   font-size: 20px;
   border: 3px #626262 solid;
+  opacity: ${(p) => (p.disabled ? 0.5 : 1)};
 `;
 
 const Quantity = styled.div`

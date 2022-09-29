@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { registerUIComponent } from "../engine";
 import { combineLatest, concat, map, of, scan } from "rxjs";
 import styled from "styled-components";
@@ -6,12 +6,11 @@ import { Border, Center, Slot } from "./common";
 import { range } from "@latticexyz/utils";
 import {
   defineQuery,
-  EntityID,
   EntityIndex,
   getComponentValue,
+  getComponentValueStrict,
   getEntitiesWithValue,
   Has,
-  hasComponent,
   HasValue,
   setComponent,
   UpdateType,
@@ -73,9 +72,17 @@ export function registerInventory() {
 
       const inventoryIndex$ = concat(of(0), InventoryIndex.update$.pipe(map((e) => e.entity)));
 
-      return combineLatest([ownedByMe$, showInventory$, inventoryIndex$]);
+      return combineLatest([ownedByMe$, showInventory$, inventoryIndex$]).pipe(map((props) => ({ props })));
     },
-    ([ownedByMe, { layers, show }]) => {
+    ({ props }) => {
+      const [ownedByMe, { layers, show }] = props;
+
+      const [holdingBlock, setHoldingBlock] = useState<EntityIndex | undefined>();
+
+      useEffect(() => {
+        if (!show) setHoldingBlock(undefined);
+      }, [show]);
+
       const {
         noa: {
           world,
@@ -88,6 +95,21 @@ export function registerInventory() {
         toggleInventory(false);
       }
 
+      function moveItems(slot: number) {
+        const blockAtSlot = [...getEntitiesWithValue(InventoryIndex, { value: slot })][0];
+
+        // If not currently holding a block, grab the block at this slot
+        if (holdingBlock == null) {
+          return setHoldingBlock(blockAtSlot);
+        }
+
+        // Else (if currently holding a block), swap the holding block with the block at this position
+        const holdingBlockSlot = getComponentValueStrict(InventoryIndex, holdingBlock).value;
+        setComponent(InventoryIndex, holdingBlock, { value: slot });
+        setComponent(InventoryIndex, blockAtSlot, { value: holdingBlockSlot });
+        setHoldingBlock(undefined);
+      }
+
       const Slots = [...range(INVENTORY_HEIGHT * INVENTORY_WIDTH)].map((i) => {
         const blockIndex: EntityIndex | undefined = [...getEntitiesWithValue(InventoryIndex, { value: i })][0];
         const blockID = blockIndex != null ? world.entities[blockIndex] : undefined;
@@ -97,7 +119,8 @@ export function registerInventory() {
             key={"slot" + i}
             blockID={quantity ? blockID : undefined}
             quantity={quantity || undefined}
-            onClick={() => console.log("clicked slot", i)}
+            onClick={() => moveItems(i)}
+            disabled={blockIndex === holdingBlock}
           />
         );
       });

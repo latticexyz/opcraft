@@ -7,7 +7,6 @@ import {
   hasComponent,
   setComponent,
   defineRxSystem,
-  getEntitiesWithValue,
   removeComponent,
   runQuery,
 } from "@latticexyz/recs";
