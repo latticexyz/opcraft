@@ -29,4 +29,5 @@ const Border = styled.div<{ borderColor: string; borderWidth: number }>`
   top: -${(p) => p.borderWidth}px;
   left: -${(p) => p.borderWidth}px;
   z-index: 100;
+  pointer-events: none;
 `;

@@ -1,6 +1,12 @@
-import { getComponentValue, HasValue, runQuery, setComponent, updateComponent } from "@latticexyz/recs";
+import {
+  getComponentValue,
+  getEntitiesWithValue,
+  HasValue,
+  runQuery,
+  setComponent,
+  updateComponent,
+} from "@latticexyz/recs";
 import { NetworkLayer, BlockType } from "../../network";
-import { INDEX_TO_BLOCK } from "../../react/components/ActionBar";
 import { HandComponent, HAND_COMPONENT } from "../engine/components/handComponent";
 import { MiningBlockComponent, MINING_BLOCK_COMPONENT } from "../engine/components/miningBlockComponent";
 import { NoaLayer } from "../types";
@@ -8,9 +14,9 @@ import { NoaLayer } from "../types";
 export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
   const {
     noa,
-    components: { SelectedSlot, UI },
+    components: { SelectedSlot, UI, InventoryIndex },
     SingletonEntity,
-    api: { setCraftingTable, toggleInventory },
+    api: { setCraftingTable, toggleInventory, placeSelectedItem },
   } = context;
 
   const {
@@ -90,18 +96,7 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
         return setCraftingTable([]);
       }
 
-      const blockIndex = getComponentValue(SelectedSlot, SingletonEntity)?.value ?? 1;
-      const blockID = INDEX_TO_BLOCK[blockIndex];
-      const ownedEntitiesOfType = [
-        ...runQuery([
-          HasValue(withOptimisticUpdates(OwnedBy), { value: connectedAddress.get() }),
-          HasValue(Item, { value: blockID }),
-        ]),
-      ];
-      const blockEntityIndex = ownedEntitiesOfType[0];
-      if (blockEntityIndex == null) return console.warn("no owned block of type", blockID);
-      const blockEntity = world.entities[blockEntityIndex];
-      build(blockEntity, { x: pos[0], y: pos[1], z: pos[2] });
+      placeSelectedItem({ x: pos[0], y: pos[1], z: pos[2] });
     }
   });
 

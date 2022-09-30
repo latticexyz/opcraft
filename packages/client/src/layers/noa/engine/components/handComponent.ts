@@ -1,11 +1,8 @@
 import * as BABYLON from "@babylonjs/core";
 import { Engine } from "noa-engine";
-import { EntityIndex, getComponentValue, HasValue, runQuery } from "@latticexyz/recs";
-import { NetworkLayer } from "../../../network";
-import { INDEX_TO_BLOCK } from "../../../react/components/ActionBar";
+import { EntityID } from "@latticexyz/recs";
 import { Material } from "@babylonjs/core";
 import { BlockIdToKey, BlockTypeKey } from "../../../network/constants";
-import { defineSelectedSlotComponent } from "../../components";
 import {
   IDLE_ANIMATION_BOX_BLOCK,
   IDLE_ANIMATION_BOX_HAND,
@@ -23,13 +20,7 @@ export interface HandComponent {
 
 export const HAND_COMPONENT = "HAND_COMPONENT";
 
-export function registerHandComponent(
-  noa: Engine,
-  networkLayer: NetworkLayer,
-  SelectedSlot: ReturnType<typeof defineSelectedSlotComponent>,
-  SingletonEntity: EntityIndex
-) {
-  const { Item, OwnedBy } = networkLayer.components;
+export function registerHandComponent(noa: Engine, getSelectedBlockType: () => EntityID | undefined) {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   //@ts-ignore
   noa.ents.createComponent({
@@ -41,14 +32,9 @@ export function registerHandComponent(
         const id = states[i].__id;
         if (id === noa.playerEntity) {
           // NOTE: for now just animate / change the material of the player hand
-          const selectedSlot = getComponentValue(SelectedSlot, SingletonEntity)?.value ?? 1;
-          const matchingBlocks = runQuery([
-            HasValue(OwnedBy, { value: networkLayer.network.connectedAddress.get() }),
-            HasValue(Item, { value: INDEX_TO_BLOCK[selectedSlot] }),
-          ]);
-          const amount = matchingBlocks.size;
-          const blockTypeKey = BlockIdToKey[INDEX_TO_BLOCK[selectedSlot]];
-          if (amount > 0 && blockMaterials[blockTypeKey] !== undefined) {
+          const selectedBlock = getSelectedBlockType();
+          const blockTypeKey = selectedBlock && BlockIdToKey[selectedBlock];
+          if (blockTypeKey && blockMaterials[blockTypeKey] !== undefined) {
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             blockMesh.material = blockMaterials[blockTypeKey]!;
             handMesh.visibility = 0;
