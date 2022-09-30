@@ -1,6 +1,7 @@
 import { Color3, Matrix, MeshBuilder, Scene, StandardMaterial, Texture } from "@babylonjs/core";
 import * as BABYLON from "@babylonjs/core";
 import type { Engine } from "noa-engine";
+import { SKY_COLOR } from "../setup/setupNoaEngine";
 /*
  * Setups clouds in a hacky way
  */
@@ -23,7 +24,7 @@ export function setupClouds(noa: Engine) {
     true,
     Texture.NEAREST_SAMPLINGMODE
   );
-  mat.emissiveColor = new Color3(1, 1, 1);
+  // mat.emissiveColor = new Color3(1, 1, 1);
   mat.diffuseTexture = cloudTexture;
   mat.diffuseTexture.hasAlpha = true;
   mat.specularColor = new BABYLON.Color3(0.2, 0.2, 0.2);
@@ -140,25 +141,44 @@ export function setupSky(noa: Engine) {
     },
     scene
   );
+  const skyBox = MeshBuilder.CreateBox(
+    "skyMesh",
+    {
+      height: 1.2e4,
+      width: 1.2e4,
+      depth: 1000,
+    },
+    scene
+  );
 
   const skyMat = new StandardMaterial("sky", scene);
+  const skyBoxMat = new StandardMaterial("skyBox", scene);
   skyMat.backFaceCulling = false;
   skyMat.emissiveColor = new Color3(0.2, 0.3, 0.7);
-  skyMat.diffuseColor = skyMat.emissiveColor;
+  skyMat.diffuseColor = new Color3(0.2, 0.3, 0.7);
+  skyBoxMat.backFaceCulling = false;
+  // skyBoxMat.emissiveColor = new Color3(clearColor[0], clearColor[1], clearColor[2]);
+  skyBoxMat.diffuseColor = new Color3(...SKY_COLOR);
 
   skyMesh.renderingGroupId = -1;
   skyMesh.material = skyMat;
   skyMesh.applyFog = true;
 
+  skyBox.renderingGroupId = -1;
+  skyBox.material = skyMat;
+  skyBox.applyFog = true;
+
   skyMesh.rotation.x = -Math.PI / 2;
 
   noa.rendering.addMeshToScene(skyMesh, false);
+  noa.rendering.addMeshToScene(skyBox, false);
 
   const update = () => {
     const local: number[] = [];
     const [playerX, playerY, playerZ] = noa.ents.getPositionData(noa.playerEntity)!.position!;
     const [x, y, z] = noa.globalToLocal([playerX, playerY, playerZ], [0, 0, 0], local);
     skyMesh.position.copyFromFloats(x, y + SKY_HEIGHT, z);
+    skyBox.position.copyFromFloats(x, y + SKY_HEIGHT, z);
   };
 
   noa.on("beforeRender", update);

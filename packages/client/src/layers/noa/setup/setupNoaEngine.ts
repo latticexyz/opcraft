@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { Engine } from "noa-engine";
 // add a mesh to represent the player, and scale it, etc.
 import "@babylonjs/core/Meshes/Builders/boxBuilder";
@@ -21,7 +22,7 @@ export interface API {
 // 16 is the limit before performance issues
 const CHUNK_RENDER_DISTANCE = 12;
 const CHUNK_SIZE = 16;
-const SKY_COLOR = [0.7, 0.8, 1];
+export const SKY_COLOR = [0.7, 0.8, 1];
 const MIN_CHUNK = 2;
 const MIN_HEIGHT = MIN_CHUNK * CHUNK_SIZE;
 
@@ -36,15 +37,10 @@ export function setupNoaEngine(api: API) {
     chunkSize: CHUNK_SIZE,
     playerStart: [-1543, 13, -826],
     blockTestDistance: 7,
-    texturePath: "",
     playerHeight: 1.85,
     playerWidth: 0.6,
     playerAutoStep: 1,
     clearColor: SKY_COLOR,
-    ambientColor: [1, 1, 1],
-    lightDiffuse: [1, 1, 1],
-    lightSpecular: [1, 1, 1],
-    groundLightColor: [1, 1, 1],
     useAO: true,
     AOmultipliers: [0.93, 0.8, 0.5],
     reverseAOmultiplier: 1.0,
@@ -145,9 +141,28 @@ export function setupNoaEngine(api: API) {
   scene.fogMode = BABYLON.Scene.FOGMODE_LINEAR;
   scene.fogStart = CHUNK_RENDER_DISTANCE * CHUNK_SIZE;
   scene.fogEnd = CHUNK_RENDER_DISTANCE * CHUNK_SIZE + CHUNK_SIZE * 2;
-  // scene.fogDensity = 0.003;
-  // scene.fogDensity = 0.0006;
   scene.fogColor = new BABYLON.Color3(...SKY_COLOR);
+  //@ts-ignore
+  const camera = noa.rendering._camera;
+  const colorGrading = new BABYLON.Texture("./assets/textures/lut/LUT_Night2.png", scene, true, false);
+  colorGrading.level = 0;
+  colorGrading.wrapU = BABYLON.Texture.CLAMP_ADDRESSMODE;
+  colorGrading.wrapV = BABYLON.Texture.CLAMP_ADDRESSMODE;
+  scene.imageProcessingConfiguration.colorGradingWithGreenDepth = false;
+  scene.imageProcessingConfiguration.colorGradingEnabled = true;
+  scene.imageProcessingConfiguration.colorGradingTexture = colorGrading;
+  // Color Curves
+  const postProcess = new BABYLON.ImageProcessingPostProcess("processing", 1.0, camera);
+  const curve = new BABYLON.ColorCurves();
+  curve.globalSaturation = 60; // CANDY!
+  postProcess.colorCurves = curve;
+  postProcess.colorCurvesEnabled = true;
+  // Glow
+  const glow = new BABYLON.GlowLayer("glow", scene, {
+    mainTextureFixedSize: 512,
+    blurKernelSize: 128,
+  });
+  glow.intensity = 0.4;
 
   // Register sounds
   new BABYLON.Sound("theme", "/audio/OP_World_Theme_Mix_1.mp3", null, null, {
@@ -160,5 +175,5 @@ export function setupNoaEngine(api: API) {
     const key = BlockIndexToKey[index];
     return key != null && key != "Air" && !Blocks[key]?.fluid;
   };
-  return { noa, setBlock };
+  return { noa, setBlock, glow };
 }
