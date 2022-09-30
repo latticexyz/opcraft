@@ -7,13 +7,8 @@ import { registerUIComponent } from "../engine";
 import styled from "styled-components";
 import { getBlockIconUrl } from "../../noa/constants";
 
-type BlockAction = {
-  action: "mine" | "build";
-  blockType: BlockTypeKey;
-};
-
 type BlockSummary = {
-  [blockNumber: string]: BlockAction[];
+  [blockNumber: string]: Partial<Record<BlockTypeKey, { add?: number; remove?: number }>>;
 };
 
 const BlockExplorerContainer = styled.div`
@@ -53,19 +48,19 @@ const BlockExplorerContainer = styled.div`
     object-fit: cover;
     border-radius: 2px;
   }
-  .BlockExplorer-ActionIcon::before {
+  .BlockExplorer-ActionIcon {
     position: absolute;
     inset: 0;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 1.2rem;
+    font-size: 0.8rem;
   }
-  .BlockExplorer-ActionIcon--mine::before {
+  .BlockExplorer-ActionIcon--remove {
     content: "-";
     color: hsl(0, 100%, 80%);
   }
-  .BlockExplorer-ActionIcon--build::before {
+  .BlockExplorer-ActionIcon--add {
     content: "+";
     color: hsl(100, 100%, 80%);
   }
@@ -96,7 +91,7 @@ export function registerBlockExplorer() {
         scan<NetworkComponentUpdate | number, BlockSummary>((summary, update) => {
           // Block number
           if (typeof update === "number") {
-            return summary[update] ? summary : { ...summary, [update]: [] };
+            return summary[update] ? summary : { ...summary, [update]: {} };
           }
 
           // otherwise it's a NetworkComponentUpdate
@@ -104,46 +99,47 @@ export function registerBlockExplorer() {
           // We're only visualizing the stream of new blocks so skip backfill
           if (txHash === "worker" || txHash === "cache") return summary;
 
-          const actions: ReadonlyArray<BlockAction> = summary[blockNumber] ?? [];
           const componentKey = mappings[update.component];
 
           // Item component updates correspond to a mined terrain block
           if (componentKey === "Item") {
             console.log("mined terrain block");
             const { value } = update.value as ComponentValue<SchemaOf<typeof Item>>;
+            const blockType = BlockIdToKey[value as EntityID];
             return {
               ...summary,
-              [blockNumber]: [
-                ...actions,
-                {
-                  action: "mine",
-                  blockType: BlockIdToKey[value as EntityID],
+              [blockNumber]: {
+                ...(summary[blockNumber] ?? {}),
+                [blockType]: {
+                  ...(summary[blockNumber]?.[blockType] ?? {}),
+                  remove: (summary[blockNumber]?.[blockType]?.remove ?? 0) + 1,
                 },
-              ],
+              },
             };
           }
 
           // Position component updates correspond to a mined or placed ECS block
           if (componentKey === "Position") {
             const entityIndex = world.entityToIndex.get(update.entity);
-            const blockType = entityIndex != null ? getComponentValue(Item, entityIndex)?.value : undefined;
-            if (!blockType) {
+            const blockTypeId = entityIndex != null ? getComponentValue(Item, entityIndex)?.value : undefined;
+            if (!blockTypeId) {
               // console.warn("Received Position update of unknown entity", update.entity);
               return summary;
             }
+            const blockType = BlockIdToKey[blockTypeId as EntityID];
 
             // If the update includes a position, it corresponds to a placed block
             if (update.value) {
               console.log("placed block");
               return {
                 ...summary,
-                [blockNumber]: [
-                  ...actions,
-                  {
-                    action: "build",
-                    blockType: BlockIdToKey[blockType as EntityID],
+                [blockNumber]: {
+                  ...(summary[blockNumber] ?? {}),
+                  [blockType]: {
+                    ...(summary[blockNumber]?.[blockType] ?? {}),
+                    add: (summary[blockNumber]?.[blockType]?.add ?? 0) + 1,
                   },
-                ],
+                },
               };
             }
             // otherwise it corresponds to a mined ecs block
@@ -151,13 +147,13 @@ export function registerBlockExplorer() {
               console.log("mined ecs block");
               return {
                 ...summary,
-                [blockNumber]: [
-                  ...actions,
-                  {
-                    action: "mine",
-                    blockType: BlockIdToKey[blockType as EntityID],
+                [blockNumber]: {
+                  ...(summary[blockNumber] ?? {}),
+                  [blockType]: {
+                    ...(summary[blockNumber]?.[blockType] ?? {}),
+                    remove: (summary[blockNumber]?.[blockType]?.remove ?? 0) + 1,
                   },
-                ],
+                },
               };
             }
           }
@@ -169,17 +165,29 @@ export function registerBlockExplorer() {
     (summary) => {
       return (
         <BlockExplorerContainer>
-          {Object.entries(summary).map(([blockNumber, actions]) => (
+          {Object.entries(summary).map(([blockNumber, block]) => (
             <div key={blockNumber} className="BlockExplorer-Block">
               {parseInt(blockNumber) % 16 === 0 ? <div className="BlockExplorer-BlockNumber">{blockNumber}</div> : null}
               <div className="BlockExplorer-Actions">
-                {actions.map(({ action, blockType }, i) => {
+                {Object.entries(block).map(([blockType, counts], i) => {
                   if (blockType === "Air") return null;
                   return (
-                    <div key={i} className={`BlockExplorer-Action BlockExplorer-Action--${action}`}>
-                      <img src={getBlockIconUrl(blockType)} />
-                      <div className={`BlockExplorer-ActionIcon BlockExplorer-ActionIcon--${action}`} />
-                    </div>
+                    <React.Fragment key={blockType}>
+                      {counts.add ? (
+                        <div className="BlockExplorer-Action">
+                          <img src={getBlockIconUrl(blockType as BlockTypeKey)} />
+                          <div className="BlockExplorer-ActionIcon BlockExplorer-ActionIcon--add">+{counts.add}</div>
+                        </div>
+                      ) : null}
+                      {counts.remove ? (
+                        <div className="BlockExplorer-Action">
+                          <img src={getBlockIconUrl(blockType as BlockTypeKey)} />
+                          <div className="BlockExplorer-ActionIcon BlockExplorer-ActionIcon--remove">
+                            -{counts.remove}
+                          </div>
+                        </div>
+                      ) : null}
+                    </React.Fragment>
                   );
                 })}
               </div>
