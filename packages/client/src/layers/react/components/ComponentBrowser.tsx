@@ -1,7 +1,7 @@
 import React from "react";
 import { Browser } from "@latticexyz/ecs-browser";
 import { registerUIComponent } from "../engine";
-import { of } from "rxjs";
+import { map } from "rxjs";
 export function registerComponentBrowser() {
   registerUIComponent(
     "ComponentBrowser",
@@ -11,18 +11,21 @@ export function registerComponentBrowser() {
       rowStart: 1,
       rowEnd: 13,
     },
-    (layers) => of(layers),
-    (layers) => {
-      return (
+    (layers) => layers.noa.components.UI.update$.pipe(map((e) => ({ layers, show: e.value[0]?.showComponentBrowser }))),
+    ({ layers, show }) => {
+      const {
+        network: { world, dev },
+      } = layers;
+      return show ? (
         <Browser
-          world={layers.network.world}
-          entities={layers.network.world.entities}
+          world={world}
+          entities={world.entities}
           layers={layers}
-          devHighlightComponent={layers.network.dev.DevHighlightComponent}
-          hoverHighlightComponent={layers.network.dev.HoverHighlightComponent}
-          setContractComponentValue={layers.network.dev.setContractComponentValue}
+          devHighlightComponent={dev.DevHighlightComponent}
+          hoverHighlightComponent={dev.HoverHighlightComponent}
+          setContractComponentValue={dev.setContractComponentValue}
         />
-      );
+      ) : null;
     }
   );
 }

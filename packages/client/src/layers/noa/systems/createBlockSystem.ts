@@ -9,8 +9,7 @@ export function createBlockSystem(network: NetworkLayer, context: NoaLayer) {
 
   const {
     world,
-    components: { Item },
-    indexers: { Position },
+    components: { Item, Position },
     actions: { withOptimisticUpdates },
     api: { getBlockAtPosition },
   } = network;
@@ -31,9 +30,7 @@ export function createBlockSystem(network: NetworkLayer, context: NoaLayer) {
     const position = getComponentValue(OptimisticPosition, update.entity);
     const item = getComponentValue(OptimisticItem, update.entity);
 
-    if (!position || !item) {
-      return console.warn("no position/item for this update", update, position, item);
-    }
+    if (!position || !item) return;
 
     setBlock(position, item.value as EntityID);
   });

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { observer } from "mobx-react-lite";
 import { useLayers, useEngineStore } from "../hooks";
 import { filterNullishValues } from "@latticexyz/utils";
@@ -39,13 +39,14 @@ const UIComponentContainer: React.FC<{ gridConfig: GridConfiguration }> = React.
 });
 
 export const UIComponentRenderer: React.FC<{ layers: Layers; id: string; uiComponent: UIComponent }> = React.memo(
-  ({ layers, id, uiComponent: { requirement, render, gridConfig } }) => {
-    const state = useStream(requirement(layers));
+  ({ layers, id, uiComponent: { requirement, Render, gridConfig } }) => {
+    const req = useMemo(() => requirement(layers), [requirement, layers]);
+    const state = useStream(req);
     if (!state) return null;
 
     return (
       <UIComponentContainer key={`component-${id}`} gridConfig={gridConfig}>
-        {render(state)}
+        {<Render {...state} />}
       </UIComponentContainer>
     );
   }

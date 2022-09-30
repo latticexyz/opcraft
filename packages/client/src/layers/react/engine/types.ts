@@ -1,4 +1,4 @@
-import { ReactElement } from "react";
+import React from "react";
 import { Observable } from "rxjs";
 import { Layers } from "../../../types";
 
@@ -7,5 +7,5 @@ export type GridConfiguration = { colStart: number; colEnd: number; rowStart: nu
 export interface UIComponent<T = unknown> {
   gridConfig: GridConfiguration;
   requirement(layers: Layers): Observable<T>;
-  render(props: NonNullable<T>): ReactElement | null;
+  Render: React.FC<NonNullable<T>>;
 }

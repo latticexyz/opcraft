@@ -1,6 +1,5 @@
-import { getComponentValue, HasValue, runQuery, setComponent } from "@latticexyz/recs";
+import { getComponentValue, HasValue, runQuery, setComponent, updateComponent } from "@latticexyz/recs";
 import { NetworkLayer, BlockType } from "../../network";
-import { INDEX_TO_BLOCK } from "../../react/components/ActionBar";
 import { HandComponent, HAND_COMPONENT } from "../engine/components/handComponent";
 import { MiningBlockComponent, MINING_BLOCK_COMPONENT } from "../engine/components/miningBlockComponent";
 import { NoaLayer } from "../types";
@@ -8,18 +7,13 @@ import { NoaLayer } from "../types";
 export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
   const {
     noa,
-    components: { SelectedSlot },
+    components: { SelectedSlot, UI },
     SingletonEntity,
-    api: { setCraftingTable },
+    api: { setCraftingTable, toggleInventory, placeSelectedItem },
   } = context;
 
   const {
-    world,
-    components: { Item, OwnedBy },
-    indexers: { Position },
-    api: { build, mine },
-    network: { connectedAddress },
-    actions: { withOptimisticUpdates },
+    components: { Item, Position },
   } = network;
 
   // clear targeted block on on left click
@@ -72,7 +66,10 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
   });
 
   // place a block on right click
+  noa.inputs.unbind("alt-fire"); // Unbind to remove the default binding of "E"
+  noa.inputs.bind("alt-fire", "<mouse 3>");
   noa.inputs.down.on("alt-fire", function () {
+    console.log("alt-fire");
     if (noa.targetedBlock) {
       const pos = noa.targetedBlock.adjacent;
       const targeted = noa.targetedBlock.position;
@@ -88,30 +85,27 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
         return setCraftingTable([]);
       }
 
-      const blockIndex = getComponentValue(SelectedSlot, SingletonEntity)?.value ?? 1;
-      const blockID = INDEX_TO_BLOCK[blockIndex];
-      const ownedEntitiesOfType = [
-        ...runQuery([
-          HasValue(withOptimisticUpdates(OwnedBy), { value: connectedAddress.get() }),
-          HasValue(Item, { value: blockID }),
-        ]),
-      ];
-      const blockEntityIndex = ownedEntitiesOfType[0];
-      if (blockEntityIndex == null) return console.warn("no owned block of type", blockID);
-      const blockEntity = world.entities[blockEntityIndex];
-      build(blockEntity, { x: pos[0], y: pos[1], z: pos[2] });
+      placeSelectedItem({ x: pos[0], y: pos[1], z: pos[2] });
     }
   });
 
-  // add a key binding for "E" to do the same as alt-fire
-  noa.inputs.bind("alt-fire", "E");
-
   // Control selected slot with keys 1-9
-  noa.inputs.bind("slot", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "P", "O", "I", "U");
+  noa.inputs.bind("slot", "1", "2", "3", "4", "5", "6", "7", "8", "9");
+
   noa.inputs.down.on("slot", (e) => {
     console.log(e.key);
-    const mappings: { [key: number | string]: number } = { 0: 10, P: 11, O: 12, I: 13, U: 14 };
-    const key = mappings[e.key as string | number] ?? Number(e.key);
+    const key = Number(e.key) - 1;
     setComponent(SelectedSlot, SingletonEntity, { value: key });
+  });
+
+  noa.inputs.bind("componentbrowser", "`");
+  noa.inputs.down.on("componentbrowser", () => {
+    const showComponentBrowser = getComponentValue(UI, SingletonEntity)?.showComponentBrowser;
+    updateComponent(UI, SingletonEntity, { showComponentBrowser: !showComponentBrowser });
+  });
+
+  noa.inputs.bind("inventory", "E");
+  noa.inputs.down.on("inventory", () => {
+    toggleInventory();
   });
 }
