@@ -179,6 +179,7 @@ export async function createNetworkLayer(config: GameConfig) {
     dev: setupDevSystems(world, encoders, systems),
     config,
     relayer,
+    worldAddress: config.worldAddress,
   };
 
   return context;

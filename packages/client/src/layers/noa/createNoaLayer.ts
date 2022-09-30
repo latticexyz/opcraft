@@ -6,6 +6,7 @@ import {
   removeComponent,
   setComponent,
   updateComponent,
+  createLocalCache,
 } from "@latticexyz/recs";
 import { random } from "@latticexyz/utils";
 import { NetworkLayer } from "../network";
@@ -36,6 +37,13 @@ import { defineInventoryIndexComponent } from "./components/InventoryIndex";
 
 export function createNoaLayer(network: NetworkLayer) {
   const world = namespaceWorld(network.world, "noa");
+  const {
+    worldAddress,
+    network: {
+      config: { chainId },
+    },
+  } = network;
+  const uniqueWorldId = chainId + worldAddress;
 
   const SingletonEntity = world.registerEntity({ id: Singleton });
 
@@ -46,7 +54,7 @@ export function createNoaLayer(network: NetworkLayer) {
     PlayerPosition: definePlayerPositionComponent(world),
     PlayerDirection: definePlayerDirectionComponent(world),
     UI: defineUIComponent(world),
-    InventoryIndex: createIndexer(defineInventoryIndexComponent(world)),
+    InventoryIndex: createLocalCache(createIndexer(defineInventoryIndexComponent(world)), uniqueWorldId),
   };
 
   // --- SETUP ----------------------------------------------------------------------

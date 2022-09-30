@@ -48,10 +48,7 @@ export function registerInventory() {
         of({}),
         ownedByMeQuery.update$.pipe(
           scan((acc, curr) => {
-            console.log("update", curr);
-            console.log("entity", curr.entity);
             const blockID = getComponentValue(Item, curr.entity)?.value;
-            console.log("blockid", blockID);
             if (!blockID) return { ...acc };
             acc[blockID] = acc[blockID] || 0;
             if (curr.type === UpdateType.Exit) {
@@ -106,7 +103,7 @@ export function registerInventory() {
         // Else (if currently holding a block), swap the holding block with the block at this position
         const holdingBlockSlot = getComponentValueStrict(InventoryIndex, holdingBlock).value;
         setComponent(InventoryIndex, holdingBlock, { value: slot });
-        setComponent(InventoryIndex, blockAtSlot, { value: holdingBlockSlot });
+        blockAtSlot && setComponent(InventoryIndex, blockAtSlot, { value: holdingBlockSlot });
         setHoldingBlock(undefined);
       }
 
