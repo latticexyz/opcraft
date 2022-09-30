@@ -57,11 +57,9 @@ const BlockExplorerContainer = styled.div`
     align-items: center;
   }
   .BlockExplorer-ActionIcon--remove {
-    content: "-";
     color: hsl(0, 100%, 80%);
   }
   .BlockExplorer-ActionIcon--add {
-    content: "+";
     color: hsl(100, 100%, 80%);
   }
 `;
