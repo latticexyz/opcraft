@@ -18,7 +18,7 @@ import { defineNameComponent } from "./components/NameComponent";
 import { getBlockAtPosition as getBlockAtPositionApi, getECSBlock, getTerrain, getTerrainBlock } from "./api";
 import { createPerlin } from "@latticexyz/noise";
 import { BlockIdToKey, BlockType } from "./constants";
-import { createRelayerStream, GodID } from "@latticexyz/network";
+import { createFaucetService, createRelayerStream, GodID } from "@latticexyz/network";
 import { SystemTypes } from "contracts/types/SystemTypes";
 import { SystemAbis } from "contracts/types/SystemAbis.mjs";
 
@@ -51,6 +51,7 @@ export async function createNetworkLayer(config: GameConfig) {
     SystemTypes
   >(getNetworkConfig(config), world, components, SystemAbis, { initialGasPrice: 2_000_000 });
 
+  // Relayer setup
   const playerAddress = network.connectedAddress.get();
   const playerSigner = network.signer.get();
   const relayer =
@@ -58,6 +59,9 @@ export async function createNetworkLayer(config: GameConfig) {
       ? await createRelayerStream(playerSigner, config.relayerServiceUrl, playerAddress)
       : null;
   relayer && world.registerDisposer(relayer.dispose);
+
+  // Faucet setup
+  const faucet = config.faucetServiceUrl != null ? createFaucetService(config.faucetServiceUrl) : null;
 
   // --- ACTION SYSTEM --------------------------------------------------------------
   const actions = createActionSystem<{ actionType: string; coord?: VoxelCoord; blockType?: keyof typeof BlockType }>(
@@ -148,22 +152,15 @@ export async function createNetworkLayer(config: GameConfig) {
     });
   }
 
-  // --- DUMB FAUCET - REPLACE BY ACTUAL FAUCET ASAP
-  const playerIsBroke = (await network.signer.get()?.getBalance())?.lte(utils.parseEther("0.01"));
+  // --- DEV FAUCET - REMOVE IN PROD
+  const playerIsBroke = (await network.signer.get()?.getBalance())?.lte(utils.parseEther("0.005"));
   console.log("IsBroke", playerIsBroke);
   if (playerIsBroke) {
-    const richAccount = new Wallet(
-      "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
-      network.providers.get().json
-    );
-    const tx = await richAccount.sendTransaction({
-      to: network.connectedAddress.get(),
-      value: utils.parseEther("0.1"),
-    });
-    await tx.wait();
+    const address = network.connectedAddress.get();
+    console.log("requesting drip to", address);
+    address && (await faucet?.dripDev({ address }));
   }
-
-  const playerIsStillBroke = (await network.signer.get()?.getBalance())?.lte(utils.parseEther("0.01"));
+  const playerIsStillBroke = (await network.signer.get()?.getBalance())?.lte(utils.parseEther("0.005"));
   console.log("IsStillBroke", playerIsStillBroke);
 
   // --- CONTEXT --------------------------------------------------------------------
@@ -183,6 +180,7 @@ export async function createNetworkLayer(config: GameConfig) {
     worldAddress: config.worldAddress,
     ecsEvent$,
     mappings,
+    faucet,
   };
 
   return context;

@@ -28,6 +28,7 @@ const defaultParams = {
   checkpoint: "https://ecs-snapshot.op-bedrock.lattice.xyz",
   stream: "https://ecs-stream.op-bedrock.lattice.xyz",
   relayer: "https://ecs-relay.op-bedrock.lattice.xyz",
+  faucet: undefined,
   blockTime: "1000",
 };
 
@@ -50,6 +51,7 @@ async function bootGame() {
     const checkpointUrl = params.get("checkpoint") ?? defaultParams.checkpoint;
     const streamServiceUrl = params.get("stream") ?? defaultParams.stream;
     const relayerServiceUrl = params.get("relayer") ?? defaultParams.relayer;
+    const faucetServiceUrl = params.get("faucet") ?? defaultParams.faucet;
     const peerJsUrl = params.get("peerJs") || undefined;
     const devMode = params.get("dev") === "true";
     const initialBlockNumberString = params.get("initialBlockNumber") ?? defaultParams.initialBlockNumber;
@@ -74,6 +76,7 @@ async function bootGame() {
         checkpointUrl,
         streamServiceUrl,
         relayerServiceUrl,
+        faucetServiceUrl,
         devMode,
         blockTime,
         initialBlockNumber,
