@@ -15,26 +15,27 @@ const BlockExplorerContainer = styled.div`
   display: flex;
   justify-content: flex-end;
   flex-direction: row-reverse;
-  padding: 12px;
+  padding: 8px;
   overflow: hidden;
-  background: linear-gradient(180deg, rgba(31, 31, 31, 0.6) 0%, rgba(31, 31, 31, 0) 75%);
+  // background: linear-gradient(180deg, rgba(31, 31, 31, 0.6) 0%, rgba(31, 31, 31, 0) 75%);
+  font-size: 0.8rem;
 
   .BlockExplorer-Block {
     border-left: 2px solid rgba(31, 31, 31, 0.3);
     position: relative;
-    margin-top: 1em;
+    margin-bottom: 1em;
   }
   .BlockExplorer-BlockNumber {
     position: absolute;
-    top: -1em;
+    bottom: -1em;
     left: -2px;
     border-left: 2px solid rgba(31, 31, 31, 0.3);
     height: 1em;
-    padding-left: 4px;
-    font-size: 0.8rem;
+    padding-left: 3px;
+    padding-top: 3px;
   }
   .BlockExplorer-Actions {
-    height: 30px;
+    height: 20px;
     display: flex;
     padding: 0 1px;
   }
@@ -54,7 +55,6 @@ const BlockExplorerContainer = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 0.8rem;
   }
   .BlockExplorer-ActionIcon--remove {
     content: "-";
