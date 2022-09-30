@@ -10,16 +10,14 @@ import {
   Uint8ArrayToInt32Array,
 } from "@latticexyz/utils";
 
-function encodeMessage(address: string, position: number[], direction: number[]): Uint8Array {
-  const encodedAddress = ethAddressToUint8Array(address);
+function encodeMessage(position: number[], direction: number[]): Uint8Array {
   const data = Int32ArrayToUint8Array([...position, ...direction]);
-  return concatUint8Arrays(encodedAddress, data);
+  return concatUint8Arrays(data);
 }
 
-function decodeMessage(data: Uint8Array): { address: string; position: number[]; direction: number[] } {
-  const [addressBytes, positionBytes, directionBytes] = splitUint8Arrays(data, [20, 12, 12]);
+function decodeMessage(data: Uint8Array): { position: number[]; direction: number[] } {
+  const [positionBytes, directionBytes] = splitUint8Arrays(data, [12, 12]);
   return {
-    address: Uint8ArrayToHexString(addressBytes),
     position: Uint8ArrayToInt32Array(positionBytes),
     direction: Uint8ArrayToInt32Array(directionBytes),
   };
@@ -46,7 +44,7 @@ export function createRelayerSystem(network: NetworkLayer, context: NoaLayer) {
   relayer.subscribe("chunk(0,0)");
 
   function setPosition(position: number[], direction: number[]) {
-    relayer?.push("chunk(0,0)", encodeMessage(connectedAddress.get() || "0x00", position, direction));
+    relayer?.push("chunk(0,0)", encodeMessage(position, direction));
   }
 
   const interval = setInterval(() => {
@@ -63,12 +61,11 @@ export function createRelayerSystem(network: NetworkLayer, context: NoaLayer) {
     setPosition(data.position, lookAt);
   }, 100);
 
-  defineRxSystem(world, relayer.event$, ({ data }) => {
+  defineRxSystem(world, relayer.event$, ({ message, address }) => {
     const {
-      address,
       position: [x, y, z],
       direction: [dx, dy, dz],
-    } = decodeMessage(data);
+    } = decodeMessage(message.data);
     if (address === connectedAddress.get()) return;
 
     const entity = world.registerEntity({ id: address as EntityID });

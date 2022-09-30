@@ -52,9 +52,10 @@ export async function createNetworkLayer(config: GameConfig) {
   >(getNetworkConfig(config), world, components, SystemAbis, { initialGasPrice: 2_000_000 });
 
   const playerAddress = network.connectedAddress.get();
+  const playerSigner = network.signer.get();
   const relayer =
-    config.relayerServiceUrl && playerAddress
-      ? await createRelayerStream(config.relayerServiceUrl, playerAddress)
+    config.relayerServiceUrl && playerAddress && playerSigner
+      ? await createRelayerStream(playerSigner, config.relayerServiceUrl, playerAddress)
       : null;
   relayer && world.registerDisposer(relayer.dispose);
 
