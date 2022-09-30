@@ -2,6 +2,7 @@ import styled from "styled-components";
 export { BlockIcon } from "./BlockIcon";
 export { Slot } from "./Slot";
 export { Border } from "./Border";
+export { AbsoluteBorder } from "./AbsoluteBorder";
 
 export const GUI = styled.div<{ _x: number; _y: number; _height: number; _width: number; scale: number }>`
   height: ${(p) => p._height * p.scale}px;

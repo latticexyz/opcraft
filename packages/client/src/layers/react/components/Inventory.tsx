@@ -36,7 +36,7 @@ export function registerInventory() {
           network: { connectedAddress },
         },
         noa: {
-          components: { UI, InventoryIndex },
+          components: { UI, InventoryIndex, SelectedSlot },
         },
       } = layers;
 
@@ -68,11 +68,15 @@ export function registerInventory() {
       );
 
       const inventoryIndex$ = concat(of(0), InventoryIndex.update$.pipe(map((e) => e.entity)));
+      const selectedSlot$ = concat(of(0), SelectedSlot.update$.pipe(map((e) => e.value[0]?.value)));
 
-      return combineLatest([ownedByMe$, showInventory$, inventoryIndex$]).pipe(map((props) => ({ props })));
+      return combineLatest([ownedByMe$, showInventory$, selectedSlot$, inventoryIndex$]).pipe(
+        map((props) => ({ props }))
+      );
     },
     ({ props }) => {
-      const [ownedByMe, { layers, show }] = props;
+      const [ownedByMe, { layers, show }, selectedSlot] = props;
+      console.log("selected", selectedSlot);
 
       const [holdingBlock, setHoldingBlock] = useState<EntityIndex | undefined>();
 
@@ -118,6 +122,7 @@ export function registerInventory() {
             quantity={quantity || undefined}
             onClick={() => moveItems(i)}
             disabled={blockIndex === holdingBlock}
+            selected={i === selectedSlot}
           />
         );
       });
@@ -126,7 +131,7 @@ export function registerInventory() {
         <Absolute>
           <Center>
             <Background onClick={close} />
-            <Border color={"#999999"} style={{ zIndex: 1 }}>
+            <Border borderColor={"#999999"} style={{ zIndex: 1 }}>
               <Wrapper>
                 {[...range(INVENTORY_WIDTH * (INVENTORY_HEIGHT - 1))]
                   .map((i) => i + INVENTORY_WIDTH)

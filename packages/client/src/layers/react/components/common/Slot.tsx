@@ -2,6 +2,7 @@ import { EntityID } from "@latticexyz/recs";
 import React from "react";
 import styled from "styled-components";
 import { BlockIcon } from "./BlockIcon";
+import { AbsoluteBorder } from "./AbsoluteBorder";
 import { Border } from "./Border";
 
 export const Slot: React.FC<{
@@ -11,17 +12,21 @@ export const Slot: React.FC<{
   selected?: boolean;
   disabled?: boolean;
 }> = ({ blockID, quantity, onClick, selected, disabled }) => (
-  <Border color={selected ? "green" : "lightgray"}>
-    <Border color={"#999999"}>
-      <Inner onClick={onClick} disabled={disabled}>
-        {blockID ? (
-          <BlockIcon blockID={blockID} scale={3.6}>
-            {quantity != null ? <Quantity>{quantity}</Quantity> : null}
-          </BlockIcon>
-        ) : null}
-      </Inner>
+  <AbsoluteBorder borderColor={selected ? "#ffffff" : "transparent"} borderWidth={6}>
+    <Border borderColor={"#b1b1b1"}>
+      <Border borderColor={"#797979"}>
+        <Border borderColor={"rgb(0 0 0 / 10%)"}>
+          <Inner onClick={onClick} disabled={disabled}>
+            {blockID ? (
+              <BlockIcon blockID={blockID} scale={4}>
+                {quantity != null ? <Quantity>{quantity}</Quantity> : null}
+              </BlockIcon>
+            ) : null}
+          </Inner>
+        </Border>
+      </Border>
     </Border>
-  </Border>
+  </AbsoluteBorder>
 );
 
 const Inner = styled.div<{ disabled?: boolean }>`
@@ -31,7 +36,6 @@ const Inner = styled.div<{ disabled?: boolean }>`
   justify-items: center;
   align-items: center;
   font-size: 20px;
-  border: 3px #626262 solid;
   opacity: ${(p) => (p.disabled ? 0.5 : 1)};
 `;
 

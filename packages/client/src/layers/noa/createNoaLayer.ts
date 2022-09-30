@@ -72,7 +72,7 @@ export function createNoaLayer(network: NetworkLayer) {
 
   // Set initial values
   setComponent(components.UI, SingletonEntity, { showComponentBrowser: false, showInventory: false });
-  setComponent(components.SelectedSlot, SingletonEntity, { value: 1 });
+  setComponent(components.SelectedSlot, SingletonEntity, { value: 0 });
 
   // --- API ------------------------------------------------------------------------
   function setCraftingTable(entities: EntityIndex[]) {
