@@ -19,7 +19,7 @@ export interface API {
 // 8 still runs extremely well
 // 12 might be "high" setting
 // 16 is the limit before performance issues
-const CHUNK_RENDER_DISTANCE = 6;
+const CHUNK_RENDER_DISTANCE = 12;
 const CHUNK_SIZE = 16;
 const SKY_COLOR = [0.7, 0.8, 1];
 const MIN_CHUNK = 2;

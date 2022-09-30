@@ -122,7 +122,7 @@ export function createNoaLayer(network: NetworkLayer) {
     build(itemEntity, coord);
   }
 
-  // --- SETUP NOA CONSTANTS
+  // --- SETUP NOA CONSTANTS --------------------------------------------------------
   monkeyPatchMeshComponent(noa);
   registerModelComponent(noa);
   registerRotationComponent(noa);

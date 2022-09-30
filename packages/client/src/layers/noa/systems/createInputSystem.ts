@@ -1,11 +1,4 @@
-import {
-  getComponentValue,
-  getEntitiesWithValue,
-  HasValue,
-  runQuery,
-  setComponent,
-  updateComponent,
-} from "@latticexyz/recs";
+import { getComponentValue, HasValue, runQuery, setComponent, updateComponent } from "@latticexyz/recs";
 import { NetworkLayer, BlockType } from "../../network";
 import { HandComponent, HAND_COMPONENT } from "../engine/components/handComponent";
 import { MiningBlockComponent, MINING_BLOCK_COMPONENT } from "../engine/components/miningBlockComponent";
@@ -14,17 +7,13 @@ import { NoaLayer } from "../types";
 export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
   const {
     noa,
-    components: { SelectedSlot, UI, InventoryIndex },
+    components: { SelectedSlot, UI },
     SingletonEntity,
     api: { setCraftingTable, toggleInventory, placeSelectedItem },
   } = context;
 
   const {
-    world,
-    components: { Item, OwnedBy, Position },
-    api: { build },
-    network: { connectedAddress },
-    actions: { withOptimisticUpdates },
+    components: { Item, Position },
   } = network;
 
   // clear targeted block on on left click
@@ -116,7 +105,6 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
   });
 
   noa.inputs.bind("inventory", "E");
-  // noa.inputs.unbind("alt-fire", "E");
   noa.inputs.down.on("inventory", () => {
     toggleInventory();
   });
