@@ -1,14 +1,7 @@
 import { NetworkLayer } from "../../network/types";
 import { NoaLayer } from "../types";
 import { defineRxSystem, EntityID, setComponent } from "@latticexyz/recs";
-import {
-  concatUint8Arrays,
-  ethAddressToUint8Array,
-  Int32ArrayToUint8Array,
-  splitUint8Arrays,
-  Uint8ArrayToHexString,
-  Uint8ArrayToInt32Array,
-} from "@latticexyz/utils";
+import { concatUint8Arrays, Int32ArrayToUint8Array, splitUint8Arrays, Uint8ArrayToInt32Array } from "@latticexyz/utils";
 
 function encodeMessage(position: number[], direction: number[]): Uint8Array {
   const data = Int32ArrayToUint8Array([...position, ...direction]);
