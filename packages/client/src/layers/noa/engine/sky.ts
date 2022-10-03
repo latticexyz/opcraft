@@ -1,4 +1,4 @@
-import { Color3, Matrix, MeshBuilder, Scene, StandardMaterial, Texture } from "@babylonjs/core";
+import { Color3, MeshBuilder, Scene, StandardMaterial, Texture } from "@babylonjs/core";
 import * as BABYLON from "@babylonjs/core";
 import type { Engine } from "noa-engine";
 import { SKY_COLOR } from "../setup/setupNoaEngine";
@@ -24,7 +24,6 @@ export function setupClouds(noa: Engine) {
     true,
     Texture.NEAREST_SAMPLINGMODE
   );
-  // mat.emissiveColor = new Color3(1, 1, 1);
   mat.diffuseTexture = cloudTexture;
   mat.diffuseTexture.hasAlpha = true;
   mat.specularColor = new BABYLON.Color3(0.2, 0.2, 0.2);
@@ -93,7 +92,8 @@ export function setupClouds(noa: Engine) {
 
   noa.rendering.addMeshToScene(s, false);
 
-  const [playerX, _, playerZ] = noa.ents.getPositionData(noa.playerEntity)!.position!;
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const [playerX, , playerZ] = noa.ents.getPositionData(noa.playerEntity)!.position!;
   const cloudCenter = [playerX, playerZ];
   let currentRadian = 0;
 
@@ -106,7 +106,8 @@ export function setupClouds(noa: Engine) {
     ];
     currentRadian += 0.0001;
     const [x, y, z] = noa.globalToLocal([cloudPosition[0], CLOUD_HEIGHT, cloudPosition[1]], [0, 0, 0], local);
-    const [currentPlayerX, _, currentPlayerZ] = noa.ents.getPositionData(noa.playerEntity)!.position!;
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const [currentPlayerX, , currentPlayerZ] = noa.ents.getPositionData(noa.playerEntity)!.position!;
     s.position.copyFromFloats(x, y, z);
     // move clouds towards player
     const diffX = currentPlayerX - cloudCenter[0];
@@ -157,7 +158,6 @@ export function setupSky(noa: Engine) {
   skyMat.emissiveColor = new Color3(0.2, 0.3, 0.7);
   skyMat.diffuseColor = new Color3(0.2, 0.3, 0.7);
   skyBoxMat.backFaceCulling = false;
-  // skyBoxMat.emissiveColor = new Color3(clearColor[0], clearColor[1], clearColor[2]);
   skyBoxMat.diffuseColor = new Color3(...SKY_COLOR);
 
   skyMesh.renderingGroupId = -1;
@@ -175,6 +175,7 @@ export function setupSky(noa: Engine) {
 
   const update = () => {
     const local: number[] = [];
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const [playerX, playerY, playerZ] = noa.ents.getPositionData(noa.playerEntity)!.position!;
     const [x, y, z] = noa.globalToLocal([playerX, playerY, playerZ], [0, 0, 0], local);
     skyMesh.position.copyFromFloats(x, y + SKY_HEIGHT, z);

@@ -1,8 +1,7 @@
-import { Color3, Matrix, MeshBuilder, Scene, StandardMaterial, Texture } from "@babylonjs/core";
-import * as BABYLON from "@babylonjs/core";
+import { Color3, MeshBuilder, Scene, StandardMaterial, GlowLayer } from "@babylonjs/core";
 import type { Engine } from "noa-engine";
 /*
- * Setups clouds in a hacky way
+ * Setup day/night cycle in a hacky way
  */
 const CYCLE = 5 * 60 * 1000;
 
@@ -10,7 +9,7 @@ const CYCLE = 5 * 60 * 1000;
  * Setups sun
  */
 
-export function setupSun(noa: Engine, glow: BABYLON.GlowLayer) {
+export function setupSun(noa: Engine, glow: GlowLayer) {
   const scene: Scene = noa.rendering.getScene();
   const marker = MeshBuilder.CreateBox("marker");
   marker.visibility = 0;
@@ -47,6 +46,7 @@ export function setupSun(noa: Engine, glow: BABYLON.GlowLayer) {
     const progress = (elapsed % CYCLE) / CYCLE;
     // sync SUN marker
     const local: number[] = [];
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const [playerX, playerY, playerZ] = noa.ents.getPositionData(noa.playerEntity)!.position!;
     const [x, y, z] = noa.globalToLocal([playerX, playerY, playerZ], [0, 0, 0], local);
     marker.position.copyFromFloats(x, y, z);
