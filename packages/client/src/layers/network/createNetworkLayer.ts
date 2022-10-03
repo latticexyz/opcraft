@@ -46,7 +46,7 @@ export async function createNetworkLayer(config: GameConfig) {
   };
 
   // --- SETUP ----------------------------------------------------------------------
-  const { txQueue, systems, txReduced$, network, startSync, encoders } = await setupMUDNetwork<
+  const { txQueue, systems, txReduced$, network, startSync, encoders, ecsEvent$, mappings } = await setupMUDNetwork<
     typeof components,
     SystemTypes
   >(getNetworkConfig(config), world, components, SystemAbis, { initialGasPrice: 2_000_000 });
@@ -180,6 +180,8 @@ export async function createNetworkLayer(config: GameConfig) {
     config,
     relayer,
     worldAddress: config.worldAddress,
+    ecsEvent$,
+    mappings,
   };
 
   return context;
