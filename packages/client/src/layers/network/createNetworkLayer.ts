@@ -58,7 +58,6 @@ export async function createNetworkLayer(config: GameConfig) {
     config.relayServiceUrl && playerAddress && playerSigner
       ? await createRelayStream(playerSigner, config.relayServiceUrl, playerAddress)
       : null;
-  relay && world.registerDisposer(relay.dispose);
 
   // Faucet setup
   const faucet = config.faucetServiceUrl != null ? createFaucetService(config.faucetServiceUrl) : null;
