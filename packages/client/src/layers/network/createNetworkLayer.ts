@@ -3,7 +3,7 @@ import { setupDevSystems } from "./setup";
 import { createActionSystem, setupMUDNetwork } from "@latticexyz/std-client";
 import { GameConfig, getNetworkConfig } from "./config";
 import { VoxelCoord } from "@latticexyz/utils";
-import { BigNumber, utils, Wallet } from "ethers";
+import { BigNumber, utils } from "ethers";
 import {
   definePositionComponent,
   defineOwnedByComponent,
