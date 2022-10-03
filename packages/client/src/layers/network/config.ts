@@ -6,9 +6,9 @@ export type GameConfig = {
   chainId: number;
   jsonRpc: string;
   wsRpc?: string;
-  checkpointUrl?: string;
+  snapshotUrl?: string;
   streamServiceUrl?: string;
-  relayerServiceUrl?: string;
+  relayServiceUrl?: string;
   faucetServiceUrl?: string;
   peerJsUrl?: string;
   devMode: boolean;
@@ -33,7 +33,7 @@ export const getNetworkConfig: (networkConfig: GameConfig) => SetupContractConfi
   },
   privateKey: config.privateKey,
   chainId: config.chainId,
-  checkpointServiceUrl: config.checkpointUrl,
+  snapshotServiceUrl: config.snapshotUrl,
   streamServiceUrl: config.streamServiceUrl,
   initialBlockNumber: config.initialBlockNumber,
   worldAddress: config.worldAddress,

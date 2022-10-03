@@ -16,7 +16,7 @@ function decodeMessage(data: Uint8Array): { position: number[]; direction: numbe
   };
 }
 
-export function createRelayerSystem(network: NetworkLayer, context: NoaLayer) {
+export function createRelaySystem(network: NetworkLayer, context: NoaLayer) {
   const {
     world,
     components: { PlayerPosition, PlayerDirection },
@@ -25,19 +25,19 @@ export function createRelayerSystem(network: NetworkLayer, context: NoaLayer) {
 
   const {
     network: { connectedAddress },
-    relayer,
+    relay,
   } = network;
 
-  if (!relayer) {
+  if (!relay) {
     console.warn("ECS message relayer not available. Not syncronizing player positions.");
     return;
   }
 
   // TODO: add proper chunking logic
-  relayer.subscribe("chunk(0,0)");
+  relay.subscribe("chunk(0,0)");
 
   function setPosition(position: number[], direction: number[]) {
-    relayer?.push("chunk(0,0)", encodeMessage(position, direction));
+    relay?.push("chunk(0,0)", encodeMessage(position, direction));
   }
 
   const interval = setInterval(() => {
@@ -54,7 +54,7 @@ export function createRelayerSystem(network: NetworkLayer, context: NoaLayer) {
     setPosition(data.position, lookAt);
   }, 100);
 
-  defineRxSystem(world, relayer.event$, ({ message, address }) => {
+  defineRxSystem(world, relay.event$, ({ message, address }) => {
     const {
       position: [x, y, z],
       direction: [dx, dy, dz],

@@ -25,9 +25,9 @@ const defaultParams = {
   rpc: "https://l2.op-bedrock.lattice.xyz",
   wsRpc: "wss://l2.op-bedrock.lattice.xyz",
   initialBlockNumber: "589657",
-  checkpoint: "https://ecs-snapshot.op-bedrock.lattice.xyz",
+  snapshot: "https://ecs-snapshot.op-bedrock.lattice.xyz",
   stream: "https://ecs-stream.op-bedrock.lattice.xyz",
-  relayer: "https://ecs-relay.op-bedrock.lattice.xyz",
+  relay: "https://ecs-relay.op-bedrock.lattice.xyz",
   faucet: undefined,
   blockTime: "1000",
 };
@@ -48,9 +48,9 @@ async function bootGame() {
     const chainIdString = params.get("chainId") ?? defaultParams.chainId;
     const jsonRpc = params.get("rpc") ?? defaultParams.rpc;
     const wsRpc = params.get("wsRpc") ?? defaultParams.wsRpc; // || (jsonRpc && jsonRpc.replace("http", "ws"));
-    const checkpointUrl = params.get("checkpoint") ?? defaultParams.checkpoint;
+    const snapshotUrl = params.get("snapshot") ?? defaultParams.snapshot;
     const streamServiceUrl = params.get("stream") ?? defaultParams.stream;
-    const relayerServiceUrl = params.get("relayer") ?? defaultParams.relayer;
+    const relayServiceUrl = params.get("relay") ?? defaultParams.relay;
     const faucetServiceUrl = params.get("faucet") ?? defaultParams.faucet;
     const peerJsUrl = params.get("peerJs") || undefined;
     const devMode = params.get("dev") === "true";
@@ -73,9 +73,9 @@ async function bootGame() {
         jsonRpc,
         peerJsUrl,
         wsRpc,
-        checkpointUrl,
+        snapshotUrl,
         streamServiceUrl,
-        relayerServiceUrl,
+        relayServiceUrl,
         faucetServiceUrl,
         devMode,
         blockTime,
@@ -93,14 +93,6 @@ async function bootGame() {
         setTimestamp(Date.now());
       }, 100);
     });
-
-    // Make sure there is only one canvas.
-    // Ideally HMR should handle this, but in some cases it fails.
-    // If there are two canvas elements, do a full reload.
-    // if (document.querySelectorAll("#phaser-game canvas").length > 1) {
-    //   console.log("Detected two canvas elements, full reload");
-    //   import.meta.hot?.invalidate();
-    // }
 
     // Start syncing once all systems have booted
     if (initialBoot) {
