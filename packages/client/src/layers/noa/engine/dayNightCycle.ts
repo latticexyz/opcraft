@@ -45,7 +45,6 @@ export function setupSun(noa: Engine, glow: BABYLON.GlowLayer) {
     last = now;
     elapsed += dt;
     const progress = (elapsed % CYCLE) / CYCLE;
-    console.log(progress);
     // sync SUN marker
     const local: number[] = [];
     const [playerX, playerY, playerZ] = noa.ents.getPositionData(noa.playerEntity)!.position!;
@@ -54,9 +53,9 @@ export function setupSun(noa: Engine, glow: BABYLON.GlowLayer) {
     // move sun
     marker.rotation.z = -(Math.PI * 2 * progress);
     const scene = noa.rendering.getScene();
-    const gradingLevel = Math.sin(-(Math.PI * 2 * progress));
-    console.log(gradingLevel);
-    scene.imageProcessingConfiguration.colorGradingTexture.level = Math.max(0, Math.sin(-(Math.PI * 2 * progress)));
+    const gradingLevel = Math.max(0, Math.min(3 * Math.sin(-(Math.PI * 2 * progress)), 1));
+    glow.intensity = Math.max(0, Math.min(1 - gradingLevel, 1)) * 0.4;
+    scene.imageProcessingConfiguration.colorGradingTexture.level = gradingLevel;
   };
 
   noa.on("beforeRender", update);

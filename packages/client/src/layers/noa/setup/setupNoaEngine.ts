@@ -20,7 +20,7 @@ export interface API {
 // 8 still runs extremely well
 // 12 might be "high" setting
 // 16 is the limit before performance issues
-const CHUNK_RENDER_DISTANCE = 12;
+const CHUNK_RENDER_DISTANCE = 8;
 const CHUNK_SIZE = 16;
 export const SKY_COLOR = [0.7, 0.8, 1];
 const MIN_CHUNK = 2;
@@ -53,10 +53,9 @@ export function setupNoaEngine(api: API) {
   const noa = new Engine(opts);
   const scene = noa.rendering.getScene();
   // Note: this is the amount of time, per tick, spent requesting chunks from userland and meshing them
-  // IT DOES NOT INCLUDE TIME SPENT BY THE CLIENT GENEERATING THE CHUNKS
-  // On lower end device we should bring this down to 9 or 11
-  noa.world.maxProcessingPerTick = 16;
-  noa.world.maxProcessingPerRender = 12;
+  // IT DOES NOT INCLUDE TIME SPENT BY THE CLIENT GENERATING THE CHUNKS
+  noa.world.maxProcessingPerTick = 12;
+  noa.world.maxProcessingPerRender = 8;
   // Register simple materials
   const textures = Object.values(Blocks).reduce<string[]>((materials, block) => {
     if (!block || !block.material) return materials;
