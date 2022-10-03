@@ -38,6 +38,7 @@ import { registerHandComponent } from "./engine/components/handComponent";
 import { registerModelComponent } from "./engine/components/modelComponent";
 import { MINING_BLOCK_COMPONENT, registerMiningBlockComponent } from "./engine/components/miningBlockComponent";
 import { defineInventoryIndexComponent } from "./components/InventoryIndex";
+import { setupSun } from "./engine/dayNightCycle";
 
 export function createNoaLayer(network: NetworkLayer) {
   const world = namespaceWorld(network.world, "noa");
@@ -65,7 +66,7 @@ export function createNoaLayer(network: NetworkLayer) {
   };
 
   // --- SETUP ----------------------------------------------------------------------
-  const { noa, setBlock } = setupNoaEngine(network.api);
+  const { noa, setBlock, glow } = setupNoaEngine(network.api);
 
   // Set initial values
   setComponent(components.UI, SingletonEntity, { showComponentBrowser: false, showInventory: false });
@@ -131,6 +132,7 @@ export function createNoaLayer(network: NetworkLayer) {
   setupClouds(noa);
   setupSky(noa);
   setupHand(noa);
+  setupSun(noa, glow)
   noa.entities.addComponentAgain(noa.playerEntity, MINING_BLOCK_COMPONENT, {});
 
   const context = {
