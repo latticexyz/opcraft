@@ -9,6 +9,7 @@ export type GameConfig = {
   checkpointUrl?: string;
   streamServiceUrl?: string;
   relayerServiceUrl?: string;
+  faucetServiceUrl?: string;
   peerJsUrl?: string;
   devMode: boolean;
   initialBlockNumber: number;
