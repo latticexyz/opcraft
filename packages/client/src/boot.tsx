@@ -52,7 +52,6 @@ async function bootGame() {
     const streamServiceUrl = params.get("stream") ?? defaultParams.stream;
     const relayServiceUrl = params.get("relay") ?? defaultParams.relay;
     const faucetServiceUrl = params.get("faucet") ?? defaultParams.faucet;
-    const peerJsUrl = params.get("peerJs") || undefined;
     const devMode = params.get("dev") === "true";
     const initialBlockNumberString = params.get("initialBlockNumber") ?? defaultParams.initialBlockNumber;
     const initialBlockNumber = initialBlockNumberString ? parseInt(initialBlockNumberString) : 0;
@@ -71,7 +70,6 @@ async function bootGame() {
         privateKey,
         chainId: parseInt(chainIdString),
         jsonRpc,
-        peerJsUrl,
         wsRpc,
         snapshotUrl,
         streamServiceUrl,

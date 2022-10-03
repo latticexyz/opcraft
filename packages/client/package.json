@@ -44,7 +44,6 @@
     "nice-grpc-web": "^2.0.0",
     "noa-engine": "git+https://github.com/latticexyz/noa.git",
     "observable-webworker": "^4.0.1",
-    "peerjs": "^1.4.6",
     "phaser": "3.60.0-beta.4",
     "protobufjs": "^7.1.2",
     "proxy-deep": "^3.1.1",

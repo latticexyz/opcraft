@@ -10,7 +10,6 @@ export type GameConfig = {
   streamServiceUrl?: string;
   relayServiceUrl?: string;
   faucetServiceUrl?: string;
-  peerJsUrl?: string;
   devMode: boolean;
   initialBlockNumber: number;
   blockTime: number;
