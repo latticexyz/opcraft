@@ -25,7 +25,7 @@ const defaultParams = {
   rpc: "https://l2.op-bedrock.lattice.xyz",
   wsRpc: "wss://l2.op-bedrock.lattice.xyz",
   initialBlockNumber: "589657",
-  checkpoint: "https://ecs-snapshot.op-bedrock.lattice.xyz",
+  snapshot: "https://ecs-snapshot.op-bedrock.lattice.xyz",
   stream: "https://ecs-stream.op-bedrock.lattice.xyz",
   relay: "https://ecs-relay.op-bedrock.lattice.xyz",
   faucet: undefined,
@@ -48,7 +48,7 @@ async function bootGame() {
     const chainIdString = params.get("chainId") ?? defaultParams.chainId;
     const jsonRpc = params.get("rpc") ?? defaultParams.rpc;
     const wsRpc = params.get("wsRpc") ?? defaultParams.wsRpc; // || (jsonRpc && jsonRpc.replace("http", "ws"));
-    const checkpointUrl = params.get("checkpoint") ?? defaultParams.checkpoint;
+    const snapshotUrl = params.get("snapshot") ?? defaultParams.snapshot;
     const streamServiceUrl = params.get("stream") ?? defaultParams.stream;
     const relayServiceUrl = params.get("relay") ?? defaultParams.relay;
     const faucetServiceUrl = params.get("faucet") ?? defaultParams.faucet;
@@ -73,7 +73,7 @@ async function bootGame() {
         jsonRpc,
         peerJsUrl,
         wsRpc,
-        checkpointUrl,
+        snapshotUrl,
         streamServiceUrl,
         relayServiceUrl,
         faucetServiceUrl,
