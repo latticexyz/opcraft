@@ -32,7 +32,7 @@ import {
   createInputSystem,
   createInventoryIndexSystem,
   createPlayerPositionSystem,
-  createRelayerSystem,
+  createRelaySystem,
 } from "./systems";
 import { registerHandComponent } from "./engine/components/handComponent";
 import { registerModelComponent } from "./engine/components/modelComponent";
@@ -159,7 +159,7 @@ export function createNoaLayer(network: NetworkLayer) {
   createInputSystem(network, context);
   createBlockSystem(network, context);
   createPlayerPositionSystem(network, context);
-  createRelayerSystem(network, context);
+  createRelaySystem(network, context);
   createInventoryIndexSystem(network, context);
 
   return context;

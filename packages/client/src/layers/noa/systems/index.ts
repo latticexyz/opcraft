@@ -1,5 +1,5 @@
 export { createInputSystem } from "./createInputSystem";
 export { createBlockSystem } from "./createBlockSystem";
 export { createPlayerPositionSystem } from "./createPlayerPositionSystem";
-export { createRelayerSystem } from "./createRelayerSystem";
+export { createRelaySystem } from "./createRelaySystem";
 export { createInventoryIndexSystem } from "./createInventoryIndexSystem";

@@ -8,7 +8,7 @@ export type GameConfig = {
   wsRpc?: string;
   checkpointUrl?: string;
   streamServiceUrl?: string;
-  relayerServiceUrl?: string;
+  relayServiceUrl?: string;
   faucetServiceUrl?: string;
   peerJsUrl?: string;
   devMode: boolean;

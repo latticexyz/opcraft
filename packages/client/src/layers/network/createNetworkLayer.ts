@@ -18,7 +18,7 @@ import { defineNameComponent } from "./components/NameComponent";
 import { getBlockAtPosition as getBlockAtPositionApi, getECSBlock, getTerrain, getTerrainBlock } from "./api";
 import { createPerlin } from "@latticexyz/noise";
 import { BlockIdToKey, BlockType } from "./constants";
-import { createFaucetService, createRelayerStream, GodID } from "@latticexyz/network";
+import { createFaucetService, createRelayStream, GodID } from "@latticexyz/network";
 import { SystemTypes } from "contracts/types/SystemTypes";
 import { SystemAbis } from "contracts/types/SystemAbis.mjs";
 
@@ -54,11 +54,11 @@ export async function createNetworkLayer(config: GameConfig) {
   // Relayer setup
   const playerAddress = network.connectedAddress.get();
   const playerSigner = network.signer.get();
-  const relayer =
-    config.relayerServiceUrl && playerAddress && playerSigner
-      ? await createRelayerStream(playerSigner, config.relayerServiceUrl, playerAddress)
+  const relay =
+    config.relayServiceUrl && playerAddress && playerSigner
+      ? await createRelayStream(playerSigner, config.relayServiceUrl, playerAddress)
       : null;
-  relayer && world.registerDisposer(relayer.dispose);
+  relay && world.registerDisposer(relay.dispose);
 
   // Faucet setup
   const faucet = config.faucetServiceUrl != null ? createFaucetService(config.faucetServiceUrl) : null;
@@ -176,7 +176,7 @@ export async function createNetworkLayer(config: GameConfig) {
     api: { build, mine, getBlockAtPosition, getECSBlockAtPosition, getTerrainBlockAtPosition },
     dev: setupDevSystems(world, encoders, systems),
     config,
-    relayer,
+    relay,
     worldAddress: config.worldAddress,
     ecsEvent$,
     mappings,
