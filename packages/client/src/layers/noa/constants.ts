@@ -2,6 +2,8 @@ import { EntityID } from "@latticexyz/recs";
 import { BlockTypeKey } from "../network/constants";
 import { Block, NoaBlockType } from "./types";
 
+export const CRAFTING_SIZE = 9;
+
 export const Textures = {
   Grass: "./assets/blocks/4-Grass_block-top.png",
   GrassSide: "./assets/blocks/4-Grass_block-side.png",

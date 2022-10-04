@@ -2,19 +2,25 @@ import React, { useEffect, useState } from "react";
 import { registerUIComponent } from "../engine";
 import { combineLatest, concat, map, of, scan } from "rxjs";
 import styled from "styled-components";
-import { Border, Center, Slot } from "./common";
+import { AbsoluteBorder, Center, Slot } from "./common";
 import { range } from "@latticexyz/utils";
 import {
   defineQuery,
+  EntityID,
   EntityIndex,
   getComponentValue,
-  getComponentValueStrict,
   getEntitiesWithValue,
   Has,
   HasValue,
+  runQuery,
   setComponent,
   UpdateType,
 } from "@latticexyz/recs";
+import { BlockType } from "../../network";
+import { CRAFTING_SIZE, getBlockIconUrl } from "../../noa/constants";
+import { BlockIdToKey } from "../../network/constants";
+import { Layers } from "../../../types";
+import { GodID } from "@latticexyz/network";
 
 // This gives us 36 inventory slots. As of now there are 34 types of items, so it should fit.
 const INVENTORY_WIDTH = 9;
@@ -36,7 +42,7 @@ export function registerInventory() {
           network: { connectedAddress },
         },
         noa: {
-          components: { UI, InventoryIndex, SelectedSlot },
+          components: { UI, InventoryIndex, SelectedSlot, CraftingTable },
         },
       } = layers;
 
@@ -69,8 +75,9 @@ export function registerInventory() {
 
       const inventoryIndex$ = concat(of(0), InventoryIndex.update$.pipe(map((e) => e.entity)));
       const selectedSlot$ = concat(of(0), SelectedSlot.update$.pipe(map((e) => e.value[0]?.value)));
+      const craftingTable$ = concat(of(0), CraftingTable.update$);
 
-      return combineLatest([ownedByMe$, showInventory$, selectedSlot$, inventoryIndex$]).pipe(
+      return combineLatest([ownedByMe$, showInventory$, selectedSlot$, inventoryIndex$, craftingTable$]).pipe(
         map((props) => ({ props }))
       );
     },
@@ -82,6 +89,18 @@ export function registerInventory() {
       useEffect(() => {
         if (!show) setHoldingBlock(undefined);
       }, [show]);
+
+      useEffect(() => {
+        if (holdingBlock == null) {
+          document.body.style.cursor = "unset";
+          return;
+        }
+
+        const blockID = world.entities[holdingBlock];
+        const blockType = BlockIdToKey[blockID];
+        const icon = getBlockIconUrl(blockType);
+        document.body.style.cursor = `url(${icon}) 12 12, auto`;
+      }, [holdingBlock]);
 
       const {
         noa: {
@@ -97,19 +116,28 @@ export function registerInventory() {
 
       function moveItems(slot: number) {
         const blockAtSlot = [...getEntitiesWithValue(InventoryIndex, { value: slot })][0];
+        const blockIDAtSlot = blockAtSlot == null ? null : layers.noa.world.entities[blockAtSlot];
+        const ownedEntitiesOfType = blockIDAtSlot && ownedByMe[blockIDAtSlot];
 
         // If not currently holding a block, grab the block at this slot
         if (holdingBlock == null) {
-          return setHoldingBlock(blockAtSlot);
+          if (ownedEntitiesOfType) setHoldingBlock(blockAtSlot);
+          return;
         }
 
         // Else (if currently holding a block), swap the holding block with the block at this position
-        const holdingBlockSlot = getComponentValueStrict(InventoryIndex, holdingBlock).value;
+        const holdingBlockSlot = getComponentValue(InventoryIndex, holdingBlock)?.value;
+        if (holdingBlockSlot == null) {
+          console.warn("holding block has no slot", holdingBlock);
+          setHoldingBlock(undefined);
+          return;
+        }
         setComponent(InventoryIndex, holdingBlock, { value: slot });
         blockAtSlot && setComponent(InventoryIndex, blockAtSlot, { value: holdingBlockSlot });
         setHoldingBlock(undefined);
       }
 
+      // Map each inventory slot to the corresponding block type at this slot index
       const Slots = [...range(INVENTORY_HEIGHT * INVENTORY_WIDTH)].map((i) => {
         const blockIndex: EntityIndex | undefined = [...getEntitiesWithValue(InventoryIndex, { value: i })][0];
         const blockID = blockIndex != null ? world.entities[blockIndex] : undefined;
@@ -130,13 +158,16 @@ export function registerInventory() {
         <Absolute>
           <Center>
             <Background onClick={close} />
-            <Border borderColor={"#999999"} style={{ zIndex: 1 }}>
-              <Wrapper>
-                {[...range(INVENTORY_WIDTH * (INVENTORY_HEIGHT - 1))]
-                  .map((i) => i + INVENTORY_WIDTH)
-                  .map((i) => Slots[i])}
-              </Wrapper>
-            </Border>
+            <div>
+              <AbsoluteBorder borderColor={"#999999"} borderWidth={3}>
+                <Crafting layers={layers} holdingBlock={holdingBlock} setHoldingBlock={setHoldingBlock} />
+                <Wrapper>
+                  {[...range(INVENTORY_WIDTH * (INVENTORY_HEIGHT - 1))]
+                    .map((i) => i + INVENTORY_WIDTH)
+                    .map((i) => Slots[i])}
+                </Wrapper>
+              </AbsoluteBorder>
+            </div>
           </Center>
         </Absolute>
       );
@@ -182,3 +213,130 @@ const Background = styled.div`
   width: 100%;
   pointer-events: all;
 `;
+
+// TODO move into own component
+const Crafting: React.FC<{
+  layers: Layers;
+  holdingBlock: EntityIndex | undefined;
+  setHoldingBlock: (block: EntityIndex | undefined) => void;
+}> = ({ layers, holdingBlock, setHoldingBlock }) => {
+  const {
+    network: {
+      components: { OwnedBy, Item },
+      actions: { withOptimisticUpdates },
+      network: { connectedAddress },
+    },
+    noa: {
+      api: { getCraftingTable, setCraftingTableIndex, clearCraftingTable },
+      world,
+    },
+  } = layers;
+
+  const OptimisticOwnedBy = withOptimisticUpdates(OwnedBy);
+
+  function getOverrideId(i: number) {
+    return ("crafting" + i) as EntityID;
+  }
+
+  useEffect(() => {
+    return () => {
+      for (let i = 0; i < CRAFTING_SIZE; i++) {
+        OptimisticOwnedBy.removeOverride(getOverrideId(i));
+        clearCraftingTable();
+      }
+    };
+  }, []);
+
+  const craftingTable = getCraftingTable();
+
+  function handleInput(i: number) {
+    const blockAtIndex = craftingTable[i];
+
+    // If we are not holding a block but there is a block at this position, grab the block
+    if (holdingBlock == null) {
+      OptimisticOwnedBy.removeOverride(getOverrideId(i));
+      setCraftingTableIndex(i, undefined);
+      setHoldingBlock(blockAtIndex);
+      return;
+    }
+
+    // If there already is a block of the current type at this position, remove the block
+    if (blockAtIndex === holdingBlock) {
+      OptimisticOwnedBy.removeOverride(getOverrideId(i));
+      setCraftingTableIndex(i, undefined);
+      return;
+    }
+
+    // Check if we still own an entity of the held block type
+    const blockID = world.entities[holdingBlock];
+    const ownedEntitiesOfType = [
+      ...runQuery([HasValue(OptimisticOwnedBy, { value: connectedAddress.get() }), HasValue(Item, { value: blockID })]),
+    ];
+
+    // If we don't own a block of the held block type, ignore this click
+    if (ownedEntitiesOfType.length === 0) {
+      console.warn("no owned entities of type", blockID, holdingBlock);
+      return;
+    }
+
+    // Set the optimisitic override for this crafting slot
+    const ownedEntityOfType = ownedEntitiesOfType[0];
+    OptimisticOwnedBy.removeOverride(getOverrideId(i));
+    OptimisticOwnedBy.addOverride(getOverrideId(i), {
+      entity: ownedEntityOfType,
+      value: { value: GodID },
+    });
+
+    // Place the held block on the crafting table
+    setCraftingTableIndex(i, holdingBlock);
+
+    // If this was the last block of this type we own, reset the cursor
+    if (ownedEntitiesOfType.length === 1) {
+      setHoldingBlock(undefined);
+    }
+  }
+
+  function handleOutput() {
+    console.log("crafting");
+  }
+
+  const Slots = craftingTable.slice(0, 4).map((blockIndex, index) => {
+    const blockID = blockIndex != -1 ? world.entities[blockIndex] : undefined;
+    return <Slot key={"crafting-slot" + index} blockID={blockID} onClick={() => handleInput(index)} />;
+  });
+
+  return (
+    <CraftingWrapper>
+      <CraftingInput>{[...range(4)].map((i) => Slots[i])}</CraftingInput>
+      <CraftingOutput>
+        <Slot blockID={BlockType.Grass} onClick={() => handleOutput()} selected={true} />
+      </CraftingOutput>
+    </CraftingWrapper>
+  );
+};
+
+const CraftingWrapper = styled.div`
+  width: 100%;
+  background-color: lightgray;
+  display: grid;
+  grid-template-columns: repeat(2, auto);
+  justify-content: center;
+  align-items: center;
+  grid-gap: 100px;
+  padding: 20px;
+  z-index: 11;
+  pointer-events: all;
+`;
+
+const CraftingInput = styled.div`
+  background-color: rgb(0 0 0 / 40%);
+  display: grid;
+  grid-template-columns: repeat(2, auto);
+  align-items: start;
+  justify-content: start;
+  pointer-events: all;
+  border: 5px lightgray solid;
+  z-index: 10;
+`;
+
+const CraftingOutput = styled.div``;

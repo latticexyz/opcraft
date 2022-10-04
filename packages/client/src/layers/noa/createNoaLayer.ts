@@ -21,7 +21,7 @@ import {
   defineCraftingTableComponent,
   defineUIComponent,
 } from "./components";
-import { Singleton } from "./constants";
+import { CRAFTING_SIZE, Singleton } from "./constants";
 import { setupHand } from "./engine/hand";
 import { monkeyPatchMeshComponent } from "./engine/components/monkeyPatchMeshComponent";
 import { registerRotationComponent, registerTargetedRotationComponent } from "./engine/components/rotationComponent";
@@ -82,11 +82,19 @@ export function createNoaLayer(network: NetworkLayer) {
     setComponent(components.CraftingTable, SingletonEntity, { value: entities.slice(0, 9) });
   }
 
-  function setCraftingTableIndex(index: number, entity: EntityIndex) {
-    const currentCraftingTable = getComponentValue(components.CraftingTable, SingletonEntity)?.value ?? [];
-    const newCraftingTable = [...currentCraftingTable];
+  function getCraftingTable(): EntityIndex[] {
+    return (getComponentValue(components.CraftingTable, SingletonEntity)?.value || [
+      ...new Array(CRAFTING_SIZE),
+    ]) as EntityIndex[];
+  }
+
+  function setCraftingTableIndex(index: number, entity: EntityIndex | undefined) {
+    const currentCraftingTable = getComponentValue(components.CraftingTable, SingletonEntity)?.value ?? [
+      ...new Array(9),
+    ];
+    const newCraftingTable = [...currentCraftingTable].map((i) => (i == null ? -1 : i));
     newCraftingTable[index] = entity;
-    setComponent(components.CraftingTable, SingletonEntity, { value: newCraftingTable });
+    setCraftingTable(newCraftingTable as EntityIndex[]);
   }
 
   function clearCraftingTable() {
@@ -154,6 +162,7 @@ export function createNoaLayer(network: NetworkLayer) {
     api: {
       setBlock,
       setCraftingTable,
+      getCraftingTable,
       clearCraftingTable,
       setCraftingTableIndex,
       teleportRandom,
