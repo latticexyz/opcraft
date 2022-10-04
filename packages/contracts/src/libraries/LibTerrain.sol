@@ -374,7 +374,7 @@ library LibTerrain {
   }
 
   function Bedrock(int32 y) internal pure returns (uint256) {
-    if (y < -255) return BedrockID;
+    if (y <= -63) return BedrockID;
   }
 
   function Sand(VoxelCoord memory coord) internal pure returns (uint256) {
@@ -420,10 +420,10 @@ library LibTerrain {
       return 0;
 
     uint16 hash = getCoordHash(x, z);
-    if (hash > 5) return 0;
+    if (hash > 10) return 0;
 
     hash = getCoordHash(y, x + z);
-    if (hash <= 5) return DiamondID;
+    if (hash <= 10) return DiamondID;
   }
 
   function Snow(VoxelCoord memory coord) internal pure returns (uint256) {

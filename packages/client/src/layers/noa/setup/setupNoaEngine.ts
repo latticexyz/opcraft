@@ -23,7 +23,7 @@ export interface API {
 const CHUNK_RENDER_DISTANCE = 8;
 const CHUNK_SIZE = 16;
 export const SKY_COLOR = [0.7, 0.8, 1];
-const MIN_CHUNK = 2;
+const MIN_CHUNK = 4;
 const MIN_HEIGHT = MIN_CHUNK * CHUNK_SIZE;
 
 export function setupNoaEngine(api: API) {

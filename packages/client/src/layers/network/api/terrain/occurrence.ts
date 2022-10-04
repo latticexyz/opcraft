@@ -14,7 +14,7 @@ export function Air({ coord: { y }, height }: TerrainState): EntityID | undefine
 }
 
 export function Bedrock({ coord: { y } }: TerrainState): EntityID | undefined {
-  if (y < -255) return BlockType.Bedrock;
+  if (y <= -63) return BlockType.Bedrock;
 }
 
 export function Sand(state: TerrainState): EntityID | undefined {
@@ -46,10 +46,10 @@ export function Diamond(state: TerrainState): EntityID | undefined {
   if ([Biome.Savanna, Biome.Forest, Biome.Desert].includes(biome) && y >= -20) return;
 
   const hash1 = accessState(state, "coordHash2D");
-  if (hash1 > 5) return;
+  if (hash1 > 10) return;
 
   const hash2 = accessState(state, "coordHash1D");
-  if (hash2 <= 5) return BlockType.Diamond;
+  if (hash2 <= 10) return BlockType.Diamond;
 }
 
 export function Snow(state: TerrainState): EntityID | undefined {

@@ -24,7 +24,7 @@ contract MineSystem is System {
     (VoxelCoord memory coord, uint256 blockType) = abi.decode(arguments, (VoxelCoord, uint256));
     require(blockType != AirID, "can not mine air");
     require(blockType != WaterID, "can not mine water");
-    require(coord.y < 256 && coord.y >= -256, "out of chunk bounds");
+    require(coord.y < 256 && coord.y >= -63, "out of chunk bounds");
 
     // Initialize components
     PositionComponent positionComponent = PositionComponent(getAddressById(components, PositionComponentID));

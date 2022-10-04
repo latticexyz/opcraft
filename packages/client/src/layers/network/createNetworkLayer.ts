@@ -60,7 +60,7 @@ export async function createNetworkLayer(config: GameConfig) {
       : null;
 
   // Faucet setup
-  const faucet = config.faucetServiceUrl != null ? createFaucetService(config.faucetServiceUrl) : null;
+  const faucet = config.faucetServiceUrl ? createFaucetService(config.faucetServiceUrl) : null;
 
   // --- ACTION SYSTEM --------------------------------------------------------------
   const actions = createActionSystem<{ actionType: string; coord?: VoxelCoord; blockType?: keyof typeof BlockType }>(
