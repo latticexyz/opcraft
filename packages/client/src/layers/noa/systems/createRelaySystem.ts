@@ -66,7 +66,7 @@ export function createRelaySystem(network: NetworkLayer, context: NoaLayer) {
     const quaternion: number[] = [];
     q.toArray(quaternion);
     relayPositionAndDirection(position, quaternion);
-  }, 300);
+  }, 200);
 
   defineRxSystem(world, relay.event$, ({ message, address }) => {
     const {
