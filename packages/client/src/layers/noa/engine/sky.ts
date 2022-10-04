@@ -1,7 +1,7 @@
 import { Color3, MeshBuilder, Scene, StandardMaterial, Texture } from "@babylonjs/core";
 import * as BABYLON from "@babylonjs/core";
 import type { Engine } from "noa-engine";
-import { SKY_COLOR } from "../setup/setupNoaEngine";
+import { SKY_COLOR } from "../setup/constants";
 /*
  * Setups clouds in a hacky way
  */
