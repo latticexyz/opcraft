@@ -23,10 +23,10 @@ export function monkeyPatchMeshComponent(noa: Engine) {
         state.mesh.rotation.copyFromFloats(pitch, yaw, 0);
       } else if (hasNoaComponent(noa, id, ROTATION_COMPONENT)) {
         const rotationComponent: RotationComponent = getNoaComponentStrict(noa, id, ROTATION_COMPONENT);
-        const { yaw, pitch } = rotationComponent;
+        const { rotation } = rotationComponent;
         const head = state.mesh.getChildMeshes(true)[0];
-        if (head) head.rotation.x = pitch;
-        state.mesh.rotation.y = yaw;
+        if (head) head.rotation.x = rotation.x;
+        state.mesh.rotation.y = rotation.y;
       }
     }
   };

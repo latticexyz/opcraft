@@ -41,3 +41,12 @@ export function setNoaComponent<S extends Record<string, any>>(
 export function setNoaPosition(noa: Engine, entity: number, position: VoxelCoord) {
   noa.entities.setPosition(entity, position.x, position.y, position.z);
 }
+
+export function getNoaPositionStrict(noa: Engine, entity: number): VoxelCoord {
+  const data = noa.ents.getPositionData(entity)?.position;
+  if (!data) {
+    throw new Error("NOA: no position data for " + entity);
+  }
+  const [x, y, z] = data;
+  return { x, y, z };
+}
