@@ -123,15 +123,15 @@ contract MineSystemTest is MudTest {
   function testInsideBounds() public {
     vm.startPrank(alice);
     MineSystem mineSystem = MineSystem(system(MineSystemID));
-    VoxelCoord memory coord = VoxelCoord({ x: -1598, y: -255, z: 4650 });
-    uint256 minedEntity = mineSystem.executeTyped(coord, StoneID);
+    VoxelCoord memory coord = VoxelCoord({ x: -1598, y: -63, z: 4650 });
+    uint256 minedEntity = mineSystem.executeTyped(coord, BedrockID);
     vm.stopPrank();
   }
 
   function testFailOutOfBounds() public {
     vm.startPrank(alice);
     MineSystem mineSystem = MineSystem(system(MineSystemID));
-    VoxelCoord memory coord = VoxelCoord({ x: -1598, y: -257, z: 4650 });
+    VoxelCoord memory coord = VoxelCoord({ x: -1598, y: -64, z: 4650 });
     uint256 minedEntity = mineSystem.executeTyped(coord, BedrockID);
     vm.stopPrank();
   }
