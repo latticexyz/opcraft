@@ -5,5 +5,5 @@
 export const CHUNK_RENDER_DISTANCE = 8;
 export const CHUNK_SIZE = 16;
 export const SKY_COLOR = [0.7, 0.8, 1];
-export const MIN_CHUNK = 2;
+export const MIN_CHUNK = 4;
 export const MIN_HEIGHT = MIN_CHUNK * CHUNK_SIZE;
