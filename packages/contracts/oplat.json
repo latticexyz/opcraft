@@ -1,0 +1,7 @@
+{
+  "chainId": 64657,
+  "chainBlockTime": 1,
+  "chainGasLimit": 100000000,
+  "rpc": "https://opcraft-1-replica-0.bedrock-goerli.optimism.io",
+  "wsRpc": "wss://opcraft-1-replica-0.bedrock-goerli.optimism.io/ws"
+}
