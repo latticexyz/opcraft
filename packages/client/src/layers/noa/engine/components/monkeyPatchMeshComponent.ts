@@ -1,4 +1,7 @@
+import { Mesh, normalizeEnvInfo } from "@babylonjs/core";
 import { Engine } from "noa-engine";
+import { RotationComponent, ROTATION_COMPONENT } from "./rotationComponent";
+import { getNoaComponentStrict, hasNoaComponent } from "./utils";
 
 export function monkeyPatchMeshComponent(noa: Engine) {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -14,18 +17,16 @@ export function monkeyPatchMeshComponent(noa: Engine) {
         rpos[1] + state.offset[1],
         rpos[2] + state.offset[2]
       );
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      //@ts-ignore
-      const rotationComponent = noa.ents.getState(id, "rotation");
       if (id === noa.playerEntity) {
         const yaw = noa.camera.heading;
         const pitch = noa.camera.pitch;
         state.mesh.rotation.copyFromFloats(pitch, yaw, 0);
-      } else if (rotationComponent) {
-        const { rotation } = rotationComponent;
-        const yaw = rotation.y;
-        const pitch = rotation.x;
-        state.mesh.rotation.copyFromFloats(pitch, yaw, 0);
+      } else if (hasNoaComponent(noa, id, ROTATION_COMPONENT)) {
+        const rotationComponent: RotationComponent = getNoaComponentStrict(noa, id, ROTATION_COMPONENT);
+        const { yaw, pitch } = rotationComponent;
+        const head = state.mesh.getChildMeshes(true)[0];
+        if (head) head.rotation.x = pitch;
+        state.mesh.rotation.y = yaw;
       }
     }
   };

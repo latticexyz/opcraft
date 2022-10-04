@@ -1,65 +1,43 @@
-import { Mesh, StandardMaterial, Color3, Vector3 } from "@babylonjs/core";
-import {
-  defineSystem,
-  EntityIndex,
-  getComponentValueStrict,
-  Has,
-  UpdateType,
-  defineComponentSystem,
-} from "@latticexyz/recs";
-import { getStringColor } from "@latticexyz/std-client";
-import { VoxelCoord } from "@latticexyz/utils";
+import { Mesh } from "@babylonjs/core";
+import { defineSystem, EntityIndex, Has, UpdateType, isComponentUpdate } from "@latticexyz/recs";
 import { NetworkLayer } from "../../network";
+import { setNoaComponent, setNoaPosition } from "../engine/components/utils";
 import { applyModel } from "../engine/model";
 import { NoaLayer } from "../types";
+import { RotationComponent, ROTATION_COMPONENT } from "../engine/components/rotationComponent";
 
 export function createPlayerPositionSystem(network: NetworkLayer, context: NoaLayer) {
   const {
     noa,
+    mudToNoaId,
     components: { PlayerPosition, PlayerDirection },
   } = context;
 
-  const {
-    world,
-    network: { connectedAddress },
-  } = network;
+  const { world } = network;
 
-  const mudToNoaId = new Map<number, number>();
-
-  function spawnPlayer(entity: EntityIndex, isPlayer: boolean) {
-    const noaEntity = isPlayer ? noa.playerEntity : noa.entities.add();
-
-    mudToNoaId.set(entity, noaEntity);
-
-    console.log("spawning player", noaEntity);
-    // get the player entity's ID and other info (position, size, ..)
-    // TODO: set this outside of noa to make dynamic and multiplayer
-    const dat = noa.entities.getPositionData(noa.playerEntity);
-    const w = dat?.width;
-    const h = dat?.height ?? 0;
+  function spawnPlayer(entity: EntityIndex) {
+    const isMappingStored = mudToNoaId.has(entity);
+    const noaEntity: number = mudToNoaId.get(entity) ?? noa.entities.add();
+    if (!isMappingStored) {
+      mudToNoaId.set(entity, noaEntity);
+    }
 
     const scene = noa.rendering.getScene();
     const mesh = Mesh.CreateBox("player-mesh", 1, scene);
-    if (w != null) mesh.scaling.x = w;
-    if (w != null) mesh.scaling.z = w;
-    if (h != null) mesh.scaling.y = h;
+    // if (w != null) mesh.scaling.x = w;
+    // if (w != null) mesh.scaling.z = w;
+    // if (h != null) mesh.scaling.y = h;
 
-    const address = "0x00";
-    const color = getStringColor(address);
-    const hexString = "#" + color.toString(16);
-    const material = new StandardMaterial(address, scene);
-    material.alpha = 1;
-    material.diffuseColor = Color3.FromHexString(hexString);
-    mesh.material = material;
-
-    // add "mesh" component to the player entity
-    // this causes the mesh to move around in sync with the player entity
     noa.entities.addComponentAgain(noaEntity, noa.entities.names.mesh, {
       mesh: mesh,
       // offset vector is needed because noa positions are always the
       // bottom-center of the entity, and Babylon's CreateBox gives a
       // mesh registered at the center of the box
-      offset: [0, h / 2, 0],
+      offset: [0, 1 / 2, 0],
+    });
+    noa.entities.addComponentAgain(noaEntity, ROTATION_COMPONENT, {
+      yaw: 0,
+      pitch: 0,
     });
     applyModel(
       noa,
@@ -69,84 +47,29 @@ export function createPlayerPositionSystem(network: NetworkLayer, context: NoaLa
       "./assets/skins/steve.png",
       0,
       true,
-      "Steve",
+      "player",
       [1, 1, 1]
     );
   }
 
-  // Bad style, don't try at home
-  // const moveInProgress = new Map<EntityIndex, boolean>();
-  // const queuedMove = new Map<EntityIndex, VoxelCoord>();
-
-  async function movePlayer(entity: EntityIndex, pos: VoxelCoord) {
-    // Only one move at a time
-    // if (moveInProgress.get(entity)) {
-    //   return queuedMove.set(entity, pos);
-    // }
-
-    // moveInProgress.set(entity, true);
-
-    const noaEntity = mudToNoaId.get(entity);
-    if (noaEntity == null) return console.error("Need to spawn entity first", entity);
-
-    noa.entities.setPosition(noaEntity, pos.x, pos.y, pos.z);
-
-    // TODO: figure out smooth movement
-    // const currentPos = noa.entities.getPosition(noaEntity);
-    // console.log("got current position", currentPos);
-    // const delta = [pos.x - currentPos[0], pos.y - currentPos[1], pos.z - currentPos[2]];
-    // if (delta[0] == 0 && delta[1] == 0 && delta[2] == 0) return;
-
-    // // "Smooth movement"
-    // const steps = 1000;
-    // for (let i = 1; i <= steps; i++) {
-    //   console.log("move step ", i, delta, pos, currentPos);
-    //   const newPos = currentPos.map((p, j) => p + (i / steps) * delta[j]);
-    //   noa.entities.setPosition(noaEntity, newPos[0], newPos[1], newPos[2]);
-    //   console.log("setting position to", newPos);
-    // }
-
-    // // Release lock
-    // moveInProgress.set(entity, false);
-    // const nextMove = queuedMove.get(entity);
-    // if (nextMove) {
-    //   queuedMove.delete(entity);
-    //   movePlayer(entity, nextMove);
-    // }
-  }
-
   // Everything with a position that is no block is considered a player
-  defineSystem(world, [Has(PlayerPosition)], (update) => {
+  defineSystem(world, [Has(PlayerPosition), Has(PlayerDirection)], (update) => {
+    if (update.type === UpdateType.Enter) {
+      spawnPlayer(update.entity);
+    }
     if (update.type === UpdateType.Exit) {
       // Remove player
       // TODO: figure out how to remove an entity in NOA
       return;
     }
 
-    const isPlayer = world.entities[update.entity] === connectedAddress.get();
-
-    const position = getComponentValueStrict(PlayerPosition, update.entity);
-    if (update.type === UpdateType.Enter) {
-      // Set player position
-      spawnPlayer(update.entity, isPlayer);
+    const noaEntity = mudToNoaId.get(update.entity);
+    if (noaEntity == null) return console.error("Need to spawn entity first", update.entity);
+    if (isComponentUpdate(update, PlayerPosition) && update.value[0]) {
+      setNoaPosition(noa, noaEntity, update.value[0]);
     }
-
-    !isPlayer && movePlayer(update.entity, position);
-  });
-
-  defineComponentSystem(world, PlayerDirection, (update) => {
-    const direction = update.value[0];
-    if (direction) {
-      const isPlayer = world.entities[update.entity] === connectedAddress.get();
-      if (isPlayer) return;
-
-      const noaEntity = mudToNoaId.get(update.entity);
-      if (noaEntity == null) return console.error("Need to spawn entity first", update.entity);
-
-      const mesh: Mesh = noa.entities.getMeshData(noaEntity).mesh;
-      const head = mesh.getChildMeshes(true)[0];
-      mesh?.lookAt(new Vector3(direction.x, 0, direction.z));
-      head?.lookAt(new Vector3(0, direction.y / 10, 1));
+    if (isComponentUpdate(update, PlayerDirection) && update.value[0]) {
+      setNoaComponent<RotationComponent>(noa, noaEntity, ROTATION_COMPONENT, update.value[0]);
     }
   });
 }
