@@ -68,8 +68,14 @@ export function registerInventory() {
       );
 
       const showInventory$ = concat(
-        of({ layers, show: false }),
-        UI.update$.pipe(map((e) => ({ layers, show: e.value[0]?.showInventory })))
+        of({ layers, show: false, craftingSideLength: 2 }),
+        UI.update$.pipe(
+          map((e) => ({
+            layers,
+            show: e.value[0]?.showInventory,
+            craftingSideLength: e.value[0]?.showCrafting ? 3 : 2, // Increase crafting side length if crafting flag is set
+          }))
+        )
       );
 
       const inventoryIndex$ = concat(of(0), InventoryIndex.update$.pipe(map((e) => e.entity)));
@@ -81,7 +87,7 @@ export function registerInventory() {
       );
     },
     ({ props }) => {
-      const [ownedByMe, { layers, show }, selectedSlot] = props;
+      const [ownedByMe, { layers, show, craftingSideLength }, selectedSlot] = props;
 
       const [holdingBlock, setHoldingBlock] = useState<EntityIndex | undefined>();
 
@@ -163,7 +169,7 @@ export function registerInventory() {
                   layers={layers}
                   holdingBlock={holdingBlock}
                   setHoldingBlock={setHoldingBlock}
-                  sideLength={2}
+                  sideLength={craftingSideLength}
                 />
                 <Wrapper>
                   {[...range(INVENTORY_WIDTH * (INVENTORY_HEIGHT - 1))]

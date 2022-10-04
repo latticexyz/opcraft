@@ -10,7 +10,7 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
     noa,
     components: { SelectedSlot, UI },
     SingletonEntity,
-    api: { setCraftingTable, toggleInventory, placeSelectedItem },
+    api: { toggleInventory, placeSelectedItem },
   } = context;
 
   const {
@@ -74,8 +74,7 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
           HasValue(Item, { value: BlockType.Crafting }),
         ]).size > 0
       ) {
-        noa.container.setPointerLock(false);
-        return setCraftingTable([]);
+        return toggleInventory(true, true);
       }
 
       placeSelectedItem({ x: pos[0], y: pos[1], z: pos[2] });

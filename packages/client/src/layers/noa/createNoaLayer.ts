@@ -75,7 +75,11 @@ export function createNoaLayer(network: NetworkLayer) {
   const mudToNoaId = new Map<number, number>();
 
   // Set initial values
-  setComponent(components.UI, SingletonEntity, { showComponentBrowser: false, showInventory: false });
+  setComponent(components.UI, SingletonEntity, {
+    showComponentBrowser: false,
+    showInventory: false,
+    showCrafting: false,
+  });
   setComponent(components.SelectedSlot, SingletonEntity, { value: 0 });
 
   // --- API ------------------------------------------------------------------------
@@ -184,10 +188,10 @@ export function createNoaLayer(network: NetworkLayer) {
     setNoaPosition(noa, noa.playerEntity, coord);
   }
 
-  function toggleInventory(open?: boolean) {
+  function toggleInventory(open?: boolean, crafting?: boolean) {
     open = open ?? !getComponentValue(components.UI, SingletonEntity)?.showInventory;
     noa.container.setPointerLock(!open);
-    updateComponent(components.UI, SingletonEntity, { showInventory: open });
+    updateComponent(components.UI, SingletonEntity, { showInventory: open, showCrafting: Boolean(open && crafting) });
   }
 
   function getSelectedBlockType(): EntityID | undefined {
