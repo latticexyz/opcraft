@@ -1,4 +1,4 @@
-import { Curve3, Vector3 } from "@babylonjs/core";
+import { Curve3, Quaternion, Vector3, Vector4 } from "@babylonjs/core";
 import { Engine } from "noa-engine";
 import { setNoaComponent } from "./utils";
 
@@ -20,16 +20,19 @@ export function registerRotationComponent(noa: Engine) {
 export const TARGETED_ROTATION_COMPONENT = "TARGETED_ROTATION_COMPONENT";
 
 export interface TargetedRotationComponent {
-  points: Vector3[];
+  points: Vector4[];
   currentTick: number;
   __id?: number;
 }
 const NUMBER_OF_TICKS_IN_CURVE = 5;
 
-function getPoint(targetedRotations: Vector3[], currentTick: number) {
-  const CatmullRomSpline = Curve3.CreateCatmullRomSpline(targetedRotations, NUMBER_OF_TICKS_IN_CURVE, false);
-  const points = CatmullRomSpline.getPoints();
-  return points[NUMBER_OF_TICKS_IN_CURVE + currentTick];
+function getPoint(targetedRotations: Vector4[], currentTick: number): Vector3 {
+  const firstV = targetedRotations[0];
+  const secondV = targetedRotations[1];
+  const a = Quaternion.FromArray([firstV.x, firstV.y, firstV.z, firstV.w]);
+  const b = Quaternion.FromArray([secondV.x, secondV.y, secondV.z, secondV.w]);
+  const out = Quaternion.Slerp(a, b, currentTick / (NUMBER_OF_TICKS_IN_CURVE - 1));
+  return out.toEulerAngles();
 }
 
 export function registerTargetedRotationComponent(noa: Engine) {
@@ -42,7 +45,7 @@ export function registerTargetedRotationComponent(noa: Engine) {
       for (let i = 0; i < states.length; i++) {
         const { points, currentTick } = states[i];
         const id = states[i].__id;
-        if (id) {
+        if (id && points.length === 2) {
           const point = getPoint(points, currentTick);
           setNoaComponent<RotationComponent>(noa, id, ROTATION_COMPONENT, { rotation: point });
         }

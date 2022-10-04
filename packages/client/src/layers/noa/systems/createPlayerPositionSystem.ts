@@ -1,4 +1,4 @@
-import { Mesh, Vector3 } from "@babylonjs/core";
+import { Mesh, Quaternion, Vector3, Vector4 } from "@babylonjs/core";
 import { defineSystem, EntityIndex, Has, UpdateType, isComponentUpdate } from "@latticexyz/recs";
 import { NetworkLayer } from "../../network";
 import {
@@ -105,22 +105,23 @@ export function createPlayerPositionSystem(network: NetworkLayer, context: NoaLa
     }
     if (isComponentUpdate(update, PlayerDirection) && update.value[0]) {
       const { rotation } = getNoaComponentStrict<RotationComponent>(noa, noaEntity, ROTATION_COMPONENT);
-      const { pitch, yaw } = update.value[0];
+      const { qx, qy, qz, qw } = update.value[0];
+      const quaternion = Quaternion.FromArray([qx, qy, qz, qw]);
       if (eq(ZERO_VECTOR, rotation)) {
         setNoaComponent<RotationComponent>(noa, noaEntity, ROTATION_COMPONENT, {
-          rotation: new Vector3(pitch, yaw, 0),
+          rotation: quaternion.toEulerAngles(),
         });
       }
       const { points } = getNoaComponentStrict<TargetedRotationComponent>(noa, noaEntity, TARGETED_ROTATION_COMPONENT);
-      points.push(new Vector3(pitch, yaw, 0));
-      if (points.length > 4) {
+      points.push(new Vector4(qx, qy, qz, qw));
+      if (points.length > 2) {
         points.splice(0, 1);
       } else {
-        while (points.length < 4) {
-          points.push(new Vector3(pitch, yaw, 0));
+        while (points.length < 2) {
+          points.push(new Vector4(qx, qy, qz, qw));
         }
       }
-      setNoaComponent<TargetedPositionComponent>(noa, noaEntity, TARGETED_ROTATION_COMPONENT, {
+      setNoaComponent<TargetedRotationComponent>(noa, noaEntity, TARGETED_ROTATION_COMPONENT, {
         points,
         currentTick: 0,
       });

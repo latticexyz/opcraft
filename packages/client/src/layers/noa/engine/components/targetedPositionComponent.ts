@@ -26,7 +26,7 @@ export function registerTargetedPositionComponent(noa: Engine) {
       for (let i = 0; i < states.length; i++) {
         const { points, currentTick } = states[i];
         const id = states[i].__id;
-        if (id) {
+        if (id && points.length === 4) {
           const point = getPoint(points, currentTick);
           noa.entities.setPosition(id, [point.x, point.y, point.z]);
         }

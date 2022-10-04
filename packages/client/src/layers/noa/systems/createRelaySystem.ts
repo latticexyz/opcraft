@@ -1,3 +1,4 @@
+import { Quaternion } from "@babylonjs/core";
 import { NetworkLayer } from "../../network/types";
 import { NoaLayer } from "../types";
 import { defineRxSystem, EntityID, setComponent } from "@latticexyz/recs";
@@ -22,7 +23,7 @@ function encodeMessage(position: number[], direction: number[]): Uint8Array {
 }
 
 function decodeMessage(data: Uint8Array): { position: number[]; direction: number[] } {
-  const [positionBytes, directionBytes] = splitUint8Arrays(data, [12, 8]);
+  const [positionBytes, directionBytes] = splitUint8Arrays(data, [12, 16]);
   return {
     position: Uint8ArrayToInt32Array(positionBytes).map(fromFixedPoint),
     direction: Uint8ArrayToInt32Array(directionBytes).map(fromFixedPoint),
@@ -61,18 +62,21 @@ export function createRelaySystem(network: NetworkLayer, context: NoaLayer) {
     const { position } = positionData;
     const pitch = noa.camera.pitch;
     const yaw = noa.camera.heading;
-    relayPositionAndDirection(position, [pitch, yaw]);
+    const q = Quaternion.FromEulerAngles(pitch, yaw, 0);
+    const quaternion: number[] = [];
+    q.toArray(quaternion);
+    relayPositionAndDirection(position, quaternion);
   }, 200);
 
   defineRxSystem(world, relay.event$, ({ message, address }) => {
     const {
       position: [x, y, z],
-      direction: [pitch, yaw],
+      direction: [qx, qy, qz, qw],
     } = decodeMessage(message.data);
     if (address === connectedAddress.get()) return;
     const entity = world.registerEntity({ id: address as EntityID });
     setComponent(PlayerPosition, entity, { x, y, z });
-    setComponent(PlayerDirection, entity, { pitch, yaw });
+    setComponent(PlayerDirection, entity, { qx, qy, qz, qw });
   });
 
   world.registerDisposer(() => {
