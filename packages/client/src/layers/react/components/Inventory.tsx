@@ -16,8 +16,7 @@ import {
   setComponent,
   UpdateType,
 } from "@latticexyz/recs";
-import { BlockType } from "../../network";
-import { CRAFTING_SIZE, getBlockIconUrl } from "../../noa/constants";
+import { getBlockIconUrl } from "../../noa/constants";
 import { BlockIdToKey } from "../../network/constants";
 import { Layers } from "../../../types";
 import { GodID } from "@latticexyz/network";
@@ -160,7 +159,12 @@ export function registerInventory() {
             <Background onClick={close} />
             <div>
               <AbsoluteBorder borderColor={"#999999"} borderWidth={3}>
-                <Crafting layers={layers} holdingBlock={holdingBlock} setHoldingBlock={setHoldingBlock} />
+                <Crafting
+                  layers={layers}
+                  holdingBlock={holdingBlock}
+                  setHoldingBlock={setHoldingBlock}
+                  sideLength={2}
+                />
                 <Wrapper>
                   {[...range(INVENTORY_WIDTH * (INVENTORY_HEIGHT - 1))]
                     .map((i) => i + INVENTORY_WIDTH)
@@ -219,7 +223,8 @@ const Crafting: React.FC<{
   layers: Layers;
   holdingBlock: EntityIndex | undefined;
   setHoldingBlock: (block: EntityIndex | undefined) => void;
-}> = ({ layers, holdingBlock, setHoldingBlock }) => {
+  sideLength: number;
+}> = ({ layers, holdingBlock, setHoldingBlock, sideLength }) => {
   const {
     network: {
       components: { OwnedBy, Item },
@@ -227,7 +232,7 @@ const Crafting: React.FC<{
       network: { connectedAddress },
     },
     noa: {
-      api: { getCraftingTable, setCraftingTableIndex, clearCraftingTable },
+      api: { getCraftingTable, setCraftingTableIndex, clearCraftingTable, getCraftingResult },
       world,
     },
   } = layers;
@@ -240,7 +245,7 @@ const Crafting: React.FC<{
 
   useEffect(() => {
     return () => {
-      for (let i = 0; i < CRAFTING_SIZE; i++) {
+      for (let i = 0; i < sideLength * sideLength; i++) {
         OptimisticOwnedBy.removeOverride(getOverrideId(i));
         clearCraftingTable();
       }
@@ -249,21 +254,35 @@ const Crafting: React.FC<{
 
   const craftingTable = getCraftingTable();
 
+  function getX(i: number) {
+    return Math.floor(i / sideLength);
+  }
+
+  function getY(i: number) {
+    return i % sideLength;
+  }
+
   function handleInput(i: number) {
-    const blockAtIndex = craftingTable[i];
+    const x = getX(i);
+    const y = getY(i);
+    console.log("setting block", x, y);
+
+    const blockAtIndex = craftingTable[x][y];
+    const blockTypeAtIndex = getComponentValue(Item, blockAtIndex)?.value as EntityID | undefined;
+    const blockTypeIndexAtIndex = blockTypeAtIndex && world.entityToIndex.get(blockTypeAtIndex);
 
     // If we are not holding a block but there is a block at this position, grab the block
     if (holdingBlock == null) {
       OptimisticOwnedBy.removeOverride(getOverrideId(i));
-      setCraftingTableIndex(i, undefined);
-      setHoldingBlock(blockAtIndex);
+      setCraftingTableIndex([x, y], undefined);
+      setHoldingBlock(blockTypeIndexAtIndex);
       return;
     }
 
     // If there already is a block of the current type at this position, remove the block
-    if (blockAtIndex === holdingBlock) {
+    if (blockTypeIndexAtIndex === holdingBlock) {
       OptimisticOwnedBy.removeOverride(getOverrideId(i));
-      setCraftingTableIndex(i, undefined);
+      setCraftingTableIndex([x, y], undefined);
       return;
     }
 
@@ -288,7 +307,7 @@ const Crafting: React.FC<{
     });
 
     // Place the held block on the crafting table
-    setCraftingTableIndex(i, holdingBlock);
+    setCraftingTableIndex([x, y], ownedEntityOfType);
 
     // If this was the last block of this type we own, reset the cursor
     if (ownedEntitiesOfType.length === 1) {
@@ -300,16 +319,19 @@ const Crafting: React.FC<{
     console.log("crafting");
   }
 
-  const Slots = craftingTable.slice(0, 4).map((blockIndex, index) => {
-    const blockID = blockIndex != -1 ? world.entities[blockIndex] : undefined;
+  const Slots = [...range(sideLength * sideLength)].map((index) => {
+    const x = getX(index);
+    const y = getY(index);
+    const blockIndex = craftingTable[x][y];
+    const blockID = getComponentValue(Item, blockIndex)?.value as EntityID | undefined;
     return <Slot key={"crafting-slot" + index} blockID={blockID} onClick={() => handleInput(index)} />;
   });
 
   return (
     <CraftingWrapper>
-      <CraftingInput>{[...range(4)].map((i) => Slots[i])}</CraftingInput>
+      <CraftingInput sideLength={sideLength}>{[...range(sideLength * sideLength)].map((i) => Slots[i])}</CraftingInput>
       <CraftingOutput>
-        <Slot blockID={BlockType.Grass} onClick={() => handleOutput()} selected={true} />
+        <Slot blockID={getCraftingResult()} onClick={() => handleOutput()} selected={true} />
       </CraftingOutput>
     </CraftingWrapper>
   );
@@ -328,10 +350,10 @@ const CraftingWrapper = styled.div`
   pointer-events: all;
 `;
 
-const CraftingInput = styled.div`
+const CraftingInput = styled.div<{ sideLength: number }>`
   background-color: rgb(0 0 0 / 40%);
   display: grid;
-  grid-template-columns: repeat(2, auto);
+  grid-template-columns: repeat(${(p) => p.sideLength}, auto);
   align-items: start;
   justify-content: start;
   pointer-events: all;

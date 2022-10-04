@@ -21,7 +21,7 @@ import {
   defineCraftingTableComponent,
   defineUIComponent,
 } from "./components";
-import { CRAFTING_SIZE, Singleton } from "./constants";
+import { CRAFTING_SIDE, EMPTY_CRAFTING_TABLE, Singleton } from "./constants";
 import { setupHand } from "./engine/hand";
 import { monkeyPatchMeshComponent } from "./engine/components/monkeyPatchMeshComponent";
 import { registerRotationComponent, registerTargetedRotationComponent } from "./engine/components/rotationComponent";
@@ -41,6 +41,7 @@ import { defineInventoryIndexComponent } from "./components/InventoryIndex";
 import { setupSun } from "./engine/dayNightCycle";
 import { setNoaPosition } from "./engine/components/utils";
 import { registerTargetedPositionComponent } from "./engine/components/targetedPositionComponent";
+import { defaultAbiCoder as abi, keccak256 } from "ethers/lib/utils";
 
 export function createNoaLayer(network: NetworkLayer) {
   const world = namespaceWorld(network.world, "noa");
@@ -50,7 +51,7 @@ export function createNoaLayer(network: NetworkLayer) {
       config: { chainId },
       connectedAddress,
     },
-    components: { OwnedBy, Item },
+    components: { OwnedBy, Item, Recipe },
     api: { build },
   } = network;
   const uniqueWorldId = chainId + worldAddress;
@@ -78,27 +79,100 @@ export function createNoaLayer(network: NetworkLayer) {
   setComponent(components.SelectedSlot, SingletonEntity, { value: 0 });
 
   // --- API ------------------------------------------------------------------------
-  function setCraftingTable(entities: EntityIndex[]) {
-    setComponent(components.CraftingTable, SingletonEntity, { value: entities.slice(0, 9) });
+  function setCraftingTable(entities: EntityIndex[][]) {
+    setComponent(components.CraftingTable, SingletonEntity, { value: entities.flat().slice(0, 9) });
   }
 
-  function getCraftingTable(): EntityIndex[] {
-    return (getComponentValue(components.CraftingTable, SingletonEntity)?.value || [
-      ...new Array(CRAFTING_SIZE),
+  function getCraftingTable(): EntityIndex[][] {
+    const flatCraftingTable = (getComponentValue(components.CraftingTable, SingletonEntity)?.value || [
+      ...EMPTY_CRAFTING_TABLE,
     ]) as EntityIndex[];
+
+    const craftingTable: EntityIndex[][] = [];
+    for (let i = 0; i < CRAFTING_SIDE; i++) {
+      craftingTable.push([]);
+      for (let j = 0; j < CRAFTING_SIDE; j++) {
+        craftingTable[i].push(flatCraftingTable[i * CRAFTING_SIDE + j]);
+      }
+    }
+
+    console.log("non-flat table", craftingTable);
+
+    return craftingTable;
   }
 
-  function setCraftingTableIndex(index: number, entity: EntityIndex | undefined) {
-    const currentCraftingTable = getComponentValue(components.CraftingTable, SingletonEntity)?.value ?? [
-      ...new Array(9),
-    ];
-    const newCraftingTable = [...currentCraftingTable].map((i) => (i == null ? -1 : i));
-    newCraftingTable[index] = entity;
-    setCraftingTable(newCraftingTable as EntityIndex[]);
+  function setCraftingTableIndex(index: [number, number], entity: EntityIndex | undefined) {
+    const craftingTable = getCraftingTable();
+    console.log("crafting table before");
+    console.table(craftingTable);
+    craftingTable[index[0]][index[1]] = entity ?? (-1 as EntityIndex);
+    console.log("crafting table after");
+    console.table(craftingTable);
+    setCraftingTable(craftingTable);
+    console.log("get again");
+    console.table(getCraftingTable());
+    setCraftingTable(craftingTable);
+    console.log("get again");
+    console.table(getCraftingTable());
   }
 
   function clearCraftingTable() {
     removeComponent(components.CraftingTable, SingletonEntity);
+  }
+
+  function getTrimmedCraftingTable() {
+    const craftingTable = getCraftingTable();
+    // Trim the crafting table array
+    let minX = -1;
+    let maxX = -1;
+    let minY = -1;
+    let maxY = -1;
+
+    for (let x = 0; x < CRAFTING_SIDE; x++) {
+      for (let y = 0; y < CRAFTING_SIDE; y++) {
+        if (craftingTable[x][y] !== -1) {
+          if (minX === -1) minX = x;
+          if (minY === -1) minY = y;
+          maxX = x;
+          maxY = y;
+        }
+      }
+    }
+
+    console.log("first non empty", minX, minY, maxX, maxY);
+    if ([minX, minY, maxX, maxY].includes(-1)) return { items: [] as EntityID[][], types: [] as EntityID[][] };
+
+    const trimmedCraftingTableItems: EntityID[][] = [];
+    const trimmedCraftingTableTypes: EntityID[][] = [];
+    for (let x = 0; x <= maxX - minX; x++) {
+      trimmedCraftingTableItems.push([]);
+      trimmedCraftingTableTypes.push([]);
+      for (let y = 0; y <= maxY - minY; y++) {
+        const blockIndex = craftingTable[x + minX][y + minY];
+        const blockID = ((blockIndex !== -1 && world.entities[blockIndex]) || "0x00") as EntityID;
+        const blockType = ((blockIndex !== -1 && getComponentValue(Item, blockIndex)?.value) || "0x00") as EntityID;
+        trimmedCraftingTableItems[x].push(blockID);
+        trimmedCraftingTableTypes[x].push(blockType);
+      }
+    }
+
+    return { items: trimmedCraftingTableItems, types: trimmedCraftingTableTypes };
+  }
+
+  function getCraftingResult(): EntityID | undefined {
+    const { types } = getTrimmedCraftingTable();
+
+    // Abi-encode
+    const abiEncodedCraftingTable = abi.encode(["uint256[][]"], [types]);
+
+    console.log("abi encoded", abiEncodedCraftingTable);
+    // Hash
+    const hashed = keccak256(abiEncodedCraftingTable);
+    console.log("hashed", hashed);
+    const resultIndex = [...getEntitiesWithValue(Recipe, { value: hashed })][0];
+    const resultID = resultIndex == null ? undefined : world.entities[resultIndex];
+    console.log("result", resultID);
+    return resultID;
   }
 
   function teleportRandom() {
@@ -165,6 +239,7 @@ export function createNoaLayer(network: NetworkLayer) {
       getCraftingTable,
       clearCraftingTable,
       setCraftingTableIndex,
+      getCraftingResult,
       teleportRandom,
       toggleInventory,
       placeSelectedItem,
