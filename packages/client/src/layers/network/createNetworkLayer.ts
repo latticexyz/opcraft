@@ -1,4 +1,4 @@
-import { createIndexer, createWorld, EntityID, getComponentValue } from "@latticexyz/recs";
+import { createIndexer, createWorld, EntityID, EntityType, getComponentValue } from "@latticexyz/recs";
 import { setupDevSystems } from "./setup";
 import { createActionSystem, setupMUDNetwork, waitForActionCompletion } from "@latticexyz/std-client";
 import { GameConfig, getNetworkConfig } from "./config";
@@ -155,12 +155,12 @@ export async function createNetworkLayer(config: GameConfig) {
     });
   }
 
-  async function craft(ingredients: EntityID[][]) {
+  async function craft(ingredients: EntityID[][], result: EntityID) {
     const entities = filterNullishValues(ingredients.flat().map((id) => world.entityToIndex.get(id)));
 
     const id = actions.add({
       id: `craft ${entities.join("/")}` as EntityID,
-      metadata: { actionType: "craft" },
+      metadata: { actionType: "craft", blockType: BlockIdToKey[result] },
       requirement: () => true,
       components: { OwnedBy: components.OwnedBy },
       execute: () => systems["system.Craft"].executeTyped(ingredients, { gasLimit: 1_700_000 }),
