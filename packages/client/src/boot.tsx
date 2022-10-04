@@ -20,15 +20,15 @@ let registerUIComponents = registerUIComponentsImport;
 let Engine = EngineImport;
 
 const defaultParams = {
-  chainId: "901",
-  worldAddress: "0x687bB6c57915aa2529EfC7D2a26668855e022fAE",
-  rpc: "https://l2.op-bedrock.lattice.xyz",
-  wsRpc: "wss://l2.op-bedrock.lattice.xyz",
-  initialBlockNumber: "589657",
-  snapshot: "https://ecs-snapshot.op-bedrock.lattice.xyz",
-  stream: "https://ecs-stream.op-bedrock.lattice.xyz",
-  relay: "https://ecs-relay.op-bedrock.lattice.xyz",
-  faucet: undefined,
+  chainId: "64657",
+  worldAddress: "0x3f223884B9C3Ee2ce126eE511f892058611f7071",
+  rpc: "https://opcraft-1-replica-0.bedrock-goerli.optimism.io",
+  wsRpc: "wss://opcraft-1-replica-0.bedrock-goerli.optimism.io/ws",
+  initialBlockNumber: "607832",
+  snapshot: "https://ecs-snapshot.opcraft-mud-services.lattice.xyz",
+  stream: "https://ecs-stream.opcraft-mud-services.lattice.xyz",
+  relay: "https://ecs-relay.opcraft-mud-services.lattice.xyz",
+  faucet: "https://faucet.opcraft-mud-services.lattice.xyz",
   blockTime: "1000",
 };
 
