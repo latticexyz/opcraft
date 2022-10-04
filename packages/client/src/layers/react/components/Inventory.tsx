@@ -230,9 +230,10 @@ const Crafting: React.FC<{
       components: { OwnedBy, Item },
       actions: { withOptimisticUpdates },
       network: { connectedAddress },
+      api: { craft },
     },
     noa: {
-      api: { getCraftingTable, setCraftingTableIndex, clearCraftingTable, getCraftingResult },
+      api: { getCraftingTable, setCraftingTableIndex, clearCraftingTable, getCraftingResult, getTrimmedCraftingTable },
       world,
     },
   } = layers;
@@ -315,8 +316,10 @@ const Crafting: React.FC<{
     }
   }
 
-  function handleOutput() {
-    console.log("crafting");
+  async function handleOutput() {
+    const { items } = getTrimmedCraftingTable();
+    clearCraftingTable();
+    await craft(items);
   }
 
   const Slots = [...range(sideLength * sideLength)].map((index) => {
