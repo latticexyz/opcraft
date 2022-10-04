@@ -54,7 +54,6 @@ export const Crafting: React.FC<{
   function handleInput(i: number) {
     const x = getX(i);
     const y = getY(i);
-    console.log("setting block", x, y);
 
     const blockAtIndex = craftingTable[x][y];
     const blockTypeAtIndex = getComponentValue(Item, blockAtIndex)?.value as EntityID | undefined;

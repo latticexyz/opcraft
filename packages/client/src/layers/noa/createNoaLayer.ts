@@ -87,6 +87,8 @@ export function createNoaLayer(network: NetworkLayer) {
     setComponent(components.CraftingTable, SingletonEntity, { value: entities.flat().slice(0, 9) });
   }
 
+  // Get a 2d representation of the current crafting table
+  // -1 corresponds to empty slots
   function getCraftingTable(): EntityIndex[][] {
     const flatCraftingTable = (getComponentValue(components.CraftingTable, SingletonEntity)?.value || [
       ...EMPTY_CRAFTING_TABLE,
@@ -100,30 +102,21 @@ export function createNoaLayer(network: NetworkLayer) {
       }
     }
 
-    console.log("non-flat table", craftingTable);
-
     return craftingTable;
   }
 
+  // Set 2d representation of crafting table
   function setCraftingTableIndex(index: [number, number], entity: EntityIndex | undefined) {
     const craftingTable = getCraftingTable();
-    console.log("crafting table before");
-    console.table(craftingTable);
     craftingTable[index[0]][index[1]] = entity ?? (-1 as EntityIndex);
-    console.log("crafting table after");
-    console.table(craftingTable);
     setCraftingTable(craftingTable);
-    console.log("get again");
-    console.table(getCraftingTable());
-    setCraftingTable(craftingTable);
-    console.log("get again");
-    console.table(getCraftingTable());
   }
 
   function clearCraftingTable() {
     removeComponent(components.CraftingTable, SingletonEntity);
   }
 
+  // Get a trimmed 2d representation of the crafting table
   function getTrimmedCraftingTable() {
     const craftingTable = getCraftingTable();
     // Trim the crafting table array
@@ -143,7 +136,6 @@ export function createNoaLayer(network: NetworkLayer) {
       }
     }
 
-    console.log("first non empty", minX, minY, maxX, maxY);
     if ([minX, minY, maxX, maxY].includes(-1)) return { items: [] as EntityID[][], types: [] as EntityID[][] };
 
     const trimmedCraftingTableItems: EntityID[][] = [];
@@ -163,19 +155,16 @@ export function createNoaLayer(network: NetworkLayer) {
     return { items: trimmedCraftingTableItems, types: trimmedCraftingTableTypes };
   }
 
+  // Get the block type the current crafting table ingredients hash to
   function getCraftingResult(): EntityID | undefined {
     const { types } = getTrimmedCraftingTable();
 
-    // Abi-encode
-    const abiEncodedCraftingTable = abi.encode(["uint256[][]"], [types]);
+    // ABI encode and hash current trimmed crafting table
+    const hash = keccak256(abi.encode(["uint256[][]"], [types]));
 
-    console.log("abi encoded", abiEncodedCraftingTable);
-    // Hash
-    const hashed = keccak256(abiEncodedCraftingTable);
-    console.log("hashed", hashed);
-    const resultIndex = [...getEntitiesWithValue(Recipe, { value: hashed })][0];
+    // Check for block types with this recipe hash
+    const resultIndex = [...getEntitiesWithValue(Recipe, { value: hash })][0];
     const resultID = resultIndex == null ? undefined : world.entities[resultIndex];
-    console.log("result", resultID);
     return resultID;
   }
 
