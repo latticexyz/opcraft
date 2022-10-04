@@ -106,7 +106,6 @@ export function registerBlockExplorer() {
 
               // Item component updates correspond to a mined terrain block
               if (componentKey === "Item") {
-                console.log("mined terrain block");
                 const { value: entityId } = value as ComponentValue<SchemaOf<typeof Item>>;
                 const blockType = BlockIdToKey[entityId as EntityID];
                 return { blockNumber, blockType, action: "remove" };
@@ -117,19 +116,16 @@ export function registerBlockExplorer() {
                 const entityIndex = world.entityToIndex.get(entity);
                 const blockTypeId = entityIndex != null ? getComponentValue(Item, entityIndex)?.value : undefined;
                 if (!blockTypeId) {
-                  // console.warn("Received Position update of unknown entity", entity);
                   return;
                 }
                 const blockType = BlockIdToKey[blockTypeId as EntityID];
 
                 // If the update includes a position, it corresponds to a placed block
                 if (value) {
-                  console.log("placed block");
                   return { blockNumber, blockType, action: "add" };
                 }
                 // otherwise it corresponds to a mined ecs block
                 else {
-                  console.log("mined ecs block");
                   return { blockNumber, blockType, action: "remove" };
                 }
               }

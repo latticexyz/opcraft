@@ -76,7 +76,6 @@ export function registerInventory() {
     },
     ({ props }) => {
       const [ownedByMe, { layers, show }, selectedSlot] = props;
-      console.log("selected", selectedSlot);
 
       const [holdingBlock, setHoldingBlock] = useState<EntityIndex | undefined>();
 

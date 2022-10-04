@@ -24,7 +24,7 @@ import {
 import { Singleton } from "./constants";
 import { setupHand } from "./engine/hand";
 import { monkeyPatchMeshComponent } from "./engine/components/monkeyPatchMeshComponent";
-import { registerRotationComponent } from "./engine/components/rotationComponent";
+import { registerRotationComponent, registerTargetedRotationComponent } from "./engine/components/rotationComponent";
 import { setupClouds, setupSky } from "./engine/sky";
 import { setupNoaEngine } from "./setup";
 import {
@@ -39,6 +39,8 @@ import { registerModelComponent } from "./engine/components/modelComponent";
 import { MINING_BLOCK_COMPONENT, registerMiningBlockComponent } from "./engine/components/miningBlockComponent";
 import { defineInventoryIndexComponent } from "./components/InventoryIndex";
 import { setupSun } from "./engine/dayNightCycle";
+import { setNoaPosition } from "./engine/components/utils";
+import { registerTargetedPositionComponent } from "./engine/components/targetedPositionComponent";
 
 export function createNoaLayer(network: NetworkLayer) {
   const world = namespaceWorld(network.world, "noa");
@@ -67,6 +69,9 @@ export function createNoaLayer(network: NetworkLayer) {
 
   // --- SETUP ----------------------------------------------------------------------
   const { noa, setBlock, glow } = setupNoaEngine(network.api);
+  // Because NOA and RECS currently use different ECS libraries we need to maintain a mapping of RECS ID to Noa ID
+  // A future version of OPCraft will remove the NOA ECS library and use pure RECS only
+  const mudToNoaId = new Map<number, number>();
 
   // Set initial values
   setComponent(components.UI, SingletonEntity, { showComponentBrowser: false, showInventory: false });
@@ -94,7 +99,7 @@ export function createNoaLayer(network: NetworkLayer) {
       y: 150,
       z: random(10000, -10000),
     };
-    noa.entities.setPosition(noa.playerEntity, coord.x, coord.y, coord.z);
+    setNoaPosition(noa, noa.playerEntity, coord);
   }
 
   function toggleInventory(open?: boolean) {
@@ -127,17 +132,20 @@ export function createNoaLayer(network: NetworkLayer) {
   monkeyPatchMeshComponent(noa);
   registerModelComponent(noa);
   registerRotationComponent(noa);
+  registerTargetedRotationComponent(noa);
+  registerTargetedPositionComponent(noa);
   registerHandComponent(noa, getSelectedBlockType);
   registerMiningBlockComponent(noa, network);
   setupClouds(noa);
   setupSky(noa);
   setupHand(noa);
-  setupSun(noa, glow)
+  setupSun(noa, glow);
   noa.entities.addComponentAgain(noa.playerEntity, MINING_BLOCK_COMPONENT, {});
 
   const context = {
     world,
     components,
+    mudToNoaId,
     peer: {
       peerObject: {},
       connections: [],

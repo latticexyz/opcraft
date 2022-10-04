@@ -10,21 +10,13 @@ import { EntityID } from "@latticexyz/recs";
 import { NoaBlockType } from "../types";
 import { createMeshBlock } from "./utils";
 import { BlockIndexToKey, BlockTypeKey } from "../../network/constants";
+import { setupScene } from "../engine/setupScene";
+import { CHUNK_RENDER_DISTANCE, CHUNK_SIZE, MIN_HEIGHT, SKY_COLOR } from "./constants";
 
 export interface API {
   getTerrainBlockAtPosition: (coord: VoxelCoord) => EntityID;
   getECSBlockAtPosition: (coord: VoxelCoord) => EntityID | undefined;
 }
-
-// 4 is very fast
-// 8 still runs extremely well
-// 12 might be "high" setting
-// 16 is the limit before performance issues
-const CHUNK_RENDER_DISTANCE = 8;
-const CHUNK_SIZE = 16;
-export const SKY_COLOR = [0.7, 0.8, 1];
-const MIN_CHUNK = 4;
-const MIN_HEIGHT = MIN_CHUNK * CHUNK_SIZE;
 
 export function setupNoaEngine(api: API) {
   const opts = {
@@ -136,33 +128,7 @@ export function setupNoaEngine(api: API) {
   //     if (noa.camera.zoomDistance > 10) noa.camera.zoomDistance = 10;
   //   }
   // });
-
-  scene.fogMode = BABYLON.Scene.FOGMODE_LINEAR;
-  scene.fogStart = CHUNK_RENDER_DISTANCE * CHUNK_SIZE;
-  scene.fogEnd = CHUNK_RENDER_DISTANCE * CHUNK_SIZE + CHUNK_SIZE * 2;
-  scene.fogColor = new BABYLON.Color3(...SKY_COLOR);
-  //@ts-ignore
-  const camera = noa.rendering._camera;
-  const colorGrading = new BABYLON.Texture("./assets/textures/lut/LUT_Night2.png", scene, true, false);
-  colorGrading.level = 0;
-  colorGrading.wrapU = BABYLON.Texture.CLAMP_ADDRESSMODE;
-  colorGrading.wrapV = BABYLON.Texture.CLAMP_ADDRESSMODE;
-  scene.imageProcessingConfiguration.colorGradingWithGreenDepth = false;
-  scene.imageProcessingConfiguration.colorGradingEnabled = true;
-  scene.imageProcessingConfiguration.colorGradingTexture = colorGrading;
-  // Color Curves
-  const postProcess = new BABYLON.ImageProcessingPostProcess("processing", 1.0, camera);
-  const curve = new BABYLON.ColorCurves();
-  curve.globalSaturation = 60; // CANDY!
-  postProcess.colorCurves = curve;
-  postProcess.colorCurvesEnabled = true;
-  // Glow
-  const glow = new BABYLON.GlowLayer("glow", scene, {
-    mainTextureFixedSize: 512,
-    blurKernelSize: 128,
-  });
-  glow.intensity = 0.4;
-
+  const { glow } = setupScene(noa);
   // Register sounds
   new BABYLON.Sound("theme", "/audio/OP_World_Theme_Mix_1.mp3", null, null, {
     loop: true,

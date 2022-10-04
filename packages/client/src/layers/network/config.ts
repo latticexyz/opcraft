@@ -10,7 +10,6 @@ export type GameConfig = {
   streamServiceUrl?: string;
   relayServiceUrl?: string;
   faucetServiceUrl?: string;
-  peerJsUrl?: string;
   devMode: boolean;
   initialBlockNumber: number;
   blockTime: number;
@@ -35,6 +34,7 @@ export const getNetworkConfig: (networkConfig: GameConfig) => SetupContractConfi
   chainId: config.chainId,
   snapshotServiceUrl: config.snapshotUrl,
   streamServiceUrl: config.streamServiceUrl,
+  relayServiceUrl: config.relayServiceUrl,
   initialBlockNumber: config.initialBlockNumber,
   worldAddress: config.worldAddress,
   devMode: config.devMode,

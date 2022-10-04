@@ -1,6 +1,9 @@
-import { World } from "@latticexyz/recs";
-import { defineVoxelCoordComponent } from "@latticexyz/std-client";
+import { defineComponent, Type, World } from "@latticexyz/recs";
 
 export function definePlayerDirectionComponent(world: World) {
-  return defineVoxelCoordComponent(world, { id: "PlayerDirection" });
+  return defineComponent(
+    world,
+    { qx: Type.Number, qy: Type.Number, qz: Type.Number, qw: Type.Number },
+    { id: "PlayerDirection" }
+  );
 }
