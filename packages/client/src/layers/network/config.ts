@@ -34,6 +34,7 @@ export const getNetworkConfig: (networkConfig: GameConfig) => SetupContractConfi
   chainId: config.chainId,
   snapshotServiceUrl: config.snapshotUrl,
   streamServiceUrl: config.streamServiceUrl,
+  relayerServiceUrl: config.relayerServiceUrl,
   initialBlockNumber: config.initialBlockNumber,
   worldAddress: config.worldAddress,
   devMode: config.devMode,

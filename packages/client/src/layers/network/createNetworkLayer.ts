@@ -27,7 +27,8 @@ import { SystemAbis } from "contracts/types/SystemAbis.mjs";
  * Its purpose is to synchronize the client components with the contract components.
  */
 export async function createNetworkLayer(config: GameConfig) {
-  console.log("Network config", config);
+  console.log("[Network] Network config");
+  console.table(config);
 
   // --- WORLD ----------------------------------------------------------------------
   const world = createWorld();
@@ -58,6 +59,9 @@ export async function createNetworkLayer(config: GameConfig) {
     config.relayServiceUrl && playerAddress && playerSigner
       ? await createRelayStream(playerSigner, config.relayServiceUrl, playerAddress)
       : null;
+
+  relay && world.registerDisposer(relay.dispose);
+  if (relay) console.log("[Relayer] Relayer connected: " + config.relayServiceUrl);
 
   // Faucet setup
   const faucet = config.faucetServiceUrl ? createFaucetService(config.faucetServiceUrl) : null;
@@ -153,14 +157,10 @@ export async function createNetworkLayer(config: GameConfig) {
 
   // --- DEV FAUCET - REMOVE IN PROD
   const playerIsBroke = (await network.signer.get()?.getBalance())?.lte(utils.parseEther("0.005"));
-  console.log("IsBroke", playerIsBroke);
   if (playerIsBroke) {
     const address = network.connectedAddress.get();
-    console.log("requesting drip to", address);
     address && (await faucet?.dripDev({ address }));
   }
-  const playerIsStillBroke = (await network.signer.get()?.getBalance())?.lte(utils.parseEther("0.005"));
-  console.log("IsStillBroke", playerIsStillBroke);
 
   // --- CONTEXT --------------------------------------------------------------------
   const context = {

@@ -150,7 +150,7 @@ async function bootGame() {
       reloadingNoa = false;
     });
   }
-  console.log("booted");
+  console.log("[Global] OPCraft booted");
 
   return { layers, ecs };
 }
