@@ -1,8 +1,8 @@
-import { createIndexer, createWorld, EntityID, getComponentValue } from "@latticexyz/recs";
+import { createIndexer, createWorld, EntityID, EntityType, getComponentValue } from "@latticexyz/recs";
 import { setupDevSystems } from "./setup";
-import { createActionSystem, setupMUDNetwork } from "@latticexyz/std-client";
+import { createActionSystem, setupMUDNetwork, waitForActionCompletion } from "@latticexyz/std-client";
 import { GameConfig, getNetworkConfig } from "./config";
-import { VoxelCoord } from "@latticexyz/utils";
+import { filterNullishValues, VoxelCoord } from "@latticexyz/utils";
 import { BigNumber, utils } from "ethers";
 import {
   definePositionComponent,
@@ -155,6 +155,26 @@ export async function createNetworkLayer(config: GameConfig) {
     });
   }
 
+  async function craft(ingredients: EntityID[][], result: EntityID) {
+    const entities = filterNullishValues(ingredients.flat().map((id) => world.entityToIndex.get(id)));
+
+    const id = actions.add({
+      id: `craft ${entities.join("/")}` as EntityID,
+      metadata: { actionType: "craft", blockType: BlockIdToKey[result] },
+      requirement: () => true,
+      components: { OwnedBy: components.OwnedBy },
+      execute: () => systems["system.Craft"].executeTyped(ingredients, { gasLimit: 1_700_000 }),
+      updates: () =>
+        entities.map((entity) => ({
+          component: "OwnedBy",
+          entity,
+          value: { value: GodID },
+        })),
+    });
+
+    await waitForActionCompletion(actions.Action, id);
+  }
+
   // --- DEV FAUCET - REMOVE IN PROD
   const playerIsBroke = (await network.signer.get()?.getBalance())?.lte(utils.parseEther("0.005"));
   if (playerIsBroke) {
@@ -172,7 +192,7 @@ export async function createNetworkLayer(config: GameConfig) {
     startSync,
     network,
     actions,
-    api: { build, mine, getBlockAtPosition, getECSBlockAtPosition, getTerrainBlockAtPosition },
+    api: { build, mine, craft, getBlockAtPosition, getECSBlockAtPosition, getTerrainBlockAtPosition },
     dev: setupDevSystems(world, encoders, systems),
     config,
     relay,
