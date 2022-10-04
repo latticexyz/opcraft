@@ -24,7 +24,7 @@ import {
 import { Singleton } from "./constants";
 import { setupHand } from "./engine/hand";
 import { monkeyPatchMeshComponent } from "./engine/components/monkeyPatchMeshComponent";
-import { registerRotationComponent } from "./engine/components/rotationComponent";
+import { registerRotationComponent, registerTargetedRotationComponent } from "./engine/components/rotationComponent";
 import { setupClouds, setupSky } from "./engine/sky";
 import { setupNoaEngine } from "./setup";
 import {
@@ -40,6 +40,7 @@ import { MINING_BLOCK_COMPONENT, registerMiningBlockComponent } from "./engine/c
 import { defineInventoryIndexComponent } from "./components/InventoryIndex";
 import { setupSun } from "./engine/dayNightCycle";
 import { setNoaPosition } from "./engine/components/utils";
+import { registerTargetedPositionComponent } from "./engine/components/targetedPositionComponent";
 
 export function createNoaLayer(network: NetworkLayer) {
   const world = namespaceWorld(network.world, "noa");
@@ -131,6 +132,8 @@ export function createNoaLayer(network: NetworkLayer) {
   monkeyPatchMeshComponent(noa);
   registerModelComponent(noa);
   registerRotationComponent(noa);
+  registerTargetedRotationComponent(noa);
+  registerTargetedPositionComponent(noa);
   registerHandComponent(noa, getSelectedBlockType);
   registerMiningBlockComponent(noa, network);
   setupClouds(noa);
