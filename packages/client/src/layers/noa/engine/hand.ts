@@ -23,18 +23,18 @@ export function setupHand(noa: Engine) {
   core.visibility = 0;
   const handMaterial = noa.rendering.makeStandardMaterial("handMaterial");
   handMaterial.diffuseTexture = new Texture(
-    "./assets/skins/steve.png",
+    "./assets/skins/player1.png",
     scene,
     true,
     true,
     Texture.NEAREST_SAMPLINGMODE
   );
   handMaterial.diffuseTexture!.hasAlpha = true;
-  // from the model.json -> right hand
-  const handTextureSize = [64, 64];
-  const handSize = [4, 12, 4];
-  const handScale = 0.07;
-  const handOffset = [40, 16];
+  // from the player.json -> right hand
+  const handTextureSize = [128, 128];
+  const handSize = [8, 24, 8];
+  const handScale = 0.035;
+  const handOffset = [80, 32];
   const handFaceUV = createFaceUV(handOffset, handSize, handTextureSize);
   const hand = BABYLON.MeshBuilder.CreateBox(
     "hand",

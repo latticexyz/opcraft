@@ -51,6 +51,7 @@ export function createRelaySystem(network: NetworkLayer, context: NoaLayer) {
   relay.subscribe("chunk(0,0)");
 
   function relayPositionAndDirection(position: number[], direction: number[]) {
+    console.log(`[Relay] sent message with position (x=${position[0]} y=${position[1]} z=${position[2]}}`);
     relay?.push("chunk(0,0)", encodeMessage(position, direction));
   }
 
@@ -75,6 +76,7 @@ export function createRelaySystem(network: NetworkLayer, context: NoaLayer) {
     } = decodeMessage(message.data);
     if (address === connectedAddress.get()) return;
     const entity = world.registerEntity({ id: address as EntityID });
+    console.log("[Relay] received message from " + address);
     setComponent(PlayerPosition, entity, { x, y, z });
     setComponent(PlayerDirection, entity, { qx, qy, qz, qw });
   });
