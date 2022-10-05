@@ -1,14 +1,4 @@
-import {
-  AbstractMesh,
-  DynamicTexture,
-  Matrix,
-  Mesh,
-  MeshBuilder,
-  Scene,
-  Texture,
-  Vector3,
-  Vector4,
-} from "@babylonjs/core";
+import { AbstractMesh, DynamicTexture, Matrix, Mesh, MeshBuilder, Texture, Vector3, Vector4 } from "@babylonjs/core";
 import { Engine } from "noa-engine";
 
 const models: { [key: string]: any } = {};

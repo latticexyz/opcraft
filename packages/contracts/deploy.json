@@ -24,7 +24,12 @@
     { "name": "TransferSystem", "writeAccess": ["OwnedByComponent"] },
     {
       "name": "InitSystem",
-      "writeAccess": ["GameConfigComponent", "RecipeComponent", "ItemPrototypeComponent", "OccurrenceComponent"],
+      "writeAccess": ["GameConfigComponent", "ItemPrototypeComponent", "OccurrenceComponent"],
+      "initialize": "new bytes(0)"
+    },
+    {
+      "name": "Init2System",
+      "writeAccess": ["RecipeComponent"],
       "initialize": "new bytes(0)"
     }
   ]
