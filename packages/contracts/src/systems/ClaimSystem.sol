@@ -13,16 +13,16 @@ import { getChunkCoord } from "../utils.sol";
 uint256 constant ID = uint256(keccak256("system.Claim"));
 
 // Chunk entity = concat(chunk.x | chunk.y)
-function getChunkEntity(Coord memory chunk) returns (uint256) {
+function getChunkEntity(Coord memory chunk) pure returns (uint256) {
   return uint256((uint64(uint32(chunk.x)) << 32) | uint32(chunk.y));
 }
 
-function getClaimInChunk(ClaimComponent claimComponent, Coord memory chunk) returns (Claim memory) {
+function getClaimInChunk(ClaimComponent claimComponent, Coord memory chunk) view returns (Claim memory) {
   bytes memory currentClaimBytes = claimComponent.getRawValue(getChunkEntity(chunk));
   return currentClaimBytes.length == 0 ? Claim(0, 0) : abi.decode(currentClaimBytes, (Claim));
 }
 
-function getClaimAtCoord(ClaimComponent claimComponent, VoxelCoord memory coord) returns (Claim memory) {
+function getClaimAtCoord(ClaimComponent claimComponent, VoxelCoord memory coord) view returns (Claim memory) {
   return getClaimInChunk(claimComponent, getChunkCoord(coord));
 }
 
@@ -36,7 +36,7 @@ contract ClaimSystem is System {
     StakeComponent stakeComponent = StakeComponent(getAddressById(components, StakeComponentID));
     ClaimComponent claimComponent = ClaimComponent(getAddressById(components, ClaimComponentID));
 
-    uint256 senderStakeInChunk = getStakeInChunk(stakeComponent, getStakeEntity(chunk, msg.sender));
+    uint32 senderStakeInChunk = getStakeInChunk(stakeComponent, getStakeEntity(chunk, msg.sender));
     Claim memory currentClaimInChunk = getClaimInChunk(claimComponent, chunk);
 
     // Require sender's stake to be higher than the current claim

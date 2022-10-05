@@ -48,7 +48,7 @@ contract StakeSystemTest is MudTest {
 
     // Assert the new stake of allice is 1
     uint256 stakeEntity = getStakeEntity(chunk, alice);
-    uint256 stake = StakeComponent(component(StakeComponentID)).getValue(stakeEntity);
+    uint32 stake = StakeComponent(component(StakeComponentID)).getValue(stakeEntity);
     assertEq(stake, 1);
 
     // Call the stake system again
@@ -70,7 +70,7 @@ contract StakeSystemTest is MudTest {
 
     // Assert the new stake of allice is 1
     uint256 stakeEntity = getStakeEntity(chunk, alice);
-    uint256 stake = StakeComponent(component(StakeComponentID)).getValue(stakeEntity);
+    uint32 stake = StakeComponent(component(StakeComponentID)).getValue(stakeEntity);
     assertEq(stake, 1);
 
     // Call the stake system again with the same diamond -> this should fail

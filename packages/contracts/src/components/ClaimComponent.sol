@@ -5,7 +5,7 @@ import "solecs/Component.sol";
 uint256 constant ID = uint256(keccak256("component.Claim"));
 
 struct Claim {
-  uint256 stake;
+  uint32 stake;
   uint256 claimer;
 }
 
@@ -17,7 +17,7 @@ contract ClaimComponent is Component {
     values = new LibTypes.SchemaValue[](2);
 
     keys[0] = "stake";
-    values[0] = LibTypes.SchemaValue.UINT256;
+    values[0] = LibTypes.SchemaValue.UINT32;
 
     keys[1] = "claimer";
     values[1] = LibTypes.SchemaValue.UINT256;
