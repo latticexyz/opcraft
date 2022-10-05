@@ -52,6 +52,24 @@ export function Diamond(state: TerrainState): EntityID | undefined {
   if (hash2 <= 10) return BlockType.Diamond;
 }
 
+export function Coal(state: TerrainState): EntityID | undefined {
+  const {
+    coord: { y },
+    height,
+  } = state;
+
+  if (y >= height) return;
+
+  const biome = accessState(state, "biome");
+  if ([Biome.Savanna, Biome.Forest, Biome.Desert].includes(biome) && y >= -20) return;
+
+  const hash1 = accessState(state, "coordHash2D");
+  if (hash1 <= 10 || hash1 > 50) return;
+
+  const hash2 = accessState(state, "coordHash1D");
+  if (hash2 > 10 && hash2 <= 50) return BlockType.Coal;
+}
+
 export function Snow(state: TerrainState): EntityID | undefined {
   const {
     coord: { y },

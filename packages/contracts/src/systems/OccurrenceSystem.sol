@@ -17,7 +17,7 @@ uint256 constant ID = uint256(keccak256("system.Occurrence"));
 contract OccurrenceSystem is System {
   constructor(IWorld _world, address _components) System(_world, _components) {}
 
-  function execute(bytes memory arguments) public returns (bytes memory) {
+  function execute(bytes memory arguments) public pure returns (bytes memory) {
     (uint256 blockType, VoxelCoord memory coord) = abi.decode(arguments, (uint256, VoxelCoord));
 
     if (blockType == GrassID) return abi.encode(Grass(coord));
@@ -27,6 +27,7 @@ contract OccurrenceSystem is System {
     if (blockType == SandID) return abi.encode(Sand(coord));
     if (blockType == WaterID) return abi.encode(Water(coord));
     if (blockType == DiamondID) return abi.encode(Diamond(coord));
+    if (blockType == CoalID) return abi.encode(Coal(coord));
     if (blockType == LeavesID) return abi.encode(Leaves(coord));
     if (blockType == RedFlowerID) return abi.encode(RedFlower(coord));
     if (blockType == GrassPlantID) return abi.encode(GrassPlant(coord));
@@ -50,117 +51,121 @@ contract OccurrenceSystem is System {
     return abi.encode(uint256(0));
   }
 
-  function executeTyped(uint256 blockType, VoxelCoord memory coord) public returns (uint256) {
+  function executeTyped(uint256 blockType, VoxelCoord memory coord) public pure returns (uint256) {
     return abi.decode(execute(abi.encode(blockType, coord)), (uint256));
   }
 
   // Occurence functions
 
-  function Grass(VoxelCoord memory coord) public returns (uint256) {
+  function Grass(VoxelCoord memory coord) public pure returns (uint256) {
     return LibTerrain.Grass(coord);
   }
 
-  function Dirt(VoxelCoord memory coord) public returns (uint256) {
+  function Dirt(VoxelCoord memory coord) public pure returns (uint256) {
     return LibTerrain.Dirt(coord);
   }
 
-  function Log(VoxelCoord memory coord) public returns (uint256) {
+  function Log(VoxelCoord memory coord) public pure returns (uint256) {
     return LibTerrain.Structure(coord);
   }
 
-  function Stone(VoxelCoord memory coord) public returns (uint256) {
+  function Stone(VoxelCoord memory coord) public pure returns (uint256) {
     return LibTerrain.Stone(coord);
   }
 
-  function Sand(VoxelCoord memory coord) public returns (uint256) {
+  function Sand(VoxelCoord memory coord) public pure returns (uint256) {
     return LibTerrain.Sand(coord);
   }
 
-  function Water(VoxelCoord memory coord) public returns (uint256) {
+  function Water(VoxelCoord memory coord) public pure returns (uint256) {
     return LibTerrain.Water(coord);
   }
 
-  function Diamond(VoxelCoord memory coord) public returns (uint256) {
+  function Diamond(VoxelCoord memory coord) public pure returns (uint256) {
     return LibTerrain.Diamond(coord);
   }
 
-  function Leaves(VoxelCoord memory coord) public returns (uint256) {
+  function Coal(VoxelCoord memory coord) public pure returns (uint256) {
+    return LibTerrain.Coal(coord);
+  }
+
+  function Leaves(VoxelCoord memory coord) public pure returns (uint256) {
     return LibTerrain.Structure(coord);
   }
 
-  function RedFlower(VoxelCoord memory coord) public returns (uint256) {
+  function RedFlower(VoxelCoord memory coord) public pure returns (uint256) {
     return LibTerrain.SmallPlant(coord);
   }
 
-  function GrassPlant(VoxelCoord memory coord) public returns (uint256) {
+  function GrassPlant(VoxelCoord memory coord) public pure returns (uint256) {
     return LibTerrain.SmallPlant(coord);
   }
 
-  function OrangeFlower(VoxelCoord memory coord) public returns (uint256) {
+  function OrangeFlower(VoxelCoord memory coord) public pure returns (uint256) {
     return LibTerrain.SmallPlant(coord);
   }
 
-  function MagentaFlower(VoxelCoord memory coord) public returns (uint256) {
+  function MagentaFlower(VoxelCoord memory coord) public pure returns (uint256) {
     return LibTerrain.SmallPlant(coord);
   }
 
-  function LightBlueFlower(VoxelCoord memory coord) public returns (uint256) {
+  function LightBlueFlower(VoxelCoord memory coord) public pure returns (uint256) {
     return LibTerrain.SmallPlant(coord);
   }
 
-  function LimeFlower(VoxelCoord memory coord) public returns (uint256) {
+  function LimeFlower(VoxelCoord memory coord) public pure returns (uint256) {
     return LibTerrain.SmallPlant(coord);
   }
 
-  function PinkFlower(VoxelCoord memory coord) public returns (uint256) {
+  function PinkFlower(VoxelCoord memory coord) public pure returns (uint256) {
     return LibTerrain.SmallPlant(coord);
   }
 
-  function GrayFlower(VoxelCoord memory coord) public returns (uint256) {
+  function GrayFlower(VoxelCoord memory coord) public pure returns (uint256) {
     return LibTerrain.SmallPlant(coord);
   }
 
-  function LightGrayFlower(VoxelCoord memory coord) public returns (uint256) {
+  function LightGrayFlower(VoxelCoord memory coord) public pure returns (uint256) {
     return LibTerrain.SmallPlant(coord);
   }
 
-  function CyanFlower(VoxelCoord memory coord) public returns (uint256) {
+  function CyanFlower(VoxelCoord memory coord) public pure returns (uint256) {
     return LibTerrain.SmallPlant(coord);
   }
 
-  function PurpleFlower(VoxelCoord memory coord) public returns (uint256) {
+  function PurpleFlower(VoxelCoord memory coord) public pure returns (uint256) {
     return LibTerrain.SmallPlant(coord);
   }
 
-  function BlueFlower(VoxelCoord memory coord) public returns (uint256) {
+  function BlueFlower(VoxelCoord memory coord) public pure returns (uint256) {
     return LibTerrain.SmallPlant(coord);
   }
 
-  function GreenFlower(VoxelCoord memory coord) public returns (uint256) {
+  function GreenFlower(VoxelCoord memory coord) public pure returns (uint256) {
     return LibTerrain.SmallPlant(coord);
   }
 
-  function BlackFlower(VoxelCoord memory coord) public returns (uint256) {
+  function BlackFlower(VoxelCoord memory coord) public pure returns (uint256) {
     return LibTerrain.SmallPlant(coord);
   }
 
-  function Kelp(VoxelCoord memory coord) public returns (uint256) {
+  function Kelp(VoxelCoord memory coord) public pure returns (uint256) {
     return LibTerrain.SmallPlant(coord);
   }
 
-  function Wool(VoxelCoord memory coord) public returns (uint256) {
+  function Wool(VoxelCoord memory coord) public pure returns (uint256) {
     return LibTerrain.Structure(coord);
   }
 
-  function Snow(VoxelCoord memory coord) public returns (uint256) {
+  function Snow(VoxelCoord memory coord) public pure returns (uint256) {
     return LibTerrain.Snow(coord);
   }
 
-  function Clay(VoxelCoord memory coord) public returns (uint256) {
+  function Clay(VoxelCoord memory coord) public pure returns (uint256) {
     return LibTerrain.Clay(coord);
   }
 
-  function Bedrock(VoxelCoord memory coord) public returns (uint256) {
+  function Bedrock(VoxelCoord memory coord) public pure returns (uint256) {
     return LibTerrain.Bedrock(coord);
   }
 }

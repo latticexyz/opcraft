@@ -107,6 +107,9 @@ library LibTerrain {
     blockID = Diamond(x, y, z, height, biome);
     if (blockID != 0) return blockID;
 
+    blockID = Coal(x, y, z, height, biome);
+    if (blockID != 0) return blockID;
+
     int32 distanceFromHeight = height - y;
 
     blockID = Sand(y, height, biome, distanceFromHeight);
@@ -424,6 +427,32 @@ library LibTerrain {
 
     hash = getCoordHash(y, x + z);
     if (hash <= 10) return DiamondID;
+  }
+
+  function Coal(VoxelCoord memory coord) internal pure returns (uint256) {
+    int128[4] memory biomeValues = getBiome(coord.x, coord.z);
+    int32 height = getHeight(coord.x, coord.z, biomeValues);
+    uint8 biome = getMaxBiome(biomeValues);
+    return Coal(coord.x, coord.y, coord.z, height, biome);
+  }
+
+  function Coal(
+    int32 x,
+    int32 y,
+    int32 z,
+    int32 height,
+    uint8 biome
+  ) internal pure returns (uint256) {
+    if (y >= height) return 0;
+
+    if ((biome == uint8(Biome.Savanna) || biome == uint8(Biome.Forest) || biome == uint8(Biome.Forest)) && y >= -20)
+      return 0;
+
+    uint16 hash = getCoordHash(x, z);
+    if (hash <= 10 || hash > 50) return 0;
+
+    hash = getCoordHash(y, x + z);
+    if (hash > 10 && hash <= 50) return CoalID;
   }
 
   function Snow(VoxelCoord memory coord) internal pure returns (uint256) {
