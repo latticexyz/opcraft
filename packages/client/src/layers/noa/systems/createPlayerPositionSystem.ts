@@ -18,6 +18,9 @@ import {
 import { TargetedPositionComponent, TARGETED_POSITION_COMPONENT } from "../engine/components/targetedPositionComponent";
 import { eq, ZERO_VECTOR } from "../../../utils/coord";
 
+const MODEL_DATA = "./assets/models/player.json";
+const MODEL_TEXTURE = "./assets/skins/player1.png";
+
 export function createPlayerPositionSystem(network: NetworkLayer, context: NoaLayer) {
   const {
     noa,
@@ -27,7 +30,7 @@ export function createPlayerPositionSystem(network: NetworkLayer, context: NoaLa
 
   const { world } = network;
 
-  function spawnPlayer(entity: EntityIndex) {
+  function spawnPlayer(entity: EntityIndex, address: string) {
     const isMappingStored = mudToNoaId.has(entity);
     const noaEntity: number = mudToNoaId.get(entity) ?? noa.entities.add();
     if (!isMappingStored) {
@@ -57,23 +60,14 @@ export function createPlayerPositionSystem(network: NetworkLayer, context: NoaLa
     });
     noa.entities.addComponentAgain(noaEntity, TARGETED_POSITION_COMPONENT, ZERO_VECTOR);
     setNoaPosition(noa, noaEntity, ZERO_VECTOR);
-    applyModel(
-      noa,
-      noaEntity,
-      noaEntity.toString(),
-      "./assets/models/player.json",
-      "./assets/skins/steve.png",
-      0,
-      true,
-      "player",
-      [1, 1, 1]
-    );
+    applyModel(noa, noaEntity, MODEL_DATA, MODEL_TEXTURE, address);
   }
 
   // Everything with a position that is no block is considered a player
   defineSystem(world, [Has(PlayerPosition), Has(PlayerDirection)], (update) => {
+    const address = world.entities[update.entity];
     if (update.type === UpdateType.Enter) {
-      spawnPlayer(update.entity);
+      spawnPlayer(update.entity, address.substring(0, 10));
     }
     if (update.type === UpdateType.Exit) {
       // Remove player

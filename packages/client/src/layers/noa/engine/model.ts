@@ -18,18 +18,7 @@ const templateModels: { [i: string]: Mesh } = {};
  * Setups and applies model to entity
  */
 
-export async function applyModel(
-  noa: Engine,
-  eid: number,
-  uuid: string,
-  model: string,
-  texture: string,
-  offset: number,
-  nametag: boolean,
-  name: string,
-  hitbox: number[]
-) {
-  const scene = noa.rendering.getScene();
+export async function applyModel(noa: Engine, eid: number, model: string, texture: string, name: string) {
   if (models[model] == undefined) {
     fetch(model)
       .then((response) => response.json())
@@ -37,39 +26,22 @@ export async function applyModel(
         models[model] = data;
         models[model].animations = buildAnimations(data.animations);
 
-        applyModelTo(noa, model, data, texture, name, nametag, eid, uuid, hitbox, scene, offset);
+        applyModelTo(noa, model, data, texture, name, eid);
       });
   } else {
-    applyModelTo(noa, model, models[model], texture, name, nametag, eid, uuid, hitbox, scene, offset);
+    applyModelTo(noa, model, models[model], texture, name, eid);
   }
 }
 
-/*
- * Applies modeel to entity
- */
-
-async function applyModelTo(
-  noa: Engine,
-  model: string,
-  data: object,
-  texture: string,
-  name: string,
-  nametag: boolean,
-  eid: number,
-  uuid: string,
-  hitbox: number[],
-  scene: Scene,
-  offset: number
-) {
+async function applyModelTo(noa: Engine, model: string, data: object, texture: string, name: string, eid: number) {
   const builded: any = await buildModel(noa, model, data, texture);
 
-  builded.nametag = addNametag(noa, builded.main, name, noa.ents.getPositionData(eid)!.height, nametag);
+  builded.nametag = addNametag(noa, builded.main, name, noa.ents.getPositionData(eid)!.height);
 
   noa.ents.addComponentAgain(eid, "model", builded);
 
   noa.entities.addComponentAgain(eid, "mesh", {
     mesh: builded.main,
-    offset: offset,
     animations: models[model].animations,
   });
 
@@ -122,7 +94,7 @@ function buildAnimations(data: AnimationsList) {
 
 function createTemplateModel(noa: Engine, name: string, model: any) {
   const scene = noa.rendering.getScene();
-  const scale = 0.06;
+  const scale = 0.03;
   const txtSize = [model.geometry.texturewidth, model.geometry.textureheight];
 
   const main = new Mesh("main", scene);
@@ -216,11 +188,11 @@ function createTemplateModel(noa: Engine, name: string, model: any) {
   return main;
 }
 
-export function addNametag(noa: Engine, mainMesh: Mesh, name: string, height: number, visible: boolean) {
+export function addNametag(noa: Engine, mainMesh: Mesh, name: string, height: number) {
   const scene = noa.rendering.getScene();
 
   const font_size = 96;
-  const font = "bold " + font_size + "px 'lato'";
+  const font = "bold " + font_size + "px 'Lattice Pixel'";
 
   //Set height for plane
   const planeHeight = 0.3;
@@ -235,7 +207,7 @@ export function addNametag(noa: Engine, mainMesh: Mesh, name: string, height: nu
   const temp = new DynamicTexture("DynamicTexture", 64, scene, false);
   const tmpctx = temp.getContext();
   tmpctx.font = font;
-  const DTWidth = tmpctx.measureText(name).width + 8;
+  const DTWidth = tmpctx.measureText(name).width + 32;
 
   //Calculate width the plane has to be
   const planeWidth = DTWidth * ratio;
@@ -259,10 +231,8 @@ export function addNametag(noa: Engine, mainMesh: Mesh, name: string, height: nu
   plane.rotation.x = 0;
   plane.rotation.y = 0;
 
-  plane.isVisible = visible;
-
   plane.setParent(mainMesh);
-  plane.setPositionWithLocalVector(new Vector3(0, height + 0.2, 0));
+  plane.setPositionWithLocalVector(new Vector3(0, height + 1.2, 0));
   noa.rendering.addMeshToScene(plane);
 
   return plane;

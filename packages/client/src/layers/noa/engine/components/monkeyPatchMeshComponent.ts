@@ -1,4 +1,4 @@
-import { Mesh, normalizeEnvInfo } from "@babylonjs/core";
+import { Mesh, MeshAssetTask, normalizeEnvInfo } from "@babylonjs/core";
 import { Engine } from "noa-engine";
 import { RotationComponent, ROTATION_COMPONENT } from "./rotationComponent";
 import { getNoaComponentStrict, hasNoaComponent } from "./utils";
@@ -8,6 +8,8 @@ export function monkeyPatchMeshComponent(noa: Engine) {
   //@ts-ignore
   noa.entities.removeComponent(noa.playerEntity, noa.entities.names.fadeOnZoom);
   const toMonkeyPatch = (dt: any, states: any) => {
+    const yaw = noa.camera.heading;
+    const pitch = noa.camera.pitch;
     for (let i = 0; i < states.length; i++) {
       const state = states[i];
       const id = state.__id;
@@ -18,13 +20,14 @@ export function monkeyPatchMeshComponent(noa: Engine) {
         rpos[2] + state.offset[2]
       );
       if (id === noa.playerEntity) {
-        const yaw = noa.camera.heading;
-        const pitch = noa.camera.pitch;
         state.mesh.rotation.copyFromFloats(pitch, yaw, 0);
       } else if (hasNoaComponent(noa, id, ROTATION_COMPONENT)) {
         const rotationComponent: RotationComponent = getNoaComponentStrict(noa, id, ROTATION_COMPONENT);
         const { rotation } = rotationComponent;
-        const head = state.mesh.getChildMeshes(true)[0];
+        const childMeshes = state.mesh.getChildMeshes(true);
+        const head = childMeshes[0];
+        const nameTag: Mesh = childMeshes[childMeshes.length - 1];
+        nameTag.rotation.y = yaw - rotation.y;
         if (head) head.rotation.x = rotation.x;
         state.mesh.rotation.y = rotation.y;
       }

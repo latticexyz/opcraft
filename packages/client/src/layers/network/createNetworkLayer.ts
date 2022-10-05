@@ -1,4 +1,4 @@
-import { createIndexer, createWorld, EntityID, EntityType, getComponentValue } from "@latticexyz/recs";
+import { createIndexer, createWorld, EntityID, getComponentValue } from "@latticexyz/recs";
 import { setupDevSystems } from "./setup";
 import { createActionSystem, setupMUDNetwork, waitForActionCompletion } from "@latticexyz/std-client";
 import { GameConfig, getNetworkConfig } from "./config";
@@ -178,6 +178,7 @@ export async function createNetworkLayer(config: GameConfig) {
   // --- DEV FAUCET - REMOVE IN PROD
   const playerIsBroke = (await network.signer.get()?.getBalance())?.lte(utils.parseEther("0.005"));
   if (playerIsBroke) {
+    console.log("[Dev Faucet] Dripping funds to player");
     const address = network.connectedAddress.get();
     address && (await faucet?.dripDev({ address }));
   }
