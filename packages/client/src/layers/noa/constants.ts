@@ -15,8 +15,8 @@ export const Textures = {
   LogTop: "./assets/blocks/47-Log-0-top.png",
   Sand: "./assets/blocks/07-Sand.png",
   Stone: "./assets/blocks/48-Stone.png",
-  Water: "./assets/blocks/10-Water.png",
-  TransparentWater: "./assets/blocks/10-Water.png",
+  Water: "./assets/blocks/10-4-Water.png",
+  TransparentWater: "./assets/blocks/10-4-Water.png",
   Cobblestone: "./assets/blocks/1-Cobblestone.png",
   Coal: "./assets/blocks/39-Coal_Ore.png",
   Iron: "./assets/blocks/38-Iron_Ore.png",
@@ -43,8 +43,8 @@ export const Textures = {
   BlueFlower: "./assets/blocks/59-blue_flower.png",
   GreenFlower: "./assets/blocks/60-green_flower.png",
   BlackFlower: "./assets/blocks/61-black_flower.png",
-  GrassPlant: "./assets/blocks/dark_grass.png",
-  Kelp: "./assets/blocks/kelp-small.png",
+  GrassPlant: "./assets/blocks/63-Grass_plant.png",
+  Kelp: "./assets/blocks/65-Kelp-2.png",
   Bedrock: "./assets/blocks/44-Obsidian.png",
 };
 
