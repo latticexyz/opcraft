@@ -67,29 +67,11 @@ async function applyModelTo(
 
   noa.ents.addComponentAgain(eid, "model", builded);
 
-  const hitboxMesh = MeshBuilder.CreateBox(
-    `hitbox-${uuid}`,
-    {
-      height: hitbox[1],
-      width: hitbox[0],
-      depth: hitbox[2],
-    },
-    scene
-  );
-
-  // eslint-disable-next-line no-constant-condition
-  if (true || eid != noa.playerEntity) {
-    noa.entities.addComponentAgain(eid, "mesh", {
-      mesh: builded.main,
-      offset: offset,
-      animations: models[model].animations,
-    });
-  } else {
-    const data = noa.ents.getPositionData(eid);
-
-    builded.main.setParent(noa.entities.getMeshData(eid).mesh);
-    builded.main.position = new Vector3(0, -data!.height / 2, 0);
-  }
+  noa.entities.addComponentAgain(eid, "mesh", {
+    mesh: builded.main,
+    offset: offset,
+    animations: models[model].animations,
+  });
 
   noa.rendering.addMeshToScene(builded.main, false);
 }
