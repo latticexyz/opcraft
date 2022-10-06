@@ -4,8 +4,7 @@ import { registerCrosshairs } from "./Crosshairs";
 import { registerLoadingState } from "./LoadingState";
 import { registerBlockExplorer } from "./BlockExplorer";
 import { registerInventory } from "./Inventory";
-import { registerBalance } from "./Balance";
-import { registerChunkExplorer } from "./ChunkExplorer";
+import { registerSidebar } from "./Sidebar";
 export * from "./common";
 
 export function registerUIComponents() {
@@ -15,6 +14,5 @@ export function registerUIComponents() {
   registerCrosshairs();
   registerBlockExplorer();
   registerInventory();
-  registerBalance();
-  registerChunkExplorer();
+  registerSidebar();
 }

@@ -231,9 +231,9 @@ export function createNoaLayer(network: NetworkLayer) {
 
   function getStakeAndClaim(chunk: Coord) {
     const chunkEntityIndex = world.entityToIndex.get(getChunkEntity(chunk));
-    const claim = chunkEntityIndex == null ? null : getComponentValue(Claim, chunkEntityIndex);
+    const claim = chunkEntityIndex == null ? undefined : getComponentValue(Claim, chunkEntityIndex);
     const stakeEntityIndex = world.entityToIndex.get(getStakeEntity(chunk, connectedAddress.get() || "0x00"));
-    const stake = stakeEntityIndex == null ? null : getComponentValue(Stake, stakeEntityIndex);
+    const stake = stakeEntityIndex == null ? undefined : getComponentValue(Stake, stakeEntityIndex);
     return { claim, stake };
   }
 
