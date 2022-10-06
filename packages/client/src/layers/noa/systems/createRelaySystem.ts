@@ -94,11 +94,6 @@ export async function createRelaySystem(network: NetworkLayer, context: NoaLayer
     }))
   );
 
-  const currentChunk$ = playerPosition$.pipe(
-    map<VoxelCoord, ChunkCoord>((vc) => pixelToChunkCoord({ x: vc.x, y: vc.z }, RELAY_CHUNK_SIZE))
-  );
-
-  const currentChunkComputed = streamToDefinedComputed(currentChunk$);
   const { addedChunks$, removedChunks$, visibleChunks } = createChunks(currentArea$, RELAY_CHUNK_SIZE, 0);
 
   // Initial subscription
@@ -107,11 +102,11 @@ export async function createRelaySystem(network: NetworkLayer, context: NoaLayer
     relay.subscribe(createChunkTopicMessage(c));
   }
 
-  const addedChunkSubscription = addedChunks$.subscribe((chunk) => {
+  defineRxSystem(world, addedChunks$, (chunk) => {
     relay.subscribe(createChunkTopicMessage(chunk));
   });
 
-  const removedChunksSubcription = removedChunks$.subscribe((chunk) => {
+  defineRxSystem(world, removedChunks$, (chunk) => {
     const removedPlayers = runQuery([
       Has(PlayerDirection),
       Has(PlayerPosition),
@@ -123,19 +118,14 @@ export async function createRelaySystem(network: NetworkLayer, context: NoaLayer
     }
   });
 
-  async function relayPositionAndDirection(position: number[], direction: number[]) {
-    const currentChunk = toJS((await currentChunkComputed).get());
-    relay?.push(createChunkTopicMessage(currentChunk), encodeMessage(position, direction));
-  }
-
-  const relaySubscription = playerPosition$.subscribe(() => {
-    const position = getNoaPositionStrict(noa, noa.playerEntity);
+  defineRxSystem(world, playerPosition$, (position) => {
     const pitch = noa.camera.pitch;
     const yaw = noa.camera.heading;
     const q = Quaternion.FromEulerAngles(pitch, yaw, 0);
     const quaternion: number[] = [];
     q.toArray(quaternion);
-    relayPositionAndDirection([position.x, position.y, position.z], quaternion);
+    const currentChunk = pixelToChunkCoord({ x: position.x, y: position.z }, RELAY_CHUNK_SIZE);
+    relay?.push(createChunkTopicMessage(currentChunk), encodeMessage([position.x, position.y, position.z], quaternion));
   });
 
   defineRxSystem(world, relay.event$, ({ message, address }) => {
@@ -160,8 +150,4 @@ export async function createRelaySystem(network: NetworkLayer, context: NoaLayer
       if (lastMessage < timeOut) removePlayerComponent(player);
     }
   });
-
-  world.registerDisposer(() => relaySubscription.unsubscribe());
-  world.registerDisposer(() => addedChunkSubscription.unsubscribe());
-  world.registerDisposer(() => removedChunksSubcription.unsubscribe());
 }
