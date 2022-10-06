@@ -28,3 +28,7 @@ export const Title = styled.span`
   color: #ff0;
   text-transform: capitalize;
 `;
+
+export const Faded = styled.span`
+  opacity: 0.5;
+`;

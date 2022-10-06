@@ -10,14 +10,16 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
     noa,
     components: { SelectedSlot, UI },
     SingletonEntity,
-    api: { toggleInventory, placeSelectedItem },
+    api: { toggleInventory, placeSelectedItem, getCurrentChunk },
   } = context;
 
   const {
     components: { Item, Position },
+    api: { stake, claim },
   } = network;
 
-  // clear targeted block on on left click
+  // mine targeted block on on left click
+  noa.inputs.bind("fire", "F");
   noa.inputs.down.on("fire", function () {
     if (noa.targetedBlock) {
       const pos = noa.targetedBlock.position;
@@ -60,7 +62,7 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
 
   // place a block on right click
   noa.inputs.unbind("alt-fire"); // Unbind to remove the default binding of "E"
-  noa.inputs.bind("alt-fire", "<mouse 3>");
+  noa.inputs.bind("alt-fire", "<mouse 3>", "R");
   noa.inputs.down.on("alt-fire", function () {
     console.log("alt-fire");
     if (noa.targetedBlock) {
@@ -99,5 +101,17 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
   noa.inputs.bind("inventory", "E");
   noa.inputs.down.on("inventory", () => {
     toggleInventory();
+  });
+
+  noa.inputs.bind("stake", "X");
+  noa.inputs.down.on("stake", () => {
+    const chunk = getCurrentChunk();
+    chunk && stake(chunk);
+  });
+
+  noa.inputs.bind("claim", "C");
+  noa.inputs.down.on("claim", () => {
+    const chunk = getCurrentChunk();
+    chunk && claim(chunk);
   });
 }

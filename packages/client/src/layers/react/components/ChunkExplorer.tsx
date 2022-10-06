@@ -2,12 +2,10 @@ import React from "react";
 import { registerUIComponent } from "../engine";
 import { concat, interval, map, of } from "rxjs";
 import styled from "styled-components";
-import { getNoaComponentStrict } from "../../noa/engine/components/utils";
-import { PositionComponent, POSITION_COMPONENT } from "../../noa/engine/components/defaultComponent";
-import { getChunkCoord, getChunkEntity } from "../../../utils/chunk";
+import { getChunkEntity } from "../../../utils/chunk";
 import { getStakeEntity } from "../../../utils/stake";
 import { getComponentValue } from "@latticexyz/recs";
-import { Button, Container, Title } from "./common";
+import { Button, Container, Faded, Title } from "./common";
 
 export function registerChunkExplorer() {
   registerUIComponent(
@@ -26,19 +24,19 @@ export function registerChunkExplorer() {
           world,
           api,
         },
-        noa: { noa },
+        noa: {
+          api: { getCurrentChunk },
+        },
       } = layers;
       return concat(of(1), interval(200)).pipe(
         map(() => {
-          const { position } = getNoaComponentStrict<PositionComponent>(noa, noa.playerEntity, POSITION_COMPONENT);
-          if (!position) return null;
-          const coord = { x: Math.floor(position[0]), y: Math.floor(position[1]), z: Math.floor(position[2]) };
-          const chunk = getChunkCoord(coord);
+          const chunk = getCurrentChunk();
+          if (!chunk) return null;
           const chunkEntityIndex = world.entityToIndex.get(getChunkEntity(chunk));
           const claim = chunkEntityIndex == null ? null : getComponentValue(Claim, chunkEntityIndex);
           const stakeEntityIndex = world.entityToIndex.get(getStakeEntity(chunk, connectedAddress.get() || "0x00"));
           const stake = stakeEntityIndex == null ? null : getComponentValue(Stake, stakeEntityIndex);
-          return { coord, chunk, claim, stake, api: { stake: api.stake, claim: api.claim } };
+          return { chunk, claim, stake, api: { stake: api.stake, claim: api.claim } };
         })
       );
     },
@@ -55,8 +53,14 @@ export function registerChunkExplorer() {
             <p>Stake: {stakeValue}</p>
             <p>Claim: {claim ? `${claimValue} (${claim.claimer.substring(0, 6)}...)` : `none`}</p>
             <Buttons>
-              <Button onClick={() => api.stake(chunk)}>Stake</Button>
-              {stakeValue > claimValue ? <Button onClick={() => api.claim(chunk)}>Claim</Button> : null}
+              <Button onClick={() => api.stake(chunk)}>
+                Stake <Faded>(X)</Faded>
+              </Button>
+              {stakeValue > claimValue ? (
+                <Button onClick={() => api.claim(chunk)}>
+                  Claim<Faded>(C)</Faded>
+                </Button>
+              ) : null}
             </Buttons>
           </ChunkContainer>
         </Wrapper>

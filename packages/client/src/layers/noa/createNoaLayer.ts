@@ -41,10 +41,12 @@ import { registerModelComponent } from "./engine/components/modelComponent";
 import { MINING_BLOCK_COMPONENT, registerMiningBlockComponent } from "./engine/components/miningBlockComponent";
 import { defineInventoryIndexComponent } from "./components/InventoryIndex";
 import { setupSun } from "./engine/dayNightCycle";
-import { setNoaPosition } from "./engine/components/utils";
+import { getNoaComponentStrict, setNoaPosition } from "./engine/components/utils";
 import { registerTargetedPositionComponent } from "./engine/components/targetedPositionComponent";
 import { defaultAbiCoder as abi, keccak256 } from "ethers/lib/utils";
 import { GodID } from "@latticexyz/network";
+import { getChunkCoord } from "../../utils/chunk";
+import { PositionComponent, POSITION_COMPONENT } from "./engine/components/defaultComponent";
 
 export function createNoaLayer(network: NetworkLayer) {
   const world = namespaceWorld(network.world, "noa");
@@ -208,6 +210,13 @@ export function createNoaLayer(network: NetworkLayer) {
     build(itemEntity, coord);
   }
 
+  function getCurrentChunk() {
+    const { position } = getNoaComponentStrict<PositionComponent>(noa, noa.playerEntity, POSITION_COMPONENT);
+    if (!position) return null;
+    const coord = { x: Math.floor(position[0]), y: Math.floor(position[1]), z: Math.floor(position[2]) };
+    return getChunkCoord(coord);
+  }
+
   // --- SETUP NOA CONSTANTS --------------------------------------------------------
   monkeyPatchMeshComponent(noa);
   registerModelComponent(noa);
@@ -242,6 +251,7 @@ export function createNoaLayer(network: NetworkLayer) {
       teleportRandom,
       toggleInventory,
       placeSelectedItem,
+      getCurrentChunk,
     },
     SingletonEntity,
   };
