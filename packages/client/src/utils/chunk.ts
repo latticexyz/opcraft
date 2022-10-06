@@ -1,4 +1,4 @@
-import { formatEntityID } from "@latticexyz/network/src/utils";
+import { formatEntityID } from "@latticexyz/network";
 import { Coord, padToBitLength, toInt32, VoxelCoord } from "@latticexyz/utils";
 import { CHUNK } from "../constants";
 
