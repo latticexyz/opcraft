@@ -7,6 +7,7 @@ import { PositionComponent, POSITION_COMPONENT } from "../../noa/engine/componen
 import { getChunkCoord, getChunkEntity } from "../../../utils/chunk";
 import { getStakeEntity } from "../../../utils/stake";
 import { getComponentValue } from "@latticexyz/recs";
+import { Button, Container, Title } from "./common";
 
 export function registerChunkExplorer() {
   registerUIComponent(
@@ -14,7 +15,7 @@ export function registerChunkExplorer() {
     {
       rowStart: 2,
       rowEnd: 13,
-      colStart: 11,
+      colStart: 8,
       colEnd: 13,
     },
     (layers) => {
@@ -41,19 +42,23 @@ export function registerChunkExplorer() {
         })
       );
     },
-    ({ coord, chunk, claim, stake, api }) => {
+    ({ chunk, claim, stake, api }) => {
+      const stakeValue = stake?.value ?? 0;
+      const claimValue = claim?.stake ?? 0;
+
       return (
         <Wrapper>
-          <>
-            Position: ({coord.x}, {coord.y}, {coord.z})<br />
-            Chunk: ({chunk.x}, {chunk.y})<br />
-            Stake: {stake ? `${JSON.stringify(stake)}` : `no stake`}
-            <br />
-            Claim: {claim ? `${claim.stake} by ${claim.claimer}` : `no claim`}
-            <br />
-            <Button onClick={() => api.stake(chunk)}>Stake</Button>
-            <Button onClick={() => api.claim(chunk)}>Claim</Button>
-          </>
+          <ChunkContainer>
+            <p>
+              <Title>Chunk</Title> ({chunk.x}, {chunk.y})
+            </p>
+            <p>Stake: {stakeValue}</p>
+            <p>Claim: {claim ? `${claimValue} (${claim.claimer.substring(0, 6)}...)` : `none`}</p>
+            <Buttons>
+              <Button onClick={() => api.stake(chunk)}>Stake</Button>
+              {stakeValue > claimValue ? <Button onClick={() => api.claim(chunk)}>Claim</Button> : null}
+            </Buttons>
+          </ChunkContainer>
         </Wrapper>
       );
     }
@@ -61,9 +66,19 @@ export function registerChunkExplorer() {
 }
 
 const Wrapper = styled.div`
-  background-color: black;
-  font-size: 13px;
+  display: grid;
+  justify-items: end;
+  padding: 20px;
+`;
+
+const ChunkContainer = styled(Container)`
+  line-height: 1;
   pointer-events: all;
 `;
 
-const Button = styled.button``;
+const Buttons = styled.div`
+  margin-top: 8px;
+  display: grid;
+  grid-gap: 9px;
+  grid-auto-flow: column;
+`;

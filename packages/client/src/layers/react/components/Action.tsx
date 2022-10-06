@@ -4,6 +4,7 @@ import styled from "styled-components";
 import { PendingIcon } from "./icons/PendingIcon";
 import { CheckIcon } from "./icons/CheckIcon";
 import { CloseIcon } from "./icons/CloseIcon";
+import { Container } from "./common";
 
 type Props = {
   state: ActionState;
@@ -12,15 +13,10 @@ type Props = {
   description?: string;
 };
 
-const ActionContainer = styled.div`
-  box-shadow: 0 0 0 3px #555, 0 0 0 5px #000;
-  background: #222;
-  margin: 5px;
-  border-radius: 3px;
+const ActionContainer = styled(Container)`
   display: flex;
 
   gap: 10px;
-  padding: 8px;
   position: relative;
 
   transition: opacity 300ms ease-in-out;
@@ -45,6 +41,7 @@ const ActionContainer = styled.div`
     justify-content: center;
     gap: 6px;
   }
+
   .ActionTitle {
     color: #ff0;
     text-transform: capitalize;
