@@ -11,7 +11,6 @@ import {
   runQuery,
   HasValue,
   EntityID,
-  defineRxSystem,
   getComponentValueStrict,
   hasComponent,
 } from "@latticexyz/recs";
@@ -39,6 +38,7 @@ import {
   createInventoryIndexSystem,
   createPlayerPositionSystem,
   createRelaySystem,
+  createSyncLocalPlayerPositionSystem,
 } from "./systems";
 import { registerHandComponent } from "./engine/components/handComponent";
 import { registerModelComponent } from "./engine/components/modelComponent";
@@ -94,6 +94,10 @@ export function createNoaLayer(network: NetworkLayer) {
     showCrafting: false,
   });
   setComponent(components.SelectedSlot, SingletonEntity, { value: 0 });
+
+  if (hasComponent(components.LocalPlayerPosition, SingletonEntity)) {
+    setNoaPosition(noa, noa.playerEntity, getComponentValueStrict(components.LocalPlayerPosition, SingletonEntity));
+  }
 
   // --- API ------------------------------------------------------------------------
   function setCraftingTable(entities: EntityIndex[][]) {
@@ -252,6 +256,8 @@ export function createNoaLayer(network: NetworkLayer) {
   const playerPosition$ = new BehaviorSubject(getCurrentPlayerPosition());
   world.registerDisposer(timer(0, 200).pipe(map(getCurrentPlayerPosition)).subscribe(playerPosition$)?.unsubscribe);
 
+  const slowPlayerPosition$ = playerPosition$.pipe(throttleTime(2000));
+
   const playerChunk$ = new BehaviorSubject(getCurrentChunk());
   world.registerDisposer(playerPosition$.pipe(map((pos) => getChunkCoord(pos))).subscribe(playerChunk$)?.unsubscribe);
 
@@ -259,16 +265,6 @@ export function createNoaLayer(network: NetworkLayer) {
   world.registerDisposer(
     playerChunk$.pipe(map((coord) => getStakeAndClaim(coord))).subscribe(stakeAndClaim$)?.unsubscribe
   );
-
-  const godEntityIndex = world.registerEntity({ id: GodID });
-  if (hasComponent(components.LocalPlayerPosition, godEntityIndex)) {
-    setNoaPosition(noa, noa.playerEntity, getComponentValueStrict(components.LocalPlayerPosition, godEntityIndex));
-  }
-
-  const slowPlayerPosition$ = playerPosition$.pipe(throttleTime(2000));
-  defineRxSystem(world, slowPlayerPosition$, (pos) => {
-    setComponent(components.LocalPlayerPosition, godEntityIndex, pos);
-  });
 
   const context = {
     world,
@@ -290,7 +286,7 @@ export function createNoaLayer(network: NetworkLayer) {
       getCurrentPlayerPosition,
       getStakeAndClaim,
     },
-    streams: { playerPosition$, playerChunk$, stakeAndClaim$ },
+    streams: { playerPosition$, slowPlayerPosition$, playerChunk$, stakeAndClaim$ },
     SingletonEntity,
   };
 
@@ -300,6 +296,7 @@ export function createNoaLayer(network: NetworkLayer) {
   createPlayerPositionSystem(network, context);
   createRelaySystem(network, context);
   createInventoryIndexSystem(network, context);
+  createSyncLocalPlayerPositionSystem(network, context);
 
   return context;
 }
