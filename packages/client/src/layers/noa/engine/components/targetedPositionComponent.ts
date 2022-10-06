@@ -26,6 +26,10 @@ export function registerTargetedPositionComponent(noa: Engine) {
   noa.ents.createComponent({
     name: TARGETED_POSITION_COMPONENT,
     state: { points: [], currentTick: 0 },
+    onAdd: (id: number, state: TargetedPositionComponent) => {
+      state.points = [];
+      state.currentTick = 0;
+    },
     system: function (dt: number, states: TargetedPositionComponent[]) {
       currentAnimationTick++;
       for (let i = 0; i < states.length; i++) {
@@ -37,7 +41,7 @@ export function registerTargetedPositionComponent(noa: Engine) {
           noY1.y = 0;
           const noY2 = points[1].clone();
           noY2.y = 0;
-          const speed = Math.sqrt(noY1.subtract(noY2).lengthSquared());
+          const speed = Math.min(2.5, Math.sqrt(noY1.subtract(noY2).lengthSquared()));
           noa.entities.setPosition(id, [point.x, point.y, point.z]);
           animateFrameOfMesh(noa, id, speed, currentAnimationTick);
         }

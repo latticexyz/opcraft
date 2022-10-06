@@ -65,8 +65,8 @@ export function createPlayerPositionSystem(network: NetworkLayer, context: NoaLa
 
   // Everything with a position that is no block is considered a player
   defineSystem(world, [Has(PlayerPosition), Has(PlayerDirection)], (update) => {
-    const address = world.entities[update.entity];
     if (update.type === UpdateType.Enter) {
+      const address = world.entities[update.entity];
       spawnPlayer(update.entity, address.substring(0, 10));
     }
     if (update.type === UpdateType.Exit) {
