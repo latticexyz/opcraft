@@ -152,8 +152,6 @@ export const Blocks: { [key in BlockTypeKey]: Block | undefined } = {
   GrassPlant: { type: NoaBlockType.MESH, material: Textures.GrassPlant, solid: false, opaque: false },
 };
 
-export const Singleton = "Singleton" as EntityID;
-
 export function getBlockIconUrl(blockType: BlockTypeKey): string | undefined {
   const block = Blocks[blockType];
   if (!block) return;

@@ -7,12 +7,12 @@ import { awaitPromise } from "@latticexyz/utils";
 
 export function registerBalance() {
   registerUIComponent(
-    "Crosshairs",
+    "Balance",
     {
       rowStart: 1,
       rowEnd: 2,
       colStart: 8,
-      colEnd: 13,
+      colEnd: 12,
     },
     ({
       network: {

@@ -30,7 +30,7 @@ export function registerLoadingState() {
     ({ LoadingState, world }) => {
       const GodEntityIndex = world.entityToIndex.get(GodID);
 
-      const loadingState = GodEntityIndex && getComponentValue(LoadingState, GodEntityIndex);
+      const loadingState = GodEntityIndex == null ? null : getComponentValue(LoadingState, GodEntityIndex);
       if (loadingState == null) {
         return <BootScreen initialOpacity={1}>Connecting</BootScreen>;
       }

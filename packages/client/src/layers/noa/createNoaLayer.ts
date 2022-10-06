@@ -12,7 +12,7 @@ import {
   HasValue,
   EntityID,
 } from "@latticexyz/recs";
-import { random, VoxelCoord } from "@latticexyz/utils";
+import { Coord, random, VoxelCoord } from "@latticexyz/utils";
 import { NetworkLayer } from "../network";
 import {
   definePlayerDirectionComponent,
@@ -20,8 +20,10 @@ import {
   defineSelectedSlotComponent,
   defineCraftingTableComponent,
   defineUIComponent,
+  definePlayerLastMessage,
+  definePlayerRelayerChunkPositionComponent,
 } from "./components";
-import { CRAFTING_SIDE, EMPTY_CRAFTING_TABLE, Singleton } from "./constants";
+import { CRAFTING_SIDE, EMPTY_CRAFTING_TABLE } from "./constants";
 import { setupHand } from "./engine/hand";
 import { monkeyPatchMeshComponent } from "./engine/components/monkeyPatchMeshComponent";
 import { registerRotationComponent, registerTargetedRotationComponent } from "./engine/components/rotationComponent";
@@ -39,11 +41,13 @@ import { registerModelComponent } from "./engine/components/modelComponent";
 import { MINING_BLOCK_COMPONENT, registerMiningBlockComponent } from "./engine/components/miningBlockComponent";
 import { defineInventoryIndexComponent } from "./components/InventoryIndex";
 import { setupSun } from "./engine/dayNightCycle";
-import { setNoaPosition } from "./engine/components/utils";
+import { getNoaPositionStrict, setNoaPosition } from "./engine/components/utils";
 import { registerTargetedPositionComponent } from "./engine/components/targetedPositionComponent";
 import { defaultAbiCoder as abi, keccak256 } from "ethers/lib/utils";
-import { definePlayerRelayerChunkPositionComponent } from "./components/PlayerRelayerChunkPosition";
-import { definePlayerLastMessge } from "./components/PlayerLastMessage";
+import { GodID } from "@latticexyz/network";
+import { getChunkCoord, getChunkEntity } from "../../utils/chunk";
+import { BehaviorSubject, map, timer } from "rxjs";
+import { getStakeEntity } from "../../utils/stake";
 
 export function createNoaLayer(network: NetworkLayer) {
   const world = namespaceWorld(network.world, "noa");
@@ -53,12 +57,12 @@ export function createNoaLayer(network: NetworkLayer) {
       config: { chainId },
       connectedAddress,
     },
-    components: { OwnedBy, Item, Recipe },
+    components: { OwnedBy, Item, Recipe, Claim, Stake },
     api: { build },
   } = network;
   const uniqueWorldId = chainId + worldAddress;
 
-  const SingletonEntity = world.registerEntity({ id: Singleton });
+  const SingletonEntity = world.registerEntity({ id: GodID });
 
   // --- COMPONENTS -----------------------------------------------------------------
   const components = {
@@ -67,7 +71,7 @@ export function createNoaLayer(network: NetworkLayer) {
     PlayerPosition: definePlayerPositionComponent(world),
     PlayerRelayerChunkPosition: createIndexer(definePlayerRelayerChunkPositionComponent(world)),
     PlayerDirection: definePlayerDirectionComponent(world),
-    PlayerLastMessage: definePlayerLastMessge(world),
+    PlayerLastMessage: definePlayerLastMessage(world),
     UI: defineUIComponent(world),
     InventoryIndex: createLocalCache(createIndexer(defineInventoryIndexComponent(world)), uniqueWorldId),
   };
@@ -207,6 +211,23 @@ export function createNoaLayer(network: NetworkLayer) {
     build(itemEntity, coord);
   }
 
+  function getCurrentPlayerPosition() {
+    return getNoaPositionStrict(noa, noa.playerEntity);
+  }
+
+  function getCurrentChunk() {
+    const position = getCurrentPlayerPosition();
+    return getChunkCoord(position);
+  }
+
+  function getStakeAndClaim(chunk: Coord) {
+    const chunkEntityIndex = world.entityToIndex.get(getChunkEntity(chunk));
+    const claim = chunkEntityIndex == null ? null : getComponentValue(Claim, chunkEntityIndex);
+    const stakeEntityIndex = world.entityToIndex.get(getStakeEntity(chunk, connectedAddress.get() || "0x00"));
+    const stake = stakeEntityIndex == null ? null : getComponentValue(Stake, stakeEntityIndex);
+    return { claim, stake };
+  }
+
   // --- SETUP NOA CONSTANTS --------------------------------------------------------
   monkeyPatchMeshComponent(noa);
   registerModelComponent(noa);
@@ -220,6 +241,19 @@ export function createNoaLayer(network: NetworkLayer) {
   setupHand(noa);
   setupSun(noa, glow);
   noa.entities.addComponentAgain(noa.playerEntity, MINING_BLOCK_COMPONENT, {});
+
+  // --- SETUP STREAMS --------------------------------------------------------------
+  // (Create streams as BehaviorSubject to allow for multiple observers and getting the current value)
+  const playerPosition$ = new BehaviorSubject(getCurrentPlayerPosition());
+  world.registerDisposer(timer(0, 200).pipe(map(getCurrentPlayerPosition)).subscribe(playerPosition$)?.unsubscribe);
+
+  const playerChunk$ = new BehaviorSubject(getCurrentChunk());
+  world.registerDisposer(playerPosition$.pipe(map((pos) => getChunkCoord(pos))).subscribe(playerChunk$)?.unsubscribe);
+
+  const stakeAndClaim$ = new BehaviorSubject(getStakeAndClaim(getCurrentChunk()));
+  world.registerDisposer(
+    playerChunk$.pipe(map((coord) => getStakeAndClaim(coord))).subscribe(stakeAndClaim$)?.unsubscribe
+  );
 
   const context = {
     world,
@@ -241,7 +275,11 @@ export function createNoaLayer(network: NetworkLayer) {
       teleportRandom,
       toggleInventory,
       placeSelectedItem,
+      getCurrentChunk,
+      getCurrentPlayerPosition,
+      getStakeAndClaim,
     },
+    streams: { playerPosition$, playerChunk$, stakeAndClaim$ },
     SingletonEntity,
   };
 

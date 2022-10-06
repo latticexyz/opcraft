@@ -12,13 +12,13 @@ import { DiamondID } from "../prototypes/Blocks.sol";
 uint256 constant ID = uint256(keccak256("system.Stake"));
 
 // Stake entity = concat(address | chunk.x | chunk.y)
-function getStakeEntity(Coord memory chunk, address entity) returns (uint256) {
+function getStakeEntity(Coord memory chunk, address entity) pure returns (uint256) {
   return uint256((uint256(uint160(entity)) << 64) | (uint64(uint32(chunk.x)) << 32) | uint32(chunk.y));
 }
 
-function getStakeInChunk(StakeComponent stakeComponent, uint256 stakeEntity) returns (uint256) {
+function getStakeInChunk(StakeComponent stakeComponent, uint256 stakeEntity) view returns (uint32) {
   bytes memory currentStakeBytes = stakeComponent.getRawValue(stakeEntity);
-  return currentStakeBytes.length == 0 ? 0 : abi.decode(currentStakeBytes, (uint256));
+  return currentStakeBytes.length == 0 ? 0 : abi.decode(currentStakeBytes, (uint32));
 }
 
 contract StakeSystem is System {
@@ -43,7 +43,7 @@ contract StakeSystem is System {
 
     // Increase stake in this chunk
     uint256 stakeEntity = getStakeEntity(chunk, msg.sender);
-    uint256 currentStake = getStakeInChunk(stakeComponent, stakeEntity);
+    uint32 currentStake = getStakeInChunk(stakeComponent, stakeEntity);
 
     stakeComponent.set(stakeEntity, currentStake + 1);
   }
