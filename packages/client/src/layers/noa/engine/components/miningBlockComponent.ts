@@ -17,7 +17,7 @@ export interface MiningBlockComponent {
 
 export const MINING_BLOCK_COMPONENT = "MINING_BLOCK_COMPONENT";
 
-const MINING_DURATION = 10;
+const MINING_DURATION = 800;
 
 const NORMALS = [
   [0, 0, 1],
