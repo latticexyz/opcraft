@@ -11,6 +11,9 @@ import {
   runQuery,
   HasValue,
   EntityID,
+  defineRxSystem,
+  getComponentValueStrict,
+  hasComponent,
 } from "@latticexyz/recs";
 import { Coord, random, VoxelCoord } from "@latticexyz/utils";
 import { NetworkLayer } from "../network";
@@ -22,6 +25,7 @@ import {
   defineUIComponent,
   definePlayerLastMessage,
   definePlayerRelayerChunkPositionComponent,
+  defineLocalPlayerPositionComponent,
 } from "./components";
 import { CRAFTING_SIDE, EMPTY_CRAFTING_TABLE } from "./constants";
 import { setupHand } from "./engine/hand";
@@ -46,7 +50,7 @@ import { registerTargetedPositionComponent } from "./engine/components/targetedP
 import { defaultAbiCoder as abi, keccak256 } from "ethers/lib/utils";
 import { GodID } from "@latticexyz/network";
 import { getChunkCoord, getChunkEntity } from "../../utils/chunk";
-import { BehaviorSubject, map, timer } from "rxjs";
+import { BehaviorSubject, map, throttleTime, timer } from "rxjs";
 import { getStakeEntity } from "../../utils/stake";
 
 export function createNoaLayer(network: NetworkLayer) {
@@ -69,6 +73,7 @@ export function createNoaLayer(network: NetworkLayer) {
     SelectedSlot: defineSelectedSlotComponent(world),
     CraftingTable: defineCraftingTableComponent(world),
     PlayerPosition: definePlayerPositionComponent(world),
+    LocalPlayerPosition: createLocalCache(defineLocalPlayerPositionComponent(world)),
     PlayerRelayerChunkPosition: createIndexer(definePlayerRelayerChunkPositionComponent(world)),
     PlayerDirection: definePlayerDirectionComponent(world),
     PlayerLastMessage: definePlayerLastMessage(world),
@@ -254,6 +259,16 @@ export function createNoaLayer(network: NetworkLayer) {
   world.registerDisposer(
     playerChunk$.pipe(map((coord) => getStakeAndClaim(coord))).subscribe(stakeAndClaim$)?.unsubscribe
   );
+
+  const godEntityIndex = world.registerEntity({ id: GodID });
+  if (hasComponent(components.LocalPlayerPosition, godEntityIndex)) {
+    setNoaPosition(noa, noa.playerEntity, getComponentValueStrict(components.LocalPlayerPosition, godEntityIndex));
+  }
+
+  const slowPlayerPosition$ = playerPosition$.pipe(throttleTime(2000));
+  defineRxSystem(world, slowPlayerPosition$, (pos) => {
+    setComponent(components.LocalPlayerPosition, godEntityIndex, pos);
+  });
 
   const context = {
     world,
