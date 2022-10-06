@@ -20,6 +20,8 @@ import {
   defineSelectedSlotComponent,
   defineCraftingTableComponent,
   defineUIComponent,
+  definePlayerLastMessage,
+  definePlayerRelayerChunkPositionComponent,
 } from "./components";
 import { CRAFTING_SIDE, EMPTY_CRAFTING_TABLE, Singleton } from "./constants";
 import { setupHand } from "./engine/hand";
@@ -42,8 +44,6 @@ import { setupSun } from "./engine/dayNightCycle";
 import { setNoaPosition } from "./engine/components/utils";
 import { registerTargetedPositionComponent } from "./engine/components/targetedPositionComponent";
 import { defaultAbiCoder as abi, keccak256 } from "ethers/lib/utils";
-import { definePlayerRelayerChunkPositionComponent } from "./components/PlayerRelayerChunkPosition";
-import { definePlayerLastMessge } from "./components/PlayerLastMessage";
 
 export function createNoaLayer(network: NetworkLayer) {
   const world = namespaceWorld(network.world, "noa");
@@ -67,7 +67,7 @@ export function createNoaLayer(network: NetworkLayer) {
     PlayerPosition: definePlayerPositionComponent(world),
     PlayerRelayerChunkPosition: createIndexer(definePlayerRelayerChunkPositionComponent(world)),
     PlayerDirection: definePlayerDirectionComponent(world),
-    PlayerLastMessage: definePlayerLastMessge(world),
+    PlayerLastMessage: definePlayerLastMessage(world),
     UI: defineUIComponent(world),
     InventoryIndex: createLocalCache(createIndexer(defineInventoryIndexComponent(world)), uniqueWorldId),
   };
