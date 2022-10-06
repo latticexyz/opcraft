@@ -24,8 +24,14 @@ export const Center = styled.div`
   justify-items: center;
 `;
 
-export const Title = styled.span`
+export const Gold = styled.span`
   color: #ff0;
+`;
+
+export const Red = styled.span`
+  color: #eb453b;
+`;
+export const Title = styled(Gold)`
   text-transform: capitalize;
 `;
 

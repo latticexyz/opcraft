@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { registerUIComponent } from "../engine";
 import { combineLatest, concat, map, of, scan } from "rxjs";
 import styled from "styled-components";
-import { AbsoluteBorder, Center, Crafting, Slot } from "./common";
+import { AbsoluteBorder, Center, Crafting, Gold, Red, Slot } from "./common";
 import { range } from "@latticexyz/utils";
 import {
   defineQuery,
@@ -16,6 +16,7 @@ import {
 } from "@latticexyz/recs";
 import { getBlockIconUrl } from "../../noa/constants";
 import { BlockIdToKey } from "../../network/constants";
+import { formatEntityID } from "@latticexyz/network";
 
 // This gives us 36 inventory slots. As of now there are 34 types of items, so it should fit.
 const INVENTORY_WIDTH = 9;
@@ -25,7 +26,7 @@ export function registerInventory() {
   registerUIComponent(
     "Inventory",
     {
-      rowStart: 12,
+      rowStart: 11,
       rowEnd: 13,
       colStart: 1,
       colEnd: 13,
@@ -38,6 +39,7 @@ export function registerInventory() {
         },
         noa: {
           components: { UI, InventoryIndex, SelectedSlot, CraftingTable },
+          streams: { stakeAndClaim$ },
         },
       } = layers;
 
@@ -78,12 +80,18 @@ export function registerInventory() {
       const selectedSlot$ = concat(of(0), SelectedSlot.update$.pipe(map((e) => e.value[0]?.value)));
       const craftingTable$ = concat(of(0), CraftingTable.update$);
 
-      return combineLatest([ownedByMe$, showInventory$, selectedSlot$, inventoryIndex$, craftingTable$]).pipe(
-        map((props) => ({ props }))
-      );
+      return combineLatest([
+        ownedByMe$,
+        showInventory$,
+        selectedSlot$,
+        stakeAndClaim$,
+        of(connectedAddress.get()),
+        inventoryIndex$,
+        craftingTable$,
+      ]).pipe(map((props) => ({ props })));
     },
     ({ props }) => {
-      const [ownedByMe, { layers, show, craftingSideLength }, selectedSlot] = props;
+      const [ownedByMe, { layers, show, craftingSideLength }, selectedSlot, stakeAndClaim, connectedAddress] = props;
 
       const [holdingBlock, setHoldingBlock] = useState<EntityIndex | undefined>();
 
@@ -178,10 +186,26 @@ export function registerInventory() {
         </Absolute>
       );
 
+      const { claim } = stakeAndClaim;
+      const canBuild = claim && connectedAddress ? claim.claimer === formatEntityID(connectedAddress) : true;
+
       const ActionBar = (
-        <Center>
+        <RelativeCenter>
+          {claim && !canBuild && (
+            <Notification>
+              <Red>X</Red> you cannot build or mine here. This chunk has been claimed by{" "}
+              <Gold>
+                {claim.claimer.substring(0, 6)}...{claim.claimer.substring(36, 42)}
+              </Gold>
+            </Notification>
+          )}
+          {claim && canBuild && (
+            <Notification>
+              <Gold>You control this chunk!</Gold>
+            </Notification>
+          )}
           <Wrapper>{[...range(INVENTORY_WIDTH)].map((i) => Slots[i])}</Wrapper>
-        </Center>
+        </RelativeCenter>
       );
 
       return (
@@ -193,6 +217,15 @@ export function registerInventory() {
     }
   );
 }
+
+const Notification = styled.p`
+  position: absolute;
+  top: -5px;
+`
+
+const RelativeCenter = styled(Center)`
+  position: relative;
+`;
 
 const Absolute = styled.div`
   position: absolute;

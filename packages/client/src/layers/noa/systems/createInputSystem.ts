@@ -1,4 +1,6 @@
+import { formatEntityID } from "@latticexyz/network";
 import { getComponentValue, HasValue, runQuery, setComponent, updateComponent } from "@latticexyz/recs";
+import { streamToComputed } from "@latticexyz/utils";
 import { NetworkLayer, BlockType } from "../../network";
 import { HandComponent, HAND_COMPONENT } from "../engine/components/handComponent";
 import { MiningBlockComponent, MINING_BLOCK_COMPONENT } from "../engine/components/miningBlockComponent";
@@ -11,17 +13,29 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
     components: { SelectedSlot, UI },
     SingletonEntity,
     api: { toggleInventory, placeSelectedItem, getCurrentChunk },
+    streams: { stakeAndClaim$ },
   } = context;
 
   const {
     components: { Item, Position },
     api: { stake, claim },
+    network: { connectedAddress },
   } = network;
 
   // mine targeted block on on left click
   noa.inputs.bind("fire", "F");
+
+  function canInteract() {
+    const { claim } = stakeAndClaim$.getValue() || {};
+    const playerAddress = connectedAddress.get();
+    if (!playerAddress) return false;
+    if (!claim) return true;
+    return claim.claimer === formatEntityID(playerAddress);
+  }
+
   noa.inputs.down.on("fire", function () {
     if (noa.targetedBlock) {
+      if (!canInteract()) return;
       const pos = noa.targetedBlock.position;
       const miningComponent = getNoaComponentStrict<MiningBlockComponent>(
         noa,
@@ -64,7 +78,6 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
   noa.inputs.unbind("alt-fire"); // Unbind to remove the default binding of "E"
   noa.inputs.bind("alt-fire", "<mouse 3>", "R");
   noa.inputs.down.on("alt-fire", function () {
-    console.log("alt-fire");
     if (noa.targetedBlock) {
       const pos = noa.targetedBlock.adjacent;
       const targeted = noa.targetedBlock.position;
@@ -78,7 +91,7 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
       ) {
         return toggleInventory(true, true);
       }
-
+      if (!canInteract()) return;
       placeSelectedItem({ x: pos[0], y: pos[1], z: pos[2] });
     }
   });
