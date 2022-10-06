@@ -9,7 +9,7 @@ const CYCLE = 5 * 60 * 1000;
  * Setups sun
  */
 
-export function setupSun(noa: Engine, glow: GlowLayer) {
+export function setupDayNightCycle(noa: Engine, glow: GlowLayer) {
   const scene: Scene = noa.rendering.getScene();
   const marker = MeshBuilder.CreateBox("marker");
   marker.visibility = 0;
@@ -53,7 +53,7 @@ export function setupSun(noa: Engine, glow: GlowLayer) {
     // move sun
     marker.rotation.z = -(Math.PI * 2 * progress);
     const scene = noa.rendering.getScene();
-    const gradingLevel = Math.max(0, Math.min(3 * Math.sin(-(Math.PI * 2 * progress)), 1));
+    const gradingLevel = Math.max(0, Math.min(3 * Math.sin(-(Math.PI * 2 * progress)), 0.7));
     glow.intensity = Math.max(0, Math.min(1 - gradingLevel, 1)) * 0.4;
     scene.imageProcessingConfiguration.colorGradingTexture.level = gradingLevel;
   };

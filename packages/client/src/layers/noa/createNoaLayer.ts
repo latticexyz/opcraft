@@ -40,7 +40,7 @@ import { registerHandComponent } from "./engine/components/handComponent";
 import { registerModelComponent } from "./engine/components/modelComponent";
 import { MINING_BLOCK_COMPONENT, registerMiningBlockComponent } from "./engine/components/miningBlockComponent";
 import { defineInventoryIndexComponent } from "./components/InventoryIndex";
-import { setupSun } from "./engine/dayNightCycle";
+import { setupDayNightCycle } from "./engine/dayNightCycle";
 import { getNoaPositionStrict, setNoaPosition } from "./engine/components/utils";
 import { registerTargetedPositionComponent } from "./engine/components/targetedPositionComponent";
 import { defaultAbiCoder as abi, keccak256 } from "ethers/lib/utils";
@@ -239,7 +239,7 @@ export function createNoaLayer(network: NetworkLayer) {
   setupClouds(noa);
   setupSky(noa);
   setupHand(noa);
-  setupSun(noa, glow);
+  setupDayNightCycle(noa, glow);
   noa.entities.addComponentAgain(noa.playerEntity, MINING_BLOCK_COMPONENT, {});
 
   // --- SETUP STREAMS --------------------------------------------------------------
@@ -259,10 +259,6 @@ export function createNoaLayer(network: NetworkLayer) {
     world,
     components,
     mudToNoaId,
-    peer: {
-      peerObject: {},
-      connections: [],
-    },
     noa,
     api: {
       setBlock,
