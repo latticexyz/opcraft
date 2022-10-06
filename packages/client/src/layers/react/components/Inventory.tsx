@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { registerUIComponent } from "../engine";
 import { combineLatest, concat, map, of, scan } from "rxjs";
 import styled from "styled-components";
-import { AbsoluteBorder, Center, Crafting, Slot } from "./common";
+import { AbsoluteBorder, Center, Crafting, Gold, Red, Slot } from "./common";
 import { range } from "@latticexyz/utils";
 import {
   defineQuery,
@@ -192,17 +192,17 @@ export function registerInventory() {
       const ActionBar = (
         <RelativeCenter>
           {claim && !canBuild && (
-            <p style={{ position: "absolute", top: -5 }}>
-              <span style={{ color: "#EB453B" }}>X</span> you cannot build or mine here. This chunk has been claimed by{" "}
-              <span style={{ color: "#ff0" }}>
+            <Notification>
+              <Red>X</Red> you cannot build or mine here. This chunk has been claimed by{" "}
+              <Gold>
                 {claim.claimer.substring(0, 6)}...{claim.claimer.substring(36, 42)}
-              </span>
-            </p>
+              </Gold>
+            </Notification>
           )}
           {claim && canBuild && (
-            <p style={{ position: "absolute", top: -5 }}>
-              <span style={{ color: "#ff0" }}>You control this chunk!</span>
-            </p>
+            <Notification>
+              <Gold>You control this chunk!</Gold>
+            </Notification>
           )}
           <Wrapper>{[...range(INVENTORY_WIDTH)].map((i) => Slots[i])}</Wrapper>
         </RelativeCenter>
@@ -217,6 +217,11 @@ export function registerInventory() {
     }
   );
 }
+
+const Notification = styled.p`
+  position: absolute;
+  top: -5px;
+`
 
 const RelativeCenter = styled(Center)`
   position: relative;
