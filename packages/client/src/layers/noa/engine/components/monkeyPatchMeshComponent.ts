@@ -27,7 +27,7 @@ export function monkeyPatchMeshComponent(noa: Engine) {
         const childMeshes = state.mesh.getChildMeshes(true);
         const head = childMeshes[0];
         const nameTag: Mesh = childMeshes[childMeshes.length - 1];
-        nameTag.rotation.y = yaw - rotation.y;
+        if (nameTag) nameTag.rotation.y = yaw - rotation.y;
         if (head) head.rotation.x = rotation.x;
         state.mesh.rotation.y = rotation.y;
       }

@@ -1,4 +1,4 @@
-import { Curve3, Quaternion, Vector3, Vector4 } from "@babylonjs/core";
+import { Quaternion, Vector3, Vector4 } from "@babylonjs/core";
 import { Engine } from "noa-engine";
 import { setNoaComponent } from "./utils";
 
@@ -14,6 +14,9 @@ export function registerRotationComponent(noa: Engine) {
   noa.ents.createComponent({
     name: ROTATION_COMPONENT,
     state: { rotation: new Vector3() },
+    onAdd: (id: number, state: RotationComponent) => {
+      state.rotation = new Vector3();
+    },
   });
 }
 
@@ -41,6 +44,10 @@ export function registerTargetedRotationComponent(noa: Engine) {
   noa.ents.createComponent({
     name: TARGETED_ROTATION_COMPONENT,
     state: { points: [], currentTick: 0 },
+    onAdd: (id: number, state: TargetedRotationComponent) => {
+      state.points = [];
+      state.currentTick = 0;
+    },
     system: function (dt: number, states: TargetedRotationComponent[]) {
       for (let i = 0; i < states.length; i++) {
         const { points, currentTick } = states[i];

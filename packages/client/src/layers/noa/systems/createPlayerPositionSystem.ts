@@ -1,9 +1,18 @@
-import { Mesh, Quaternion, Vector3, Vector4 } from "@babylonjs/core";
-import { defineSystem, EntityIndex, Has, UpdateType, isComponentUpdate } from "@latticexyz/recs";
+import { Quaternion, Vector3, Vector4 } from "@babylonjs/core";
+import {
+  defineSystem,
+  EntityIndex,
+  Has,
+  UpdateType,
+  isComponentUpdate,
+  defineSyncSystem,
+  getComponentValueStrict,
+} from "@latticexyz/recs";
 import { NetworkLayer } from "../../network";
 import {
   getNoaComponentStrict,
   getNoaPositionStrict,
+  removeNoaComponent,
   setNoaComponent,
   setNoaPosition,
 } from "../engine/components/utils";
@@ -17,6 +26,8 @@ import {
 } from "../engine/components/rotationComponent";
 import { TargetedPositionComponent, TARGETED_POSITION_COMPONENT } from "../engine/components/targetedPositionComponent";
 import { eq, ZERO_VECTOR } from "../../../utils/coord";
+import { pixelToChunkCoord } from "@latticexyz/phaserx";
+import { RELAY_CHUNK_SIZE } from "./createRelaySystem";
 
 const MODEL_DATA = "./assets/models/player.json";
 const MODEL_TEXTURE = "./assets/skins/player1.png";
@@ -25,7 +36,7 @@ export function createPlayerPositionSystem(network: NetworkLayer, context: NoaLa
   const {
     noa,
     mudToNoaId,
-    components: { PlayerPosition, PlayerDirection },
+    components: { PlayerPosition, PlayerRelayerChunkPosition, PlayerDirection },
   } = context;
 
   const { world } = network;
@@ -37,19 +48,6 @@ export function createPlayerPositionSystem(network: NetworkLayer, context: NoaLa
       mudToNoaId.set(entity, noaEntity);
     }
 
-    const scene = noa.rendering.getScene();
-    const mesh = Mesh.CreateBox("player-mesh", 1, scene);
-    // if (w != null) mesh.scaling.x = w;
-    // if (w != null) mesh.scaling.z = w;
-    // if (h != null) mesh.scaling.y = h;
-
-    noa.entities.addComponentAgain(noaEntity, noa.entities.names.mesh, {
-      mesh: mesh,
-      // offset vector is needed because noa positions are always the
-      // bottom-center of the entity, and Babylon's CreateBox gives a
-      // mesh registered at the center of the box
-      offset: [0, 1 / 2, 0],
-    });
     noa.entities.addComponentAgain(noaEntity, ROTATION_COMPONENT, {
       yaw: 0,
       pitch: 0,
@@ -63,16 +61,36 @@ export function createPlayerPositionSystem(network: NetworkLayer, context: NoaLa
     applyModel(noa, noaEntity, MODEL_DATA, MODEL_TEXTURE, address);
   }
 
-  // Everything with a position that is no block is considered a player
+  function despawnPlayer(entity: EntityIndex) {
+    const isMappingStored = mudToNoaId.has(entity);
+    const noaEntity: number = mudToNoaId.get(entity) ?? noa.entities.add();
+    if (!isMappingStored) {
+      console.error("Can't despawn non existing noa entity: " + noaEntity);
+    }
+    removeNoaComponent(noa, noaEntity, noa.entities.names.mesh);
+    removeNoaComponent(noa, noaEntity, ROTATION_COMPONENT);
+    removeNoaComponent(noa, noaEntity, TARGETED_ROTATION_COMPONENT);
+    removeNoaComponent(noa, noaEntity, TARGETED_POSITION_COMPONENT);
+  }
+
+  defineSyncSystem(
+    world,
+    [Has(PlayerPosition), Has(PlayerDirection)],
+    () => PlayerRelayerChunkPosition,
+    (entity) => {
+      const position = getComponentValueStrict(PlayerPosition, entity);
+      const chunkCoord = pixelToChunkCoord({ x: position.x, y: position.z }, RELAY_CHUNK_SIZE);
+      return chunkCoord;
+    }
+  );
+
   defineSystem(world, [Has(PlayerPosition), Has(PlayerDirection)], (update) => {
-    const address = world.entities[update.entity];
     if (update.type === UpdateType.Enter) {
+      const address = world.entities[update.entity];
       spawnPlayer(update.entity, address.substring(0, 10));
     }
     if (update.type === UpdateType.Exit) {
-      // Remove player
-      // TODO: figure out how to remove an entity in NOA
-      return;
+      despawnPlayer(update.entity);
     }
 
     const noaEntity = mudToNoaId.get(update.entity);

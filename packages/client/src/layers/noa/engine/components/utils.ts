@@ -21,6 +21,13 @@ export function getNoaComponentStrict<S>(noa: Engine, entity: number, componentN
   return s as S;
 }
 
+export function getNoaComponent<S>(noa: Engine, entity: number, componentName: string): S | undefined {
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  //@ts-ignore
+  const s = noa.entities.getState(entity, componentName);
+  return s as S | undefined;
+}
+
 export function setNoaComponent<S extends Record<string, any>>(
   noa: Engine,
   entity: number,
@@ -36,6 +43,12 @@ export function setNoaComponent<S extends Record<string, any>>(
   for (const k of Object.keys(data)) {
     s[k] = data[k];
   }
+}
+
+export function removeNoaComponent(noa: Engine, entity: number, component: string) {
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  //@ts-ignore
+  noa.entities.removeComponent(entity, component);
 }
 
 export function setNoaPosition(noa: Engine, entity: number, position: VoxelCoord) {
