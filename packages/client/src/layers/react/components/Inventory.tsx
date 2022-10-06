@@ -16,6 +16,7 @@ import {
 } from "@latticexyz/recs";
 import { getBlockIconUrl } from "../../noa/constants";
 import { BlockIdToKey } from "../../network/constants";
+import { formatEntityID } from "@latticexyz/network";
 
 // This gives us 36 inventory slots. As of now there are 34 types of items, so it should fit.
 const INVENTORY_WIDTH = 9;
@@ -25,7 +26,7 @@ export function registerInventory() {
   registerUIComponent(
     "Inventory",
     {
-      rowStart: 12,
+      rowStart: 11,
       rowEnd: 13,
       colStart: 1,
       colEnd: 13,
@@ -38,6 +39,7 @@ export function registerInventory() {
         },
         noa: {
           components: { UI, InventoryIndex, SelectedSlot, CraftingTable },
+          streams: { stakeAndClaim$ },
         },
       } = layers;
 
@@ -78,12 +80,18 @@ export function registerInventory() {
       const selectedSlot$ = concat(of(0), SelectedSlot.update$.pipe(map((e) => e.value[0]?.value)));
       const craftingTable$ = concat(of(0), CraftingTable.update$);
 
-      return combineLatest([ownedByMe$, showInventory$, selectedSlot$, inventoryIndex$, craftingTable$]).pipe(
-        map((props) => ({ props }))
-      );
+      return combineLatest([
+        ownedByMe$,
+        showInventory$,
+        selectedSlot$,
+        stakeAndClaim$,
+        of(connectedAddress.get()),
+        inventoryIndex$,
+        craftingTable$,
+      ]).pipe(map((props) => ({ props })));
     },
     ({ props }) => {
-      const [ownedByMe, { layers, show, craftingSideLength }, selectedSlot] = props;
+      const [ownedByMe, { layers, show, craftingSideLength }, selectedSlot, stakeAndClaim, connectedAddress] = props;
 
       const [holdingBlock, setHoldingBlock] = useState<EntityIndex | undefined>();
 
@@ -178,10 +186,26 @@ export function registerInventory() {
         </Absolute>
       );
 
+      const { claim } = stakeAndClaim;
+      const canBuild = claim && connectedAddress ? claim.claimer === formatEntityID(connectedAddress) : true;
+
       const ActionBar = (
-        <Center>
+        <RelativeCenter>
+          {claim && !canBuild && (
+            <p style={{ position: "absolute", top: -5 }}>
+              <span style={{ color: "#EB453B" }}>X</span> you cannot build or mine here. This chunk has been claimed by{" "}
+              <span style={{ color: "#ff0" }}>
+                {claim.claimer.substring(0, 6)}...{claim.claimer.substring(36, 42)}
+              </span>
+            </p>
+          )}
+          {claim && canBuild && (
+            <p style={{ position: "absolute", top: -5 }}>
+              <span style={{ color: "#ff0" }}>You control this chunk!</span>
+            </p>
+          )}
           <Wrapper>{[...range(INVENTORY_WIDTH)].map((i) => Slots[i])}</Wrapper>
-        </Center>
+        </RelativeCenter>
       );
 
       return (
@@ -193,6 +217,10 @@ export function registerInventory() {
     }
   );
 }
+
+const RelativeCenter = styled(Center)`
+  position: relative;
+`;
 
 const Absolute = styled.div`
   position: absolute;
