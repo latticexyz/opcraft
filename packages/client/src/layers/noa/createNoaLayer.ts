@@ -11,6 +11,8 @@ import {
   runQuery,
   HasValue,
   EntityID,
+  getComponentValueStrict,
+  hasComponent,
 } from "@latticexyz/recs";
 import { Coord, random, VoxelCoord } from "@latticexyz/utils";
 import { NetworkLayer } from "../network";
@@ -22,6 +24,7 @@ import {
   defineUIComponent,
   definePlayerLastMessage,
   definePlayerRelayerChunkPositionComponent,
+  defineLocalPlayerPositionComponent,
 } from "./components";
 import { CRAFTING_SIDE, EMPTY_CRAFTING_TABLE } from "./constants";
 import { setupHand } from "./engine/hand";
@@ -35,6 +38,7 @@ import {
   createInventoryIndexSystem,
   createPlayerPositionSystem,
   createRelaySystem,
+  createSyncLocalPlayerPositionSystem,
 } from "./systems";
 import { registerHandComponent } from "./engine/components/handComponent";
 import { registerModelComponent } from "./engine/components/modelComponent";
@@ -46,7 +50,7 @@ import { registerTargetedPositionComponent } from "./engine/components/targetedP
 import { defaultAbiCoder as abi, keccak256 } from "ethers/lib/utils";
 import { GodID } from "@latticexyz/network";
 import { getChunkCoord, getChunkEntity } from "../../utils/chunk";
-import { BehaviorSubject, map, timer } from "rxjs";
+import { BehaviorSubject, map, throttleTime, timer } from "rxjs";
 import { getStakeEntity } from "../../utils/stake";
 
 export function createNoaLayer(network: NetworkLayer) {
@@ -69,6 +73,7 @@ export function createNoaLayer(network: NetworkLayer) {
     SelectedSlot: defineSelectedSlotComponent(world),
     CraftingTable: defineCraftingTableComponent(world),
     PlayerPosition: definePlayerPositionComponent(world),
+    LocalPlayerPosition: createLocalCache(defineLocalPlayerPositionComponent(world)),
     PlayerRelayerChunkPosition: createIndexer(definePlayerRelayerChunkPositionComponent(world)),
     PlayerDirection: definePlayerDirectionComponent(world),
     PlayerLastMessage: definePlayerLastMessage(world),
@@ -89,6 +94,10 @@ export function createNoaLayer(network: NetworkLayer) {
     showCrafting: false,
   });
   setComponent(components.SelectedSlot, SingletonEntity, { value: 0 });
+
+  if (hasComponent(components.LocalPlayerPosition, SingletonEntity)) {
+    setNoaPosition(noa, noa.playerEntity, getComponentValueStrict(components.LocalPlayerPosition, SingletonEntity));
+  }
 
   // --- API ------------------------------------------------------------------------
   function setCraftingTable(entities: EntityIndex[][]) {
@@ -247,6 +256,8 @@ export function createNoaLayer(network: NetworkLayer) {
   const playerPosition$ = new BehaviorSubject(getCurrentPlayerPosition());
   world.registerDisposer(timer(0, 200).pipe(map(getCurrentPlayerPosition)).subscribe(playerPosition$)?.unsubscribe);
 
+  const slowPlayerPosition$ = playerPosition$.pipe(throttleTime(2000));
+
   const playerChunk$ = new BehaviorSubject(getCurrentChunk());
   world.registerDisposer(playerPosition$.pipe(map((pos) => getChunkCoord(pos))).subscribe(playerChunk$)?.unsubscribe);
 
@@ -275,7 +286,7 @@ export function createNoaLayer(network: NetworkLayer) {
       getCurrentPlayerPosition,
       getStakeAndClaim,
     },
-    streams: { playerPosition$, playerChunk$, stakeAndClaim$ },
+    streams: { playerPosition$, slowPlayerPosition$, playerChunk$, stakeAndClaim$ },
     SingletonEntity,
   };
 
@@ -285,6 +296,7 @@ export function createNoaLayer(network: NetworkLayer) {
   createPlayerPositionSystem(network, context);
   createRelaySystem(network, context);
   createInventoryIndexSystem(network, context);
+  createSyncLocalPlayerPositionSystem(network, context);
 
   return context;
 }
