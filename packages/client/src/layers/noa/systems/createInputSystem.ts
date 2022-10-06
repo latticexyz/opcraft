@@ -24,15 +24,13 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
 
   // mine targeted block on on left click
   noa.inputs.bind("fire", "F");
-  const stakeAndClaim = streamToComputed(stakeAndClaim$);
 
   function canInteract() {
-    const { claim } = stakeAndClaim.get() || {};
+    const { claim } = stakeAndClaim$.getValue() || {};
     const playerAddress = connectedAddress.get();
     if (!playerAddress) return false;
-    const canBuild = claim && connectedAddress ? claim.claimer === formatEntityID(playerAddress) : true;
-    if (!canBuild) return false;
-    return true;
+    if (!claim) return true;
+    return claim.claimer === formatEntityID(playerAddress);
   }
 
   noa.inputs.down.on("fire", function () {
