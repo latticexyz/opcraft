@@ -12,7 +12,7 @@ import {
   HasValue,
   EntityID,
 } from "@latticexyz/recs";
-import { random, VoxelCoord } from "@latticexyz/utils";
+import { Coord, random, VoxelCoord } from "@latticexyz/utils";
 import { NetworkLayer } from "../network";
 import {
   definePlayerDirectionComponent,
@@ -41,12 +41,13 @@ import { registerModelComponent } from "./engine/components/modelComponent";
 import { MINING_BLOCK_COMPONENT, registerMiningBlockComponent } from "./engine/components/miningBlockComponent";
 import { defineInventoryIndexComponent } from "./components/InventoryIndex";
 import { setupSun } from "./engine/dayNightCycle";
-import { getNoaComponentStrict, setNoaPosition } from "./engine/components/utils";
+import { getNoaPositionStrict, setNoaPosition } from "./engine/components/utils";
 import { registerTargetedPositionComponent } from "./engine/components/targetedPositionComponent";
 import { defaultAbiCoder as abi, keccak256 } from "ethers/lib/utils";
 import { GodID } from "@latticexyz/network";
-import { getChunkCoord } from "../../utils/chunk";
-import { PositionComponent, POSITION_COMPONENT } from "./engine/components/defaultComponent";
+import { getChunkCoord, getChunkEntity } from "../../utils/chunk";
+import { BehaviorSubject, map, timer } from "rxjs";
+import { getStakeEntity } from "../../utils/stake";
 
 export function createNoaLayer(network: NetworkLayer) {
   const world = namespaceWorld(network.world, "noa");
@@ -56,7 +57,7 @@ export function createNoaLayer(network: NetworkLayer) {
       config: { chainId },
       connectedAddress,
     },
-    components: { OwnedBy, Item, Recipe },
+    components: { OwnedBy, Item, Recipe, Claim, Stake },
     api: { build },
   } = network;
   const uniqueWorldId = chainId + worldAddress;
@@ -210,11 +211,21 @@ export function createNoaLayer(network: NetworkLayer) {
     build(itemEntity, coord);
   }
 
+  function getCurrentPlayerPosition() {
+    return getNoaPositionStrict(noa, noa.playerEntity);
+  }
+
   function getCurrentChunk() {
-    const { position } = getNoaComponentStrict<PositionComponent>(noa, noa.playerEntity, POSITION_COMPONENT);
-    if (!position) return null;
-    const coord = { x: Math.floor(position[0]), y: Math.floor(position[1]), z: Math.floor(position[2]) };
-    return getChunkCoord(coord);
+    const position = getCurrentPlayerPosition();
+    return getChunkCoord(position);
+  }
+
+  function getStakeAndClaim(chunk: Coord) {
+    const chunkEntityIndex = world.entityToIndex.get(getChunkEntity(chunk));
+    const claim = chunkEntityIndex == null ? null : getComponentValue(Claim, chunkEntityIndex);
+    const stakeEntityIndex = world.entityToIndex.get(getStakeEntity(chunk, connectedAddress.get() || "0x00"));
+    const stake = stakeEntityIndex == null ? null : getComponentValue(Stake, stakeEntityIndex);
+    return { claim, stake };
   }
 
   // --- SETUP NOA CONSTANTS --------------------------------------------------------
@@ -230,6 +241,19 @@ export function createNoaLayer(network: NetworkLayer) {
   setupHand(noa);
   setupSun(noa, glow);
   noa.entities.addComponentAgain(noa.playerEntity, MINING_BLOCK_COMPONENT, {});
+
+  // --- SETUP STREAMS --------------------------------------------------------------
+  // (Create streams as BehaviorSubject to allow for multiple observers and getting the current value)
+  const playerPosition$ = new BehaviorSubject(getCurrentPlayerPosition());
+  world.registerDisposer(timer(0, 200).pipe(map(getCurrentPlayerPosition)).subscribe(playerPosition$)?.unsubscribe);
+
+  const playerChunk$ = new BehaviorSubject(getCurrentChunk());
+  world.registerDisposer(playerPosition$.pipe(map((pos) => getChunkCoord(pos))).subscribe(playerChunk$)?.unsubscribe);
+
+  const stakeAndClaim$ = new BehaviorSubject(getStakeAndClaim(getCurrentChunk()));
+  world.registerDisposer(
+    playerChunk$.pipe(map((coord) => getStakeAndClaim(coord))).subscribe(stakeAndClaim$)?.unsubscribe
+  );
 
   const context = {
     world,
@@ -252,7 +276,10 @@ export function createNoaLayer(network: NetworkLayer) {
       toggleInventory,
       placeSelectedItem,
       getCurrentChunk,
+      getCurrentPlayerPosition,
+      getStakeAndClaim,
     },
+    streams: { playerPosition$, playerChunk$, stakeAndClaim$ },
     SingletonEntity,
   };
 

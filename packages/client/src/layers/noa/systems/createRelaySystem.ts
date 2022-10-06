@@ -24,7 +24,6 @@ import {
 import { createChunks, getChunksInArea, pixelToChunkCoord as toChunkCoord } from "@latticexyz/phaserx";
 import { NetworkLayer } from "../../network/types";
 import { NoaLayer } from "../types";
-import { getNoaPositionStrict } from "../engine/components/utils";
 
 const PRECISION = 2;
 const UNRESPONSIVE_PLAYER_CLEANUP = 2_000;
@@ -61,6 +60,7 @@ export async function createRelaySystem(network: NetworkLayer, context: NoaLayer
   const {
     world,
     components: { PlayerPosition, PlayerRelayerChunkPosition, PlayerDirection, PlayerLastMessage },
+    streams: { playerPosition$ },
     noa,
   } = context;
 
@@ -81,7 +81,6 @@ export async function createRelaySystem(network: NetworkLayer, context: NoaLayer
     removeComponent(PlayerLastMessage, entity);
   }
 
-  const playerPosition$ = timer(0, 200).pipe(map(() => getNoaPositionStrict(noa, noa.playerEntity)));
   const HALF_LENGTH = RELAY_CHUNK_SIZE;
 
   const currentArea$ = playerPosition$.pipe(

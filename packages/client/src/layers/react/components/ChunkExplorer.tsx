@@ -1,10 +1,7 @@
 import React from "react";
 import { registerUIComponent } from "../engine";
-import { concat, interval, map, of } from "rxjs";
+import { map } from "rxjs";
 import styled from "styled-components";
-import { getChunkEntity } from "../../../utils/chunk";
-import { getStakeEntity } from "../../../utils/stake";
-import { getComponentValue } from "@latticexyz/recs";
 import { Button, Container, Faded, Title } from "./common";
 
 export function registerChunkExplorer() {
@@ -18,24 +15,15 @@ export function registerChunkExplorer() {
     },
     (layers) => {
       const {
-        network: {
-          components: { Claim, Stake },
-          network: { connectedAddress },
-          world,
-          api,
-        },
+        network: { api },
         noa: {
-          api: { getCurrentChunk },
+          streams: { playerChunk$ },
+          api: { getStakeAndClaim },
         },
       } = layers;
-      return concat(of(1), interval(200)).pipe(
-        map(() => {
-          const chunk = getCurrentChunk();
-          if (!chunk) return null;
-          const chunkEntityIndex = world.entityToIndex.get(getChunkEntity(chunk));
-          const claim = chunkEntityIndex == null ? null : getComponentValue(Claim, chunkEntityIndex);
-          const stakeEntityIndex = world.entityToIndex.get(getStakeEntity(chunk, connectedAddress.get() || "0x00"));
-          const stake = stakeEntityIndex == null ? null : getComponentValue(Stake, stakeEntityIndex);
+      return playerChunk$.pipe(
+        map((chunk) => {
+          const { stake, claim } = getStakeAndClaim(chunk);
           return { chunk, claim, stake, api: { stake: api.stake, claim: api.claim } };
         })
       );
