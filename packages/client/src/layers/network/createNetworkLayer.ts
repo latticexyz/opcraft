@@ -2,7 +2,7 @@ import { createIndexer, createWorld, EntityID, getComponentValue, HasValue, runQ
 import { setupDevSystems } from "./setup";
 import { createActionSystem, setupMUDNetwork, waitForActionCompletion } from "@latticexyz/std-client";
 import { GameConfig, getNetworkConfig } from "./config";
-import { Coord, filterNullishValues, VoxelCoord } from "@latticexyz/utils";
+import { awaitPromise, Coord, filterNullishValues, VoxelCoord } from "@latticexyz/utils";
 import { BigNumber, utils } from "ethers";
 import {
   definePositionComponent,
@@ -23,6 +23,7 @@ import { BlockIdToKey, BlockType } from "./constants";
 import { createFaucetService, createRelayStream, GodID } from "@latticexyz/network";
 import { SystemTypes } from "contracts/types/SystemTypes";
 import { SystemAbis } from "contracts/types/SystemAbis.mjs";
+import { map, timer } from "rxjs";
 
 /**
  * The Network layer is the lowest layer in the client architecture.
@@ -217,13 +218,20 @@ export async function createNetworkLayer(config: GameConfig) {
     });
   }
 
-  // --- DEV FAUCET - REMOVE IN PROD
-  const playerIsBroke = (await network.signer.get()?.getBalance())?.lte(utils.parseEther("0.005"));
-  if (playerIsBroke) {
-    console.log("[Dev Faucet] Dripping funds to player");
-    const address = network.connectedAddress.get();
-    address && (await faucet?.dripDev({ address }));
+  if (config.devMode) {
+    const playerIsBroke = (await network.signer.get()?.getBalance())?.lte(utils.parseEther("0.005"));
+    if (playerIsBroke) {
+      console.log("[Dev Faucet] Dripping funds to player");
+      const address = network.connectedAddress.get();
+      address && (await faucet?.dripDev({ address }));
+    }
   }
+
+  // --- STREAMS --------------------------------------------------------------------
+  const connectedClients$ = timer(0, 5000).pipe(
+    map<number, Promise<number>>(() => relay?.countConnected() || new Promise((res) => res(0))),
+    awaitPromise()
+  );
 
   // --- CONTEXT --------------------------------------------------------------------
   const context = {
@@ -237,6 +245,7 @@ export async function createNetworkLayer(config: GameConfig) {
     actions,
     api: { build, mine, craft, stake, claim, getBlockAtPosition, getECSBlockAtPosition, getTerrainBlockAtPosition },
     dev: setupDevSystems(world, encoders, systems),
+    streams: { connectedClients$ },
     config,
     relay,
     worldAddress: config.worldAddress,

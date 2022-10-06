@@ -66,6 +66,7 @@ const Wrapper = styled.div`
 const ChunkContainer = styled(Container)`
   line-height: 1;
   pointer-events: all;
+  min-width: 200px;
 `;
 
 const Buttons = styled.div`

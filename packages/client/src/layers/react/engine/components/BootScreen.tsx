@@ -8,7 +8,7 @@ export const BootScreen: React.FC<{ initialOpacity?: number }> = ({ children, in
 
   return (
     <Container>
-      <img src="/img/mud.png" style={{ opacity }}></img>
+      <img src="/img/opcraft-light.png" style={{ opacity, width: 300 }}></img>
       <div>{children || <>&nbsp;</>}</div>
     </Container>
   );
@@ -30,7 +30,7 @@ const Container = styled.div`
   pointer-events: all;
 
   div {
-    font-family: "Space Grotesk", sans-serif;
+    font-family: "Lattice Pixel", sans-serif;
   }
 
   img {
