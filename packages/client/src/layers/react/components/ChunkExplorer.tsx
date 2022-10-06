@@ -5,8 +5,8 @@ import styled from "styled-components";
 import { getNoaComponentStrict } from "../../noa/engine/components/utils";
 import { PositionComponent, POSITION_COMPONENT } from "../../noa/engine/components/defaultComponent";
 import { getChunkCoord, getChunkEntity } from "../../../utils/chunk";
-import { getComponentValue } from "@latticexyz/recs";
 import { getStakeEntity } from "../../../utils/stake";
+import { getComponentValue } from "@latticexyz/recs";
 
 export function registerChunkExplorer() {
   registerUIComponent(
@@ -35,9 +35,7 @@ export function registerChunkExplorer() {
           const chunk = getChunkCoord(coord);
           const chunkEntityIndex = world.entityToIndex.get(getChunkEntity(chunk));
           const claim = chunkEntityIndex == null ? null : getComponentValue(Claim, chunkEntityIndex);
-
           const stakeEntityIndex = world.entityToIndex.get(getStakeEntity(chunk, connectedAddress.get() || "0x00"));
-          console.log("stake entity", getStakeEntity(coord, connectedAddress.get()!));
           const stake = stakeEntityIndex == null ? null : getComponentValue(Stake, stakeEntityIndex);
           return { coord, chunk, claim, stake, api: { stake: api.stake, claim: api.claim } };
         })

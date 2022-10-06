@@ -195,7 +195,7 @@ export async function createNetworkLayer(config: GameConfig) {
       metadata: { actionType: "stake", blockType: "Diamond" },
       requirement: () => true,
       components: { OwnedBy: components.OwnedBy },
-      execute: () => systems["system.Stake"].executeTyped(diamondEntity, chunkCoord, { gasLimit: 1_700_000 }),
+      execute: () => systems["system.Stake"].executeTyped(diamondEntity, chunkCoord, { gasLimit: 600_000 }),
       updates: () => [
         {
           component: "OwnedBy",
@@ -209,10 +209,10 @@ export async function createNetworkLayer(config: GameConfig) {
   function claim(chunkCoord: Coord) {
     actions.add({
       id: `stake+${chunkCoord.x}/${chunkCoord.y}` as EntityID,
-      metadata: { actionType: "stake", blockType: "Diamond" },
+      metadata: { actionType: "claim", blockType: "Diamond" },
       requirement: () => true,
       components: {},
-      execute: () => systems["system.Claim"].executeTyped(chunkCoord, { gasLimit: 1_700_000 }),
+      execute: () => systems["system.Claim"].executeTyped(chunkCoord, { gasLimit: 600_000 }),
       updates: () => [],
     });
   }
