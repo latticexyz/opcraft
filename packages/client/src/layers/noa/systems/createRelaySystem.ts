@@ -1,6 +1,5 @@
 import { Quaternion } from "@babylonjs/core";
-import { NetworkLayer } from "../../network/types";
-import { NoaLayer } from "../types";
+import { map, timer } from "rxjs";
 import {
   defineRxSystem,
   EntityID,
@@ -14,18 +13,18 @@ import {
 } from "@latticexyz/recs";
 import {
   Area,
+  awaitStreamValue,
   concatUint8Arrays,
+  Coord,
   Int32ArrayToUint8Array,
   splitUint8Arrays,
-  streamToDefinedComputed,
   Uint8ArrayToInt32Array,
   VoxelCoord,
 } from "@latticexyz/utils";
+import { createChunks, getChunksInArea, pixelToChunkCoord as toChunkCoord } from "@latticexyz/phaserx";
+import { NetworkLayer } from "../../network/types";
+import { NoaLayer } from "../types";
 import { getNoaPositionStrict } from "../engine/components/utils";
-import { map, timer } from "rxjs";
-import { createChunks, getChunksInArea, pixelToChunkCoord } from "@latticexyz/phaserx";
-import { ChunkCoord } from "@latticexyz/phaserx/src/types";
-import { toJS } from "mobx";
 
 const PRECISION = 2;
 const UNRESPONSIVE_PLAYER_CLEANUP = 2_000;
@@ -40,7 +39,7 @@ function fromFixedPoint(n: number): number {
   return n / Math.pow(10, PRECISION);
 }
 
-function createChunkTopicMessage(chunk: ChunkCoord) {
+function createChunkTopicMessage(chunk: Coord) {
   return `c(${chunk.x},${chunk.y})`;
 }
 
@@ -97,7 +96,7 @@ export async function createRelaySystem(network: NetworkLayer, context: NoaLayer
   const { addedChunks$, removedChunks$, visibleChunks } = createChunks(currentArea$, RELAY_CHUNK_SIZE, 0);
 
   // Initial subscription
-  const initialArea = toJS((await streamToDefinedComputed(currentArea$)).get());
+  const initialArea = await awaitStreamValue(currentArea$);
   for (const c of getChunksInArea(initialArea, RELAY_CHUNK_SIZE).coords()) {
     relay.subscribe(createChunkTopicMessage(c));
   }
@@ -124,7 +123,7 @@ export async function createRelaySystem(network: NetworkLayer, context: NoaLayer
     const q = Quaternion.FromEulerAngles(pitch, yaw, 0);
     const quaternion: number[] = [];
     q.toArray(quaternion);
-    const currentChunk = pixelToChunkCoord({ x: position.x, y: position.z }, RELAY_CHUNK_SIZE);
+    const currentChunk = toChunkCoord({ x: position.x, y: position.z }, RELAY_CHUNK_SIZE);
     relay?.push(createChunkTopicMessage(currentChunk), encodeMessage([position.x, position.y, position.z], quaternion));
   });
 
@@ -134,7 +133,7 @@ export async function createRelaySystem(network: NetworkLayer, context: NoaLayer
       direction: [qx, qy, qz, qw],
     } = decodeMessage(message.data);
     if (address === connectedAddress.get()) return;
-    const playerChunk = pixelToChunkCoord({ x, y: z }, RELAY_CHUNK_SIZE);
+    const playerChunk = toChunkCoord({ x, y: z }, RELAY_CHUNK_SIZE);
     if (!visibleChunks.current.has(playerChunk) || !visibleChunks.current.get(playerChunk)) return;
     const entity = world.registerEntity({ id: address as EntityID });
     setComponent(PlayerPosition, entity, { x, y, z });
