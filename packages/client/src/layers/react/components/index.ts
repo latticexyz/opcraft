@@ -5,6 +5,7 @@ import { registerLoadingState } from "./LoadingState";
 import { registerBlockExplorer } from "./BlockExplorer";
 import { registerInventory } from "./Inventory";
 import { registerBalance } from "./Balance";
+import { registerChunkExplorer } from "./ChunkExplorer";
 export * from "./common";
 
 export function registerUIComponents() {
@@ -15,4 +16,5 @@ export function registerUIComponents() {
   registerBlockExplorer();
   registerInventory();
   registerBalance();
+  registerChunkExplorer();
 }

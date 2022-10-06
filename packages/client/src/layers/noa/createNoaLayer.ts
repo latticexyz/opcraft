@@ -23,7 +23,7 @@ import {
   definePlayerLastMessage,
   definePlayerRelayerChunkPositionComponent,
 } from "./components";
-import { CRAFTING_SIDE, EMPTY_CRAFTING_TABLE, Singleton } from "./constants";
+import { CRAFTING_SIDE, EMPTY_CRAFTING_TABLE } from "./constants";
 import { setupHand } from "./engine/hand";
 import { monkeyPatchMeshComponent } from "./engine/components/monkeyPatchMeshComponent";
 import { registerRotationComponent, registerTargetedRotationComponent } from "./engine/components/rotationComponent";
@@ -44,6 +44,7 @@ import { setupSun } from "./engine/dayNightCycle";
 import { setNoaPosition } from "./engine/components/utils";
 import { registerTargetedPositionComponent } from "./engine/components/targetedPositionComponent";
 import { defaultAbiCoder as abi, keccak256 } from "ethers/lib/utils";
+import { GodID } from "@latticexyz/network";
 
 export function createNoaLayer(network: NetworkLayer) {
   const world = namespaceWorld(network.world, "noa");
@@ -58,7 +59,7 @@ export function createNoaLayer(network: NetworkLayer) {
   } = network;
   const uniqueWorldId = chainId + worldAddress;
 
-  const SingletonEntity = world.registerEntity({ id: Singleton });
+  const SingletonEntity = world.registerEntity({ id: GodID });
 
   // --- COMPONENTS -----------------------------------------------------------------
   const components = {

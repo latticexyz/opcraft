@@ -1,8 +1,8 @@
-import { createIndexer, createWorld, EntityID, getComponentValue } from "@latticexyz/recs";
+import { createIndexer, createWorld, EntityID, getComponentValue, HasValue, runQuery } from "@latticexyz/recs";
 import { setupDevSystems } from "./setup";
 import { createActionSystem, setupMUDNetwork, waitForActionCompletion } from "@latticexyz/std-client";
 import { GameConfig, getNetworkConfig } from "./config";
-import { filterNullishValues, VoxelCoord } from "@latticexyz/utils";
+import { Coord, filterNullishValues, VoxelCoord } from "@latticexyz/utils";
 import { BigNumber, utils } from "ethers";
 import {
   definePositionComponent,
@@ -13,6 +13,8 @@ import {
   defineItemComponent,
   defineItemPrototypeComponent,
   defineOccurrenceComponent,
+  defineStakeComponent,
+  defineClaimComponent,
 } from "./components";
 import { defineNameComponent } from "./components/NameComponent";
 import { getBlockAtPosition as getBlockAtPositionApi, getECSBlock, getTerrain, getTerrainBlock } from "./api";
@@ -44,6 +46,8 @@ export async function createNetworkLayer(config: GameConfig) {
     Recipe: defineRecipeComponent(world),
     LoadingState: defineLoadingStateComponent(world),
     Occurrence: defineOccurrenceComponent(world),
+    Stake: defineStakeComponent(world),
+    Claim: defineClaimComponent(world),
   };
 
   // --- SETUP ----------------------------------------------------------------------
@@ -175,6 +179,33 @@ export async function createNetworkLayer(config: GameConfig) {
     await waitForActionCompletion(actions.Action, id);
   }
 
+  function stake(chunkCoord: Coord) {
+    const diamondEntityIndex = [
+      ...runQuery([
+        HasValue(components.OwnedBy, { value: network.connectedAddress.get() }),
+        HasValue(components.Item, { value: BlockType.Diamond }),
+      ]),
+    ][0];
+
+    if (diamondEntityIndex == null) return console.warn("No owned diamonds to stake");
+    const diamondEntity = world.entities[diamondEntityIndex];
+
+    actions.add({
+      id: `stake+${chunkCoord.x}/${chunkCoord.y}` as EntityID,
+      metadata: { actionType: "stake", blockType: "Diamond" },
+      requirement: () => true,
+      components: { OwnedBy: components.OwnedBy },
+      execute: () => systems["system.Stake"].executeTyped(diamondEntity, chunkCoord, { gasLimit: 1_700_000 }),
+      updates: () => [
+        {
+          component: "OwnedBy",
+          entity: diamondEntityIndex,
+          value: { value: GodID },
+        },
+      ],
+    });
+  }
+
   // --- DEV FAUCET - REMOVE IN PROD
   const playerIsBroke = (await network.signer.get()?.getBalance())?.lte(utils.parseEther("0.005"));
   if (playerIsBroke) {
@@ -193,7 +224,7 @@ export async function createNetworkLayer(config: GameConfig) {
     startSync,
     network,
     actions,
-    api: { build, mine, craft, getBlockAtPosition, getECSBlockAtPosition, getTerrainBlockAtPosition },
+    api: { build, mine, craft, getBlockAtPosition, getECSBlockAtPosition, getTerrainBlockAtPosition, stake },
     dev: setupDevSystems(world, encoders, systems),
     config,
     relay,

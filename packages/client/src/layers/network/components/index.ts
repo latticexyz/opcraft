@@ -6,3 +6,5 @@ export { defineGameConfigComponent } from "./GameConfigComponent";
 export { defineRecipeComponent } from "./RecipeComponent";
 export { defineLoadingStateComponent } from "./LoadingStateComponent";
 export { defineOccurrenceComponent } from "./OccurrenceComponent";
+export { defineStakeComponent } from "./StakeComponent";
+export { defineClaimComponent } from "./ClaimComponent";
