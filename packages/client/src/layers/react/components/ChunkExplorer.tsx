@@ -39,7 +39,7 @@ export function registerChunkExplorer() {
           const stakeEntityIndex = world.entityToIndex.get(getStakeEntity(chunk, connectedAddress.get() || "0x00"));
           console.log("stake entity", getStakeEntity(coord, connectedAddress.get()!));
           const stake = stakeEntityIndex == null ? null : getComponentValue(Stake, stakeEntityIndex);
-          return { coord, chunk, claim, stake, api: { stake: api.stake } };
+          return { coord, chunk, claim, stake, api: { stake: api.stake, claim: api.claim } };
         })
       );
     },
@@ -54,6 +54,7 @@ export function registerChunkExplorer() {
             Claim: {claim ? `${claim.stake} by ${claim.claimer}` : `no claim`}
             <br />
             <Button onClick={() => api.stake(chunk)}>Stake</Button>
+            <Button onClick={() => api.claim(chunk)}>Claim</Button>
           </>
         </Wrapper>
       );

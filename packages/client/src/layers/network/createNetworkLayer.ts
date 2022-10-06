@@ -206,6 +206,17 @@ export async function createNetworkLayer(config: GameConfig) {
     });
   }
 
+  function claim(chunkCoord: Coord) {
+    actions.add({
+      id: `stake+${chunkCoord.x}/${chunkCoord.y}` as EntityID,
+      metadata: { actionType: "stake", blockType: "Diamond" },
+      requirement: () => true,
+      components: {},
+      execute: () => systems["system.Claim"].executeTyped(chunkCoord, { gasLimit: 1_700_000 }),
+      updates: () => [],
+    });
+  }
+
   // --- DEV FAUCET - REMOVE IN PROD
   const playerIsBroke = (await network.signer.get()?.getBalance())?.lte(utils.parseEther("0.005"));
   if (playerIsBroke) {
@@ -224,7 +235,7 @@ export async function createNetworkLayer(config: GameConfig) {
     startSync,
     network,
     actions,
-    api: { build, mine, craft, getBlockAtPosition, getECSBlockAtPosition, getTerrainBlockAtPosition, stake },
+    api: { build, mine, craft, stake, claim, getBlockAtPosition, getECSBlockAtPosition, getTerrainBlockAtPosition },
     dev: setupDevSystems(world, encoders, systems),
     config,
     relay,
