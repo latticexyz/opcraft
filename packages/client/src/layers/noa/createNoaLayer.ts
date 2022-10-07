@@ -256,7 +256,7 @@ export function createNoaLayer(network: NetworkLayer) {
   const playerPosition$ = new BehaviorSubject(getCurrentPlayerPosition());
   world.registerDisposer(timer(0, 200).pipe(map(getCurrentPlayerPosition)).subscribe(playerPosition$)?.unsubscribe);
 
-  const slowPlayerPosition$ = playerPosition$.pipe(throttleTime(2000));
+  const slowPlayerPosition$ = playerPosition$.pipe(throttleTime(10000));
 
   const playerChunk$ = new BehaviorSubject(getCurrentChunk());
   world.registerDisposer(playerPosition$.pipe(map((pos) => getChunkCoord(pos))).subscribe(playerChunk$)?.unsubscribe);

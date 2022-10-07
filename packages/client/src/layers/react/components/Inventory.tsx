@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { registerUIComponent } from "../engine";
 import { combineLatest, concat, map, of, scan } from "rxjs";
 import styled from "styled-components";
-import { Absolute, AbsoluteBorder, Background, Center, Crafting, Slot, Gold, Red } from "./common";
+import { Absolute, AbsoluteBorder, Background, Center, Crafting, Slot, Gold, Red, Relative } from "./common";
 import { range } from "@latticexyz/utils";
 import {
   defineQuery,
@@ -26,7 +26,7 @@ export function registerInventory() {
   registerUIComponent(
     "Inventory",
     {
-      rowStart: 11,
+      rowStart: 1,
       rowEnd: 13,
       colStart: 1,
       colEnd: 13,
@@ -184,11 +184,11 @@ export function registerInventory() {
                   setHoldingBlock={setHoldingBlock}
                   sideLength={craftingSideLength}
                 />
-                <Wrapper>
+                <ActionBarWrapper>
                   {[...range(INVENTORY_WIDTH * (INVENTORY_HEIGHT - 1))]
                     .map((i) => i + INVENTORY_WIDTH)
                     .map((i) => Slots[i])}
-                </Wrapper>
+                </ActionBarWrapper>
               </AbsoluteBorder>
             </div>
           </Center>
@@ -198,12 +198,13 @@ export function registerInventory() {
       const { claim } = stakeAndClaim;
       const canBuild = claim && connectedAddress ? claim.claimer === formatEntityID(connectedAddress) : true;
 
-      const ActionBar = (
-        <RelativeCenter>
+      const Bottom = (
+        <BottomBar>
           <ConnectedPlayersContainer>
             <PlayerCount>{connectedClients}</PlayerCount>
             <PixelatedImage src="/img/mud-player.png" width={35} />
           </ConnectedPlayersContainer>
+          <ActionBarWrapper>{[...range(INVENTORY_WIDTH)].map((i) => Slots[i])}</ActionBarWrapper>
           <LogoContainer>
             <PixelatedImage src="/img/opcraft-dark.png" width={150} />
           </LogoContainer>
@@ -220,15 +221,14 @@ export function registerInventory() {
               <Gold>You control this chunk!</Gold>
             </Notification>
           )}
-          <Wrapper>{[...range(INVENTORY_WIDTH)].map((i) => Slots[i])}</Wrapper>
-        </RelativeCenter>
+        </BottomBar>
       );
 
       return (
-        <>
+        <Wrapper>
           {show ? Inventory : null}
-          {ActionBar}
-        </>
+          {Bottom}
+        </Wrapper>
       );
     }
   );
@@ -240,37 +240,30 @@ const PixelatedImage = styled.img`
 
 const PlayerCount = styled.span`
   font-size: 1.5em;
-  margin-left: 5px;
-  margin-bottom: -5px;
 `;
 
 const ConnectedPlayersContainer = styled.div`
-  display: flex;
+  display: grid;
+  justify-content: start;
+  padding: 0 20px;
+  grid-auto-flow: column;
   align-items: center;
-  justify-content: center;
-  position: absolute;
-  left: 15px;
-  bottom: 15px;
 `;
 
 const LogoContainer = styled.div`
-  position: absolute;
-  right: 15px;
-  bottom: 15px;
+  display: grid;
+  justify-items: end;
+  padding: 0 20px;
 `;
 
 const Notification = styled.p`
   position: absolute;
-  top: 25px;
+  top: -25px;
+  width: 100%;
+  text-align: center;
 `;
 
-const RelativeCenter = styled(Center)`
-  position: relative;
-`;
-
-const Wrapper = styled.div`
-  position: absolute;
-  bottom: 0px;
+const ActionBarWrapper = styled.div`
   background-color: rgb(0 0 0 / 40%);
   display: grid;
   grid-template-columns: repeat(9, 1fr);
@@ -278,4 +271,20 @@ const Wrapper = styled.div`
   pointer-events: all;
   border: 5px lightgray solid;
   z-index: 10;
+  position: relative;
+`;
+
+const BottomBar = styled.div`
+  display: grid;
+  align-items: end;
+  justify-content: space-between;
+  grid-template-columns: 1fr auto 1fr;
+  width: 100%;
+  padding-bottom: 20px;
+  position: relative;
+`;
+
+const Wrapper = styled(Center)`
+  display: grid;
+  align-items: end;
 `;
