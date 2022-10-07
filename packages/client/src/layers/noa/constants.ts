@@ -1,10 +1,12 @@
-import { EntityID } from "@latticexyz/recs";
 import { BlockTypeKey } from "../network/constants";
+
 import { Block, NoaBlockType } from "./types";
 
 export const CRAFTING_SIDE = 3;
 export const CRAFTING_SIZE = CRAFTING_SIDE * CRAFTING_SIDE;
 export const EMPTY_CRAFTING_TABLE = [...new Array(CRAFTING_SIZE)].map(() => -1);
+export const MINING_DURATION = 800;
+export const FAST_MINING_DURATION = 400;
 
 export const Textures = {
   Grass: "./assets/blocks/4-Grass_block-top.png",
