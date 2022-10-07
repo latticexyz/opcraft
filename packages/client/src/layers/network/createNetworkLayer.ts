@@ -227,9 +227,31 @@ export async function createNetworkLayer(config: GameConfig) {
     });
   }
 
+  function transfer(entity: EntityID, receiver: string) {
+    const entityIndex = world.entityToIndex.get(entity);
+    if (entityIndex == null) return console.warn("trying to transfer unknown entity", entity);
+    const blockId = getComponentValue(components.Item, entityIndex)?.value;
+    const blockType = blockId != null ? BlockIdToKey[blockId as EntityID] : undefined;
+
+    actions.add({
+      id: `transfer+${entity}` as EntityID,
+      metadata: { actionType: "transfer", blockType },
+      requirement: () => true,
+      components: { OwnedBy: components.OwnedBy },
+      execute: () => systems["system.Transfer"].executeTyped(entity, receiver, { gasLimit: 600_000 }),
+      updates: () => [
+        {
+          component: "OwnedBy",
+          entity: entityIndex,
+          value: { value: GodID },
+        },
+      ],
+    });
+  }
+
   // --- STREAMS --------------------------------------------------------------------
   const connectedClients$ = timer(0, 5000).pipe(
-    map<number, Promise<number>>(() => relay?.countConnected() || new Promise((res) => res(0))),
+    map(async () => relay?.countConnected() || 0),
     awaitPromise()
   );
 
@@ -249,6 +271,7 @@ export async function createNetworkLayer(config: GameConfig) {
       craft,
       stake,
       claim,
+      transfer,
       getBlockAtPosition,
       getECSBlockAtPosition,
       getTerrainBlockAtPosition,

@@ -9,10 +9,10 @@ export * from "./common";
 
 export function registerUIComponents() {
   registerLoadingState();
-  registerComponentBrowser();
   registerActionQueue();
   registerCrosshairs();
   registerBlockExplorer();
   registerInventory();
   registerSidebar();
+  registerComponentBrowser();
 }
