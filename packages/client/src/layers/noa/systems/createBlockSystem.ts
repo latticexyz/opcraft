@@ -1,4 +1,4 @@
-import { defineComponentSystem, defineSystem, EntityID, getComponentValue, Has } from "@latticexyz/recs";
+import { defineComponentSystem, defineEnterSystem, getComponentValueStrict, Has } from "@latticexyz/recs";
 import { NetworkLayer } from "../../network";
 import { NoaLayer } from "../types";
 
@@ -26,12 +26,9 @@ export function createBlockSystem(network: NetworkLayer, context: NoaLayer) {
   });
 
   // "Enter system"
-  defineSystem(world, [Has(OptimisticPosition), Has(OptimisticItem)], (update) => {
-    const position = getComponentValue(OptimisticPosition, update.entity);
-    const item = getComponentValue(OptimisticItem, update.entity);
-
-    if (!position || !item) return;
-
-    setBlock(position, item.value as EntityID);
+  defineEnterSystem(world, [Has(OptimisticPosition), Has(OptimisticItem)], (update) => {
+    const position = getComponentValueStrict(OptimisticPosition, update.entity);
+    const block = getBlockAtPosition(position);
+    setBlock(position, block);
   });
 }
