@@ -1,5 +1,4 @@
 import { BlockTypeKey } from "../network/constants";
-
 import { Block, NoaBlockType } from "./types";
 
 export const CRAFTING_SIDE = 3;
