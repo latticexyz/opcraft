@@ -14,11 +14,14 @@ type BlockEvent = {
   action?: "add" | "remove";
 };
 
-type BlockSummary = {
-  [blockNumber: string]: {
+type BlockSummaryElement = [
+  number, // block number
+  {
     [blockType in BlockTypeKey]: { add?: number; remove?: number };
-  };
-};
+  }
+];
+
+type BlockSummary = BlockSummaryElement[];
 
 const BlockExplorerContainer = styled.div`
   display: flex;
@@ -136,29 +139,28 @@ export function registerBlockExplorer() {
         .pipe(filter((update) => update.blockType !== "Air"))
         .pipe(
           scan<BlockEvent, BlockSummary>((summary, event) => {
-            return {
-              ...summary,
-              [event.blockNumber]: {
-                ...(summary[event.blockNumber] ?? {}),
-                ...(event.blockType && event.action
-                  ? {
-                      [event.blockType]: {
-                        ...(summary[event.blockNumber]?.[event.blockType] ?? {}),
-                        [event.action]: (summary[event.blockNumber]?.[event.blockType]?.[event.action] ?? 0) + 1,
-                      },
-                    }
-                  : {}),
-              },
-            };
-          }, {})
+            const block =
+              summary.find(([blockNumber]) => event.blockNumber === blockNumber) ||
+              ([event.blockNumber, {}] as BlockSummaryElement);
+            const otherBlocks = summary.filter(([blockNumber]) => event.blockNumber !== blockNumber) as BlockSummary;
+
+            if (event.blockType && event.action) {
+              block[1][event.blockType] = block[1][event.blockType] || { [event.action]: 0 };
+              const current = block[1][event.blockType][event.action] || 0;
+              block[1][event.blockType][event.action] = current + 1;
+            }
+
+            return [...otherBlocks, block].slice(-500);
+          }, [] as BlockSummary),
+          map((summary) => ({ summary }))
         );
     },
-    (summary) => {
+    ({ summary }) => {
       return (
         <BlockExplorerContainer>
-          {Object.entries(summary).map(([blockNumber, block]) => (
+          {summary.map(([blockNumber, block]) => (
             <div key={blockNumber} className="BlockExplorer-Block">
-              {parseInt(blockNumber) % 16 === 0 ? <div className="BlockExplorer-BlockNumber">{blockNumber}</div> : null}
+              {blockNumber % 16 === 0 ? <div className="BlockExplorer-BlockNumber">{blockNumber}</div> : null}
               <div className="BlockExplorer-Actions">
                 {Object.entries(block).map(([blockType, counts]) => (
                   <React.Fragment key={blockType}>

@@ -77,7 +77,7 @@ const ActionContainer = styled(Container)`
 `;
 
 // TODO: handle other action states
-const ActionStatusIcon = ({ state }: { state: ActionState }) => {
+export const ActionStatusIcon = ({ state }: { state: ActionState }) => {
   switch (state) {
     case ActionState.Complete:
       return <CheckIcon className="ActionStatus--green" />;

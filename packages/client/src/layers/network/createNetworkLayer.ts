@@ -69,7 +69,16 @@ export async function createNetworkLayer(config: GameConfig) {
   if (relay) console.log("[Relayer] Relayer connected: " + config.relayServiceUrl);
 
   // Faucet setup
-  const faucet = config.faucetServiceUrl ? createFaucetService(config.faucetServiceUrl) : null;
+  const faucet = config.faucetServiceUrl ? createFaucetService(config.faucetServiceUrl) : undefined;
+
+  if (config.devMode) {
+    const playerIsBroke = (await network.signer.get()?.getBalance())?.lte(utils.parseEther("0.005"));
+    if (playerIsBroke) {
+      console.log("[Dev Faucet] Dripping funds to player");
+      const address = network.connectedAddress.get();
+      address && (await faucet?.dripDev({ address }));
+    }
+  }
 
   // --- ACTION SYSTEM --------------------------------------------------------------
   const actions = createActionSystem<{ actionType: string; coord?: VoxelCoord; blockType?: keyof typeof BlockType }>(
@@ -218,18 +227,31 @@ export async function createNetworkLayer(config: GameConfig) {
     });
   }
 
-  if (config.devMode) {
-    const playerIsBroke = (await network.signer.get()?.getBalance())?.lte(utils.parseEther("0.005"));
-    if (playerIsBroke) {
-      console.log("[Dev Faucet] Dripping funds to player");
-      const address = network.connectedAddress.get();
-      address && (await faucet?.dripDev({ address }));
-    }
+  function transfer(entity: EntityID, receiver: string) {
+    const entityIndex = world.entityToIndex.get(entity);
+    if (entityIndex == null) return console.warn("trying to transfer unknown entity", entity);
+    const blockId = getComponentValue(components.Item, entityIndex)?.value;
+    const blockType = blockId != null ? BlockIdToKey[blockId as EntityID] : undefined;
+
+    actions.add({
+      id: `transfer+${entity}` as EntityID,
+      metadata: { actionType: "transfer", blockType },
+      requirement: () => true,
+      components: { OwnedBy: components.OwnedBy },
+      execute: () => systems["system.Transfer"].executeTyped(entity, receiver, { gasLimit: 600_000 }),
+      updates: () => [
+        {
+          component: "OwnedBy",
+          entity: entityIndex,
+          value: { value: GodID },
+        },
+      ],
+    });
   }
 
   // --- STREAMS --------------------------------------------------------------------
   const connectedClients$ = timer(0, 5000).pipe(
-    map<number, Promise<number>>(() => relay?.countConnected() || new Promise((res) => res(0))),
+    map(async () => relay?.countConnected() || 0),
     awaitPromise()
   );
 
@@ -243,7 +265,17 @@ export async function createNetworkLayer(config: GameConfig) {
     startSync,
     network,
     actions,
-    api: { build, mine, craft, stake, claim, getBlockAtPosition, getECSBlockAtPosition, getTerrainBlockAtPosition },
+    api: {
+      build,
+      mine,
+      craft,
+      stake,
+      claim,
+      transfer,
+      getBlockAtPosition,
+      getECSBlockAtPosition,
+      getTerrainBlockAtPosition,
+    },
     dev: setupDevSystems(world, encoders, systems),
     streams: { connectedClients$ },
     config,
