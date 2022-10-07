@@ -35,6 +35,7 @@ export function registerInventory() {
       const {
         network: {
           components: { OwnedBy, Item },
+          streams: { connectedClients$ }, 
           network: { connectedAddress },
         },
         noa: {
@@ -86,12 +87,13 @@ export function registerInventory() {
         selectedSlot$,
         stakeAndClaim$,
         of(connectedAddress.get()),
+        connectedClients$,
         inventoryIndex$,
         craftingTable$,
       ]).pipe(map((props) => ({ props })));
     },
     ({ props }) => {
-      const [ownedByMe, { layers, show, craftingSideLength }, selectedSlot, stakeAndClaim, connectedAddress] = props;
+      const [ownedByMe, { layers, show, craftingSideLength }, selectedSlot, stakeAndClaim, connectedAddress, connectedClients] = props;
 
       const [holdingBlock, setHoldingBlock] = useState<EntityIndex | undefined>();
 
@@ -191,6 +193,13 @@ export function registerInventory() {
 
       const ActionBar = (
         <RelativeCenter>
+          <ConnectedPlayersContainer>
+            <PlayerCount>{connectedClients}</PlayerCount>
+            <PixelatedImage src="/img/mud-player.png" width={35}/>
+          </ConnectedPlayersContainer>
+          <LogoContainer>
+            <PixelatedImage src="/img/opcraft-dark.png" width={150}/>
+          </LogoContainer>
           {claim && !canBuild && (
             <Notification>
               <Red>X</Red> you cannot build or mine here. This chunk has been claimed by{" "}
@@ -218,9 +227,34 @@ export function registerInventory() {
   );
 }
 
+const PixelatedImage = styled.img`
+  image-rendering: pixelated;
+`
+
+const PlayerCount = styled.span`
+  font-size: 1.5em;
+  margin-left: 5px;
+  margin-bottom: -5px;
+`
+
+const ConnectedPlayersContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  left: 15px;
+  bottom: 15px;
+`
+
+const LogoContainer = styled.div`
+  position: absolute;
+  right: 15px;
+  bottom: 15px;
+`
+
 const Notification = styled.p`
   position: absolute;
-  top: -5px;
+  top: 25px;
 `
 
 const RelativeCenter = styled(Center)`
@@ -236,6 +270,8 @@ const Absolute = styled.div`
 `;
 
 const Wrapper = styled.div`
+  position: absolute;
+  bottom: 0px;
   background-color: rgb(0 0 0 / 40%);
   display: grid;
   grid-template-columns: repeat(9, 1fr);
