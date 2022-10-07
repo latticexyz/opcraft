@@ -1,7 +1,7 @@
 import { Signer } from "ethers";
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { Absolute, Button, Container, Title } from "./common";
+import { Button, Container, Relative, Title } from "./common";
 import { ecoji } from "../../../utils/ecoji";
 import { FaucetServiceClient } from "@latticexyz/services/protobuf/ts/faucet/faucet";
 import { formatEther } from "ethers/lib/utils";
@@ -87,7 +87,8 @@ export const Balance: React.FC<{
   }
 
   const TwitterBox = (
-    <>
+    <Relative>
+      <InputBefore>@</InputBefore>
       <Input value={username} onChange={(e) => setUsername(e.target.value)} />
       <Buttons>
         <TwitterButton disabled={!username} onClick={tweet}>
@@ -97,7 +98,7 @@ export const Balance: React.FC<{
           {status ? <ActionStatusIcon state={status} /> : "2. Verify"}
         </TwitterButton>
       </Buttons>
-    </>
+    </Relative>
   );
 
   return (
@@ -157,9 +158,17 @@ const TwitterButton = styled(Button)`
   overflow: hidden;
 `;
 
+const InputBefore = styled.span`
+  position: absolute;
+  top: 20px;
+  left: 6px;
+  color: #919191;
+  text-shadow: 1.5px 1.5px 0 #e8e8e8;
+`;
+
 const Input = styled.input`
   width: 100%;
-  padding: 6px;
+  padding: 6px 6px 6px 18px;
   border-radius: 3px;
   border: none;
   box-shadow: 0 0 0 3px #555555;

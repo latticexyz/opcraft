@@ -47,6 +47,10 @@ export const Absolute = styled.div`
   left: 0;
 `;
 
+export const Relative = styled.div`
+  position: relative;
+`;
+
 export const Background = styled.div`
   background-color: rgba(0, 0, 0, 0.2);
   position: absolute;
