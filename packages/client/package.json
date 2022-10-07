@@ -23,7 +23,6 @@
     "async-mutex": "^0.3.2",
     "bezier-js": "^6.1.0",
     "box-intersect": "fenomas/box-intersect",
-    "buffer": "^6.0.3",
     "buffer-lite": "^1.0.0",
     "contracts": "^0.2.0",
     "ent-comp": "^0.10.1",

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import React from "react";
 import { registerUIComponent } from "../engine";
 import { combineLatest, concat, interval, map, Observable, of } from "rxjs";
@@ -6,6 +7,7 @@ import { awaitPromise } from "@latticexyz/utils";
 import { BigNumber } from "ethers";
 import { Balance } from "./Balance";
 import { ChunkExplorer } from "./ChunkExplorer";
+import { formatEther } from "ethers/lib/utils";
 
 type ObservableType<S extends Observable<unknown>> = S extends Observable<infer T> ? T : never;
 
@@ -22,7 +24,8 @@ export function registerSidebar() {
       const {
         network: {
           api,
-          network: { signer, connectedAddress },
+          faucet,
+          network: { signer, connectedAddressChecksummed },
         },
         noa: {
           streams: { playerChunk$ },
@@ -37,17 +40,13 @@ export function registerSidebar() {
         })
       );
 
-      const balance$ = concat(of(0), interval(5000)).pipe(
-        map(async () => {
-          const balance = (await signer.get()?.getBalance()) ?? BigNumber.from(0);
-          return balance
-            .div(2 ** 18)
-            .toNumber()
-            .toFixed(4);
-        }),
-        awaitPromise(),
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        map((balance) => ({ balance, address: connectedAddress.get()! }))
+      const balance$ = of(0).pipe(
+        map((balance) => ({
+          balance,
+          address: connectedAddressChecksummed.get()!,
+          signer: signer.get()!,
+          faucet,
+        }))
       );
 
       return combineLatest<[ObservableType<typeof chunk$>, ObservableType<typeof balance$>]>([chunk$, balance$]).pipe(

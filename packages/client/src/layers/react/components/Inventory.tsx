@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { registerUIComponent } from "../engine";
 import { combineLatest, concat, map, of, scan } from "rxjs";
 import styled from "styled-components";
-import { AbsoluteBorder, Center, Crafting, Gold, Red, Slot } from "./common";
+import { Absolute, AbsoluteBorder, Background, Center, Crafting, Slot, Gold, Red } from "./common";
 import { range } from "@latticexyz/utils";
 import {
   defineQuery,
@@ -35,7 +35,7 @@ export function registerInventory() {
       const {
         network: {
           components: { OwnedBy, Item },
-          streams: { connectedClients$ }, 
+          streams: { connectedClients$ },
           network: { connectedAddress },
         },
         noa: {
@@ -93,7 +93,14 @@ export function registerInventory() {
       ]).pipe(map((props) => ({ props })));
     },
     ({ props }) => {
-      const [ownedByMe, { layers, show, craftingSideLength }, selectedSlot, stakeAndClaim, connectedAddress, connectedClients] = props;
+      const [
+        ownedByMe,
+        { layers, show, craftingSideLength },
+        selectedSlot,
+        stakeAndClaim,
+        connectedAddress,
+        connectedClients,
+      ] = props;
 
       const [holdingBlock, setHoldingBlock] = useState<EntityIndex | undefined>();
 
@@ -195,10 +202,10 @@ export function registerInventory() {
         <RelativeCenter>
           <ConnectedPlayersContainer>
             <PlayerCount>{connectedClients}</PlayerCount>
-            <PixelatedImage src="/img/mud-player.png" width={35}/>
+            <PixelatedImage src="/img/mud-player.png" width={35} />
           </ConnectedPlayersContainer>
           <LogoContainer>
-            <PixelatedImage src="/img/opcraft-dark.png" width={150}/>
+            <PixelatedImage src="/img/opcraft-dark.png" width={150} />
           </LogoContainer>
           {claim && !canBuild && (
             <Notification>
@@ -229,13 +236,13 @@ export function registerInventory() {
 
 const PixelatedImage = styled.img`
   image-rendering: pixelated;
-`
+`;
 
 const PlayerCount = styled.span`
   font-size: 1.5em;
   margin-left: 5px;
   margin-bottom: -5px;
-`
+`;
 
 const ConnectedPlayersContainer = styled.div`
   display: flex;
@@ -244,29 +251,21 @@ const ConnectedPlayersContainer = styled.div`
   position: absolute;
   left: 15px;
   bottom: 15px;
-`
+`;
 
 const LogoContainer = styled.div`
   position: absolute;
   right: 15px;
   bottom: 15px;
-`
+`;
 
 const Notification = styled.p`
   position: absolute;
   top: 25px;
-`
+`;
 
 const RelativeCenter = styled(Center)`
   position: relative;
-`;
-
-const Absolute = styled.div`
-  position: absolute;
-  height: 100%;
-  width: 100%;
-  top: 0;
-  left: 0;
 `;
 
 const Wrapper = styled.div`
@@ -279,12 +278,4 @@ const Wrapper = styled.div`
   pointer-events: all;
   border: 5px lightgray solid;
   z-index: 10;
-`;
-
-const Background = styled.div`
-  background-color: rgba(0, 0, 0, 0.2);
-  position: absolute;
-  height: 100%;
-  width: 100%;
-  pointer-events: all;
 `;

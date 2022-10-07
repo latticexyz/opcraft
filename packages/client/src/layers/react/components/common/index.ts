@@ -38,3 +38,19 @@ export const Title = styled(Gold)`
 export const Faded = styled.span`
   opacity: 0.5;
 `;
+
+export const Absolute = styled.div`
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  top: 0;
+  left: 0;
+`;
+
+export const Background = styled.div`
+  background-color: rgba(0, 0, 0, 0.2);
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  pointer-events: all;
+`;

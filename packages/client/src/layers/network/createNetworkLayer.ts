@@ -69,7 +69,16 @@ export async function createNetworkLayer(config: GameConfig) {
   if (relay) console.log("[Relayer] Relayer connected: " + config.relayServiceUrl);
 
   // Faucet setup
-  const faucet = config.faucetServiceUrl ? createFaucetService(config.faucetServiceUrl) : null;
+  const faucet = config.faucetServiceUrl ? createFaucetService(config.faucetServiceUrl) : undefined;
+
+  if (config.devMode) {
+    const playerIsBroke = (await network.signer.get()?.getBalance())?.lte(utils.parseEther("0.005"));
+    if (playerIsBroke) {
+      console.log("[Dev Faucet] Dripping funds to player");
+      const address = network.connectedAddress.get();
+      address && (await faucet?.dripDev({ address }));
+    }
+  }
 
   // --- ACTION SYSTEM --------------------------------------------------------------
   const actions = createActionSystem<{ actionType: string; coord?: VoxelCoord; blockType?: keyof typeof BlockType }>(
@@ -218,15 +227,6 @@ export async function createNetworkLayer(config: GameConfig) {
     });
   }
 
-  if (config.devMode) {
-    const playerIsBroke = (await network.signer.get()?.getBalance())?.lte(utils.parseEther("0.005"));
-    if (playerIsBroke) {
-      console.log("[Dev Faucet] Dripping funds to player");
-      const address = network.connectedAddress.get();
-      address && (await faucet?.dripDev({ address }));
-    }
-  }
-
   // --- STREAMS --------------------------------------------------------------------
   const connectedClients$ = timer(0, 5000).pipe(
     map<number, Promise<number>>(() => relay?.countConnected() || new Promise((res) => res(0))),
@@ -243,7 +243,16 @@ export async function createNetworkLayer(config: GameConfig) {
     startSync,
     network,
     actions,
-    api: { build, mine, craft, stake, claim, getBlockAtPosition, getECSBlockAtPosition, getTerrainBlockAtPosition },
+    api: {
+      build,
+      mine,
+      craft,
+      stake,
+      claim,
+      getBlockAtPosition,
+      getECSBlockAtPosition,
+      getTerrainBlockAtPosition,
+    },
     dev: setupDevSystems(world, encoders, systems),
     streams: { connectedClients$ },
     config,
