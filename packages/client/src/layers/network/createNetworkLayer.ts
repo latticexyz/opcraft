@@ -1,4 +1,12 @@
-import { createIndexer, createWorld, EntityID, getComponentValue, HasValue, runQuery } from "@latticexyz/recs";
+import {
+  createIndexer,
+  createWorld,
+  EntityID,
+  EntityIndex,
+  getComponentValue,
+  HasValue,
+  runQuery,
+} from "@latticexyz/recs";
 import { setupDevSystems } from "./setup";
 import { createActionSystem, setupMUDNetwork, waitForActionCompletion } from "@latticexyz/std-client";
 import { GameConfig, getNetworkConfig } from "./config";
@@ -17,7 +25,13 @@ import {
   defineClaimComponent,
 } from "./components";
 import { defineNameComponent } from "./components/NameComponent";
-import { getBlockAtPosition as getBlockAtPositionApi, getECSBlock, getTerrain, getTerrainBlock } from "./api";
+import {
+  getBlockAtPosition as getBlockAtPositionApi,
+  getEntityAtPosition as getEntityAtPositionApi,
+  getECSBlock,
+  getTerrain,
+  getTerrainBlock,
+} from "./api";
 import { createPerlin } from "@latticexyz/noise";
 import { BlockIdToKey, BlockType } from "./constants";
 import { createFaucetService, createRelayStream, GodID } from "@latticexyz/network";
@@ -30,7 +44,7 @@ import { map, timer } from "rxjs";
  * Its purpose is to synchronize the client components with the contract components.
  */
 export async function createNetworkLayer(config: GameConfig) {
-  console.log("[Network] Network config");
+  console.info("[Network] Network config");
   console.table(config);
 
   // --- WORLD ----------------------------------------------------------------------
@@ -66,7 +80,7 @@ export async function createNetworkLayer(config: GameConfig) {
       : null;
 
   relay && world.registerDisposer(relay.dispose);
-  if (relay) console.log("[Relayer] Relayer connected: " + config.relayServiceUrl);
+  if (relay) console.info("[Relayer] Relayer connected: " + config.relayServiceUrl);
 
   // Faucet setup
   const faucet = config.faucetServiceUrl ? createFaucetService(config.faucetServiceUrl) : undefined;
@@ -74,7 +88,7 @@ export async function createNetworkLayer(config: GameConfig) {
   if (config.devMode) {
     const playerIsBroke = (await network.signer.get()?.getBalance())?.lte(utils.parseEther("0.005"));
     if (playerIsBroke) {
-      console.log("[Dev Faucet] Dripping funds to player");
+      console.info("[Dev Faucet] Dripping funds to player");
       const address = network.connectedAddress.get();
       address && (await faucet?.dripDev({ address }));
     }
@@ -90,6 +104,7 @@ export async function createNetworkLayer(config: GameConfig) {
   const { withOptimisticUpdates } = actions;
   components.Position = createIndexer(withOptimisticUpdates(components.Position));
   components.OwnedBy = createIndexer(withOptimisticUpdates(components.OwnedBy));
+  components.Item = withOptimisticUpdates(components.Item);
 
   // --- API ------------------------------------------------------------------------
 
@@ -110,19 +125,27 @@ export async function createNetworkLayer(config: GameConfig) {
   function getBlockAtPosition(position: VoxelCoord) {
     return getBlockAtPositionApi(terrainContext, perlin, position);
   }
+  function getEntityAtPosition(position: VoxelCoord) {
+    return getEntityAtPositionApi(terrainContext, position);
+  }
 
   function build(entity: EntityID, coord: VoxelCoord) {
     const entityIndex = world.entityToIndex.get(entity);
     if (entityIndex == null) return console.warn("trying to place unknown entity", entity);
     const blockId = getComponentValue(components.Item, entityIndex)?.value;
     const blockType = blockId != null ? BlockIdToKey[blockId as EntityID] : undefined;
+    const godIndex = world.entityToIndex.get(GodID);
+    const creativeMode = godIndex != null && getComponentValue(components.GameConfig, godIndex)?.creativeMode;
 
     actions.add({
       id: `build+${coord.x}/${coord.y}/${coord.z}` as EntityID,
       metadata: { actionType: "build", coord, blockType },
       requirement: () => true,
       components: { Position: components.Position, Item: components.Item, OwnedBy: components.OwnedBy },
-      execute: () => systems["system.Build"].executeTyped(BigNumber.from(entity), coord, { gasLimit: 1_700_000 }),
+      execute: () =>
+        systems[creativeMode ? "system.CreativeBuild" : "system.Build"].executeTyped(BigNumber.from(entity), coord, {
+          gasLimit: 1_700_000,
+        }),
       updates: () => [
         {
           component: "OwnedBy",
@@ -144,7 +167,7 @@ export async function createNetworkLayer(config: GameConfig) {
 
     if (blockId == null) throw new Error("entity has no block type");
     const blockType = BlockIdToKey[blockId];
-
+    const blockEntity = getEntityAtPosition(coord);
     const airEntity = world.registerEntity();
 
     actions.add({
@@ -164,6 +187,11 @@ export async function createNetworkLayer(config: GameConfig) {
           component: "Item",
           entity: airEntity,
           value: { value: BlockType.Air },
+        },
+        {
+          component: "Position",
+          entity: blockEntity || (Number.MAX_SAFE_INTEGER as EntityIndex),
+          value: null,
         },
       ],
     });

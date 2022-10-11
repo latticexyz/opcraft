@@ -20,6 +20,26 @@ import {
   Water,
 } from "./occurrence";
 
+export function getEntityAtPosition(
+  context: {
+    Position: Component<{ x: Type.Number; y: Type.Number; z: Type.Number }>;
+    Item: Component<{ value: Type.String }>;
+    world: World;
+  },
+  coord: VoxelCoord
+) {
+  const { Position, Item } = context;
+  const entitiesAtPosition = [...getEntitiesWithValue(Position, coord)];
+
+  // Prefer non-air blocks at this position
+  return (
+    entitiesAtPosition?.find((b) => {
+      const item = getComponentValue(Item, b);
+      return item && item.value !== BlockType.Air;
+    }) ?? entitiesAtPosition[0]
+  );
+}
+
 export function getECSBlock(
   context: {
     Position: Component<{ x: Type.Number; y: Type.Number; z: Type.Number }>;
@@ -28,19 +48,9 @@ export function getECSBlock(
   },
   coord: VoxelCoord
 ): EntityID | undefined {
-  const { Position, Item } = context;
-  const entitiesAtPosition = [...getEntitiesWithValue(Position, coord)];
-
-  const entityAtPosition =
-    // Prefer non-air blocks at this position
-    entitiesAtPosition?.find((b) => {
-      const item = getComponentValue(Item, b);
-      return item && item.value !== BlockType.Air;
-    }) ?? entitiesAtPosition[0];
-
-  if (entitiesAtPosition == null) return undefined;
-
-  return getComponentValue(Item, entityAtPosition)?.value as EntityID;
+  const entityAtPosition = getEntityAtPosition(context, coord);
+  if (entityAtPosition == null) return undefined;
+  return getComponentValue(context.Item, entityAtPosition)?.value as EntityID;
 }
 
 export function getBlockAtPosition(

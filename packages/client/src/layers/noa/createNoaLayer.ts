@@ -197,7 +197,10 @@ export function createNoaLayer(network: NetworkLayer) {
   function toggleInventory(open?: boolean, crafting?: boolean) {
     open = open ?? !getComponentValue(components.UI, SingletonEntity)?.showInventory;
     noa.container.setPointerLock(!open);
-    updateComponent(components.UI, SingletonEntity, { showInventory: open, showCrafting: Boolean(open && crafting) });
+    updateComponent(components.UI, SingletonEntity, {
+      showInventory: open,
+      showCrafting: Boolean(open && crafting),
+    });
   }
 
   function getSelectedBlockType(): EntityID | undefined {
