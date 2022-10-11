@@ -42,7 +42,7 @@ import {
 } from "./systems";
 import { registerHandComponent } from "./engine/components/handComponent";
 import { registerModelComponent } from "./engine/components/modelComponent";
-import { MINING_BLOCK_COMPONENT, registerMiningBlockComponent } from "./engine/components/miningBlockComponent";
+import { registerMiningBlockComponent } from "./engine/components/miningBlockComponent";
 import { defineInventoryIndexComponent } from "./components/InventoryIndex";
 import { setupDayNightCycle } from "./engine/dayNightCycle";
 import { getNoaPositionStrict, setNoaPosition } from "./engine/components/utils";
@@ -52,6 +52,8 @@ import { GodID } from "@latticexyz/network";
 import { getChunkCoord, getChunkEntity } from "../../utils/chunk";
 import { BehaviorSubject, map, throttleTime, timer } from "rxjs";
 import { getStakeEntity } from "../../utils/stake";
+import { createCreativeModeSystem } from "./systems/createCreativeModeSystem";
+import { createSpawnPlayerSystem } from "./systems/createSpawnPlayerSystem";
 
 export function createNoaLayer(network: NetworkLayer) {
   const world = namespaceWorld(network.world, "noa");
@@ -94,10 +96,6 @@ export function createNoaLayer(network: NetworkLayer) {
     showCrafting: false,
   });
   setComponent(components.SelectedSlot, SingletonEntity, { value: 0 });
-
-  if (hasComponent(components.LocalPlayerPosition, SingletonEntity)) {
-    setNoaPosition(noa, noa.playerEntity, getComponentValueStrict(components.LocalPlayerPosition, SingletonEntity));
-  }
 
   // --- API ------------------------------------------------------------------------
   function setCraftingTable(entities: EntityIndex[][]) {
@@ -240,7 +238,7 @@ export function createNoaLayer(network: NetworkLayer) {
     return { claim, stake };
   }
 
-  // --- SETUP NOA CONSTANTS --------------------------------------------------------
+  // --- SETUP NOA COMPONENTS AND MODULES --------------------------------------------------------
   monkeyPatchMeshComponent(noa);
   registerModelComponent(noa);
   registerRotationComponent(noa);
@@ -252,7 +250,6 @@ export function createNoaLayer(network: NetworkLayer) {
   setupSky(noa);
   setupHand(noa);
   setupDayNightCycle(noa, glow);
-  noa.entities.addComponentAgain(noa.playerEntity, MINING_BLOCK_COMPONENT, {});
 
   // --- SETUP STREAMS --------------------------------------------------------------
   // (Create streams as BehaviorSubject to allow for multiple observers and getting the current value)
@@ -301,6 +298,8 @@ export function createNoaLayer(network: NetworkLayer) {
   createRelaySystem(network, context);
   createInventoryIndexSystem(network, context);
   createSyncLocalPlayerPositionSystem(network, context);
+  createCreativeModeSystem(network, context);
+  createSpawnPlayerSystem(network, context);
 
   return context;
 }
