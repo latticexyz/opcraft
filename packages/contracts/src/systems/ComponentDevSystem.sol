@@ -16,7 +16,7 @@ contract ComponentDevSystem is System {
   }
 
   function execute(bytes memory arguments) public returns (bytes memory) {
-    require(msg.sender == _owner, "can only be called by owner");
+    require(msg.sender == _owner, "ONLY_OWNER");
     (uint256 componentId, uint256 entity, bytes memory value) = abi.decode(arguments, (uint256, uint256, bytes));
     IComponent c = IComponent(getAddressById(components, componentId));
     if (value.length == 0) {

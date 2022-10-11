@@ -92,7 +92,6 @@ export function createNoaLayer(network: NetworkLayer) {
     showComponentBrowser: false,
     showInventory: false,
     showCrafting: false,
-    showTransfer: false,
   });
   setComponent(components.SelectedSlot, SingletonEntity, { value: 0 });
 
@@ -201,17 +200,6 @@ export function createNoaLayer(network: NetworkLayer) {
     updateComponent(components.UI, SingletonEntity, {
       showInventory: open,
       showCrafting: Boolean(open && crafting),
-      showTransfer: false,
-    });
-  }
-
-  function toggleTransfer(open?: boolean) {
-    open = open ?? !getComponentValue(components.UI, SingletonEntity)?.showTransfer;
-    noa.container.setPointerLock(!open);
-    updateComponent(components.UI, SingletonEntity, {
-      showInventory: false,
-      showCrafting: false,
-      showTransfer: open,
     });
   }
 
@@ -297,7 +285,6 @@ export function createNoaLayer(network: NetworkLayer) {
       getCraftingResult,
       teleportRandom,
       toggleInventory,
-      toggleTransfer,
       placeSelectedItem,
       getCurrentChunk,
       getCurrentPlayerPosition,
