@@ -26,6 +26,7 @@ import { NetworkLayer } from "../../network/types";
 import { NoaLayer } from "../types";
 
 const PRECISION = 2;
+const MINIMUM_BALANCE = 0.00002 * 10 ** 9;
 const UNRESPONSIVE_PLAYER_CLEANUP = 2_000;
 const TIMEOUT = 1_000;
 export const RELAY_CHUNK_SIZE = 64;
@@ -66,6 +67,7 @@ export async function createRelaySystem(network: NetworkLayer, context: NoaLayer
 
   const {
     network: { connectedAddress },
+    streams: { balanceGwei$ },
     relay,
   } = network;
 
@@ -117,6 +119,7 @@ export async function createRelaySystem(network: NetworkLayer, context: NoaLayer
   });
 
   defineRxSystem(world, playerPosition$, (position) => {
+    if (balanceGwei$.getValue() < MINIMUM_BALANCE) return;
     const pitch = noa.camera.pitch;
     const yaw = noa.camera.heading;
     const q = Quaternion.FromEulerAngles(pitch, yaw, 0);
