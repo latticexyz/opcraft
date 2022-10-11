@@ -18,10 +18,18 @@ export const Balance: React.FC<{
   signer: Signer;
 }> = ({ address, faucet, signer }) => {
   const [open, setOpen] = useState(false);
+  const [locked, setLocked] = useState(false);
   const [timeToDrip, setTimeToDrip] = useState(0);
   const [username, setUsername] = useState("");
   const [balance, setBalance] = useState("");
   const [status, setStatus] = useState<ActionState | undefined>();
+
+  async function onRequestDrip() {
+    if (timeToDrip <= 0) {
+      if (locked && username) requestDrip();
+      else setOpen(true);
+    }
+  }
 
   async function updateBalance() {
     const balance = await signer.getBalance();
@@ -48,6 +56,7 @@ export const Balance: React.FC<{
       if (linkedUsername) {
         setUsername(linkedUsername);
         updateTimeUntilDrip(linkedUsername);
+        setLocked(true);
       }
     })();
   }, []);
@@ -67,13 +76,18 @@ export const Balance: React.FC<{
     window.open(TWITTER_URL + text);
   }
 
-  async function verifyTweet() {
+  async function requestDrip() {
     if (!faucet || !username) return;
     const usernameAddressPair = { username, address };
     setStatus(ActionState.Executing);
     try {
-      await faucet.dripVerifyTweet(usernameAddressPair);
+      if (locked) {
+        await faucet.drip(usernameAddressPair);
+      } else {
+        await faucet.dripVerifyTweet(usernameAddressPair);
+      }
       await updateBalance();
+      setLocked(true);
       setStatus(ActionState.Complete);
     } catch (e) {
       console.warn("Faucet:", e);
@@ -94,7 +108,7 @@ export const Balance: React.FC<{
         <TwitterButton disabled={!username} onClick={tweet}>
           1. Tweet
         </TwitterButton>
-        <TwitterButton disabled={!username} onClick={verifyTweet}>
+        <TwitterButton disabled={!username} onClick={requestDrip}>
           {status ? <ActionStatusIcon state={status} /> : "2. Verify"}
         </TwitterButton>
       </Buttons>
@@ -110,15 +124,19 @@ export const Balance: React.FC<{
         <p>Balance: {balance} ETH</p>
         {open ? TwitterBox : null}
         {faucet && (
-          <TwitterButton disabled={!open && timeToDrip > 0} onClick={() => timeToDrip <= 0 && setOpen(!open)}>
-            {open
-              ? "Cancel"
-              : timeToDrip > 0
-              ? `${String(Math.floor(timeToDrip / 60)).padStart(2, "0")}:${String(timeToDrip % 60).padStart(
-                  2,
-                  "0"
-                )} till next drip`
-              : "Request drip"}
+          <TwitterButton disabled={!open && timeToDrip > 0} onClick={onRequestDrip}>
+            {open ? (
+              "Cancel"
+            ) : timeToDrip > 0 ? (
+              `${String(Math.floor(timeToDrip / 60)).padStart(2, "0")}:${String(timeToDrip % 60).padStart(
+                2,
+                "0"
+              )} till next drip`
+            ) : status ? (
+              <ActionStatusIcon state={status} />
+            ) : (
+              "Request drip"
+            )}
           </TwitterButton>
         )}
       </BalanceContainer>
