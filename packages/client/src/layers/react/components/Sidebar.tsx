@@ -1,13 +1,10 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import React from "react";
 import { registerUIComponent } from "../engine";
-import { combineLatest, concat, interval, map, Observable, of } from "rxjs";
+import { combineLatest, map, Observable, of } from "rxjs";
 import styled from "styled-components";
-import { awaitPromise } from "@latticexyz/utils";
-import { BigNumber } from "ethers";
 import { Balance } from "./Balance";
 import { ChunkExplorer } from "./ChunkExplorer";
-import { formatEther } from "ethers/lib/utils";
 
 type ObservableType<S extends Observable<unknown>> = S extends Observable<infer T> ? T : never;
 
@@ -26,6 +23,7 @@ export function registerSidebar() {
           api,
           faucet,
           network: { signer, connectedAddressChecksummed },
+          streams: { balanceGwei$ },
         },
         noa: {
           streams: { playerChunk$ },
@@ -41,11 +39,11 @@ export function registerSidebar() {
       );
 
       const balance$ = of(0).pipe(
-        map((balance) => ({
-          balance,
+        map(() => ({
           address: connectedAddressChecksummed.get()!,
           signer: signer.get()!,
           faucet,
+          balanceGwei$,
         }))
       );
 

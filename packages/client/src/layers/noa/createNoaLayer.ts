@@ -11,8 +11,6 @@ import {
   runQuery,
   HasValue,
   EntityID,
-  getComponentValueStrict,
-  hasComponent,
 } from "@latticexyz/recs";
 import { Coord, random, VoxelCoord } from "@latticexyz/utils";
 import { NetworkLayer } from "../network";

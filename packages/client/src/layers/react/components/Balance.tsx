@@ -1,4 +1,4 @@
-import { Signer } from "ethers";
+import { BigNumber, Signer } from "ethers";
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Button, Container, Relative, Title } from "./common";
@@ -7,6 +7,7 @@ import { FaucetServiceClient } from "@latticexyz/services/protobuf/ts/faucet/fau
 import { formatEther } from "ethers/lib/utils";
 import { ActionState } from "@latticexyz/std-client";
 import { ActionStatusIcon } from "./Action";
+import { Observable } from "rxjs";
 
 const DEFAULT_TEXT = "autonomous worlds await... ";
 const TWITTER_URL = "https://twitter.com/intent/tweet?text=";
@@ -16,17 +17,17 @@ export const Balance: React.FC<{
   address: string;
   faucet?: FaucetServiceClient;
   signer: Signer;
-}> = ({ address, faucet, signer }) => {
+  balanceGwei$: Observable<number>;
+}> = ({ address, faucet, signer, balanceGwei$ }) => {
   const [open, setOpen] = useState(false);
   const [timeToDrip, setTimeToDrip] = useState(0);
   const [username, setUsername] = useState("");
-  const [balance, setBalance] = useState("");
+  const [balance, setBalance] = useState(0);
   const [status, setStatus] = useState<ActionState | undefined>();
 
   async function updateBalance() {
-    const balance = await signer.getBalance();
-    const eth = formatEther(balance).split(".");
-    setBalance(eth[0] + (eth.length > 1 ? "." + eth[1].substring(0, 5) : ""));
+    const balance = await signer.getBalance().then((v) => v.div(BigNumber.from(10).pow(9)).toNumber());
+    setBalance(balance);
   }
 
   async function updateTimeUntilDrip(username: string) {
@@ -36,9 +37,10 @@ export const Balance: React.FC<{
 
   // Update balance in regular intervals
   useEffect(() => {
-    updateBalance();
-    const interval = setInterval(updateBalance, 5000);
-    return () => clearInterval(interval);
+    const subscription = balanceGwei$.subscribe((balance) => {
+      setBalance(balance);
+    });
+    return () => subscription?.unsubscribe();
   }, []);
 
   // Fetch the tile until next drip once
@@ -107,7 +109,7 @@ export const Balance: React.FC<{
         <p>
           <Title>Hello,</Title> {address?.substring(0, 6)}...
         </p>
-        <p>Balance: {balance} ETH</p>
+        <p>Balance: {balance} GWEI</p>
         {open ? TwitterBox : null}
         {faucet && (
           <TwitterButton disabled={!open && timeToDrip > 0} onClick={() => timeToDrip <= 0 && setOpen(!open)}>
