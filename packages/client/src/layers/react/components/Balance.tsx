@@ -4,12 +4,11 @@ import styled from "styled-components";
 import { Button, Container, Relative, Title } from "./common";
 import { ecoji } from "../../../utils/ecoji";
 import { FaucetServiceClient } from "@latticexyz/services/protobuf/ts/faucet/faucet";
-import { formatEther } from "ethers/lib/utils";
 import { ActionState } from "@latticexyz/std-client";
 import { ActionStatusIcon } from "./Action";
 import { Observable } from "rxjs";
 
-const DEFAULT_TEXT = "autonomous worlds await... ";
+const DEFAULT_TEXT = "autonomous worlds await...\n\n";
 const TWITTER_URL = "https://twitter.com/intent/tweet?text=";
 const SIGNATURE_TEXT = (handle: string, address: string) => `${handle} tweetooor requesting drip to ${address} address`;
 
