@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Unlicense
 pragma solidity >=0.8.0;
-import "std-contracts/components/FunctionComponent.sol";
+import "std-contracts/components/FunctionBareComponent.sol";
 
 uint256 constant ID = uint256(keccak256("component.Occurrence"));
 
-contract OccurrenceComponent is FunctionComponent {
-  constructor(address world) FunctionComponent(world, ID) {}
+contract OccurrenceComponent is FunctionBareComponent {
+  constructor(address world) FunctionBareComponent(world, ID) {}
 }

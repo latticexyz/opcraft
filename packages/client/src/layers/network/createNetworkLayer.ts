@@ -144,7 +144,7 @@ export async function createNetworkLayer(config: GameConfig) {
       components: { Position: components.Position, Item: components.Item, OwnedBy: components.OwnedBy },
       execute: () =>
         systems[creativeMode ? "system.CreativeBuild" : "system.Build"].executeTyped(BigNumber.from(entity), coord, {
-          gasLimit: 1_700_000,
+          gasLimit: 500_000,
         }),
       updates: () => [
         {
@@ -176,7 +176,7 @@ export async function createNetworkLayer(config: GameConfig) {
       requirement: () => true,
       components: { Position: components.Position, OwnedBy: components.OwnedBy, Item: components.Item },
       // TODO: find tighter bound for gas limit (gas requirement is different for ecs blocks and different terrain blocks)
-      execute: () => systems["system.Mine"].executeTyped(coord, blockId, { gasLimit: 1_700_000 }),
+      execute: () => systems["system.Mine"].executeTyped(coord, blockId, { gasLimit: ecsBlock ? 400_000 : 1_000_000 }),
       updates: () => [
         {
           component: "Position",
@@ -205,7 +205,7 @@ export async function createNetworkLayer(config: GameConfig) {
       metadata: { actionType: "craft", blockType: BlockIdToKey[result] },
       requirement: () => true,
       components: { OwnedBy: components.OwnedBy },
-      execute: () => systems["system.Craft"].executeTyped(ingredients, { gasLimit: 1_700_000 }),
+      execute: () => systems["system.Craft"].executeTyped(ingredients, { gasLimit: 600_000 }),
       updates: () =>
         entities.map((entity) => ({
           component: "OwnedBy",
@@ -233,7 +233,7 @@ export async function createNetworkLayer(config: GameConfig) {
       metadata: { actionType: "stake", blockType: "Diamond" },
       requirement: () => true,
       components: { OwnedBy: components.OwnedBy },
-      execute: () => systems["system.Stake"].executeTyped(diamondEntity, chunkCoord, { gasLimit: 600_000 }),
+      execute: () => systems["system.Stake"].executeTyped(diamondEntity, chunkCoord, { gasLimit: 400_000 }),
       updates: () => [
         {
           component: "OwnedBy",
@@ -250,7 +250,7 @@ export async function createNetworkLayer(config: GameConfig) {
       metadata: { actionType: "claim", blockType: "Diamond" },
       requirement: () => true,
       components: {},
-      execute: () => systems["system.Claim"].executeTyped(chunkCoord, { gasLimit: 600_000 }),
+      execute: () => systems["system.Claim"].executeTyped(chunkCoord, { gasLimit: 400_000 }),
       updates: () => [],
     });
   }
@@ -266,7 +266,7 @@ export async function createNetworkLayer(config: GameConfig) {
       metadata: { actionType: "transfer", blockType },
       requirement: () => true,
       components: { OwnedBy: components.OwnedBy },
-      execute: () => systems["system.Transfer"].executeTyped(entity, receiver, { gasLimit: 600_000 }),
+      execute: () => systems["system.Transfer"].executeTyped(entity, receiver, { gasLimit: 400_000 }),
       updates: () => [
         {
           component: "OwnedBy",

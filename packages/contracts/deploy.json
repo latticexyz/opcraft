@@ -6,7 +6,6 @@
     "PositionComponent",
     "OwnedByComponent",
     "RecipeComponent",
-    "NameComponent",
     "OccurrenceComponent",
     "StakeComponent",
     "ClaimComponent"
@@ -18,7 +17,6 @@
     { "name": "BuildSystem", "writeAccess": ["PositionComponent", "OwnedByComponent"] },
     { "name": "CreativeBuildSystem", "writeAccess": ["PositionComponent", "ItemComponent"] },
     { "name": "CraftSystem", "writeAccess": ["OwnedByComponent", "ItemComponent"] },
-    { "name": "NameSystem", "writeAccess": ["NameComponent"] },
     { "name": "OccurrenceSystem", "writeAccess": [] },
     { "name": "StakeSystem", "writeAccess": ["StakeComponent", "OwnedByComponent"] },
     { "name": "ClaimSystem", "writeAccess": ["ClaimComponent"] },

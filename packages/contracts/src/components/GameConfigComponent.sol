@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Unlicense
 pragma solidity >=0.8.0;
-import "solecs/Component.sol";
+import "solecs/BareComponent.sol";
 
 uint256 constant ID = uint256(keccak256("component.GameConfig"));
 
@@ -8,8 +8,8 @@ struct GameConfig {
   bool creativeMode;
 }
 
-contract GameConfigComponent is Component {
-  constructor(address world) Component(world, ID) {}
+contract GameConfigComponent is BareComponent {
+  constructor(address world) BareComponent(world, ID) {}
 
   function getSchema() public pure override returns (string[] memory keys, LibTypes.SchemaValue[] memory values) {
     keys = new string[](1);
@@ -26,9 +26,5 @@ contract GameConfigComponent is Component {
   function getValue(uint256 entity) public view returns (GameConfig memory) {
     GameConfig memory gameConfig = abi.decode(getRawValue(entity), (GameConfig));
     return gameConfig;
-  }
-
-  function getEntitiesWithValue(GameConfig memory value) public view returns (uint256[] memory) {
-    return getEntitiesWithValue(abi.encode(value));
   }
 }
