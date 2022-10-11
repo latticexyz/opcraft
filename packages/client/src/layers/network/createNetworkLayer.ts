@@ -290,7 +290,7 @@ export async function createNetworkLayer(config: GameConfig) {
         ),
         awaitPromise()
       )
-      .subscribe(balanceGwei$).unsubscribe
+      .subscribe(balanceGwei$)?.unsubscribe
   );
 
   const connectedClients$ = timer(0, 5000).pipe(
