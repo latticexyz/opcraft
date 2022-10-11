@@ -52,6 +52,8 @@ import { GodID } from "@latticexyz/network";
 import { getChunkCoord, getChunkEntity } from "../../utils/chunk";
 import { BehaviorSubject, map, throttleTime, timer } from "rxjs";
 import { getStakeEntity } from "../../utils/stake";
+import { waitForComponentValue } from "@latticexyz/std-client";
+import { createCreativeModeSystem } from "./systems/createCreativeModeSystem";
 
 export function createNoaLayer(network: NetworkLayer) {
   const world = namespaceWorld(network.world, "noa");
@@ -301,6 +303,7 @@ export function createNoaLayer(network: NetworkLayer) {
   createRelaySystem(network, context);
   createInventoryIndexSystem(network, context);
   createSyncLocalPlayerPositionSystem(network, context);
+  createCreativeModeSystem(network, context);
 
   return context;
 }

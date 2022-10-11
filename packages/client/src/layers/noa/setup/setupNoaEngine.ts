@@ -20,13 +20,14 @@ export interface API {
 
 export function setupNoaEngine(api: API) {
   const opts = {
-    debug: true,
+    debug: false,
     showFPS: true,
     inverseY: false,
     inverseX: false,
     chunkAddDistance: [CHUNK_RENDER_DISTANCE + 3, CHUNK_RENDER_DISTANCE + 3],
     chunkRemoveDistance: [CHUNK_RENDER_DISTANCE + 8, CHUNK_RENDER_DISTANCE + 8],
     chunkSize: CHUNK_SIZE,
+    gravity: [0, -17, 0],
     playerStart: [-1543, 13, -826],
     blockTestDistance: 7,
     playerHeight: 1.85,
