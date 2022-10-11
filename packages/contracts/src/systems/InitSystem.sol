@@ -28,7 +28,7 @@ contract InitSystem is System {
     OccurrenceSystem occurrenceSystem = OccurrenceSystem(getAddressById(world.systems(), OccurrenceSystemID));
 
     // Game config
-    gameConfigComponent.set(GodID, GameConfig({ creativeMode: true }));
+    gameConfigComponent.set(GodID, GameConfig({ creativeMode: false }));
 
     // Blocks
     defineBlocks(itemPrototypeComponent, occurrenceComponent, occurrenceSystem);
