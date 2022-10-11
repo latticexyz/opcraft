@@ -3,7 +3,7 @@ import { Engine } from "noa-engine";
 import * as glvec3 from "gl-vec3";
 import { NetworkLayer } from "../../../network";
 import { VoxelCoord } from "@latticexyz/utils";
-import { Textures } from "../../constants";
+import { MINING_DURATION, Textures } from "../../constants";
 
 export interface MiningBlockComponent {
   breakingBlockMeshes: BABYLON.Mesh[];
@@ -12,12 +12,11 @@ export interface MiningBlockComponent {
   block: VoxelCoord;
   startTimestamp: number;
   progress: number;
+  duration: number;
   __id: number;
 }
 
 export const MINING_BLOCK_COMPONENT = "MINING_BLOCK_COMPONENT";
-
-const MINING_DURATION = 800;
 
 const NORMALS = [
   [0, 0, 1],
@@ -79,7 +78,13 @@ export function registerMiningBlockComponent(noa: Engine, networkLayer: NetworkL
   //@ts-ignore
   noa.ents.createComponent({
     name: MINING_BLOCK_COMPONENT,
-    state: { breakingBlockMeshes: [], active: false, block: { x: 0, y: 0, z: 0 }, startTimestamp: 0 },
+    state: {
+      breakingBlockMeshes: [],
+      active: false,
+      block: { x: 0, y: 0, z: 0 },
+      startTimestamp: 0,
+      duration: MINING_DURATION,
+    },
     onAdd: (id: number, state: MiningBlockComponent) => {
       const material = noa.rendering.makeStandardMaterial("crack-" + id);
       material.backFaceCulling = false;
@@ -96,10 +101,11 @@ export function registerMiningBlockComponent(noa: Engine, networkLayer: NetworkL
       state.active = false;
       state.startTimestamp = 0;
       state.progress = 0;
+      state.duration = MINING_DURATION;
     },
     system: function (dt: number, states: MiningBlockComponent[]) {
       for (let i = 0; i < states.length; i++) {
-        const { breakingBlockMeshes, breakingBlockMaterial, block, active, startTimestamp } = states[i];
+        const { breakingBlockMeshes, breakingBlockMaterial, block, active, startTimestamp, duration } = states[i];
         if (!breakingBlockMeshes.length) {
           return;
         }
@@ -128,7 +134,7 @@ export function registerMiningBlockComponent(noa: Engine, networkLayer: NetworkL
             breakingBlockMesh.setEnabled(true);
           }
         } else if (active) {
-          const progress = Math.min(Date.now() - startTimestamp, MINING_DURATION) / MINING_DURATION;
+          const progress = Math.min(Date.now() - startTimestamp, duration) / duration;
           states[i].progress = progress;
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           //@ts-ignore
@@ -146,6 +152,7 @@ export function registerMiningBlockComponent(noa: Engine, networkLayer: NetworkL
             //@ts-ignore
             breakingBlockMaterial.diffuseTexture = TEXTURES[0];
           }
+          states[i].duration = MINING_DURATION;
         }
       }
     },

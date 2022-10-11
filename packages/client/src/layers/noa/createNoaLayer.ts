@@ -277,6 +277,7 @@ export function createNoaLayer(network: NetworkLayer) {
       getCraftingTable,
       clearCraftingTable,
       setCraftingTableIndex,
+      getSelectedBlockType,
       getTrimmedCraftingTable,
       getCraftingResult,
       teleportRandom,

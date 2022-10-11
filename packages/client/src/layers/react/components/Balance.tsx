@@ -26,7 +26,7 @@ export const Balance: React.FC<{
   async function updateBalance() {
     const balance = await signer.getBalance();
     const eth = formatEther(balance).split(".");
-    setBalance(eth[0] + (eth.length > 1 ? eth[1].substring(0, 5) : ""));
+    setBalance(eth[0] + (eth.length > 1 ? "." + eth[1].substring(0, 5) : ""));
   }
 
   async function updateTimeUntilDrip(username: string) {

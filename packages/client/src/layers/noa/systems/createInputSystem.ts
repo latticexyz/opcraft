@@ -1,7 +1,8 @@
 import { formatEntityID } from "@latticexyz/network";
 import { getComponentValue, HasValue, runQuery, setComponent, updateComponent } from "@latticexyz/recs";
-import { streamToComputed } from "@latticexyz/utils";
+import { sleep } from "@latticexyz/utils";
 import { NetworkLayer, BlockType } from "../../network";
+import { FAST_MINING_DURATION } from "../constants";
 import { HandComponent, HAND_COMPONENT } from "../engine/components/handComponent";
 import { MiningBlockComponent, MINING_BLOCK_COMPONENT } from "../engine/components/miningBlockComponent";
 import { getNoaComponentStrict } from "../engine/components/utils";
@@ -12,7 +13,7 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
     noa,
     components: { SelectedSlot, UI },
     SingletonEntity,
-    api: { toggleInventory, placeSelectedItem, getCurrentChunk },
+    api: { toggleInventory, placeSelectedItem, getCurrentChunk, getSelectedBlockType },
     streams: { stakeAndClaim$ },
   } = context;
 
@@ -33,7 +34,7 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
     return claim.claimer === formatEntityID(playerAddress);
   }
 
-  noa.inputs.down.on("fire", function () {
+  function mineTargetedBlock() {
     if (noa.targetedBlock) {
       if (!canInteract()) return;
       const pos = noa.targetedBlock.position;
@@ -47,12 +48,28 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
         return;
       }
       miningComponent.active = true;
-      handComponent.isMining = true;
+      handComponent.isMining;
       miningComponent.block = { x: pos[0], y: pos[1], z: pos[2] };
+      if (getSelectedBlockType() === BlockType.Bedrock) {
+        miningComponent.duration = FAST_MINING_DURATION;
+      }
+      return miningComponent;
+    }
+  }
+
+  let firePressed = false;
+  noa.inputs.down.on("fire", async function () {
+    firePressed = true;
+    const miningComponent = mineTargetedBlock();
+    while (firePressed) {
+      if (!miningComponent?.duration) return;
+      await sleep(miningComponent.duration + 100);
+      if (firePressed) mineTargetedBlock();
     }
   });
 
   noa.inputs.up.on("fire", function () {
+    firePressed = false;
     const miningComponent = getNoaComponentStrict<MiningBlockComponent>(noa, noa.playerEntity, MINING_BLOCK_COMPONENT);
     const handComponent = getNoaComponentStrict<HandComponent>(noa, noa.playerEntity, HAND_COMPONENT);
     miningComponent.active = false;
