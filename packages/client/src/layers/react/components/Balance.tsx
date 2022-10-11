@@ -120,7 +120,7 @@ export const Balance: React.FC<{
     <>
       <BalanceContainer>
         <p>
-          <Title>Hello,</Title> {address?.substring(0, 6)}...
+          <Title>Hello,</Title> {username && locked ? "@" + username : address?.substring(0, 6) + "..."}
         </p>
         <p>Balance: {balance} GWEI</p>
         {open ? TwitterBox : null}
