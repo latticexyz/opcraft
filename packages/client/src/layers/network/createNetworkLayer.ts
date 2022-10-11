@@ -134,13 +134,18 @@ export async function createNetworkLayer(config: GameConfig) {
     if (entityIndex == null) return console.warn("trying to place unknown entity", entity);
     const blockId = getComponentValue(components.Item, entityIndex)?.value;
     const blockType = blockId != null ? BlockIdToKey[blockId as EntityID] : undefined;
+    const godIndex = world.entityToIndex.get(GodID);
+    const creativeMode = godIndex != null && getComponentValue(components.GameConfig, godIndex)?.creativeMode;
 
     actions.add({
       id: `build+${coord.x}/${coord.y}/${coord.z}` as EntityID,
       metadata: { actionType: "build", coord, blockType },
       requirement: () => true,
       components: { Position: components.Position, Item: components.Item, OwnedBy: components.OwnedBy },
-      execute: () => systems["system.Build"].executeTyped(BigNumber.from(entity), coord, { gasLimit: 1_700_000 }),
+      execute: () =>
+        systems[creativeMode ? "system.CreativeBuild" : "system.Build"].executeTyped(BigNumber.from(entity), coord, {
+          gasLimit: 1_700_000,
+        }),
       updates: () => [
         {
           component: "OwnedBy",
