@@ -10,8 +10,8 @@ import {
 import { setupDevSystems } from "./setup";
 import { createActionSystem, setupMUDNetwork, waitForActionCompletion } from "@latticexyz/std-client";
 import { GameConfig, getNetworkConfig } from "./config";
-import { awaitPromise, Coord, filterNullishValues, VoxelCoord } from "@latticexyz/utils";
-import { BigNumber, utils } from "ethers";
+import { awaitPromise, computedToStream, Coord, filterNullishValues, VoxelCoord } from "@latticexyz/utils";
+import { BigNumber, utils, Signer } from "ethers";
 import {
   definePositionComponent,
   defineOwnedByComponent,
@@ -37,7 +37,7 @@ import { BlockIdToKey, BlockType } from "./constants";
 import { createFaucetService, createRelayStream, GodID } from "@latticexyz/network";
 import { SystemTypes } from "contracts/types/SystemTypes";
 import { SystemAbis } from "contracts/types/SystemAbis.mjs";
-import { map, timer } from "rxjs";
+import { map, timer, combineLatest, Subject } from "rxjs";
 
 /**
  * The Network layer is the lowest layer in the client architecture.
@@ -278,6 +278,21 @@ export async function createNetworkLayer(config: GameConfig) {
   }
 
   // --- STREAMS --------------------------------------------------------------------
+  const balanceGwei$ = new Subject<number>();
+
+  world.registerDisposer(
+    combineLatest([timer(0, 5000), computedToStream(network.signer)])
+      .pipe(
+        map<[number, Signer | undefined], Promise<number>>(async ([, signer]) =>
+          signer
+            ? signer.getBalance().then((v) => v.div(BigNumber.from(10).pow(9)).toNumber())
+            : new Promise((res) => res(0))
+        ),
+        awaitPromise()
+      )
+      .subscribe(balanceGwei$).unsubscribe
+  );
+
   const connectedClients$ = timer(0, 5000).pipe(
     map(async () => relay?.countConnected() || 0),
     awaitPromise()
@@ -305,7 +320,7 @@ export async function createNetworkLayer(config: GameConfig) {
       getTerrainBlockAtPosition,
     },
     dev: setupDevSystems(world, encoders, systems),
-    streams: { connectedClients$ },
+    streams: { connectedClients$, balanceGwei$ },
     config,
     relay,
     worldAddress: config.worldAddress,
