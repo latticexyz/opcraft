@@ -18,7 +18,7 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
   } = context;
 
   const {
-    components: { Item, Position },
+    components: { Item, Position, GameConfig },
     api: { stake, claim },
     network: { connectedAddress },
   } = network;
@@ -43,6 +43,7 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
         noa.playerEntity,
         MINING_BLOCK_COMPONENT
       );
+      const creativeMode = getComponentValue(GameConfig, SingletonEntity)?.creativeMode;
       const handComponent = getNoaComponentStrict<HandComponent>(noa, noa.playerEntity, HAND_COMPONENT);
       if (miningComponent.active) {
         return;
@@ -50,7 +51,10 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
       miningComponent.active = true;
       handComponent.isMining;
       miningComponent.block = { x: pos[0], y: pos[1], z: pos[2] };
-      if (getSelectedBlockType() === BlockType.Bedrock) {
+
+      if (creativeMode) {
+        miningComponent.duration = 10;
+      } else if (getSelectedBlockType() === BlockType.Bedrock) {
         miningComponent.duration = FAST_MINING_DURATION;
       }
       return miningComponent;
