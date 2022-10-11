@@ -83,10 +83,8 @@ export const Balance: React.FC<{
     setStatus(ActionState.Executing);
     try {
       if (locked) {
-        console.log("Locked", username);
         await faucet.drip(usernameAddressPair);
       } else {
-        console.log("Unlocked", username);
         await faucet.dripVerifyTweet(usernameAddressPair);
       }
       await updateBalance();
