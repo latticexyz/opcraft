@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { registerUIComponent } from "../engine";
 import { combineLatest, concat, map, of, scan } from "rxjs";
 import styled from "styled-components";
-import { Absolute, AbsoluteBorder, Background, Center, Crafting, Slot, Gold, Red, Relative } from "./common";
+import { Absolute, AbsoluteBorder, Background, Center, Crafting, Slot, Gold, Red, Container } from "./common";
 import { range } from "@latticexyz/utils";
 import {
   defineQuery,
@@ -35,7 +35,7 @@ export function registerInventory() {
       const {
         network: {
           components: { OwnedBy, Item },
-          streams: { connectedClients$ },
+          streams: { connectedClients$, balanceGwei$ },
           network: { connectedAddress },
         },
         noa: {
@@ -88,6 +88,7 @@ export function registerInventory() {
         stakeAndClaim$,
         of(connectedAddress.get()),
         connectedClients$,
+        balanceGwei$,
         inventoryIndex$,
         craftingTable$,
       ]).pipe(map((props) => ({ props })));
@@ -100,6 +101,7 @@ export function registerInventory() {
         stakeAndClaim,
         connectedAddress,
         connectedClients,
+        balance,
       ] = props;
 
       const [holdingBlock, setHoldingBlock] = useState<EntityIndex | undefined>();
@@ -221,6 +223,13 @@ export function registerInventory() {
               <Gold>You control this chunk!</Gold>
             </Notification>
           )}
+          {balance === 0 && (
+            <NotificationWrapper>
+              <Container>
+                <Red>X</Red> you need to request a drip before you can mine or build (top left).
+              </Container>
+            </NotificationWrapper>
+          )}
         </BottomBar>
       );
 
@@ -233,6 +242,13 @@ export function registerInventory() {
     }
   );
 }
+
+const NotificationWrapper = styled.div`
+  position: absolute;
+  top: -25px;
+  transform: translate(-50%, -100%);
+  left: 50%;
+`;
 
 const PixelatedImage = styled.img`
   image-rendering: pixelated;

@@ -21,12 +21,14 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
     components: { Item, Position, GameConfig },
     api: { stake, claim },
     network: { connectedAddress },
+    streams: { balanceGwei$ },
   } = network;
 
   // mine targeted block on on left click
   noa.inputs.bind("fire", "F");
 
   function canInteract() {
+    if (balanceGwei$.getValue() === 0) return false;
     const { claim } = stakeAndClaim$.getValue() || {};
     const playerAddress = connectedAddress.get();
     if (!playerAddress) return false;
