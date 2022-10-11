@@ -37,7 +37,7 @@ import { BlockIdToKey, BlockType } from "./constants";
 import { createFaucetService, createRelayStream, GodID } from "@latticexyz/network";
 import { SystemTypes } from "contracts/types/SystemTypes";
 import { SystemAbis } from "contracts/types/SystemAbis.mjs";
-import { map, timer, combineLatest, Subject } from "rxjs";
+import { map, timer, combineLatest, BehaviorSubject } from "rxjs";
 
 /**
  * The Network layer is the lowest layer in the client architecture.
@@ -278,8 +278,7 @@ export async function createNetworkLayer(config: GameConfig) {
   }
 
   // --- STREAMS --------------------------------------------------------------------
-  const balanceGwei$ = new Subject<number>();
-
+  const balanceGwei$ = new BehaviorSubject<number>(1);
   world.registerDisposer(
     combineLatest([timer(0, 5000), computedToStream(network.signer)])
       .pipe(

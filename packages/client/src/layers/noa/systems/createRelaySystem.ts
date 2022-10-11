@@ -18,7 +18,6 @@ import {
   Coord,
   Int32ArrayToUint8Array,
   splitUint8Arrays,
-  streamToComputed,
   Uint8ArrayToInt32Array,
   VoxelCoord,
 } from "@latticexyz/utils";
@@ -77,8 +76,6 @@ export async function createRelaySystem(network: NetworkLayer, context: NoaLayer
     return;
   }
 
-  const balanceGwei = streamToComputed(balanceGwei$);
-
   function removePlayerComponent(entity: EntityIndex) {
     removeComponent(PlayerPosition, entity);
     removeComponent(PlayerDirection, entity);
@@ -122,7 +119,7 @@ export async function createRelaySystem(network: NetworkLayer, context: NoaLayer
   });
 
   defineRxSystem(world, playerPosition$, (position) => {
-    if ((balanceGwei.get() ?? 0) < MINIMUM_BALANCE) return;
+    if (balanceGwei$.getValue() < MINIMUM_BALANCE) return;
     const pitch = noa.camera.pitch;
     const yaw = noa.camera.heading;
     const q = Quaternion.FromEulerAngles(pitch, yaw, 0);
