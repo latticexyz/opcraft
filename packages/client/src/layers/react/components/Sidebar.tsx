@@ -5,6 +5,7 @@ import { combineLatest, map, Observable, of } from "rxjs";
 import styled from "styled-components";
 import { Balance } from "./Balance";
 import { ChunkExplorer } from "./ChunkExplorer";
+import { JoinSocial } from "./JoinSocial";
 
 type ObservableType<S extends Observable<unknown>> = S extends Observable<infer T> ? T : never;
 
@@ -57,6 +58,7 @@ export function registerSidebar() {
         <Wrapper>
           <Balance {...balance} />
           <ChunkExplorer {...chunk} />
+          <JoinSocial/>
         </Wrapper>
       );
     }
