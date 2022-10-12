@@ -28,7 +28,7 @@ export function setupNoaEngine(api: API) {
     chunkRemoveDistance: [CHUNK_RENDER_DISTANCE + 8, CHUNK_RENDER_DISTANCE + 8],
     chunkSize: CHUNK_SIZE,
     gravity: [0, -17, 0],
-    playerStart: [-1543, 13, -826],
+    playerStart: [-1543, 17, -826],
     blockTestDistance: 7,
     playerHeight: 1.85,
     playerWidth: 0.6,
