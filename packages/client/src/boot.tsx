@@ -22,8 +22,8 @@ let Engine = EngineImport;
 const defaultParams = {
   chainId: "64657",
   worldAddress: "0x58F6De1FAF79A7Fc2bC97c3e925E2B0F90eC4B11",
-  rpc: "https://opcraft-2-replica-3.bedrock-goerli.optimism.io",
-  wsRpc: "wss://opcraft-2-replica-3.bedrock-goerli.optimism.io/ws",
+  rpc: "https://opcraft-3-replica-0.bedrock-goerli.optimism.io",
+  wsRpc: "wss://opcraft-3-replica-0.bedrock-goerli.optimism.io/ws",
   initialBlockNumber: "69918",
   snapshot: "https://ecs-snapshot.opcraft-mud-services.lattice.xyz",
   stream: "https://ecs-stream.opcraft-mud-services.lattice.xyz",
