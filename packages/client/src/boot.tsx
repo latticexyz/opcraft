@@ -24,7 +24,7 @@ const defaultParams = {
   worldAddress: "0x3031a86EFA3A9c0B41EA089F2021C6490591fB8c",
   rpc: "https://opcraft-3-replica-0.bedrock-goerli.optimism.io",
   wsRpc: "wss://opcraft-3-replica-0.bedrock-goerli.optimism.io/ws",
-  initialBlockNumber: "64657",
+  initialBlockNumber: "4146",
   snapshot: "https://ecs-snapshot.opcraft-mud-services.lattice.xyz",
   stream: "https://ecs-stream.opcraft-mud-services.lattice.xyz",
   relay: "https://ecs-relay.opcraft-mud-services.lattice.xyz",
