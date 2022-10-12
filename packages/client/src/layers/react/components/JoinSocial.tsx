@@ -1,12 +1,12 @@
 import React from "react";
 import styled from "styled-components";
-import { Button, Container, Title } from "./common";
+import { Button, Container, Gold } from "./common";
 
 export const JoinSocial: React.FC = () => {
   return (
     <ChunkContainer>
       <p>
-        <Title>Join the Discord!</Title>
+        <Gold>Join the community!</Gold>
       </p>
       <Buttons>
         <Button onClick={() => window.open("https://discord.gg/XhZp6HbqNp", "blank")}>Discord</Button>
