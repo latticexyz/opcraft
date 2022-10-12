@@ -63,11 +63,17 @@ export function registerActionQueue() {
         <ActionQueueList>
           {[...getComponentEntities(Action)].map((e) => {
             const { state, metadata } = getComponentValueStrict(Action, e);
-            const { actionType, coord, blockType } = metadata || {};
+            const { actionType, coord, blockType, txHash } = metadata || {};
             const icon = blockType && getBlockIconUrl(blockType);
             return (
               <div key={e} className="ActionQueueItem">
-                <ActionQueueItem state={state} icon={icon} title={`${actionType} tx`} description={blockType} />
+                <ActionQueueItem
+                  state={state}
+                  icon={icon}
+                  title={`${actionType} tx`}
+                  description={blockType}
+                  txHash={txHash}
+                />
                 {/* TODO: conditionally render this for debugging? */}
                 {coord ? (
                   <div className="ActionQueueItemPosition">

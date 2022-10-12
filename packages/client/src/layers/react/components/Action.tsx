@@ -6,11 +6,14 @@ import { CheckIcon } from "./icons/CheckIcon";
 import { CloseIcon } from "./icons/CloseIcon";
 import { Container } from "./common";
 
+const EXPLORER = "https://blockscout.com/optimism/opcraft/";
+
 type Props = {
   state: ActionState;
   icon?: string;
   title: string;
   description?: string;
+  txHash?: string;
 };
 
 const ActionContainer = styled(Container)`
@@ -92,8 +95,13 @@ export const ActionStatusIcon = ({ state }: { state: ActionState }) => {
   }
 };
 
-export const Action = ({ state, icon, title, description }: Props) => (
-  <ActionContainer className={state <= ActionState.Executing ? "Action--pending" : ""}>
+export const Action = ({ state, icon, title, description, txHash }: Props) => (
+  <ActionContainer
+    className={state <= ActionState.Executing ? "Action--pending" : ""}
+    onClick={() => {
+      txHash && window.open(EXPLORER + txHash);
+    }}
+  >
     {/* TODO: placeholder icon if none is set so we can fill the gap and keep text aligned */}
     <div className="ActionIcon">{icon ? <img src={icon} /> : null}</div>
     <div className="ActionLabel">

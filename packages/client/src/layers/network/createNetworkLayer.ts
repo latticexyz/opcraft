@@ -4,13 +4,15 @@ import {
   EntityID,
   EntityIndex,
   getComponentValue,
+  getComponentValueStrict,
   HasValue,
   runQuery,
+  updateComponent,
 } from "@latticexyz/recs";
 import { setupDevSystems } from "./setup";
 import { createActionSystem, setupMUDNetwork, waitForActionCompletion } from "@latticexyz/std-client";
 import { GameConfig, getNetworkConfig } from "./config";
-import { awaitPromise, computedToStream, Coord, filterNullishValues, VoxelCoord } from "@latticexyz/utils";
+import { awaitPromise, computedToStream, Coord, deferred, filterNullishValues, VoxelCoord } from "@latticexyz/utils";
 import { BigNumber, utils, Signer } from "ethers";
 import {
   definePositionComponent,
@@ -95,10 +97,12 @@ export async function createNetworkLayer(config: GameConfig) {
   }
 
   // --- ACTION SYSTEM --------------------------------------------------------------
-  const actions = createActionSystem<{ actionType: string; coord?: VoxelCoord; blockType?: keyof typeof BlockType }>(
-    world,
-    txReduced$
-  );
+  const actions = createActionSystem<{
+    actionType: string;
+    coord?: VoxelCoord;
+    blockType?: keyof typeof BlockType;
+    txHash?: string;
+  }>(world, txReduced$);
 
   // Add indexers and optimistic updates
   const { withOptimisticUpdates } = actions;
@@ -129,7 +133,7 @@ export async function createNetworkLayer(config: GameConfig) {
     return getEntityAtPositionApi(terrainContext, position);
   }
 
-  function build(entity: EntityID, coord: VoxelCoord) {
+  async function build(entity: EntityID, coord: VoxelCoord) {
     const entityIndex = world.entityToIndex.get(entity);
     if (entityIndex == null) return console.warn("trying to place unknown entity", entity);
     const blockId = getComponentValue(components.Item, entityIndex)?.value;
@@ -137,15 +141,23 @@ export async function createNetworkLayer(config: GameConfig) {
     const godIndex = world.entityToIndex.get(GodID);
     const creativeMode = godIndex != null && getComponentValue(components.GameConfig, godIndex)?.creativeMode;
 
-    actions.add({
+    const [resolve, , txHash] = deferred<string>();
+    const actionIndex = actions.add({
       id: `build+${coord.x}/${coord.y}/${coord.z}` as EntityID,
       metadata: { actionType: "build", coord, blockType },
       requirement: () => true,
       components: { Position: components.Position, Item: components.Item, OwnedBy: components.OwnedBy },
-      execute: () =>
-        systems[creativeMode ? "system.CreativeBuild" : "system.Build"].executeTyped(BigNumber.from(entity), coord, {
-          gasLimit: 500_000,
-        }),
+      execute: async () => {
+        const tx = await systems[creativeMode ? "system.CreativeBuild" : "system.Build"].executeTyped(
+          BigNumber.from(entity),
+          coord,
+          {
+            gasLimit: 500_000,
+          }
+        );
+        resolve(tx.hash);
+        return tx;
+      },
       updates: () => [
         {
           component: "OwnedBy",
@@ -159,6 +171,13 @@ export async function createNetworkLayer(config: GameConfig) {
         },
       ],
     });
+    const hash = await txHash;
+
+    const metadata = getComponentValueStrict(actions.Action, actionIndex).metadata;
+
+    // TODO: clean up
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    updateComponent(actions.Action, actionIndex, { metadata: { ...metadata, txHash: hash } as any });
   }
 
   async function mine(coord: VoxelCoord) {
