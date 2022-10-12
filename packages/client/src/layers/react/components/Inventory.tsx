@@ -226,7 +226,7 @@ export function registerInventory() {
           {balance === 0 && (
             <NotificationWrapper>
               <Container>
-                <Red>X</Red> you need to request a drip before you can mine or build (top left).
+                <Red>X</Red> you need to request a drip before you can mine or build (top right).
               </Container>
             </NotificationWrapper>
           )}
