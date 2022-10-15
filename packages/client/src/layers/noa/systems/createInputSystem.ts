@@ -40,6 +40,7 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
     if (noa.targetedBlock) {
       if (!canInteract()) return;
       const pos = noa.targetedBlock.position;
+      if (pos[1] < -63) return;
       const miningComponent = getNoaComponentStrict<MiningBlockComponent>(
         noa,
         noa.playerEntity,
