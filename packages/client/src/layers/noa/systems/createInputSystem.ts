@@ -5,7 +5,7 @@ import { NetworkLayer, BlockType } from "../../network";
 import { FAST_MINING_DURATION } from "../constants";
 import { HandComponent, HAND_COMPONENT } from "../engine/components/handComponent";
 import { MiningBlockComponent, MINING_BLOCK_COMPONENT } from "../engine/components/miningBlockComponent";
-import { getNoaComponentStrict } from "../engine/components/utils";
+import { getNoaComponent, getNoaComponentStrict } from "../engine/components/utils";
 import { NoaLayer } from "../types";
 
 export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
@@ -83,7 +83,8 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
   });
 
   noa.on("targetBlockChanged", (targetedBlock: { position: number[] }) => {
-    const miningComponent = getNoaComponentStrict<MiningBlockComponent>(noa, noa.playerEntity, MINING_BLOCK_COMPONENT);
+    const miningComponent = getNoaComponent<MiningBlockComponent>(noa, noa.playerEntity, MINING_BLOCK_COMPONENT);
+    if (!miningComponent) return;
     const handComponent = getNoaComponentStrict<HandComponent>(noa, noa.playerEntity, HAND_COMPONENT);
     if (!targetedBlock) {
       return;
