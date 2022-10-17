@@ -24,8 +24,6 @@ import {
   defineStakeComponent,
   defineClaimComponent,
   defineNameComponent,
-  defineSystemsRegistryComponent,
-  defineComponentsRegistryComponent,
 } from "./components";
 import {
   getBlockAtPosition as getBlockAtPositionApi,
@@ -65,30 +63,15 @@ export async function createNetworkLayer(config: GameConfig) {
     Occurrence: defineOccurrenceComponent(world),
     Stake: defineStakeComponent(world),
     Claim: defineClaimComponent(world),
-    // The following two components are replaced after calling setupMUDNetwork
-    SystemsRegistry: defineSystemsRegistryComponent(world),
-    ComponentsRegistry: defineComponentsRegistryComponent(world),
   };
 
   // --- SETUP ----------------------------------------------------------------------
-  const {
-    txQueue,
-    systems,
-    txReduced$,
-    network,
-    startSync,
-    encoders,
-    ecsEvent$,
-    mappings,
-    SystemsRegistry,
-    ComponentsRegistry,
-  } = await setupMUDNetwork<typeof components, SystemTypes>(getNetworkConfig(config), world, components, SystemAbis, {
+  const { txQueue, systems, txReduced$, network, startSync, encoders, ecsEvent$, mappings } = await setupMUDNetwork<
+    typeof components,
+    SystemTypes
+  >(getNetworkConfig(config), world, components, SystemAbis, {
     initialGasPrice: 2_000_000,
   });
-
-  // Add registries to exported components objects
-  components.SystemsRegistry = SystemsRegistry;
-  components.ComponentsRegistry = ComponentsRegistry;
 
   // Relayer setup
   const playerAddress = network.connectedAddress.get();
