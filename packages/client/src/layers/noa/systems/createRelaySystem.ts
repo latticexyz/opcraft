@@ -118,12 +118,15 @@ export async function createRelaySystem(network: NetworkLayer, context: NoaLayer
     }
   });
 
-  defineRxSystem(world, playerPosition$, (position) => {
+  // If balance is below the minimum balance, don't send messages, but ping to keep receiving messages
+  defineRxSystem(world, timer(0, 15000), () => {
     if (balanceGwei$.getValue() < MINIMUM_BALANCE) {
-      // If balance is below the minimum balance, don't send messages, but ping to keep receiving messages
       relay.ping();
-      return;
     }
+  });
+
+  defineRxSystem(world, playerPosition$, (position) => {
+    if (balanceGwei$.getValue() < MINIMUM_BALANCE) return;
     const pitch = noa.camera.pitch;
     const yaw = noa.camera.heading;
     const q = Quaternion.FromEulerAngles(pitch, yaw, 0);
