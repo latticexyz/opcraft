@@ -104,7 +104,7 @@ export const Balance: React.FC<{
   const TwitterBox = (
     <Relative>
       <InputBefore>@</InputBefore>
-      <Input value={username} onChange={(e) => setUsername(e.target.value)} />
+      <Input value={username} onChange={(e) => setUsername(e.target.value)} placeholder={"twitter handle"} />
       <Buttons>
         <TwitterButton disabled={!username} onClick={tweet}>
           1. Tweet
