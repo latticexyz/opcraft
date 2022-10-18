@@ -28,7 +28,7 @@ export const Balance: React.FC<{
   async function onRequestDrip() {
     if (timeToDrip <= 0) {
       if (locked && username) requestDrip();
-      else setOpen(true);
+      else setOpen(!open);
     }
   }
 
