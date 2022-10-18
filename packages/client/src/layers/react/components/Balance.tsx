@@ -8,7 +8,7 @@ import { ActionState } from "@latticexyz/std-client";
 import { ActionStatusIcon } from "./Action";
 import { Observable } from "rxjs";
 
-const DEFAULT_TEXT = "autonomous worlds await...\n\n";
+const DEFAULT_TEXT = "Play OPCraft https://bit.ly/3VCVYyt @latticexyz @optimismFND\n\n";
 const TWITTER_URL = "https://twitter.com/intent/tweet?text=";
 const SIGNATURE_TEXT = (handle: string, address: string) => `${handle} tweetooor requesting drip to ${address} address`;
 
