@@ -107,7 +107,7 @@ export function registerSidebar() {
           )}
           {!tutorial?.mine && !tutorial?.inventory && tutorial?.craft && (
             <Hint onClose={() => updateTutorial({ craft: false })}>
-              <Gold>Hint</Gold>: place wool over a flower in the crafting UI (inventory) to craft dyed wool
+              <Gold>Hint</Gold>: place wool on top of a flower in the crafting UI (top of inventory) to craft dyed wool
             </Hint>
           )}
         </Wrapper>
