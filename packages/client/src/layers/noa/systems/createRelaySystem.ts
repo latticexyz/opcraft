@@ -118,6 +118,13 @@ export async function createRelaySystem(network: NetworkLayer, context: NoaLayer
     }
   });
 
+  // If balance is below the minimum balance, don't send messages, but ping to keep receiving messages
+  defineRxSystem(world, timer(0, 15000), () => {
+    if (balanceGwei$.getValue() < MINIMUM_BALANCE) {
+      relay.ping();
+    }
+  });
+
   defineRxSystem(world, playerPosition$, (position) => {
     if (balanceGwei$.getValue() < MINIMUM_BALANCE) return;
     const pitch = noa.camera.pitch;

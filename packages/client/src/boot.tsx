@@ -30,6 +30,7 @@ const defaultParams = {
   relay: "https://ecs-relay.opcraft-mud-services.lattice.xyz",
   faucet: "https://faucet.opcraft-mud-services.lattice.xyz",
   blockTime: "1000",
+  blockExplorer: "https://blockscout.com/optimism/opcraft",
 };
 
 /**
@@ -57,6 +58,7 @@ async function bootGame() {
     const initialBlockNumber = initialBlockNumberString ? parseInt(initialBlockNumberString) : 0;
     const blockTimeString = params.get("blockTime") ?? defaultParams.blockTime;
     const blockTime = blockTimeString ? parseInt(blockTimeString) : 1000;
+    const blockExplorer = params.get("blockExplorer") ?? defaultParams.blockExplorer;
 
     if (!privateKey) {
       privateKey = localStorage.getItem("burnerWallet") || Wallet.createRandom().privateKey;
@@ -78,6 +80,7 @@ async function bootGame() {
         devMode,
         blockTime,
         initialBlockNumber,
+        blockExplorer,
       };
     }
 

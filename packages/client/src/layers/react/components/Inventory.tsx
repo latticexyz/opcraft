@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { registerUIComponent } from "../engine";
 import { combineLatest, concat, map, of, scan } from "rxjs";
 import styled from "styled-components";
@@ -200,6 +200,24 @@ export function registerInventory() {
       const { claim } = stakeAndClaim;
       const canBuild = claim && connectedAddress ? claim.claimer === formatEntityID(connectedAddress) : true;
 
+      const notification =
+        balance === 0 ? (
+          <>
+            <Red>X</Red> you need to request a drip before you can mine or build (top right).
+          </>
+        ) : claim && !canBuild ? (
+          <>
+            <Red>X</Red> you cannot build or mine here. This chunk has been claimed by{" "}
+            <Gold>
+              {claim.claimer.substring(0, 6)}...{claim.claimer.substring(36, 42)}
+            </Gold>
+          </>
+        ) : claim && canBuild ? (
+          <>
+            <Gold>You control this chunk!</Gold>
+          </>
+        ) : null;
+
       const Bottom = (
         <BottomBar>
           <ConnectedPlayersContainer>
@@ -210,24 +228,9 @@ export function registerInventory() {
           <LogoContainer>
             <PixelatedImage src="/img/opcraft-dark.png" width={150} />
           </LogoContainer>
-          {claim && !canBuild && (
-            <Notification>
-              <Red>X</Red> you cannot build or mine here. This chunk has been claimed by{" "}
-              <Gold>
-                {claim.claimer.substring(0, 6)}...{claim.claimer.substring(36, 42)}
-              </Gold>
-            </Notification>
-          )}
-          {claim && canBuild && (
-            <Notification>
-              <Gold>You control this chunk!</Gold>
-            </Notification>
-          )}
-          {balance === 0 && (
+          {notification && (
             <NotificationWrapper>
-              <Container>
-                <Red>X</Red> you need to request a drip before you can mine or build (top right).
-              </Container>
+              <Container>{notification}</Container>
             </NotificationWrapper>
           )}
         </BottomBar>
@@ -248,6 +251,7 @@ const NotificationWrapper = styled.div`
   top: -25px;
   transform: translate(-50%, -100%);
   left: 50%;
+  line-height: 100%;
 `;
 
 const PixelatedImage = styled.img`

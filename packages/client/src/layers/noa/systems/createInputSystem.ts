@@ -159,4 +159,9 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
     const chunk = getCurrentChunk();
     chunk && claim(chunk);
   });
+
+  noa.inputs.bind("blockexplorer", "B");
+  noa.inputs.down.on("blockexplorer", () => {
+    window.open(network.network.config.blockExplorer);
+  });
 }
