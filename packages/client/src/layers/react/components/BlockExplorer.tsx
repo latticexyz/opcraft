@@ -36,6 +36,8 @@ const BlockExplorerContainer = styled.div`
     border-left: 2px solid rgba(31, 31, 31, 0.3);
     position: relative;
     margin-bottom: 1em;
+    pointer-events: all;
+    cursor: pointer;
   }
   .BlockExplorer-BlockNumber {
     position: absolute;
@@ -93,6 +95,7 @@ export function registerBlockExplorer() {
           components: { Item },
           network: { blockNumber$ },
           world,
+          config: { blockExplorer },
         },
       } = layers;
 
@@ -152,14 +155,18 @@ export function registerBlockExplorer() {
 
             return [...otherBlocks, block].slice(-500);
           }, [] as BlockSummary),
-          map((summary) => ({ summary }))
+          map((summary) => ({ summary, blockExplorer }))
         );
     },
-    ({ summary }) => {
+    ({ summary, blockExplorer }) => {
       return (
         <BlockExplorerContainer>
           {summary.map(([blockNumber, block]) => (
-            <div key={blockNumber} className="BlockExplorer-Block">
+            <div
+              key={blockNumber}
+              className="BlockExplorer-Block"
+              onClick={() => window.open(blockExplorer + "/block/" + blockNumber)}
+            >
               {blockNumber % 16 === 0 ? <div className="BlockExplorer-BlockNumber">{blockNumber}</div> : null}
               <div className="BlockExplorer-Actions">
                 {Object.entries(block).map(([blockType, counts]) => (
