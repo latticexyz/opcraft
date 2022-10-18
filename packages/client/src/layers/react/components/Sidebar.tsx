@@ -1,11 +1,13 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import React from "react";
 import { registerUIComponent } from "../engine";
-import { combineLatest, map, Observable, of } from "rxjs";
+import { combineLatest, concat, map, Observable, of } from "rxjs";
 import styled from "styled-components";
 import { Balance } from "./Balance";
 import { ChunkExplorer } from "./ChunkExplorer";
 import { JoinSocial } from "./JoinSocial";
+import { filterNullish } from "@latticexyz/utils";
+import { getComponentValue, updateComponent } from "@latticexyz/recs";
 
 type ObservableType<S extends Observable<unknown>> = S extends Observable<infer T> ? T : never;
 
@@ -29,6 +31,8 @@ export function registerSidebar() {
         noa: {
           streams: { playerChunk$ },
           api: { getStakeAndClaim },
+          components: { Tutorial },
+          SingletonEntity,
         },
       } = layers;
 
@@ -48,17 +52,29 @@ export function registerSidebar() {
         }))
       );
 
-      return combineLatest<[ObservableType<typeof chunk$>, ObservableType<typeof balance$>]>([chunk$, balance$]).pipe(
-        map((props) => ({ props }))
+      const tutorial$ = concat(
+        of(getComponentValue(Tutorial, SingletonEntity)),
+        Tutorial.update$.pipe(map((u) => u.value[0]))
       );
+
+      return combineLatest<
+        [ObservableType<typeof chunk$>, ObservableType<typeof balance$>, ObservableType<typeof tutorial$>]
+      >([chunk$, balance$, tutorial$]).pipe(map((props) => ({ props, layers })));
     },
-    ({ props }) => {
-      const [chunk, balance] = props;
+    ({ props, layers }) => {
+      const [chunk, balance, tutorial] = props;
+      const {
+        components: { Tutorial },
+        SingletonEntity,
+      } = layers.noa;
+
       return (
         <Wrapper>
           <Balance {...balance} />
           <ChunkExplorer {...chunk} />
-          <JoinSocial/>
+          {tutorial?.community && (
+            <JoinSocial onClose={() => updateComponent(Tutorial, SingletonEntity, { community: false })} />
+          )}
         </Wrapper>
       );
     }

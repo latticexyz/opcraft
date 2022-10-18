@@ -23,6 +23,7 @@ import {
   definePlayerLastMessage,
   definePlayerRelayerChunkPositionComponent,
   defineLocalPlayerPositionComponent,
+  defineTutorialComponent,
 } from "./components";
 import { CRAFTING_SIDE, EMPTY_CRAFTING_TABLE } from "./constants";
 import { setupHand } from "./engine/hand";
@@ -79,6 +80,7 @@ export function createNoaLayer(network: NetworkLayer) {
     PlayerLastMessage: definePlayerLastMessage(world),
     UI: defineUIComponent(world),
     InventoryIndex: createLocalCache(createIndexer(defineInventoryIndexComponent(world)), uniqueWorldId),
+    Tutorial: createLocalCache(defineTutorialComponent(world), uniqueWorldId),
   };
 
   // --- SETUP ----------------------------------------------------------------------
@@ -94,6 +96,8 @@ export function createNoaLayer(network: NetworkLayer) {
     showCrafting: false,
   });
   setComponent(components.SelectedSlot, SingletonEntity, { value: 0 });
+  !getComponentValue(components.Tutorial, SingletonEntity) &&
+    setComponent(components.Tutorial, SingletonEntity, { community: true });
 
   // --- API ------------------------------------------------------------------------
   function setCraftingTable(entities: EntityIndex[][]) {

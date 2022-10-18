@@ -4,7 +4,7 @@ export { Slot } from "./Slot";
 export { Border } from "./Border";
 export { AbsoluteBorder } from "./AbsoluteBorder";
 export { Crafting } from "./Crafting";
-export { Container } from "./Container";
+export { Container, CloseableContainer } from "./Container";
 export { Button } from "./Button";
 
 export const GUI = styled.div<{ _x: number; _y: number; _height: number; _width: number; scale: number }>`
