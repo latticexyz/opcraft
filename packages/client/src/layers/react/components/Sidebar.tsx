@@ -7,7 +7,9 @@ import { Balance } from "./Balance";
 import { ChunkExplorer } from "./ChunkExplorer";
 import { JoinSocial } from "./JoinSocial";
 import { filterNullish } from "@latticexyz/utils";
-import { getComponentValue, updateComponent } from "@latticexyz/recs";
+import { ComponentValue, getComponentValue, SchemaOf, updateComponent } from "@latticexyz/recs";
+import { Hint } from "./Hint";
+import { Gold } from "./common";
 
 type ObservableType<S extends Observable<unknown>> = S extends Observable<infer T> ? T : never;
 
@@ -68,12 +70,45 @@ export function registerSidebar() {
         SingletonEntity,
       } = layers.noa;
 
+      function updateTutorial(update: Partial<ComponentValue<SchemaOf<typeof Tutorial>>>) {
+        updateComponent(Tutorial, SingletonEntity, update);
+      }
+
       return (
         <Wrapper>
           <Balance {...balance} />
           <ChunkExplorer {...chunk} />
-          {tutorial?.community && (
-            <JoinSocial onClose={() => updateComponent(Tutorial, SingletonEntity, { community: false })} />
+          {tutorial?.community && <JoinSocial onClose={() => updateTutorial({ community: false })} />}
+          {tutorial?.moving && (
+            <Hint onClose={() => updateTutorial({ moving: false })}>
+              <Gold>Hint</Gold>: press <Gold>W, A, S, or D</Gold> to move around
+            </Hint>
+          )}
+          {tutorial?.mine && (
+            <Hint onClose={() => updateTutorial({ mine: false })}>
+              <Gold>Hint</Gold>: press and hold <Gold>left mouse</Gold> to mine a block
+            </Hint>
+          )}
+          {tutorial?.build && (
+            <Hint onClose={() => updateTutorial({ build: false })}>
+              <Gold>Hint</Gold>: press <Gold>right mouse</Gold> to place a block
+            </Hint>
+          )}
+          {tutorial?.inventory && (
+            <Hint onClose={() => updateTutorial({ inventory: false })}>
+              <Gold>Hint</Gold>: press <Gold>E</Gold> to open your inventory
+            </Hint>
+          )}
+          {!tutorial?.mine && tutorial?.claim && (
+            <Hint onClose={() => updateTutorial({ claim: false })}>
+              <Gold>Hint</Gold>: find a diamond, press <Gold>X</Gold> to stake it in a chunk, then press <Gold>C</Gold>{" "}
+              to claim the chunk
+            </Hint>
+          )}
+          {!tutorial?.mine && !tutorial?.inventory && tutorial?.craft && (
+            <Hint onClose={() => updateTutorial({ craft: false })}>
+              <Gold>Hint</Gold>: place wool over a flower in the crafting UI (inventory) to craft dyed wool
+            </Hint>
           )}
         </Wrapper>
       );

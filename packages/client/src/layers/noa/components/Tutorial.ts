@@ -5,6 +5,12 @@ export function defineTutorialComponent(world: World) {
     world,
     {
       community: Type.Boolean,
+      mine: Type.Boolean,
+      build: Type.Boolean,
+      craft: Type.Boolean,
+      claim: Type.Boolean,
+      inventory: Type.Boolean,
+      moving: Type.Boolean,
     },
     { id: "Tutorial" }
   );

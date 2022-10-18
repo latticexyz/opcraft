@@ -11,7 +11,7 @@ import { NoaLayer } from "../types";
 export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
   const {
     noa,
-    components: { SelectedSlot, UI },
+    components: { SelectedSlot, UI, Tutorial },
     SingletonEntity,
     api: { toggleInventory, placeSelectedItem, getCurrentChunk, getSelectedBlockType },
     streams: { stakeAndClaim$ },
@@ -124,6 +124,12 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
   // Control selected slot with keys 1-9
   noa.inputs.bind("slot", "1", "2", "3", "4", "5", "6", "7", "8", "9");
 
+  // Reset moving tutorial with W, A, S, D
+  noa.inputs.bind("moving", "W", "A", "S", "D");
+  noa.inputs.down.on("moving", () => {
+    updateComponent(Tutorial, SingletonEntity, { moving: false });
+  });
+
   noa.inputs.down.on("slot", (e) => {
     console.log(e.key);
     const key = Number(e.key) - 1;
@@ -139,6 +145,7 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
   noa.inputs.bind("inventory", "E");
   noa.inputs.down.on("inventory", () => {
     toggleInventory();
+    updateComponent(Tutorial, SingletonEntity, { inventory: false });
   });
 
   noa.inputs.bind("stake", "X");

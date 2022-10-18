@@ -38,6 +38,7 @@ import {
   createPlayerPositionSystem,
   createRelaySystem,
   createSyncLocalPlayerPositionSystem,
+  createTutorialSystem,
 } from "./systems";
 import { registerHandComponent } from "./engine/components/handComponent";
 import { registerModelComponent } from "./engine/components/modelComponent";
@@ -97,7 +98,15 @@ export function createNoaLayer(network: NetworkLayer) {
   });
   setComponent(components.SelectedSlot, SingletonEntity, { value: 0 });
   !getComponentValue(components.Tutorial, SingletonEntity) &&
-    setComponent(components.Tutorial, SingletonEntity, { community: true });
+    setComponent(components.Tutorial, SingletonEntity, {
+      community: true,
+      mine: true,
+      craft: true,
+      build: true,
+      inventory: true,
+      claim: true,
+      moving: true,
+    });
 
   // --- API ------------------------------------------------------------------------
   function setCraftingTable(entities: EntityIndex[][]) {
@@ -302,6 +311,7 @@ export function createNoaLayer(network: NetworkLayer) {
   createSyncLocalPlayerPositionSystem(network, context);
   createCreativeModeSystem(network, context);
   createSpawnPlayerSystem(network, context);
+  createTutorialSystem(network, context);
 
   return context;
 }
