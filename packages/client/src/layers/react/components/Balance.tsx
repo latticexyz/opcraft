@@ -39,7 +39,7 @@ export const Balance: React.FC<{
 
   async function updateTimeUntilDrip(username: string) {
     const r = await faucet?.timeUntilDrip({ address, username });
-    if (r) setTimeToDrip(Math.ceil(r.timeUntilDripMinutes * 60 + r.timeUntilDripSeconds));
+    if (r) setTimeToDrip(Math.ceil(r.timeUntilDripSeconds));
   }
 
   // Update balance in regular intervals
