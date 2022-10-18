@@ -6,11 +6,12 @@ import {
   getComponentValue,
   HasValue,
   runQuery,
+  updateComponent,
 } from "@latticexyz/recs";
 import { setupDevSystems } from "./setup";
 import { createActionSystem, setupMUDNetwork, waitForActionCompletion } from "@latticexyz/std-client";
 import { GameConfig, getNetworkConfig } from "./config";
-import { awaitPromise, computedToStream, Coord, filterNullishValues, VoxelCoord } from "@latticexyz/utils";
+import { awaitPromise, computedToStream, Coord, deferred, filterNullishValues, VoxelCoord } from "@latticexyz/utils";
 import { BigNumber, utils, Signer } from "ethers";
 import {
   definePositionComponent,
@@ -97,10 +98,11 @@ export async function createNetworkLayer(config: GameConfig) {
   }
 
   // --- ACTION SYSTEM --------------------------------------------------------------
-  const actions = createActionSystem<{ actionType: string; coord?: VoxelCoord; blockType?: keyof typeof BlockType }>(
-    world,
-    txReduced$
-  );
+  const actions = createActionSystem<{
+    actionType: string;
+    coord?: VoxelCoord;
+    blockType?: keyof typeof BlockType;
+  }>(world, txReduced$);
 
   // Add indexers and optimistic updates
   const { withOptimisticUpdates } = actions;
