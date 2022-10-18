@@ -77,10 +77,15 @@ export async function createNetworkLayer(config: GameConfig) {
   // Relayer setup
   const playerAddress = network.connectedAddress.get();
   const playerSigner = network.signer.get();
-  const relay =
-    config.relayServiceUrl && playerAddress && playerSigner
-      ? await createRelayStream(playerSigner, config.relayServiceUrl, playerAddress)
-      : null;
+  let relay: Awaited<ReturnType<typeof createRelayStream>> | undefined;
+  try {
+    relay =
+      config.relayServiceUrl && playerAddress && playerSigner
+        ? await createRelayStream(playerSigner, config.relayServiceUrl, playerAddress)
+        : undefined;
+  } catch (e) {
+    console.error(e);
+  }
 
   relay && world.registerDisposer(relay.dispose);
   if (relay) console.info("[Relayer] Relayer connected: " + config.relayServiceUrl);
