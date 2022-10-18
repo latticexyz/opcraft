@@ -54,6 +54,7 @@ import { BehaviorSubject, map, throttleTime, timer } from "rxjs";
 import { getStakeEntity } from "../../utils/stake";
 import { createCreativeModeSystem } from "./systems/createCreativeModeSystem";
 import { createSpawnPlayerSystem } from "./systems/createSpawnPlayerSystem";
+import { definePlayerMeshComponent } from "./components/PlayerMesh";
 
 export function createNoaLayer(network: NetworkLayer) {
   const world = namespaceWorld(network.world, "noa");
@@ -79,6 +80,7 @@ export function createNoaLayer(network: NetworkLayer) {
     PlayerRelayerChunkPosition: createIndexer(definePlayerRelayerChunkPositionComponent(world)),
     PlayerDirection: definePlayerDirectionComponent(world),
     PlayerLastMessage: definePlayerLastMessage(world),
+    PlayerMesh: definePlayerMeshComponent(world),
     UI: defineUIComponent(world),
     InventoryIndex: createLocalCache(createIndexer(defineInventoryIndexComponent(world)), uniqueWorldId),
     Tutorial: createLocalCache(defineTutorialComponent(world), uniqueWorldId),
