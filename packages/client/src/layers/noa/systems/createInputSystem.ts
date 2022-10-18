@@ -162,6 +162,6 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
 
   noa.inputs.bind("blockexplorer", "B");
   noa.inputs.down.on("blockexplorer", () => {
-    window.open("https://blockscout.com/optimism/opcraft");
+    window.open(network.network.config.blockExplorer);
   });
 }

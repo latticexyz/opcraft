@@ -13,6 +13,7 @@ export type GameConfig = {
   devMode: boolean;
   initialBlockNumber: number;
   blockTime: number;
+  blockExplorer?: string;
 };
 
 export const getNetworkConfig: (networkConfig: GameConfig) => SetupContractConfig = (config) => ({
@@ -38,4 +39,5 @@ export const getNetworkConfig: (networkConfig: GameConfig) => SetupContractConfi
   initialBlockNumber: config.initialBlockNumber,
   worldAddress: config.worldAddress,
   devMode: config.devMode,
+  blockExplorer: config.blockExplorer,
 });
