@@ -1,5 +1,18 @@
-import { AbstractMesh, DynamicTexture, Matrix, Mesh, MeshBuilder, Texture, Vector3, Vector4 } from "@babylonjs/core";
+import {
+  AbstractMesh,
+  DynamicTexture,
+  Matrix,
+  Mesh,
+  MeshBuilder,
+  Plane,
+  Texture,
+  Vector3,
+  Vector4,
+} from "@babylonjs/core";
 import { Engine } from "noa-engine";
+
+// Note: this code was vendored from https://github.com/VoxelSrv/voxelsrv on commit 6e1c07b
+// A rewrite is coming... soon™️
 
 const models: { [key: string]: any } = {};
 const templateModels: { [i: string]: Mesh } = {};
@@ -14,8 +27,6 @@ export async function applyModel(noa: Engine, eid: number, model: string, textur
       .then((response) => response.json())
       .then(async (data) => {
         models[model] = data;
-        models[model].animations = buildAnimations(data.animations);
-
         applyModelTo(noa, model, data, texture, name, eid);
       });
   } else {
@@ -66,20 +77,6 @@ async function buildModel(noa: Engine, name: string, model: object, texture: str
   meshlist.main = mesh;
 
   return meshlist;
-}
-
-type AnimationsList = {
-  [index: string]: {
-    speed: number;
-    parts: {
-      [index: string]: string;
-    };
-  };
-};
-
-function buildAnimations(data: AnimationsList) {
-  const builded = {};
-  return;
 }
 
 function createTemplateModel(noa: Engine, name: string, model: any) {
@@ -226,4 +223,36 @@ export function addNametag(noa: Engine, mainMesh: Mesh, name: string, height: nu
   noa.rendering.addMeshToScene(plane);
 
   return plane;
+}
+
+export function redrawNametag(noa: Engine, mainMesh: Mesh, name: string) {
+  const childMeshes = mainMesh.getChildMeshes(true);
+  const nameTag: Mesh = childMeshes[childMeshes.length - 1] as Mesh;
+  const scene = noa.rendering.getScene();
+
+  const font_size = 96;
+  const font = "bold " + font_size + "px 'Lattice Pixel'";
+
+  //Set height for dynamic texture
+  const DTHeight = 1.5 * font_size; //or set as wished
+
+  //Use a temporay dynamic texture to calculate the length of the text on the dynamic texture canvas
+  const temp = new DynamicTexture("DynamicTexture", 64, scene, false);
+  const tmpctx = temp.getContext();
+  tmpctx.font = font;
+  const DTWidth = tmpctx.measureText(name).width + 32;
+
+  //Create dynamic texture and write the text
+  const dynamicTexture = new DynamicTexture("DynamicTexture", { width: DTWidth, height: DTHeight }, scene, false);
+  const mat = noa.rendering.makeStandardMaterial("nametag");
+  mat.diffuseTexture = dynamicTexture;
+  mat.emissiveTexture = mat.diffuseTexture;
+  mat.diffuseTexture.hasAlpha = true;
+  mat.opacityTexture = mat.diffuseTexture;
+  dynamicTexture.drawText(name, null, null, font, "#eeeeee", "#00000066", true);
+  const planeHeight = 0.3;
+  const ratio = planeHeight / DTHeight;
+  const planeWidth = DTWidth * ratio;
+  nameTag.scaling.x = planeWidth;
+  nameTag.material = mat;
 }

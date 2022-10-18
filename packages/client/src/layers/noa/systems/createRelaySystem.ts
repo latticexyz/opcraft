@@ -129,7 +129,8 @@ export async function createRelaySystem(network: NetworkLayer, context: NoaLayer
     relay?.push(createChunkTopicMessage(currentChunk), encodeMessage([position.x, position.y, position.z], quaternion));
   });
 
-  defineRxSystem(world, relay.event$, ({ message, address }) => {
+  defineRxSystem(world, relay.event$, ({ message, address: checkSummedAddress }) => {
+    const address: string = checkSummedAddress.toLowerCase();
     const {
       position: [x, y, z],
       direction: [qx, qy, qz, qw],
