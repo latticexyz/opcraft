@@ -66,6 +66,8 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
 
   let firePressed = false;
   noa.inputs.down.on("fire", async function () {
+    if (!noa.container.hasPointerLock) return;
+
     firePressed = true;
     const miningComponent = mineTargetedBlock();
     while (firePressed) {
@@ -76,6 +78,8 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
   });
 
   noa.inputs.up.on("fire", function () {
+    if (!noa.container.hasPointerLock) return;
+
     firePressed = false;
     const miningComponent = getNoaComponentStrict<MiningBlockComponent>(noa, noa.playerEntity, MINING_BLOCK_COMPONENT);
     const handComponent = getNoaComponentStrict<HandComponent>(noa, noa.playerEntity, HAND_COMPONENT);
@@ -84,6 +88,8 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
   });
 
   noa.on("targetBlockChanged", (targetedBlock: { position: number[] }) => {
+    if (!noa.container.hasPointerLock) return;
+
     const miningComponent = getNoaComponent<MiningBlockComponent>(noa, noa.playerEntity, MINING_BLOCK_COMPONENT);
     if (!miningComponent) return;
     const handComponent = getNoaComponentStrict<HandComponent>(noa, noa.playerEntity, HAND_COMPONENT);
@@ -102,7 +108,10 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
   // place a block on right click
   noa.inputs.unbind("alt-fire"); // Unbind to remove the default binding of "E"
   noa.inputs.bind("alt-fire", "<mouse 3>", "R");
+
   noa.inputs.down.on("alt-fire", function () {
+    if (!noa.container.hasPointerLock) return;
+
     if (noa.targetedBlock) {
       const pos = noa.targetedBlock.adjacent;
       const targeted = noa.targetedBlock.position;
@@ -127,10 +136,12 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
   // Reset moving tutorial with W, A, S, D
   noa.inputs.bind("moving", "W", "A", "S", "D");
   noa.inputs.down.on("moving", () => {
+    if (!noa.container.hasPointerLock) return;
     updateComponent(Tutorial, SingletonEntity, { moving: false });
   });
 
   noa.inputs.down.on("slot", (e) => {
+    if (!noa.container.hasPointerLock) return;
     console.log(e.key);
     const key = Number(e.key) - 1;
     setComponent(SelectedSlot, SingletonEntity, { value: key });
@@ -144,24 +155,29 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
 
   noa.inputs.bind("inventory", "E");
   noa.inputs.down.on("inventory", () => {
+    const showInventory = getComponentValue(UI, SingletonEntity)?.showInventory;
+    if (!noa.container.hasPointerLock && !showInventory) return;
     toggleInventory();
     updateComponent(Tutorial, SingletonEntity, { inventory: false });
   });
 
   noa.inputs.bind("stake", "X");
   noa.inputs.down.on("stake", () => {
+    if (!noa.container.hasPointerLock) return;
     const chunk = getCurrentChunk();
     chunk && stake(chunk);
   });
 
   noa.inputs.bind("claim", "C");
   noa.inputs.down.on("claim", () => {
+    if (!noa.container.hasPointerLock) return;
     const chunk = getCurrentChunk();
     chunk && claim(chunk);
   });
 
   noa.inputs.bind("blockexplorer", "B");
   noa.inputs.down.on("blockexplorer", () => {
+    if (!noa.container.hasPointerLock) return;
     window.open(network.network.config.blockExplorer);
   });
 }
