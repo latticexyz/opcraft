@@ -11,6 +11,7 @@ export function defineTutorialComponent(world: World) {
       claim: Type.Boolean,
       inventory: Type.Boolean,
       moving: Type.Boolean,
+      teleport: Type.Boolean,
     },
     { id: "Tutorial" }
   );

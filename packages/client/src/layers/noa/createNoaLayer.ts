@@ -24,6 +24,7 @@ import {
   definePlayerRelayerChunkPositionComponent,
   defineLocalPlayerPositionComponent,
   defineTutorialComponent,
+  definePreTeleportPositionComponent,
 } from "./components";
 import { CRAFTING_SIDE, EMPTY_CRAFTING_TABLE } from "./constants";
 import { setupHand } from "./engine/hand";
@@ -84,6 +85,7 @@ export function createNoaLayer(network: NetworkLayer) {
     UI: defineUIComponent(world),
     InventoryIndex: createLocalCache(createIndexer(defineInventoryIndexComponent(world)), uniqueWorldId),
     Tutorial: createLocalCache(defineTutorialComponent(world), uniqueWorldId),
+    PreTeleportPosition: definePreTeleportPositionComponent(world),
   };
 
   // --- SETUP ----------------------------------------------------------------------
@@ -108,6 +110,7 @@ export function createNoaLayer(network: NetworkLayer) {
       inventory: true,
       claim: true,
       moving: true,
+      teleport: true,
     });
 
   // --- API ------------------------------------------------------------------------
@@ -196,13 +199,17 @@ export function createNoaLayer(network: NetworkLayer) {
     return resultID;
   }
 
+  function teleport(coord: VoxelCoord) {
+    setNoaPosition(noa, noa.playerEntity, coord);
+  }
+
   function teleportRandom() {
     const coord = {
       x: random(10000, -10000),
       y: 150,
       z: random(10000, -10000),
     };
-    setNoaPosition(noa, noa.playerEntity, coord);
+    teleport(coord);
   }
 
   function toggleInventory(open?: boolean, crafting?: boolean) {
@@ -293,6 +300,7 @@ export function createNoaLayer(network: NetworkLayer) {
       getSelectedBlockType,
       getTrimmedCraftingTable,
       getCraftingResult,
+      teleport,
       teleportRandom,
       toggleInventory,
       placeSelectedItem,

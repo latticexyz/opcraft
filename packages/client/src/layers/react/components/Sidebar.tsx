@@ -110,6 +110,12 @@ export function registerSidebar() {
               <Gold>Hint</Gold>: place wool on top of a flower in the crafting UI (top of inventory) to craft dyed wool
             </Hint>
           )}
+          {!tutorial?.inventory && !tutorial?.mine && !tutorial?.build && tutorial?.teleport && (
+            <Hint onClose={() => updateTutorial({ teleport: false })}>
+              <Gold>Hint</Gold>: press <Gold>O</Gold> to teleport to the spawn point, and <Gold>P</Gold> to back where
+              you were before
+            </Hint>
+          )}
         </Wrapper>
       );
     }
