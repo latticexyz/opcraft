@@ -42,7 +42,7 @@ export function registerLoadingState() {
           <BootScreen initialOpacity={1}>
             {loadingState.msg}
             <LoadingContainer>
-              {loadingState.percentage}%<Loading percentage={loadingState.percentage} />
+              {Math.floor(loadingState.percentage)}%<Loading percentage={loadingState.percentage} />
             </LoadingContainer>
           </BootScreen>
         );
