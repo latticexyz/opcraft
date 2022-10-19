@@ -40,4 +40,7 @@ export const getNetworkConfig: (networkConfig: GameConfig) => SetupContractConfi
   worldAddress: config.worldAddress,
   devMode: config.devMode,
   blockExplorer: config.blockExplorer,
+  cacheAgeThreshold: 600,
+  cacheInterval: 100,
+  limitEventsPerSecond: 40_000,
 });
