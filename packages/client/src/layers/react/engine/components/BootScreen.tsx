@@ -9,7 +9,9 @@ export const BootScreen: React.FC<{ initialOpacity?: number }> = ({ children, in
   return (
     <Container>
       <img src="/img/opcraft-light.png" style={{ opacity, width: 300 }}></img>
-      <div>{children || <>&nbsp;</>}</div>
+      <div>
+        <>{children || <>&nbsp;</>}</>
+      </div>
     </Container>
   );
 };
