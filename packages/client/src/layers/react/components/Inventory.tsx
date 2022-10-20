@@ -6,6 +6,7 @@ import { Absolute, AbsoluteBorder, Background, Center, Crafting, Slot, Gold, Red
 import { range } from "@latticexyz/utils";
 import {
   defineQuery,
+  EntityID,
   EntityIndex,
   getComponentValue,
   getEntitiesWithValue,
@@ -103,6 +104,7 @@ export function registerInventory() {
         connectedClients,
         balance,
       ] = props;
+      const { getName } = layers.network.api;
 
       const [holdingBlock, setHoldingBlock] = useState<EntityIndex | undefined>();
 
@@ -198,6 +200,9 @@ export function registerInventory() {
       );
 
       const { claim } = stakeAndClaim;
+      const claimer =
+        (claim?.claimer && getName(claim.claimer)) ||
+        claim?.claimer.substring(0, 6) + "..." + claim?.claimer.substring(36, 42);
       const canBuild = claim && connectedAddress ? claim.claimer === formatEntityID(connectedAddress) : true;
 
       const notification =
@@ -207,10 +212,7 @@ export function registerInventory() {
           </>
         ) : claim && !canBuild ? (
           <>
-            <Red>X</Red> you cannot build or mine here. This chunk has been claimed by{" "}
-            <Gold>
-              {claim.claimer.substring(0, 6)}...{claim.claimer.substring(36, 42)}
-            </Gold>
+            <Red>X</Red> you cannot build or mine here. This chunk has been claimed by <Gold>{claimer}</Gold>
           </>
         ) : claim && canBuild ? (
           <>

@@ -284,6 +284,11 @@ export async function createNetworkLayer(config: GameConfig) {
     });
   }
 
+  function getName(address: EntityID): string | undefined {
+    const entityIndex = world.entityToIndex.get(address);
+    return entityIndex != null ? getComponentValue(components.Name, entityIndex)?.value : undefined;
+  }
+
   // --- STREAMS --------------------------------------------------------------------
   const balanceGwei$ = new BehaviorSubject<number>(1);
   world.registerDisposer(
@@ -324,6 +329,7 @@ export async function createNetworkLayer(config: GameConfig) {
       getBlockAtPosition,
       getECSBlockAtPosition,
       getTerrainBlockAtPosition,
+      getName,
     },
     dev: setupDevSystems(world, encoders, systems),
     streams: { connectedClients$, balanceGwei$ },
