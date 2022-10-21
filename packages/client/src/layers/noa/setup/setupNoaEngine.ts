@@ -122,11 +122,6 @@ export function setupNoaEngine(api: API) {
   });
 
   const { glow } = setupScene(noa);
-  // Register sounds
-  new BABYLON.Sound("theme", "/audio/OP_World_Theme_Mix_1.mp3", null, null, {
-    loop: true,
-    autoplay: true,
-  });
 
   // Change block targeting mechanism
   noa.blockTargetIdCheck = function (index: number) {

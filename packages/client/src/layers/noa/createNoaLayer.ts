@@ -12,7 +12,7 @@ import {
   HasValue,
   EntityID,
 } from "@latticexyz/recs";
-import { Coord, random, VoxelCoord } from "@latticexyz/utils";
+import { Coord, isNotEmpty, pickRandom, random, VoxelCoord } from "@latticexyz/utils";
 import { NetworkLayer } from "../network";
 import {
   definePlayerDirectionComponent,
@@ -25,6 +25,7 @@ import {
   defineLocalPlayerPositionComponent,
   defineTutorialComponent,
   definePreTeleportPositionComponent,
+  defineSoundComponent,
 } from "./components";
 import { CRAFTING_SIDE, EMPTY_CRAFTING_TABLE } from "./constants";
 import { setupHand } from "./engine/hand";
@@ -38,6 +39,7 @@ import {
   createInventoryIndexSystem,
   createPlayerPositionSystem,
   createRelaySystem,
+  createSoundSystem,
   createSyncLocalPlayerPositionSystem,
   createTutorialSystem,
 } from "./systems";
@@ -56,6 +58,7 @@ import { getStakeEntity } from "../../utils/stake";
 import { createCreativeModeSystem } from "./systems/createCreativeModeSystem";
 import { createSpawnPlayerSystem } from "./systems/createSpawnPlayerSystem";
 import { definePlayerMeshComponent } from "./components/PlayerMesh";
+import { Engine } from "@babylonjs/core";
 
 export function createNoaLayer(network: NetworkLayer) {
   const world = namespaceWorld(network.world, "noa");
@@ -86,6 +89,7 @@ export function createNoaLayer(network: NetworkLayer) {
     InventoryIndex: createLocalCache(createIndexer(defineInventoryIndexComponent(world)), uniqueWorldId),
     Tutorial: createLocalCache(defineTutorialComponent(world), uniqueWorldId),
     PreTeleportPosition: definePreTeleportPositionComponent(world),
+    Sounds: defineSoundComponent(world),
   };
 
   // --- SETUP ----------------------------------------------------------------------
@@ -258,6 +262,22 @@ export function createNoaLayer(network: NetworkLayer) {
     return { claim, stake };
   }
 
+  function playNextTheme() {
+    const sounds = getComponentValue(components.Sounds, SingletonEntity);
+    if (!sounds?.themes || !isNotEmpty(sounds.themes)) return;
+    const prevThemeIndex = sounds.playingTheme ? sounds.themes.findIndex((e) => e === sounds.playingTheme) : -1;
+    const nextThemeIndex = (prevThemeIndex + 1) % sounds.themes.length;
+    const playingTheme = sounds.themes[nextThemeIndex];
+    updateComponent(components.Sounds, SingletonEntity, { playingTheme });
+  }
+
+  function playRandomTheme() {
+    const sounds = getComponentValue(components.Sounds, SingletonEntity);
+    if (!sounds?.themes || !isNotEmpty(sounds.themes)) return;
+    const playingTheme = pickRandom(sounds.themes);
+    updateComponent(components.Sounds, SingletonEntity, { playingTheme });
+  }
+
   // --- SETUP NOA COMPONENTS AND MODULES --------------------------------------------------------
   monkeyPatchMeshComponent(noa);
   registerModelComponent(noa);
@@ -307,9 +327,12 @@ export function createNoaLayer(network: NetworkLayer) {
       getCurrentChunk,
       getCurrentPlayerPosition,
       getStakeAndClaim,
+      playRandomTheme,
+      playNextTheme,
     },
     streams: { playerPosition$, slowPlayerPosition$, playerChunk$, stakeAndClaim$ },
     SingletonEntity,
+    audioEngine: Engine.audioEngine,
   };
 
   // --- SYSTEMS --------------------------------------------------------------------
@@ -322,6 +345,7 @@ export function createNoaLayer(network: NetworkLayer) {
   createCreativeModeSystem(network, context);
   createSpawnPlayerSystem(network, context);
   createTutorialSystem(network, context);
+  createSoundSystem(network, context);
 
   return context;
 }
