@@ -8,3 +8,4 @@ export { defineUIComponent } from "./UI";
 export { defineCraftingTableComponent } from "./CraftingTable";
 export { defineTutorialComponent } from "./Tutorial";
 export { definePreTeleportPositionComponent } from "./PreTeleportPosition";
+export { defineSoundComponent } from "./Sound";

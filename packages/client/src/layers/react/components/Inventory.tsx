@@ -6,7 +6,6 @@ import { Absolute, AbsoluteBorder, Background, Center, Crafting, Slot, Gold, Red
 import { range } from "@latticexyz/utils";
 import {
   defineQuery,
-  EntityID,
   EntityIndex,
   getComponentValue,
   getEntitiesWithValue,
@@ -18,6 +17,7 @@ import {
 import { getBlockIconUrl } from "../../noa/constants";
 import { BlockIdToKey } from "../../network/constants";
 import { formatEntityID } from "@latticexyz/network";
+import { Sounds } from "./Sounds";
 
 // This gives us 36 inventory slots. As of now there are 34 types of items, so it should fit.
 const INVENTORY_WIDTH = 9;
@@ -105,6 +105,7 @@ export function registerInventory() {
         balance,
       ] = props;
       const { getName } = layers.network.api;
+      const { playRandomTheme, playNextTheme } = layers.noa.api;
 
       const [holdingBlock, setHoldingBlock] = useState<EntityIndex | undefined>();
 
@@ -225,6 +226,7 @@ export function registerInventory() {
           <ConnectedPlayersContainer>
             <PlayerCount>{connectedClients}</PlayerCount>
             <PixelatedImage src="/img/mud-player.png" width={35} />
+            <Sounds playRandomTheme={playRandomTheme} playNextTheme={playNextTheme} />
           </ConnectedPlayersContainer>
           <ActionBarWrapper>{[...range(INVENTORY_WIDTH)].map((i) => Slots[i])}</ActionBarWrapper>
           <LogoContainer>
