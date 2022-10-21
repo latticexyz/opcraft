@@ -1,17 +1,13 @@
-import { DistanceBlock, Scene, Sound, Vector3 } from "@babylonjs/core";
+import { Scene, Sound, Vector3 } from "@babylonjs/core";
 import { SyncState } from "@latticexyz/network";
 import {
   defineComponentSystem,
-  defineEnterSystem,
   defineRxSystem,
   defineSystem,
   EntityID,
   getComponentValue,
-  getComponentValueStrict,
   Has,
   isComponentUpdate,
-  OverridableComponent,
-  Type,
   updateComponent,
   UpdateType,
 } from "@latticexyz/recs";
@@ -167,8 +163,6 @@ export function createSoundSystem(network: NetworkLayer, context: NoaLayer) {
           return effect["place"][itemKey as keyof typeof effect["place"]] || effect["place"].Dirt;
         }
       })();
-
-      console.log(sound?.name);
 
       // Play sound
       sound?.setPosition(blockPosVec);
