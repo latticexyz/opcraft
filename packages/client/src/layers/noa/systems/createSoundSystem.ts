@@ -34,7 +34,7 @@ export function createSoundSystem(network: NetworkLayer, context: NoaLayer) {
   const scene: Scene = noa.rendering.getScene();
   const musicUrls = [
     "/audio/OP_World_Theme_Mix_1.mp3",
-    "/audio/Berceuse._Mix_2.mp3",
+    "/audio/Berceuse_Mix_2.mp3",
     "/audio/Gymnopedia_Mix_3.mp3",
     "/audio/OP_World_2.mp3",
   ];
