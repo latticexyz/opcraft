@@ -1,4 +1,6 @@
 import { SetupContractConfig } from "@latticexyz/std-client";
+import { keccak256 } from "@latticexyz/utils";
+import { Wallet } from "ethers";
 
 export type GameConfig = {
   worldAddress: string;
@@ -44,4 +46,8 @@ export const getNetworkConfig: (networkConfig: GameConfig) => SetupContractConfi
   cacheInterval: 120, // Store cache every 2 minutes
   limitEventsPerSecond: 40_000,
   snapshotNumChunks: 100,
+  pruneOptions: {
+    playerAddress: new Wallet(config.privateKey).address,
+    hashedComponentId: keccak256("component.OwnedBy"),
+  },
 });
