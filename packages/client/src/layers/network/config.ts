@@ -46,8 +46,8 @@ export const getNetworkConfig: (networkConfig: GameConfig) => SetupContractConfi
   cacheInterval: 120, // Store cache every 2 minutes
   limitEventsPerSecond: 40_000,
   snapshotNumChunks: 100,
-  // pruneOptions: {
-  //   playerAddress: new Wallet(config.privateKey).address,
-  //   hashedComponentId: keccak256("component.OwnedBy"),
-  // },
+  pruneOptions: {
+    playerAddress: new Wallet(config.privateKey).address,
+    hashedComponentId: keccak256("component.OwnedBy"),
+  },
 });
