@@ -34,9 +34,9 @@ export function createSoundSystem(network: NetworkLayer, context: NoaLayer) {
   const scene: Scene = noa.rendering.getScene();
   const musicUrls = [
     "/audio/OP_World_Theme_Mix_1.mp3",
-    "/audio/Berceuse._Mix_1.mp3",
-    "/audio/Gymnopedia_Mix_2.mp3",
-    "audio/Mazurka Op.25 No. 2_Mix_1.mp3",
+    "/audio/Berceuse_Mix_2.mp3",
+    "/audio/Gymnopedia_Mix_3.mp3",
+    "/audio/OP_World_2.mp3",
   ];
 
   // Set the position of the audio listener
@@ -97,7 +97,7 @@ export function createSoundSystem(network: NetworkLayer, context: NoaLayer) {
   });
 
   // Set a new `playingTheme` in random intervals if none is playing
-  defineRxSystem(world, timer(0, 10000), () => {
+  defineRxSystem(world, timer(0, 600000), () => {
     const currentlyPlaying = getComponentValue(Sounds, SingletonEntity)?.playingTheme;
     if (!currentlyPlaying && Math.random() < 0.5) {
       const playingTheme = (isNotEmpty(themes) && pickRandom(themes)) || undefined;
