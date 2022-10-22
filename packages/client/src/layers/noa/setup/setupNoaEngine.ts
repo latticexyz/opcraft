@@ -28,7 +28,7 @@ export function setupNoaEngine(api: API) {
     chunkRemoveDistance: [CHUNK_RENDER_DISTANCE + 8, CHUNK_RENDER_DISTANCE + 8],
     chunkSize: CHUNK_SIZE,
     gravity: [0, -17, 0],
-    playerStart: [-1548, 17, -808],
+    playerStart: [-20000, 100, 20000],
     blockTestDistance: 7,
     playerHeight: 1.85,
     playerWidth: 0.6,
@@ -45,6 +45,12 @@ export function setupNoaEngine(api: API) {
 
   const noa = new Engine(opts);
   const scene = noa.rendering.getScene();
+  noa.world.worldGenWhilePaused = false;
+
+  // Make player float before world is loaded
+  const body = noa.ents.getPhysics(1)?.body;
+  if (body) body.gravityMultiplier = 0;
+
   // Note: this is the amount of time, per tick, spent requesting chunks from userland and meshing them
   // IT DOES NOT INCLUDE TIME SPENT BY THE CLIENT GENERATING THE CHUNKS
   noa.world.maxProcessingPerTick = 12;

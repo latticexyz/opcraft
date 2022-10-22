@@ -12,7 +12,7 @@ import {
   HasValue,
   EntityID,
 } from "@latticexyz/recs";
-import { Coord, isNotEmpty, pickRandom, random, VoxelCoord } from "@latticexyz/utils";
+import { awaitStreamValue, Coord, isNotEmpty, pickRandom, random, VoxelCoord } from "@latticexyz/utils";
 import { NetworkLayer } from "../network";
 import {
   definePlayerDirectionComponent,
@@ -51,7 +51,7 @@ import { setupDayNightCycle } from "./engine/dayNightCycle";
 import { getNoaPositionStrict, setNoaPosition } from "./engine/components/utils";
 import { registerTargetedPositionComponent } from "./engine/components/targetedPositionComponent";
 import { defaultAbiCoder as abi, keccak256 } from "ethers/lib/utils";
-import { GodID } from "@latticexyz/network";
+import { GodID, SyncState } from "@latticexyz/network";
 import { getChunkCoord, getChunkEntity } from "../../utils/chunk";
 import { BehaviorSubject, map, throttleTime, timer } from "rxjs";
 import { getStakeEntity } from "../../utils/stake";
@@ -68,7 +68,7 @@ export function createNoaLayer(network: NetworkLayer) {
       config: { chainId },
       connectedAddress,
     },
-    components: { OwnedBy, Item, Recipe, Claim, Stake },
+    components: { OwnedBy, Item, Recipe, Claim, Stake, LoadingState },
     api: { build },
   } = network;
   const uniqueWorldId = chainId + worldAddress;
@@ -94,6 +94,7 @@ export function createNoaLayer(network: NetworkLayer) {
 
   // --- SETUP ----------------------------------------------------------------------
   const { noa, setBlock, glow } = setupNoaEngine(network.api);
+
   // Because NOA and RECS currently use different ECS libraries we need to maintain a mapping of RECS ID to Noa ID
   // A future version of OPCraft will remove the NOA ECS library and use pure RECS only
   const mudToNoaId = new Map<number, number>();
@@ -302,6 +303,14 @@ export function createNoaLayer(network: NetworkLayer) {
   setupSky(noa);
   setupHand(noa);
   setupDayNightCycle(noa, glow);
+
+  // Pause noa until initial loading is done
+  setTimeout(() => {
+    if (getComponentValue(LoadingState, SingletonEntity)?.state !== SyncState.LIVE) noa.setPaused(true);
+  }, 1000);
+  awaitStreamValue(LoadingState.update$, ({ value }) => value[0]?.state === SyncState.LIVE).then(() =>
+    noa.setPaused(false)
+  );
 
   // --- SETUP STREAMS --------------------------------------------------------------
   // (Create streams as BehaviorSubject to allow for multiple observers and getting the current value)

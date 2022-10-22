@@ -3,7 +3,7 @@ import { BlockTypeKey } from "../network/constants";
 import { Block, NoaBlockType } from "./types";
 
 export const CRAFTING_SIDE = 3;
-export const SPAWN_POINT: VoxelCoord = { x: -1543, y: 11, z: -808 };
+export const SPAWN_POINT: VoxelCoord = { x: -1543, y: 15, z: -808 };
 export const CRAFTING_SIZE = CRAFTING_SIDE * CRAFTING_SIDE;
 export const EMPTY_CRAFTING_TABLE = [...new Array(CRAFTING_SIZE)].map(() => -1);
 export const MINING_DURATION = 800;
