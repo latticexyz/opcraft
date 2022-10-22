@@ -6,6 +6,7 @@ export function definePluginComponent(world: World) {
     world,
     {
       host: Type.String,
+      source: Type.String,
       path: Type.String,
       active: Type.Boolean,
     },

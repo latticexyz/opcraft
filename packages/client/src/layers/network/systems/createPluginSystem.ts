@@ -1,23 +1,24 @@
 import { createEntity, defineComponentSystem, getEntitiesWithValue, withValue } from "@latticexyz/recs";
-import { NetworkLayer } from "../types";
+import { NetworkLayer, PluginRegistrySpec } from "../types";
 
 export function createPluginSystem(context: NetworkLayer) {
   const {
     world,
     components: { Plugin, PluginRegistry },
+    api: { addPlugin },
   } = context;
 
   // Load plugins from registries
   defineComponentSystem(world, PluginRegistry, async ({ value }) => {
-    const host = value[0]?.value;
+    let host = value[0]?.value;
     if (!host) return;
 
     try {
+      host = host[host.length - 1] === "/" ? host.substring(0, host.length - 1) : host;
       const result = await fetch(host + "/index.json");
-      const paths = await result.json();
-      for (const path of paths) {
-        const exists = getEntitiesWithValue(Plugin, { host, path }).size > 0;
-        if (!exists) createEntity(world, [withValue(Plugin, { host, path, active: false })]);
+      const { source, plugins } = (await result.json()) as PluginRegistrySpec;
+      for (const path of plugins) {
+        addPlugin({ host, source, path, active: false });
       }
     } catch (e) {
       console.warn(e);

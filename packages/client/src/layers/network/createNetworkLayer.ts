@@ -1,4 +1,5 @@
 import {
+  ComponentValue,
   createEntity,
   createIndexer,
   createLocalCache,
@@ -10,6 +11,7 @@ import {
   HasValue,
   removeComponent,
   runQuery,
+  SchemaOf,
   setComponent,
   updateComponent,
   withValue,
@@ -307,8 +309,16 @@ export async function createNetworkLayer(config: GameConfig) {
   }
 
   function reloadPlugin(entity: EntityIndex) {
+    const active = getComponentValue(components.Plugin, entity)?.active;
+    if (!active) return;
     togglePlugin(entity, false);
     togglePlugin(entity, true);
+  }
+
+  function addPlugin(value: ComponentValue<SchemaOf<typeof components.Plugin>>) {
+    const { host, path, source, active } = value;
+    const exists = getEntitiesWithValue(components.Plugin, { host, path }).size > 0;
+    if (!exists) createEntity(world, [withValue(components.Plugin, { host, path, source, active })]);
   }
 
   function addPluginRegistry(url: string) {
@@ -375,6 +385,7 @@ export async function createNetworkLayer(config: GameConfig) {
       getECSBlockAtPosition,
       getTerrainBlockAtPosition,
       getName,
+      addPlugin,
       reloadPlugin,
       togglePlugin,
       addPluginRegistry,
