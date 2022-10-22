@@ -40,16 +40,15 @@ export function registerPlugins() {
       const [input, setInput] = useState("");
       const [mode, setMode] = useState(InputMode.FILTER);
 
-      console.log("input", input);
-
       // Unpack relevant variables
       const {
         components: { Plugin, PluginRegistry },
-        api: { addPlugin, reloadPlugin, togglePlugin, addPluginRegistry, reloadPluginRegistry },
+        api: { addPlugin, reloadPlugin, togglePlugin, addPluginRegistry, reloadPluginRegistryUrl },
         uniqueWorldId,
       } = layers.network;
 
       const {
+        noa,
         api: { togglePlugins },
       } = layers.noa;
 
@@ -129,6 +128,8 @@ export function registerPlugins() {
           <Background onClick={() => togglePlugins(false)} />
           <Wrapper>
             <InputBar
+              onFocus={() => (noa.inputs.disabled = true)}
+              onBlur={() => (noa.inputs.disabled = false)}
               placeholder={"filter plugins, add registry, or add plugin"}
               value={input}
               onChange={(e) => setInput(e.target.value)}
@@ -160,9 +161,12 @@ export function registerPlugins() {
                 {sortedPlugins.map(([host, ps], index) => {
                   return (
                     <RegistryList key={"registry" + host + index}>
-                      <PluginHeadline href={ps[0]?.[2]} target="_blank">
-                        {host}
-                      </PluginHeadline>
+                      <PluginHeadlineRow>
+                        <PluginHeadline href={ps[0]?.[2]} target="_blank">
+                          {host}
+                        </PluginHeadline>
+                        <IconButton onClick={() => reloadPluginRegistryUrl(host)} icon={"reload"} />
+                      </PluginHeadlineRow>
                       {ps.map(([entity, path, source, active], index) => {
                         return (
                           <PluginContainer key={"plugin/" + host + path + index}>
@@ -248,4 +252,12 @@ const PluginHeadline = styled.a`
 
 const PluginName = styled.p`
   font-size: 18px;
+`;
+
+const PluginHeadlineRow = styled.div`
+  display: grid;
+  grid-auto-flow: column;
+  grid-gap: 10px;
+  align-items: center;
+  justify-content: start;
 `;

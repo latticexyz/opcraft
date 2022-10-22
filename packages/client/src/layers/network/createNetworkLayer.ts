@@ -322,6 +322,7 @@ export async function createNetworkLayer(config: GameConfig) {
   }
 
   function addPluginRegistry(url: string) {
+    url = url[url.length - 1] === "/" ? url.substring(0, url.length - 1) : url;
     if (getEntitiesWithValue(components.PluginRegistry, { value: url }).size > 0) return;
     createEntity(world, [withValue(components.PluginRegistry, { value: url })]);
   }
@@ -330,6 +331,13 @@ export async function createNetworkLayer(config: GameConfig) {
     const entity = [...getEntitiesWithValue(components.PluginRegistry, { value: url })][0];
     if (entity == null) return;
     removeComponent(components.PluginRegistry, entity);
+  }
+
+  function reloadPluginRegistryUrl(url: string) {
+    const entity = [...getEntitiesWithValue(components.PluginRegistry, { value: url })][0];
+    if (entity == null) return;
+    removeComponent(components.PluginRegistry, entity);
+    setComponent(components.PluginRegistry, entity, { value: url });
   }
 
   function reloadPluginRegistry(entity: EntityIndex) {
@@ -391,6 +399,7 @@ export async function createNetworkLayer(config: GameConfig) {
       addPluginRegistry,
       removePluginRegistry,
       reloadPluginRegistry,
+      reloadPluginRegistryUrl,
     },
     dev: setupDevSystems(world, encoders as Promise<any>, systems),
     streams: { connectedClients$, balanceGwei$ },

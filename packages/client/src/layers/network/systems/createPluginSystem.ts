@@ -10,13 +10,13 @@ export function createPluginSystem(context: NetworkLayer) {
 
   // Load plugins from registries
   defineComponentSystem(world, PluginRegistry, async ({ value }) => {
-    let host = value[0]?.value;
+    const host = value[0]?.value;
     if (!host) return;
 
     try {
-      host = host[host.length - 1] === "/" ? host.substring(0, host.length - 1) : host;
       const result = await fetch(host + "/index.json");
       const { source, plugins } = (await result.json()) as PluginRegistrySpec;
+      console.log(plugins);
       for (const path of plugins) {
         addPlugin({ host, source, path, active: false });
       }

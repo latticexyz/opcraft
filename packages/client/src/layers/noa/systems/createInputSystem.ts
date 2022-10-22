@@ -198,7 +198,7 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
     updateComponent(Tutorial, SingletonEntity, { teleport: false });
   });
 
-  noa.inputs.bind("plugins", "\\");
+  noa.inputs.bind("plugins", ";");
   noa.inputs.down.on("plugins", () => {
     togglePlugins();
   });
