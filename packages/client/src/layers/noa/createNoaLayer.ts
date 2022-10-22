@@ -103,6 +103,7 @@ export function createNoaLayer(network: NetworkLayer) {
     showComponentBrowser: false,
     showInventory: false,
     showCrafting: false,
+    showPlugins: false,
   });
   setComponent(components.SelectedSlot, SingletonEntity, { value: 0 });
   !getComponentValue(components.Tutorial, SingletonEntity) &&
@@ -216,10 +217,21 @@ export function createNoaLayer(network: NetworkLayer) {
     teleport(coord);
   }
 
+  function togglePlugins(open?: boolean) {
+    open = open ?? !getComponentValue(components.UI, SingletonEntity)?.showPlugins;
+    noa.container.setPointerLock(!open);
+    updateComponent(components.UI, SingletonEntity, {
+      showInventory: false,
+      showCrafting: false,
+      showPlugins: open,
+    });
+  }
+
   function toggleInventory(open?: boolean, crafting?: boolean) {
     open = open ?? !getComponentValue(components.UI, SingletonEntity)?.showInventory;
     noa.container.setPointerLock(!open);
     updateComponent(components.UI, SingletonEntity, {
+      showPlugins: false,
       showInventory: open,
       showCrafting: Boolean(open && crafting),
     });
@@ -323,6 +335,7 @@ export function createNoaLayer(network: NetworkLayer) {
       teleport,
       teleportRandom,
       toggleInventory,
+      togglePlugins,
       placeSelectedItem,
       getCurrentChunk,
       getCurrentPlayerPosition,

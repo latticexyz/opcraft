@@ -1,5 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { getComponentValue, removeComponent, setComponent } from "@latticexyz/recs";
+import {
+  getComponentEntities,
+  getComponentValue,
+  Has,
+  HasValue,
+  Not,
+  NotValue,
+  removeComponent,
+  runQuery,
+  setComponent,
+} from "@latticexyz/recs";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { Time } from "./utils/time";
@@ -31,6 +41,18 @@ const defaultParams = {
   faucet: "https://faucet.opcraft-mud-services.lattice.xyz",
   blockTime: "1000",
   blockExplorer: "https://blockscout.com/optimism/opcraft",
+};
+
+export const ecs = {
+  setComponent,
+  removeComponent,
+  getComponentValue,
+  getComponentEntities,
+  runQuery,
+  Has,
+  HasValue,
+  Not,
+  NotValue,
 };
 
 /**
@@ -114,12 +136,6 @@ async function bootGame() {
   }
 
   await rebootGame();
-
-  const ecs = {
-    setComponent,
-    removeComponent,
-    getComponentValue,
-  };
 
   (window as any).layers = layers;
   (window as any).ecs = ecs;

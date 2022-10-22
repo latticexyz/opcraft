@@ -13,7 +13,7 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
     noa,
     components: { SelectedSlot, UI, Tutorial, PreTeleportPosition },
     SingletonEntity,
-    api: { toggleInventory, placeSelectedItem, getCurrentChunk, getSelectedBlockType, teleport },
+    api: { toggleInventory, togglePlugins, placeSelectedItem, getCurrentChunk, getSelectedBlockType, teleport },
     streams: { stakeAndClaim$, playerPosition$ },
   } = context;
 
@@ -183,6 +183,7 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
 
   noa.inputs.bind("spawn", "O");
   noa.inputs.down.on("spawn", () => {
+    if (!noa.container.hasPointerLock) return;
     setComponent(PreTeleportPosition, SingletonEntity, playerPosition$.getValue());
     teleport({ x: -1548, y: 20, z: -808 });
     updateComponent(Tutorial, SingletonEntity, { teleport: false });
@@ -190,9 +191,15 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
 
   noa.inputs.bind("preteleport", "P");
   noa.inputs.down.on("preteleport", () => {
+    if (!noa.container.hasPointerLock) return;
     const preTeleportPosition = getComponentValue(PreTeleportPosition, SingletonEntity);
     if (!preTeleportPosition) return;
     teleport(preTeleportPosition);
     updateComponent(Tutorial, SingletonEntity, { teleport: false });
+  });
+
+  noa.inputs.bind("plugins", ";");
+  noa.inputs.down.on("plugins", () => {
+    togglePlugins();
   });
 }

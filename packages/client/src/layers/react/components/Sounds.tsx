@@ -1,6 +1,7 @@
 import { Engine } from "@babylonjs/core";
 import React, { useState } from "react";
 import styled from "styled-components";
+import { IconButton } from "./common";
 
 const MAX_VOLUME = 1;
 
@@ -43,40 +44,19 @@ export const Sounds: React.FC<{ playRandomTheme: () => void; playNextTheme: () =
     <>
       <Container>
         <VolumeRow onMouseEnter={() => setShowAdditional(true)} onMouseLeave={() => setShowAdditional(false)}>
-          <Button onClick={toggleSound} icon={volume > 0 ? "volume-2" : "volume-x"} />
+          <IconButton onClick={toggleSound} icon={volume > 0 ? "volume-2" : "volume-x"} />
           {showAdditional && (
             <>
-              <Button onClick={() => setVolume(volume - 0.1)} icon={"volume-minus"} />
-              <Button onClick={() => setVolume(volume + 0.1)} icon={"volume-plus"} />
+              <IconButton onClick={() => setVolume(volume - 0.1)} icon={"volume-minus"} />
+              <IconButton onClick={() => setVolume(volume + 0.1)} icon={"volume-plus"} />
             </>
           )}
         </VolumeRow>
-        <Button onClick={playNextTheme} icon={"next"} />
+        <IconButton onClick={playNextTheme} icon={"next"} />
       </Container>
     </>
   );
 };
-
-const Button = styled.div<{ icon: string }>`
-  background-color: rgb(0 0 0 / 30%);
-  height: 20px;
-  width: 20px;
-  background-size: contain;
-  background-position: center;
-  border: 2px solid #000;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 200ms ease;
-  background-image: url(/ui/${(p) => p.icon}.svg);
-
-  :hover {
-    background-color: rgb(0 0 0 / 70%);
-  }
-
-  :active {
-    background-color: rgb(255 255 255 / 10%);
-  }
-`;
 
 const Container = styled.div`
   pointer-events: all;
