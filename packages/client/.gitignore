@@ -7,3 +7,4 @@ cypress/reports
 .yarn/install-state.gz
 .DS_Store
 .yarn-error.log
+types

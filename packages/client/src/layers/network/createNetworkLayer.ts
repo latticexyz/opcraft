@@ -1,11 +1,18 @@
 import {
+  createEntity,
   createIndexer,
+  createLocalCache,
   createWorld,
   EntityID,
   EntityIndex,
   getComponentValue,
+  getEntitiesWithValue,
   HasValue,
+  removeComponent,
   runQuery,
+  setComponent,
+  updateComponent,
+  withValue,
 } from "@latticexyz/recs";
 import { setupDevSystems } from "./setup";
 import { createActionSystem, setupMUDNetwork, waitForActionCompletion } from "@latticexyz/std-client";
@@ -24,6 +31,8 @@ import {
   defineStakeComponent,
   defineClaimComponent,
   defineNameComponent,
+  definePluginComponent,
+  definePluginRegistryComponent,
 } from "./components";
 import {
   getBlockAtPosition as getBlockAtPositionApi,
@@ -38,6 +47,7 @@ import { createFaucetService, createRelayStream, GodID } from "@latticexyz/netwo
 import { SystemTypes } from "contracts/types/SystemTypes";
 import { SystemAbis } from "contracts/types/SystemAbis.mjs";
 import { map, timer, combineLatest, BehaviorSubject } from "rxjs";
+import { createPluginSystem } from "./systems";
 
 /**
  * The Network layer is the lowest layer in the client architecture.
@@ -49,6 +59,7 @@ export async function createNetworkLayer(config: GameConfig) {
 
   // --- WORLD ----------------------------------------------------------------------
   const world = createWorld();
+  const uniqueWorldId = config.chainId + config.worldAddress;
 
   // --- COMPONENTS -----------------------------------------------------------------
   const components = {
@@ -63,6 +74,8 @@ export async function createNetworkLayer(config: GameConfig) {
     Occurrence: defineOccurrenceComponent(world),
     Stake: defineStakeComponent(world),
     Claim: defineClaimComponent(world),
+    Plugin: createLocalCache(definePluginComponent(world), uniqueWorldId),
+    PluginRegistry: createLocalCache(definePluginRegistryComponent(world), uniqueWorldId),
   };
 
   // --- SETUP ----------------------------------------------------------------------
@@ -99,6 +112,11 @@ export async function createNetworkLayer(config: GameConfig) {
       const address = network.connectedAddress.get();
       address && (await faucet?.dripDev({ address }));
     }
+  }
+
+  // Set initial component values
+  if (components.PluginRegistry.entities.length === 0) {
+    addPluginRegistry("https://opcraft-plugins.mud.dev");
   }
 
   // --- ACTION SYSTEM --------------------------------------------------------------
@@ -284,6 +302,33 @@ export async function createNetworkLayer(config: GameConfig) {
     });
   }
 
+  function togglePlugin(entity: EntityIndex, active?: boolean) {
+    updateComponent(components.Plugin, entity, { active });
+  }
+
+  function reloadPlugin(entity: EntityIndex) {
+    togglePlugin(entity, false);
+    togglePlugin(entity, true);
+  }
+
+  function addPluginRegistry(url: string) {
+    if (getEntitiesWithValue(components.PluginRegistry, { value: url }).size > 0) return;
+    createEntity(world, [withValue(components.PluginRegistry, { value: url })]);
+  }
+
+  function removePluginRegistry(url: string) {
+    const entity = [...getEntitiesWithValue(components.PluginRegistry, { value: url })][0];
+    if (entity == null) return;
+    removeComponent(components.PluginRegistry, entity);
+  }
+
+  function reloadPluginRegistry(entity: EntityIndex) {
+    const value = getComponentValue(components.PluginRegistry, entity);
+    if (!value) return;
+    removeComponent(components.PluginRegistry, entity);
+    setComponent(components.PluginRegistry, entity, value);
+  }
+
   function getName(address: EntityID): string | undefined {
     const entityIndex = world.entityToIndex.get(address);
     return entityIndex != null ? getComponentValue(components.Name, entityIndex)?.value : undefined;
@@ -330,8 +375,13 @@ export async function createNetworkLayer(config: GameConfig) {
       getECSBlockAtPosition,
       getTerrainBlockAtPosition,
       getName,
+      reloadPlugin,
+      togglePlugin,
+      addPluginRegistry,
+      removePluginRegistry,
+      reloadPluginRegistry,
     },
-    dev: setupDevSystems(world, encoders, systems),
+    dev: setupDevSystems(world, encoders as Promise<any>, systems),
     streams: { connectedClients$, balanceGwei$ },
     config,
     relay,
@@ -339,7 +389,11 @@ export async function createNetworkLayer(config: GameConfig) {
     ecsEvent$,
     mappings,
     faucet,
+    uniqueWorldId,
   };
+
+  // --- SYSTEMS --------------------------------------------------------------------
+  createPluginSystem(context);
 
   return context;
 }

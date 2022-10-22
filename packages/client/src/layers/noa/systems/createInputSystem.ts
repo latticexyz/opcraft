@@ -13,7 +13,7 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
     noa,
     components: { SelectedSlot, UI, Tutorial, PreTeleportPosition },
     SingletonEntity,
-    api: { toggleInventory, placeSelectedItem, getCurrentChunk, getSelectedBlockType, teleport },
+    api: { toggleInventory, togglePlugins, placeSelectedItem, getCurrentChunk, getSelectedBlockType, teleport },
     streams: { stakeAndClaim$, playerPosition$ },
   } = context;
 
@@ -194,5 +194,10 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
     if (!preTeleportPosition) return;
     teleport(preTeleportPosition);
     updateComponent(Tutorial, SingletonEntity, { teleport: false });
+  });
+
+  noa.inputs.bind("plugins", "/");
+  noa.inputs.down.on("plugins", () => {
+    togglePlugins();
   });
 }
