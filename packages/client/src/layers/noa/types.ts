@@ -1,5 +1,3 @@
-import { EntityID } from "@latticexyz/recs";
-import { VoxelCoord } from "@latticexyz/utils";
 import { createNoaLayer } from "./createNoaLayer";
 
 export type NoaLayer = Awaited<ReturnType<typeof createNoaLayer>>;

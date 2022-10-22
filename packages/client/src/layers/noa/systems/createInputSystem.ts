@@ -2,7 +2,7 @@ import { formatEntityID } from "@latticexyz/network";
 import { getComponentValue, HasValue, runQuery, setComponent, updateComponent } from "@latticexyz/recs";
 import { sleep } from "@latticexyz/utils";
 import { NetworkLayer, BlockType } from "../../network";
-import { FAST_MINING_DURATION } from "../constants";
+import { FAST_MINING_DURATION, SPAWN_POINT } from "../constants";
 import { HandComponent, HAND_COMPONENT } from "../engine/components/handComponent";
 import { MiningBlockComponent, MINING_BLOCK_COMPONENT } from "../engine/components/miningBlockComponent";
 import { getNoaComponent, getNoaComponentStrict } from "../engine/components/utils";
@@ -185,7 +185,7 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
   noa.inputs.down.on("spawn", () => {
     if (!noa.container.hasPointerLock) return;
     setComponent(PreTeleportPosition, SingletonEntity, playerPosition$.getValue());
-    teleport({ x: -1548, y: 20, z: -808 });
+    teleport(SPAWN_POINT);
     updateComponent(Tutorial, SingletonEntity, { teleport: false });
   });
 

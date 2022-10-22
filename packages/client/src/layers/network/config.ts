@@ -44,8 +44,8 @@ export const getNetworkConfig: (networkConfig: GameConfig) => SetupContractConfi
   blockExplorer: config.blockExplorer,
   cacheAgeThreshold: 60 * 60, // Invalidate cache after 1h
   cacheInterval: 120, // Store cache every 2 minutes
-  limitEventsPerSecond: 40_000,
-  snapshotNumChunks: 100,
+  limitEventsPerSecond: 100_000,
+  snapshotNumChunks: 20,
   pruneOptions: {
     playerAddress: new Wallet(config.privateKey).address,
     hashedComponentId: keccak256("component.OwnedBy"),
