@@ -281,7 +281,7 @@ export async function createNetworkLayer(config: GameConfig) {
 
   function claim(chunkCoord: Coord) {
     actions.add({
-      id: `stake+${chunkCoord.x}/${chunkCoord.y}` as EntityID,
+      id: `claim+${chunkCoord.x}/${chunkCoord.y}` as EntityID,
       metadata: { actionType: "claim", blockType: "Diamond" },
       requirement: () => true,
       components: {},
