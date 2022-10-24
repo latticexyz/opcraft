@@ -7,16 +7,20 @@ import {
   isComponentUpdate,
   defineSyncSystem,
   getComponentValueStrict,
+  getComponentValue,
+  removeComponent,
+  setComponent,
 } from "@latticexyz/recs";
 import { NetworkLayer } from "../../network";
 import {
   getNoaComponentStrict,
   getNoaPositionStrict,
+  hasNoaComponent,
   removeNoaComponent,
   setNoaComponent,
   setNoaPosition,
 } from "../engine/components/utils";
-import { applyModel } from "../engine/model";
+import { applyModel, redrawNametag } from "../engine/model";
 import { NoaLayer } from "../types";
 import {
   RotationComponent,
@@ -28,6 +32,7 @@ import { TargetedPositionComponent, TARGETED_POSITION_COMPONENT } from "../engin
 import { eq, ZERO_VECTOR } from "../../../utils/coord";
 import { pixelToChunkCoord } from "@latticexyz/phaserx";
 import { RELAY_CHUNK_SIZE } from "./createRelaySystem";
+import { MeshComponent } from "../engine/components/defaultComponent";
 
 const MODEL_DATA = "./assets/models/player.json";
 const MODEL_TEXTURE = "./assets/skins/player1.png";
@@ -36,12 +41,17 @@ export function createPlayerPositionSystem(network: NetworkLayer, context: NoaLa
   const {
     noa,
     mudToNoaId,
-    components: { PlayerPosition, PlayerRelayerChunkPosition, PlayerDirection },
+    components: { PlayerPosition, PlayerRelayerChunkPosition, PlayerDirection, PlayerMesh },
   } = context;
 
-  const { world } = network;
+  const {
+    world,
+    components: { Name },
+  } = network;
 
-  function spawnPlayer(entity: EntityIndex, address: string) {
+  async function spawnPlayer(entity: EntityIndex) {
+    const address = world.entities[entity];
+    const name = getComponentValue(Name, entity)?.value ?? address.substring(0, 10);
     const isMappingStored = mudToNoaId.has(entity);
     const noaEntity: number = mudToNoaId.get(entity) ?? noa.entities.add();
     if (!isMappingStored) {
@@ -58,7 +68,25 @@ export function createPlayerPositionSystem(network: NetworkLayer, context: NoaLa
     });
     noa.entities.addComponentAgain(noaEntity, TARGETED_POSITION_COMPONENT, ZERO_VECTOR);
     setNoaPosition(noa, noaEntity, ZERO_VECTOR);
-    applyModel(noa, noaEntity, MODEL_DATA, MODEL_TEXTURE, address);
+    await applyModel(noa, noaEntity, MODEL_DATA, MODEL_TEXTURE, name);
+    setComponent(PlayerMesh, entity, { value: true });
+  }
+
+  function updateNameTag(entity: EntityIndex) {
+    const address = world.entities[entity];
+    const name = getComponentValue(Name, entity)?.value ?? address.substring(0, 10);
+    const isMappingStored = mudToNoaId.has(entity);
+    const noaEntity: number = mudToNoaId.get(entity) ?? noa.entities.add();
+    if (!isMappingStored) {
+      console.error("Can't despawn non existing noa entity: " + noaEntity);
+      return;
+    }
+    if (hasNoaComponent(noa, noaEntity, noa.entities.names.mesh)) {
+      const mesh: MeshComponent = getNoaComponentStrict(noa, noaEntity, noa.entities.names.mesh);
+      redrawNametag(noa, mesh.mesh, name);
+    } else {
+      console.error("Can't update the nametag of an entity without a mesh: " + noaEntity);
+    }
   }
 
   function despawnPlayer(entity: EntityIndex) {
@@ -66,7 +94,9 @@ export function createPlayerPositionSystem(network: NetworkLayer, context: NoaLa
     const noaEntity: number = mudToNoaId.get(entity) ?? noa.entities.add();
     if (!isMappingStored) {
       console.error("Can't despawn non existing noa entity: " + noaEntity);
+      return;
     }
+    removeComponent(PlayerMesh, entity);
     removeNoaComponent(noa, noaEntity, noa.entities.names.mesh);
     removeNoaComponent(noa, noaEntity, ROTATION_COMPONENT);
     removeNoaComponent(noa, noaEntity, TARGETED_ROTATION_COMPONENT);
@@ -84,10 +114,14 @@ export function createPlayerPositionSystem(network: NetworkLayer, context: NoaLa
     }
   );
 
+  defineSystem(world, [Has(Name), Has(PlayerMesh)], (update) => {
+    if (update.type === UpdateType.Exit) return;
+    updateNameTag(update.entity);
+  });
+
   defineSystem(world, [Has(PlayerPosition), Has(PlayerDirection)], (update) => {
     if (update.type === UpdateType.Enter) {
-      const address = world.entities[update.entity];
-      spawnPlayer(update.entity, address.substring(0, 10));
+      spawnPlayer(update.entity);
     }
     if (update.type === UpdateType.Exit) {
       despawnPlayer(update.entity);

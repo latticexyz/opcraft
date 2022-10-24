@@ -1,10 +1,10 @@
 import React from "react";
 import styled from "styled-components";
-import { Button, Container, Gold } from "./common";
+import { Button, CloseableContainer, Gold } from "./common";
 
-export const JoinSocial: React.FC = () => {
+export const JoinSocial: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   return (
-    <ChunkContainer>
+    <SocialContainer onClose={onClose}>
       <p>
         <Gold>Join the community!</Gold>
       </p>
@@ -12,11 +12,11 @@ export const JoinSocial: React.FC = () => {
         <Button onClick={() => window.open("https://discord.gg/XhZp6HbqNp", "blank")}>Discord</Button>
         <Button onClick={() => window.open("https://twitter.com/latticexyz", "blank")}>Twitter</Button>
       </Buttons>
-    </ChunkContainer>
+    </SocialContainer>
   );
 };
 
-const ChunkContainer = styled(Container)`
+const SocialContainer = styled(CloseableContainer)`
   line-height: 1;
   pointer-events: all;
   min-width: 200px;

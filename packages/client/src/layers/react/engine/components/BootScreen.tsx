@@ -9,7 +9,9 @@ export const BootScreen: React.FC<{ initialOpacity?: number }> = ({ children, in
   return (
     <Container>
       <img src="/img/opcraft-light.png" style={{ opacity, width: 300 }}></img>
-      <div>{children || <>&nbsp;</>}</div>
+      <div>
+        <>{children || <>&nbsp;</>}</>
+      </div>
     </Container>
   );
 };
@@ -18,7 +20,7 @@ const Container = styled.div`
   width: 100%;
   height: 100%;
   position: absolute;
-  background-color: #000;
+  background-color: rgb(0 0 0 / 100%);
   display: grid;
   align-content: center;
   align-items: center;
@@ -27,7 +29,7 @@ const Container = styled.div`
   transition: all 2s ease;
   grid-gap: 50px;
   z-index: 100;
-  pointer-events: all;
+  pointer-events: none;
 
   div {
     font-family: "Lattice Pixel", sans-serif;

@@ -118,6 +118,13 @@ export async function createRelaySystem(network: NetworkLayer, context: NoaLayer
     }
   });
 
+  // If balance is below the minimum balance, don't send messages, but ping to keep receiving messages
+  defineRxSystem(world, timer(0, 15000), () => {
+    if (balanceGwei$.getValue() < MINIMUM_BALANCE) {
+      relay.ping();
+    }
+  });
+
   defineRxSystem(world, playerPosition$, (position) => {
     if (balanceGwei$.getValue() < MINIMUM_BALANCE) return;
     const pitch = noa.camera.pitch;
@@ -129,7 +136,8 @@ export async function createRelaySystem(network: NetworkLayer, context: NoaLayer
     relay?.push(createChunkTopicMessage(currentChunk), encodeMessage([position.x, position.y, position.z], quaternion));
   });
 
-  defineRxSystem(world, relay.event$, ({ message, address }) => {
+  defineRxSystem(world, relay.event$, ({ message, address: checkSummedAddress }) => {
+    const address: string = checkSummedAddress.toLowerCase();
     const {
       position: [x, y, z],
       direction: [qx, qy, qz, qw],

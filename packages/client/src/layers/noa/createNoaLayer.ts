@@ -12,7 +12,7 @@ import {
   HasValue,
   EntityID,
 } from "@latticexyz/recs";
-import { Coord, random, VoxelCoord } from "@latticexyz/utils";
+import { awaitStreamValue, Coord, isNotEmpty, pickRandom, random, VoxelCoord } from "@latticexyz/utils";
 import { NetworkLayer } from "../network";
 import {
   definePlayerDirectionComponent,
@@ -23,6 +23,9 @@ import {
   definePlayerLastMessage,
   definePlayerRelayerChunkPositionComponent,
   defineLocalPlayerPositionComponent,
+  defineTutorialComponent,
+  definePreTeleportPositionComponent,
+  defineSoundComponent,
 } from "./components";
 import { CRAFTING_SIDE, EMPTY_CRAFTING_TABLE } from "./constants";
 import { setupHand } from "./engine/hand";
@@ -36,7 +39,9 @@ import {
   createInventoryIndexSystem,
   createPlayerPositionSystem,
   createRelaySystem,
+  createSoundSystem,
   createSyncLocalPlayerPositionSystem,
+  createTutorialSystem,
 } from "./systems";
 import { registerHandComponent } from "./engine/components/handComponent";
 import { registerModelComponent } from "./engine/components/modelComponent";
@@ -46,12 +51,14 @@ import { setupDayNightCycle } from "./engine/dayNightCycle";
 import { getNoaPositionStrict, setNoaPosition } from "./engine/components/utils";
 import { registerTargetedPositionComponent } from "./engine/components/targetedPositionComponent";
 import { defaultAbiCoder as abi, keccak256 } from "ethers/lib/utils";
-import { GodID } from "@latticexyz/network";
+import { GodID, SyncState } from "@latticexyz/network";
 import { getChunkCoord, getChunkEntity } from "../../utils/chunk";
 import { BehaviorSubject, map, throttleTime, timer } from "rxjs";
 import { getStakeEntity } from "../../utils/stake";
 import { createCreativeModeSystem } from "./systems/createCreativeModeSystem";
 import { createSpawnPlayerSystem } from "./systems/createSpawnPlayerSystem";
+import { definePlayerMeshComponent } from "./components/PlayerMesh";
+import { Engine } from "@babylonjs/core";
 
 export function createNoaLayer(network: NetworkLayer) {
   const world = namespaceWorld(network.world, "noa");
@@ -61,7 +68,7 @@ export function createNoaLayer(network: NetworkLayer) {
       config: { chainId },
       connectedAddress,
     },
-    components: { OwnedBy, Item, Recipe, Claim, Stake },
+    components: { OwnedBy, Item, Recipe, Claim, Stake, LoadingState },
     api: { build },
   } = network;
   const uniqueWorldId = chainId + worldAddress;
@@ -73,16 +80,21 @@ export function createNoaLayer(network: NetworkLayer) {
     SelectedSlot: defineSelectedSlotComponent(world),
     CraftingTable: defineCraftingTableComponent(world),
     PlayerPosition: definePlayerPositionComponent(world),
-    LocalPlayerPosition: createLocalCache(defineLocalPlayerPositionComponent(world)),
+    LocalPlayerPosition: createLocalCache(defineLocalPlayerPositionComponent(world), uniqueWorldId),
     PlayerRelayerChunkPosition: createIndexer(definePlayerRelayerChunkPositionComponent(world)),
     PlayerDirection: definePlayerDirectionComponent(world),
     PlayerLastMessage: definePlayerLastMessage(world),
+    PlayerMesh: definePlayerMeshComponent(world),
     UI: defineUIComponent(world),
     InventoryIndex: createLocalCache(createIndexer(defineInventoryIndexComponent(world)), uniqueWorldId),
+    Tutorial: createLocalCache(defineTutorialComponent(world), uniqueWorldId),
+    PreTeleportPosition: definePreTeleportPositionComponent(world),
+    Sounds: defineSoundComponent(world),
   };
 
   // --- SETUP ----------------------------------------------------------------------
   const { noa, setBlock, glow } = setupNoaEngine(network.api);
+
   // Because NOA and RECS currently use different ECS libraries we need to maintain a mapping of RECS ID to Noa ID
   // A future version of OPCraft will remove the NOA ECS library and use pure RECS only
   const mudToNoaId = new Map<number, number>();
@@ -92,8 +104,20 @@ export function createNoaLayer(network: NetworkLayer) {
     showComponentBrowser: false,
     showInventory: false,
     showCrafting: false,
+    showPlugins: false,
   });
   setComponent(components.SelectedSlot, SingletonEntity, { value: 0 });
+  !getComponentValue(components.Tutorial, SingletonEntity) &&
+    setComponent(components.Tutorial, SingletonEntity, {
+      community: true,
+      mine: true,
+      craft: true,
+      build: true,
+      inventory: true,
+      claim: true,
+      moving: true,
+      teleport: true,
+    });
 
   // --- API ------------------------------------------------------------------------
   function setCraftingTable(entities: EntityIndex[][]) {
@@ -181,19 +205,34 @@ export function createNoaLayer(network: NetworkLayer) {
     return resultID;
   }
 
+  function teleport(coord: VoxelCoord) {
+    setNoaPosition(noa, noa.playerEntity, coord);
+  }
+
   function teleportRandom() {
     const coord = {
       x: random(10000, -10000),
       y: 150,
       z: random(10000, -10000),
     };
-    setNoaPosition(noa, noa.playerEntity, coord);
+    teleport(coord);
+  }
+
+  function togglePlugins(open?: boolean) {
+    open = open ?? !getComponentValue(components.UI, SingletonEntity)?.showPlugins;
+    noa.container.setPointerLock(!open);
+    updateComponent(components.UI, SingletonEntity, {
+      showInventory: false,
+      showCrafting: false,
+      showPlugins: open,
+    });
   }
 
   function toggleInventory(open?: boolean, crafting?: boolean) {
     open = open ?? !getComponentValue(components.UI, SingletonEntity)?.showInventory;
     noa.container.setPointerLock(!open);
     updateComponent(components.UI, SingletonEntity, {
+      showPlugins: false,
       showInventory: open,
       showCrafting: Boolean(open && crafting),
     });
@@ -236,6 +275,22 @@ export function createNoaLayer(network: NetworkLayer) {
     return { claim, stake };
   }
 
+  function playNextTheme() {
+    const sounds = getComponentValue(components.Sounds, SingletonEntity);
+    if (!sounds?.themes || !isNotEmpty(sounds.themes)) return;
+    const prevThemeIndex = sounds.playingTheme ? sounds.themes.findIndex((e) => e === sounds.playingTheme) : -1;
+    const nextThemeIndex = (prevThemeIndex + 1) % sounds.themes.length;
+    const playingTheme = sounds.themes[nextThemeIndex];
+    updateComponent(components.Sounds, SingletonEntity, { playingTheme });
+  }
+
+  function playRandomTheme() {
+    const sounds = getComponentValue(components.Sounds, SingletonEntity);
+    if (!sounds?.themes || !isNotEmpty(sounds.themes)) return;
+    const playingTheme = pickRandom(sounds.themes);
+    updateComponent(components.Sounds, SingletonEntity, { playingTheme });
+  }
+
   // --- SETUP NOA COMPONENTS AND MODULES --------------------------------------------------------
   monkeyPatchMeshComponent(noa);
   registerModelComponent(noa);
@@ -248,6 +303,14 @@ export function createNoaLayer(network: NetworkLayer) {
   setupSky(noa);
   setupHand(noa);
   setupDayNightCycle(noa, glow);
+
+  // Pause noa until initial loading is done
+  setTimeout(() => {
+    if (getComponentValue(LoadingState, SingletonEntity)?.state !== SyncState.LIVE) noa.setPaused(true);
+  }, 1000);
+  awaitStreamValue(LoadingState.update$, ({ value }) => value[0]?.state === SyncState.LIVE).then(() =>
+    noa.setPaused(false)
+  );
 
   // --- SETUP STREAMS --------------------------------------------------------------
   // (Create streams as BehaviorSubject to allow for multiple observers and getting the current value)
@@ -278,15 +341,20 @@ export function createNoaLayer(network: NetworkLayer) {
       getSelectedBlockType,
       getTrimmedCraftingTable,
       getCraftingResult,
+      teleport,
       teleportRandom,
       toggleInventory,
+      togglePlugins,
       placeSelectedItem,
       getCurrentChunk,
       getCurrentPlayerPosition,
       getStakeAndClaim,
+      playRandomTheme,
+      playNextTheme,
     },
     streams: { playerPosition$, slowPlayerPosition$, playerChunk$, stakeAndClaim$ },
     SingletonEntity,
+    audioEngine: Engine.audioEngine,
   };
 
   // --- SYSTEMS --------------------------------------------------------------------
@@ -298,6 +366,8 @@ export function createNoaLayer(network: NetworkLayer) {
   createSyncLocalPlayerPositionSystem(network, context);
   createCreativeModeSystem(network, context);
   createSpawnPlayerSystem(network, context);
+  createTutorialSystem(network, context);
+  createSoundSystem(network, context);
 
   return context;
 }

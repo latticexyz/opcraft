@@ -1,4 +1,6 @@
 import { SetupContractConfig } from "@latticexyz/std-client";
+import { keccak256 } from "@latticexyz/utils";
+import { Wallet } from "ethers";
 
 export type GameConfig = {
   worldAddress: string;
@@ -13,6 +15,7 @@ export type GameConfig = {
   devMode: boolean;
   initialBlockNumber: number;
   blockTime: number;
+  blockExplorer?: string;
 };
 
 export const getNetworkConfig: (networkConfig: GameConfig) => SetupContractConfig = (config) => ({
@@ -38,4 +41,13 @@ export const getNetworkConfig: (networkConfig: GameConfig) => SetupContractConfi
   initialBlockNumber: config.initialBlockNumber,
   worldAddress: config.worldAddress,
   devMode: config.devMode,
+  blockExplorer: config.blockExplorer,
+  cacheAgeThreshold: 60 * 60, // Invalidate cache after 1h
+  cacheInterval: 120, // Store cache every 2 minutes
+  limitEventsPerSecond: 100_000,
+  snapshotNumChunks: 20,
+  pruneOptions: {
+    playerAddress: new Wallet(config.privateKey).address,
+    hashedComponentId: keccak256("component.OwnedBy"),
+  },
 });

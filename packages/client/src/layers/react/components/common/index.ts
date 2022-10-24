@@ -4,8 +4,11 @@ export { Slot } from "./Slot";
 export { Border } from "./Border";
 export { AbsoluteBorder } from "./AbsoluteBorder";
 export { Crafting } from "./Crafting";
-export { Container } from "./Container";
+export { Container, CloseableContainer } from "./Container";
 export { Button } from "./Button";
+export { LoadingBar } from "./LoadingBar";
+export { IconButton } from "./IconButton";
+export { Checkbox } from "./Checkbox";
 
 export const GUI = styled.div<{ _x: number; _y: number; _height: number; _width: number; scale: number }>`
   height: ${(p) => p._height * p.scale}px;

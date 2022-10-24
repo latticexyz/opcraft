@@ -1,11 +1,15 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import React from "react";
 import { registerUIComponent } from "../engine";
-import { combineLatest, map, Observable, of } from "rxjs";
+import { combineLatest, concat, map, Observable, of } from "rxjs";
 import styled from "styled-components";
 import { Balance } from "./Balance";
 import { ChunkExplorer } from "./ChunkExplorer";
 import { JoinSocial } from "./JoinSocial";
+import { filterNullish } from "@latticexyz/utils";
+import { ComponentValue, getComponentValue, SchemaOf, updateComponent } from "@latticexyz/recs";
+import { Hint } from "./Hint";
+import { Gold } from "./common";
 
 type ObservableType<S extends Observable<unknown>> = S extends Observable<infer T> ? T : never;
 
@@ -29,13 +33,15 @@ export function registerSidebar() {
         noa: {
           streams: { playerChunk$ },
           api: { getStakeAndClaim },
+          components: { Tutorial },
+          SingletonEntity,
         },
       } = layers;
 
       const chunk$ = playerChunk$.pipe(
         map((chunk) => {
           const { stake, claim } = getStakeAndClaim(chunk);
-          return { chunk, claim, stake, api: { stake: api.stake, claim: api.claim } };
+          return { chunk, claim, stake, api: { stake: api.stake, claim: api.claim, getName: api.getName } };
         })
       );
 
@@ -48,17 +54,68 @@ export function registerSidebar() {
         }))
       );
 
-      return combineLatest<[ObservableType<typeof chunk$>, ObservableType<typeof balance$>]>([chunk$, balance$]).pipe(
-        map((props) => ({ props }))
+      const tutorial$ = concat(
+        of(getComponentValue(Tutorial, SingletonEntity)),
+        Tutorial.update$.pipe(map((u) => u.value[0]))
       );
+
+      return combineLatest<
+        [ObservableType<typeof chunk$>, ObservableType<typeof balance$>, ObservableType<typeof tutorial$>]
+      >([chunk$, balance$, tutorial$]).pipe(map((props) => ({ props, layers })));
     },
-    ({ props }) => {
-      const [chunk, balance] = props;
+    ({ props, layers }) => {
+      const [chunk, balance, tutorial] = props;
+      const {
+        components: { Tutorial },
+        SingletonEntity,
+      } = layers.noa;
+
+      function updateTutorial(update: Partial<ComponentValue<SchemaOf<typeof Tutorial>>>) {
+        updateComponent(Tutorial, SingletonEntity, update);
+      }
+
       return (
         <Wrapper>
           <Balance {...balance} />
           <ChunkExplorer {...chunk} />
-          <JoinSocial/>
+          {tutorial?.community && <JoinSocial onClose={() => updateTutorial({ community: false })} />}
+          {tutorial?.moving && (
+            <Hint onClose={() => updateTutorial({ moving: false })}>
+              <Gold>Hint</Gold>: press <Gold>W, A, S, or D</Gold> to move around
+            </Hint>
+          )}
+          {tutorial?.mine && (
+            <Hint onClose={() => updateTutorial({ mine: false })}>
+              <Gold>Hint</Gold>: press and hold <Gold>left mouse</Gold> or <Gold>F</Gold> to mine a block
+            </Hint>
+          )}
+          {tutorial?.build && (
+            <Hint onClose={() => updateTutorial({ build: false })}>
+              <Gold>Hint</Gold>: press <Gold>right mouse</Gold> or <Gold>R</Gold> to place a block
+            </Hint>
+          )}
+          {tutorial?.inventory && (
+            <Hint onClose={() => updateTutorial({ inventory: false })}>
+              <Gold>Hint</Gold>: press <Gold>E</Gold> to open your inventory
+            </Hint>
+          )}
+          {!tutorial?.mine && tutorial?.claim && (
+            <Hint onClose={() => updateTutorial({ claim: false })}>
+              <Gold>Hint</Gold>: find a diamond, press <Gold>X</Gold> to stake it in a chunk, then press <Gold>C</Gold>{" "}
+              to claim the chunk
+            </Hint>
+          )}
+          {!tutorial?.mine && !tutorial?.inventory && tutorial?.craft && (
+            <Hint onClose={() => updateTutorial({ craft: false })}>
+              <Gold>Hint</Gold>: place wool on top of a flower in the crafting UI (top of inventory) to craft dyed wool
+            </Hint>
+          )}
+          {!tutorial?.inventory && !tutorial?.mine && !tutorial?.build && tutorial?.teleport && (
+            <Hint onClose={() => updateTutorial({ teleport: false })}>
+              <Gold>Hint</Gold>: press <Gold>O</Gold> to teleport to the spawn point, and <Gold>P</Gold> to back where
+              you were before
+            </Hint>
+          )}
         </Wrapper>
       );
     }

@@ -8,7 +8,7 @@ import { ActionState } from "@latticexyz/std-client";
 import { ActionStatusIcon } from "./Action";
 import { Observable } from "rxjs";
 
-const DEFAULT_TEXT = "autonomous worlds await...\n\n";
+const DEFAULT_TEXT = "Play OPCraft https://bit.ly/3VCVYyt @latticexyz @optimismFND\n\n";
 const TWITTER_URL = "https://twitter.com/intent/tweet?text=";
 const SIGNATURE_TEXT = (handle: string, address: string) => `${handle} tweetooor requesting drip to ${address} address`;
 
@@ -28,7 +28,7 @@ export const Balance: React.FC<{
   async function onRequestDrip() {
     if (timeToDrip <= 0) {
       if (locked && username) requestDrip();
-      else setOpen(true);
+      else setOpen(!open);
     }
   }
 
@@ -39,7 +39,7 @@ export const Balance: React.FC<{
 
   async function updateTimeUntilDrip(username: string) {
     const r = await faucet?.timeUntilDrip({ address, username });
-    if (r) setTimeToDrip(Math.ceil(r.timeUntilDripMinutes * 60 + r.timeUntilDripSeconds));
+    if (r) setTimeToDrip(Math.ceil(r.timeUntilDripSeconds));
   }
 
   // Update balance in regular intervals
@@ -104,7 +104,7 @@ export const Balance: React.FC<{
   const TwitterBox = (
     <Relative>
       <InputBefore>@</InputBefore>
-      <Input value={username} onChange={(e) => setUsername(e.target.value)} />
+      <Input value={username} onChange={(e) => setUsername(e.target.value)} placeholder={"twitter handle"} />
       <Buttons>
         <TwitterButton disabled={!username} onClick={tweet}>
           1. Tweet

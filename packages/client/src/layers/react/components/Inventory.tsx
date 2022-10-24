@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { registerUIComponent } from "../engine";
 import { combineLatest, concat, map, of, scan } from "rxjs";
 import styled from "styled-components";
@@ -17,6 +17,7 @@ import {
 import { getBlockIconUrl } from "../../noa/constants";
 import { BlockIdToKey } from "../../network/constants";
 import { formatEntityID } from "@latticexyz/network";
+import { Sounds } from "./Sounds";
 
 // This gives us 36 inventory slots. As of now there are 34 types of items, so it should fit.
 const INVENTORY_WIDTH = 9;
@@ -103,6 +104,8 @@ export function registerInventory() {
         connectedClients,
         balance,
       ] = props;
+      const { getName } = layers.network.api;
+      const { playRandomTheme, playNextTheme } = layers.noa.api;
 
       const [holdingBlock, setHoldingBlock] = useState<EntityIndex | undefined>();
 
@@ -198,36 +201,40 @@ export function registerInventory() {
       );
 
       const { claim } = stakeAndClaim;
+      const claimer =
+        (claim?.claimer && getName(claim.claimer)) ||
+        claim?.claimer.substring(0, 6) + "..." + claim?.claimer.substring(36, 42);
       const canBuild = claim && connectedAddress ? claim.claimer === formatEntityID(connectedAddress) : true;
+
+      const notification =
+        balance === 0 ? (
+          <>
+            <Red>X</Red> you need to request a drip before you can mine or build (top right).
+          </>
+        ) : claim && !canBuild ? (
+          <>
+            <Red>X</Red> you cannot build or mine here. This chunk has been claimed by <Gold>{claimer}</Gold>
+          </>
+        ) : claim && canBuild ? (
+          <>
+            <Gold>You control this chunk!</Gold>
+          </>
+        ) : null;
 
       const Bottom = (
         <BottomBar>
           <ConnectedPlayersContainer>
             <PlayerCount>{connectedClients}</PlayerCount>
             <PixelatedImage src="/img/mud-player.png" width={35} />
+            <Sounds playRandomTheme={playRandomTheme} playNextTheme={playNextTheme} />
           </ConnectedPlayersContainer>
           <ActionBarWrapper>{[...range(INVENTORY_WIDTH)].map((i) => Slots[i])}</ActionBarWrapper>
           <LogoContainer>
             <PixelatedImage src="/img/opcraft-dark.png" width={150} />
           </LogoContainer>
-          {claim && !canBuild && (
-            <Notification>
-              <Red>X</Red> you cannot build or mine here. This chunk has been claimed by{" "}
-              <Gold>
-                {claim.claimer.substring(0, 6)}...{claim.claimer.substring(36, 42)}
-              </Gold>
-            </Notification>
-          )}
-          {claim && canBuild && (
-            <Notification>
-              <Gold>You control this chunk!</Gold>
-            </Notification>
-          )}
-          {balance === 0 && (
+          {notification && (
             <NotificationWrapper>
-              <Container>
-                <Red>X</Red> you need to request a drip before you can mine or build (top right).
-              </Container>
+              <Container>{notification}</Container>
             </NotificationWrapper>
           )}
         </BottomBar>
@@ -248,6 +255,7 @@ const NotificationWrapper = styled.div`
   top: -25px;
   transform: translate(-50%, -100%);
   left: 50%;
+  line-height: 100%;
 `;
 
 const PixelatedImage = styled.img`

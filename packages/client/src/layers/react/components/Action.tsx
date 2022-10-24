@@ -11,9 +11,17 @@ type Props = {
   icon?: string;
   title: string;
   description?: string;
+  link?: string;
 };
 
-const ActionContainer = styled(Container)`
+const ActionContainer = styled(Container)<{ clickable?: boolean }>`
+  ${(p) =>
+    p.clickable
+      ? `
+  pointer-events: all;
+  cursor: pointer;
+  `
+      : ""}
   display: flex;
 
   gap: 10px;
@@ -92,8 +100,12 @@ export const ActionStatusIcon = ({ state }: { state: ActionState }) => {
   }
 };
 
-export const Action = ({ state, icon, title, description }: Props) => (
-  <ActionContainer className={state <= ActionState.Executing ? "Action--pending" : ""}>
+export const Action = ({ state, icon, title, description, link }: Props) => (
+  <ActionContainer
+    className={state <= ActionState.Executing ? "Action--pending" : ""}
+    onClick={() => link && window.open(link)}
+    clickable={Boolean(link)}
+  >
     {/* TODO: placeholder icon if none is set so we can fill the gap and keep text aligned */}
     <div className="ActionIcon">{icon ? <img src={icon} /> : null}</div>
     <div className="ActionLabel">

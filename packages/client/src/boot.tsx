@@ -1,5 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { getComponentValue, removeComponent, setComponent } from "@latticexyz/recs";
+import {
+  getComponentEntities,
+  getComponentValue,
+  Has,
+  HasValue,
+  Not,
+  NotValue,
+  removeComponent,
+  runQuery,
+  setComponent,
+} from "@latticexyz/recs";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { Time } from "./utils/time";
@@ -30,6 +40,19 @@ const defaultParams = {
   relay: "https://ecs-relay.opcraft-mud-services.lattice.xyz",
   faucet: "https://faucet.opcraft-mud-services.lattice.xyz",
   blockTime: "1000",
+  blockExplorer: "https://blockscout.com/optimism/opcraft",
+};
+
+export const ecs = {
+  setComponent,
+  removeComponent,
+  getComponentValue,
+  getComponentEntities,
+  runQuery,
+  Has,
+  HasValue,
+  Not,
+  NotValue,
 };
 
 /**
@@ -57,6 +80,7 @@ async function bootGame() {
     const initialBlockNumber = initialBlockNumberString ? parseInt(initialBlockNumberString) : 0;
     const blockTimeString = params.get("blockTime") ?? defaultParams.blockTime;
     const blockTime = blockTimeString ? parseInt(blockTimeString) : 1000;
+    const blockExplorer = params.get("blockExplorer") ?? defaultParams.blockExplorer;
 
     if (!privateKey) {
       privateKey = localStorage.getItem("burnerWallet") || Wallet.createRandom().privateKey;
@@ -78,6 +102,7 @@ async function bootGame() {
         devMode,
         blockTime,
         initialBlockNumber,
+        blockExplorer,
       };
     }
 
@@ -111,12 +136,6 @@ async function bootGame() {
   }
 
   await rebootGame();
-
-  const ecs = {
-    setComponent,
-    removeComponent,
-    getComponentValue,
-  };
 
   (window as any).layers = layers;
   (window as any).ecs = ecs;

@@ -5,6 +5,7 @@ import { registerLoadingState } from "./LoadingState";
 import { registerBlockExplorer } from "./BlockExplorer";
 import { registerInventory } from "./Inventory";
 import { registerSidebar } from "./Sidebar";
+import { registerPlugins } from "./Plugins";
 export * from "./common";
 
 export function registerUIComponents() {
@@ -15,4 +16,5 @@ export function registerUIComponents() {
   registerInventory();
   registerSidebar();
   registerComponentBrowser();
+  registerPlugins();
 }

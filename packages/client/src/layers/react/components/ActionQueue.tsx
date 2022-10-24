@@ -49,25 +49,33 @@ export function registerActionQueue() {
       const {
         network: {
           actions: { Action },
+          config: { blockExplorer },
         },
       } = layers;
 
       return Action.update$.pipe(
         map(() => ({
           Action,
+          blockExplorer,
         }))
       );
     },
-    ({ Action }) => {
+    ({ Action, blockExplorer }) => {
       return (
         <ActionQueueList>
           {[...getComponentEntities(Action)].map((e) => {
-            const { state, metadata } = getComponentValueStrict(Action, e);
+            const { state, metadata, txHash } = getComponentValueStrict(Action, e);
             const { actionType, coord, blockType } = metadata || {};
             const icon = blockType && getBlockIconUrl(blockType);
             return (
               <div key={e} className="ActionQueueItem">
-                <ActionQueueItem state={state} icon={icon} title={`${actionType} tx`} description={blockType} />
+                <ActionQueueItem
+                  state={state}
+                  icon={icon}
+                  title={`${actionType} tx`}
+                  description={blockType}
+                  link={txHash && blockExplorer + "/tx/" + txHash}
+                />
                 {/* TODO: conditionally render this for debugging? */}
                 {coord ? (
                   <div className="ActionQueueItemPosition">

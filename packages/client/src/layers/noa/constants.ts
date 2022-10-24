@@ -1,7 +1,9 @@
+import { VoxelCoord } from "@latticexyz/utils";
 import { BlockTypeKey } from "../network/constants";
 import { Block, NoaBlockType } from "./types";
 
 export const CRAFTING_SIDE = 3;
+export const SPAWN_POINT: VoxelCoord = { x: -1543, y: 15, z: -808 };
 export const CRAFTING_SIZE = CRAFTING_SIDE * CRAFTING_SIDE;
 export const EMPTY_CRAFTING_TABLE = [...new Array(CRAFTING_SIZE)].map(() => -1);
 export const MINING_DURATION = 800;
@@ -71,21 +73,57 @@ export const Textures = {
 export const UVWraps: { [key in BlockTypeKey]: string | undefined } = {
   Air: undefined,
   Grass: "./assets/uv-wraps/grass.png",
-  Dirt: undefined,
-  Log: undefined,
+  Dirt: "./assets/uv-wraps/dirt.png",
+  Log: "./assets/uv-wraps/log.png",
   Sand: "./assets/uv-wraps/sand.png",
+  Glass: "./assets/uv-wraps/glass.png",
   Stone: "./assets/uv-wraps/stone.png",
   Water: undefined,
   Cobblestone: "./assets/uv-wraps/cobblestone.png",
-  Coal: undefined,
-  Crafting: undefined,
-  Iron: undefined,
-  Gold: undefined,
-  Diamond: undefined,
-  Leaves: undefined,
-  Planks: undefined,
+  Coal: "./assets/uv-wraps/coal.png",
+  Crafting: "./assets/uv-wraps/crafting.png",
+  Iron: "./assets/uv-wraps/iron.png",
+  Gold: "./assets/uv-wraps/gold.png",
+  Diamond: "./assets/uv-wraps/diamond.png",
+  Leaves: "./assets/uv-wraps/leaves.png",
+  Planks: "./assets/uv-wraps/planks.png",
+  Wool: "./assets/uv-wraps/wool.png",
+  OrangeWool: "./assets/uv-wraps/orange-wool.png",
+  MagentaWool: "./assets/uv-wraps/magenta-wool.png",
+  LightBlueWool: "./assets/uv-wraps/light-blue-wool.png",
+  YellowWool: "./assets/uv-wraps/yellow-wool.png",
+  LimeWool: "./assets/uv-wraps/lime-wool.png",
+  PinkWool: "./assets/uv-wraps/pink-wool.png",
+  GrayWool: "./assets/uv-wraps/gray-wool.png",
+  LightGrayWool: "./assets/uv-wraps/light-gray-wool.png",
+  CyanWool: "./assets/uv-wraps/cyan-wool.png",
+  PurpleWool: "./assets/uv-wraps/purple-wool.png",
+  BlueWool: "./assets/uv-wraps/blue-wool.png",
+  BrownWool: "./assets/uv-wraps/brown-wool.png",
+  GreenWool: "./assets/uv-wraps/green-wool.png",
+  RedWool: "./assets/uv-wraps/red-wool.png",
+  BlackWool: "./assets/uv-wraps/black-wool.png",
+  Sponge: "./assets/uv-wraps/sponge.png",
+  Snow: "./assets/uv-wraps/snow.png",
+  Clay: "./assets/uv-wraps/clay.png",
+  Bedrock: "./assets/uv-wraps/bedrock.png",
+  Bricks: "./assets/uv-wraps/bricks.png",
+  MossyCobblestone: "./assets/uv-wraps/mossy-cobblestone.png",
   RedFlower: undefined,
+  OrangeFlower: undefined,
+  MagentaFlower: undefined,
+  LightBlueFlower: undefined,
+  LimeFlower: undefined,
+  PinkFlower: undefined,
+  GrayFlower: undefined,
+  LightGrayFlower: undefined,
+  CyanFlower: undefined,
+  PurpleFlower: undefined,
+  BlueFlower: undefined,
+  GreenFlower: undefined,
+  BlackFlower: undefined,
   Kelp: undefined,
+  GrassPlant: undefined,
 };
 
 export const Blocks: { [key in BlockTypeKey]: Block | undefined } = {
