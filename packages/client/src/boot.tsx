@@ -20,6 +20,7 @@ import { Engine as EngineImport } from "./layers/react/engine/Engine";
 import { registerUIComponents as registerUIComponentsImport } from "./layers/react/components";
 import { Wallet } from "ethers";
 import { enableLogger } from "@latticexyz/utils";
+import { createReactLayer } from "./layers/react";
 
 enableLogger();
 
@@ -110,6 +111,7 @@ async function bootGame() {
 
     if (!layers.network) layers.network = await createNetworkLayer(networkLayerConfig);
     if (!layers.noa) layers.noa = await createNoaLayer(layers.network);
+    if (!layers.react) layers.react = await createReactLayer(layers.network, layers.noa);
 
     Time.time.setPacemaker((setTimestamp) => {
       setInterval(() => {
