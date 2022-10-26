@@ -22,6 +22,7 @@
     { "name": "StakeSystem", "writeAccess": ["StakeComponent", "OwnedByComponent"] },
     { "name": "ClaimSystem", "writeAccess": ["ClaimComponent"] },
     { "name": "TransferSystem", "writeAccess": ["OwnedByComponent"] },
+    { "name": "BulkTransferSystem", "writeAccess": ["OwnedByComponent"] },
     { "name": "NameSystem", "writeAccess": ["NameComponent"] },
     {
       "name": "InitSystem",
