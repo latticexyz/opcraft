@@ -19,7 +19,7 @@ import { Layers } from "./types";
 import { Engine as EngineImport } from "./layers/react/engine/Engine";
 import { registerUIComponents as registerUIComponentsImport } from "./layers/react/components";
 import { Wallet } from "ethers";
-import { enableLogger } from "@latticexyz/utils";
+import { enableLogger, sleep } from "@latticexyz/utils";
 
 enableLogger();
 
@@ -176,6 +176,12 @@ async function bootGame() {
 
 const mountReact: { current: (mount: boolean) => void } = { current: () => void 0 };
 const setLayers: { current: (layers: Layers) => void } = { current: () => void 0 };
+async function remountReact() {
+  mountReact.current(false);
+  await sleep(0);
+  mountReact.current(true);
+}
+(window as any).remountReact = remountReact;
 
 function bootReact() {
   const rootElement = document.getElementById("react-root");
