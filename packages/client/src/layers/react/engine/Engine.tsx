@@ -20,6 +20,8 @@ export const Engine: React.FC<{
     setLayers.current = (layers: Layers) => _setLayers(layers);
   }, []);
 
+  console.log("addr rendered", mounted);
+
   if (!mounted || !layers) return customBootScreen || <BootScreen />;
 
   return (

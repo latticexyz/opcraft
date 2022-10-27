@@ -6,6 +6,7 @@ import { registerBlockExplorer } from "./BlockExplorer";
 import { registerInventory } from "./Inventory";
 import { registerSidebar } from "./Sidebar";
 import { registerPlugins } from "./Plugins";
+import { registerChat } from "./Chat";
 export * from "./common";
 
 export function registerUIComponents() {
@@ -17,4 +18,5 @@ export function registerUIComponents() {
   registerSidebar();
   registerComponentBrowser();
   registerPlugins();
+  registerChat();
 }

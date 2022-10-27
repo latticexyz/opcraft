@@ -352,6 +352,14 @@ export async function createNetworkLayer(config: GameConfig) {
     return entityIndex != null ? getComponentValue(components.Name, entityIndex)?.value : undefined;
   }
 
+  const textEncoder = new TextEncoder();
+  function chat(msg: string) {
+    if (!relay) return;
+    const encodedMessage = textEncoder.encode("m" + msg);
+    console.log(encodedMessage);
+    relay.push("gchat", encodedMessage);
+  }
+
   // --- STREAMS --------------------------------------------------------------------
   const balanceGwei$ = new BehaviorSubject<number>(1);
   world.registerDisposer(
@@ -400,6 +408,7 @@ export async function createNetworkLayer(config: GameConfig) {
       removePluginRegistry,
       reloadPluginRegistry,
       reloadPluginRegistryUrl,
+      chat,
     },
     dev: setupDevSystems(world, encoders as Promise<any>, systems),
     streams: { connectedClients$, balanceGwei$ },
