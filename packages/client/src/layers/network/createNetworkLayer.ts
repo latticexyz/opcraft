@@ -392,6 +392,7 @@ export async function createNetworkLayer(config: GameConfig) {
       getBlockAtPosition,
       getECSBlockAtPosition,
       getTerrainBlockAtPosition,
+      getEntityAtPosition,
       getName,
       addPlugin,
       reloadPlugin,
@@ -410,6 +411,7 @@ export async function createNetworkLayer(config: GameConfig) {
     mappings,
     faucet,
     uniqueWorldId,
+    types: { BlockIdToKey, BlockType },
   };
 
   // --- SYSTEMS --------------------------------------------------------------------
