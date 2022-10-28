@@ -81,10 +81,18 @@ export async function createNetworkLayer(config: GameConfig) {
   };
 
   // --- SETUP ----------------------------------------------------------------------
-  const { txQueue, systems, txReduced$, network, startSync, encoders, ecsEvent$, mappings } = await setupMUDNetwork<
-    typeof components,
-    SystemTypes
-  >(getNetworkConfig(config), world, components, SystemAbis, {
+  const {
+    txQueue,
+    systems,
+    txReduced$,
+    network,
+    startSync,
+    encoders,
+    ecsEvent$,
+    mappings,
+    registerComponent,
+    registerSystem,
+  } = await setupMUDNetwork<typeof components, SystemTypes>(getNetworkConfig(config), world, components, SystemAbis, {
     initialGasPrice: 2_000_000,
   });
 
@@ -401,6 +409,8 @@ export async function createNetworkLayer(config: GameConfig) {
       removePluginRegistry,
       reloadPluginRegistry,
       reloadPluginRegistryUrl,
+      registerComponent,
+      registerSystem,
     },
     dev: setupDevSystems(world, encoders as Promise<any>, systems),
     streams: { connectedClients$, balanceGwei$ },
