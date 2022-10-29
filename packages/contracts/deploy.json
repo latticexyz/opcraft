@@ -20,6 +20,7 @@
     { "name": "CraftSystem", "writeAccess": ["OwnedByComponent", "ItemComponent"] },
     { "name": "OccurrenceSystem", "writeAccess": [] },
     { "name": "StakeSystem", "writeAccess": ["StakeComponent", "OwnedByComponent"] },
+    { "name": "BulkStakeSystem", "writeAccess": ["StakeComponent", "OwnedByComponent"] },
     { "name": "ClaimSystem", "writeAccess": ["ClaimComponent"] },
     { "name": "TransferSystem", "writeAccess": ["OwnedByComponent"] },
     { "name": "BulkTransferSystem", "writeAccess": ["OwnedByComponent"] },
