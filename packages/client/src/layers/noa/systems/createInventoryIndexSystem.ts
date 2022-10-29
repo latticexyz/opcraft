@@ -43,14 +43,6 @@ export function createInventoryIndexSystem(network: NetworkLayer, context: NoaLa
 
     if (blockIndex == null) return;
 
-    const quantityOfType = runQuery([
-      HasValue(OwnedBy, { value: connectedAddress.get() }),
-      HasValue(Item, { value: blockID }),
-    ]).size;
-
-    // Remove the entity index of blocks the player doesn't own, so new blocks can take its place
-    if (quantityOfType == 0) return removeComponent(InventoryIndex, blockIndex);
-
     // Assign the first free inventory index
     if (!hasComponent(InventoryIndex, blockIndex)) {
       const values = [...InventoryIndex.values.value.values()]; // lol
