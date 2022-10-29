@@ -97,7 +97,7 @@ export function createSoundSystem(network: NetworkLayer, context: NoaLayer) {
   });
 
   // Set a new `playingTheme` in random intervals if none is playing
-  defineRxSystem(world, timer(0, 600000), () => {
+  defineRxSystem(world, timer(0, 60000), () => {
     const currentlyPlaying = getComponentValue(Sounds, SingletonEntity)?.playingTheme;
     if (!currentlyPlaying && Math.random() < 0.5) {
       const playingTheme = (isNotEmpty(themes) && pickRandom(themes)) || undefined;
