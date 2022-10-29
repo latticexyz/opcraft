@@ -224,7 +224,7 @@ const List = styled(Container)`
   display: grid;
   grid-gap: 15px;
   max-height: 400px;
-  overflow: scroll;
+  overflow: auto;
   padding: 20px 20px 10px 20px;
 `;
 
