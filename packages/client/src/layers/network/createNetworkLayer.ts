@@ -129,6 +129,19 @@ export async function createNetworkLayer(config: GameConfig) {
     addPluginRegistry("https://opcraft-plugins.mud.dev");
   }
 
+  // Enable chat plugin by default
+  if (
+    getEntitiesWithValue(components.Plugin, { host: "https://opcraft-plugins.mud.dev", path: "/chat.js" }).size === 0
+  ) {
+    console.info("Enabling chat plugin by default");
+    addPlugin({
+      host: "https://opcraft-plugins.mud.dev",
+      path: "/chat.js",
+      active: true,
+      source: "https://github.com/latticexyz/opcraft-plugins",
+    });
+  }
+
   // --- ACTION SYSTEM --------------------------------------------------------------
   const actions = createActionSystem<{
     actionType: string;

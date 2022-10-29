@@ -1,5 +1,4 @@
 import { defineComponent, Type, World } from "@latticexyz/recs";
-import { defineStringComponent } from "@latticexyz/std-client";
 
 export function definePluginComponent(world: World) {
   return defineComponent(
