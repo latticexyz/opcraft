@@ -10,6 +10,8 @@ import {
   removeComponent,
   runQuery,
 } from "@latticexyz/recs";
+import { computedToStream } from "@latticexyz/utils";
+import { switchMap } from "rxjs";
 import { NetworkLayer } from "../../network";
 import { NoaLayer } from "../types";
 
@@ -24,11 +26,18 @@ export function createInventoryIndexSystem(network: NetworkLayer, context: NoaLa
     components: { InventoryIndex },
   } = context;
 
-  const ownedByMeQuery = defineQuery([HasValue(OwnedBy, { value: connectedAddress.get() }), Has(Item)], {
-    runOnInit: true,
-  });
+  const connectedAddress$ = computedToStream(connectedAddress);
 
-  defineRxSystem(world, ownedByMeQuery.update$, (update) => {
+  const update$ = connectedAddress$.pipe(
+    switchMap(
+      (address) =>
+        defineQuery([HasValue(OwnedBy, { value: address }), Has(Item)], {
+          runOnInit: true,
+        }).update$
+    )
+  );
+
+  defineRxSystem(world, update$, (update) => {
     const blockID = getComponentValue(Item, update.entity)?.value as EntityID;
     const blockIndex = blockID && world.entityToIndex.get(blockID);
 

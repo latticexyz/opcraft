@@ -255,7 +255,7 @@ export function createNoaLayer(network: NetworkLayer) {
     ][0];
     if (ownedEntityOfSelectedType == null) return console.warn("No owned item of type", blockID);
     const itemEntity = world.entities[ownedEntityOfSelectedType];
-    build(itemEntity, coord);
+    network.api.build(itemEntity, coord);
   }
 
   function getCurrentPlayerPosition() {
