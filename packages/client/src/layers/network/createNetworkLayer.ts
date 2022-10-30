@@ -42,6 +42,7 @@ import {
   getECSBlock,
   getTerrain,
   getTerrainBlock,
+  getBiome,
 } from "./api";
 import { createPerlin } from "@latticexyz/noise";
 import { BlockIdToKey, BlockType } from "./constants";
@@ -414,6 +415,7 @@ export async function createNetworkLayer(config: GameConfig) {
       getECSBlockAtPosition,
       getTerrainBlockAtPosition,
       getEntityAtPosition,
+      getBiome,
       getName,
       addPlugin,
       reloadPlugin,
