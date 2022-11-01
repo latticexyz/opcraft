@@ -15,6 +15,7 @@ import ReactDOM from "react-dom/client";
 import { Time } from "./utils/time";
 import { createNetworkLayer as createNetworkLayerImport, GameConfig } from "./layers/network";
 import { createNoaLayer as createNoaLayerImport } from "./layers/noa";
+import { createPhaserLayer as createPhaserLayerImport } from "./layers/phaser";
 import { Layers } from "./types";
 import { Engine as EngineImport } from "./layers/react/engine/Engine";
 import { registerUIComponents as registerUIComponentsImport } from "./layers/react/components";
@@ -26,6 +27,7 @@ enableLogger();
 // Assign variables that can be overridden by HMR
 let createNetworkLayer = createNetworkLayerImport;
 let createNoaLayer = createNoaLayerImport;
+let createPhaserLayer = createPhaserLayerImport;
 let registerUIComponents = registerUIComponentsImport;
 let Engine = EngineImport;
 
@@ -110,6 +112,7 @@ async function bootGame() {
 
     if (!layers.network) layers.network = await createNetworkLayer(networkLayerConfig);
     if (!layers.noa) layers.noa = await createNoaLayer(layers.network);
+    if (!layers.phaser) layers.phaser = await createPhaserLayer(layers.network);
 
     Time.time.setPacemaker((setTimestamp) => {
       setInterval(() => {
@@ -143,6 +146,7 @@ async function bootGame() {
 
   let reloadingNetwork = false;
   let reloadingNoa = false;
+  let reloadingPhaser = false;
 
   if (import.meta.hot) {
     import.meta.hot.accept("./layers/network/index.ts", async (module) => {
@@ -167,6 +171,16 @@ async function bootGame() {
       await rebootGame();
       console.log("HMR Noa");
       reloadingNoa = false;
+    });
+
+    import.meta.hot.accept("./layers/phaser/index.ts", async (module) => {
+      if (reloadingPhaser) return;
+      reloadingPhaser = true;
+      createPhaserLayer = module.createPhaserLayer;
+      dispose("phaser");
+      await rebootGame();
+      console.log("HMR Phaser");
+      reloadingPhaser = false;
     });
   }
   console.log("[Global] OPCraft booted");
