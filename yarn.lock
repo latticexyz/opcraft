@@ -1503,25 +1503,40 @@
   resolved "https://registry.yarnpkg.com/@latticexyz/services/-/services-1.24.0.tgz#d27b38e278f12eba92f6dd5f212e2892b0caef48"
   integrity sha512-b3Gpw0OZDB9T3OAbq7uahvF+2PfQ24ujQWLUewSwfMS8UNZEqkLz7CpqM6OJ7Pfb90zzOGlGPSXNWcawybP4eA==
 
-"@latticexyz/solecs@1.24.0", "@latticexyz/solecs@^1.24.0":
+"@latticexyz/solecs@1.24.0":
   version "1.24.0"
   resolved "https://registry.yarnpkg.com/@latticexyz/solecs/-/solecs-1.24.0.tgz#9c8fc47ff2f37385e17ee2f07802657549eeecf1"
   integrity sha512-eqqklo1vRElG/2IcApnVu1WlDw2mqdNQk9/kW6044KCOnetQ/7Q14mz9ShYvMSrH6WwMGB3rhiiWjimcT2CUSA==
+
+"@latticexyz/solecs@^1.24.0":
+  version "1.24.1"
+  resolved "https://registry.yarnpkg.com/@latticexyz/solecs/-/solecs-1.24.1.tgz#702f792a561dd3c0fc268e1c537b899ec85a321d"
+  integrity sha512-Kr6/8loY7cIMa3lQyp+amdC0k4rCsQP8NNZ/8LPL8DcYpY4HgrgJfVPXie0IdAv0qbopLkc6c2GIoWkHmGBkEw==
 
 "@latticexyz/std-client@1.24.0":
   version "1.24.0"
   resolved "https://registry.yarnpkg.com/@latticexyz/std-client/-/std-client-1.24.0.tgz#82dc9db9bda2d9387180c156d506a9f8d50cc56e"
   integrity sha512-67IUmpLWZby9cMeWDV9ewO+YySguadtRquvnVxygA8AmWfvoVnan0460d+ndcorXqoS4PGBFwMB8cILYQgpY4g==
 
-"@latticexyz/std-contracts@1.24.0", "@latticexyz/std-contracts@^1.24.0":
+"@latticexyz/std-contracts@1.24.0":
   version "1.24.0"
   resolved "https://registry.yarnpkg.com/@latticexyz/std-contracts/-/std-contracts-1.24.0.tgz#fdd241b3781096f41ddd46a0942587504e6cefe9"
   integrity sha512-znO7O2GQjmbJ5feWNIWhxZDcuUN4YPw5blrwPXlSrz1/v6GE9Ph2PUMiQo1tJYAQgow+L04cZnKbhw+wY4YsfQ==
 
-"@latticexyz/utils@1.24.0", "@latticexyz/utils@^1.24.0":
+"@latticexyz/std-contracts@^1.24.0":
+  version "1.24.1"
+  resolved "https://registry.yarnpkg.com/@latticexyz/std-contracts/-/std-contracts-1.24.1.tgz#b5313710b5af78e9c1c28a93dc8ee49772a93332"
+  integrity sha512-k8aV7UpXNJe674i6IX5uJS8bchdu9T/GHccVhxPwLkB9jSNGyfp8b5fJ50AgfYgfZ/xQ+Q4GAWFcDCNYxN9/Iw==
+
+"@latticexyz/utils@1.24.0":
   version "1.24.0"
   resolved "https://registry.yarnpkg.com/@latticexyz/utils/-/utils-1.24.0.tgz#14ad13e4f6343bd9a297f70f5f573e8e0cd41094"
   integrity sha512-uSPaptjJgqUlfDhbZDYNH2B7dDI/6ohHE73CaN9ZaTNMkap8N8Voyj+osZYVl9I8C25yqsM+3R8YGA5OxWwpHw==
+
+"@latticexyz/utils@^1.24.0":
+  version "1.24.1"
+  resolved "https://registry.yarnpkg.com/@latticexyz/utils/-/utils-1.24.1.tgz#7d4ef5ccb9add450f200bf15f660ed175f8e2186"
+  integrity sha512-OOvo210nZRPeS7RqdwboIXhDmKISUrLIJGqDSYhbHSTXCEA12YhAlPPPy25UeL7MmJtaYcSS7b8cgEgdYBpdKw==
 
 "@lerna/add@4.0.0":
   version "4.0.0"
