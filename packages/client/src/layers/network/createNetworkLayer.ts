@@ -440,7 +440,7 @@ export async function createNetworkLayer(config: GameConfig) {
   };
 
   // --- SYSTEMS --------------------------------------------------------------------
-  createPluginSystem(context);
+  // createPluginSystem(context);
 
   return context;
 }

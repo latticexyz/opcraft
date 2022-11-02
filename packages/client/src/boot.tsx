@@ -18,7 +18,7 @@ import { createNoaLayer as createNoaLayerImport } from "./layers/noa";
 import { createPhaserLayer as createPhaserLayerImport } from "./layers/phaser";
 import { Layers } from "./types";
 import { Engine as EngineImport } from "./layers/react/engine/Engine";
-import { registerUIComponents as registerUIComponentsImport } from "./layers/react/components";
+// import { registerUIComponents as registerUIComponentsImport } from "./layers/react/components";
 import { Wallet } from "ethers";
 import { enableLogger, sleep } from "@latticexyz/utils";
 
@@ -28,10 +28,11 @@ enableLogger();
 let createNetworkLayer = createNetworkLayerImport;
 let createNoaLayer = createNoaLayerImport;
 let createPhaserLayer = createPhaserLayerImport;
-let registerUIComponents = registerUIComponentsImport;
+// let registerUIComponents = registerUIComponentsImport;
 let Engine = EngineImport;
 
 const defaultParams = {
+  view: "map",
   chainId: "64657",
   worldAddress: "0x3031a86EFA3A9c0B41EA089F2021C6490591fB8c",
   rpc: "https://opcraft-3-replica-0.bedrock-goerli.optimism.io",
@@ -68,6 +69,7 @@ async function bootGame() {
 
   async function rebootGame(): Promise<Layers> {
     const params = new URLSearchParams(window.location.search);
+    const view = params.get("view") ?? defaultParams.view;
     const worldAddress = params.get("worldAddress") ?? defaultParams.worldAddress;
     let privateKey = params.get("burnerWalletPrivateKey");
     const chainIdString = params.get("chainId") ?? defaultParams.chainId;
@@ -111,8 +113,8 @@ async function bootGame() {
     if (!networkLayerConfig) throw new Error("Invalid config");
 
     if (!layers.network) layers.network = await createNetworkLayer(networkLayerConfig);
-    if (!layers.noa) layers.noa = await createNoaLayer(layers.network);
-    if (!layers.phaser) layers.phaser = await createPhaserLayer(layers.network);
+    if (!layers.noa && view === "game") layers.noa = await createNoaLayer(layers.network);
+    if (!layers.phaser && view === "map") layers.phaser = await createPhaserLayer(layers.network);
 
     Time.time.setPacemaker((setTimestamp) => {
       setInterval(() => {
@@ -209,7 +211,7 @@ function bootReact() {
   }
 
   renderEngine();
-  registerUIComponents();
+  // registerUIComponents();
 
   if (import.meta.hot) {
     // HMR React engine
@@ -219,13 +221,13 @@ function bootReact() {
     });
   }
 
-  if (import.meta.hot) {
-    // HMR React components
-    import.meta.hot.accept("./layers/react/components/index.ts", async (module) => {
-      registerUIComponents = module.registerUIComponents;
-      registerUIComponents();
-    });
-  }
+  // if (import.meta.hot) {
+  //   // HMR React components
+  //   import.meta.hot.accept("./layers/react/components/index.ts", async (module) => {
+  //     registerUIComponents = module.registerUIComponents;
+  //     registerUIComponents();
+  //   });
+  // }
 }
 
 export async function boot() {
