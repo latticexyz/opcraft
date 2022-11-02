@@ -4,7 +4,7 @@ import { PhaserLayer } from "../types";
 import { Textures } from "../assets/tilesets/opcraftTileset";
 import { getBlockAtPosition, getTerrain } from "../../network/api";
 import { createPerlin } from "@latticexyz/noise";
-import { BlockIdToKey } from "../../network/constants";
+import { BlockIdToKey, BlockType } from "../../network/constants";
 
 // Draw the 2D map
 export function createMapSystem(context: PhaserLayer, network: NetworkLayer) {
@@ -36,7 +36,7 @@ export function createMapSystem(context: PhaserLayer, network: NetworkLayer) {
     // - if so, find the terrain hight (getHeight) and the terrain block at this coordinate (map 2D to 3D coord: {x: x, y: height, z: y})
     // (Hint: all the functions needed for this are in this folder in OPCraft: https://github.com/latticexyz/opcraft/tree/main/packages/client/src/layers/network/api/terrain)
 
-    // TODO: export this from somewhere?
+    // TODO: export these from somewhere?
     const tilesPerChunk = chunks.chunkSize / 16;
     const perlin = await createPerlin();
 
@@ -44,16 +44,20 @@ export function createMapSystem(context: PhaserLayer, network: NetworkLayer) {
       for (let yOffset = 0; yOffset < tilesPerChunk; yOffset++) {
         const x = addedChunk.x * tilesPerChunk + xOffset;
         const z = addedChunk.y * tilesPerChunk + yOffset;
-        // TODO: this doesn't account for placed blocks, need to find if any are higher
-        const { height: y } = getTerrain({ x, y: 0, z }, perlin);
-        const entityId = getBlockAtPosition({ Position, Item, world }, perlin, { x, y, z });
-        const blockType = BlockIdToKey[entityId];
-        const tile = Textures[blockType];
-
-        if (tile != null) {
-          Main.putTileAt({ x, y: z }, tile);
-        } else {
-          console.log("Couldnt find tile for", x, y, z, blockType);
+        // iterate through Y position since perlin terrain may not have the highest placed block
+        // TODO: is there a more efficient way to do this?
+        for (let y = 128; y > -128; y--) {
+          const entityId = getBlockAtPosition({ Position, Item, world }, perlin, { x, y, z });
+          const blockType = BlockIdToKey[entityId];
+          if (blockType !== "Air") {
+            const tile = Textures[blockType];
+            if (tile) {
+              Main.putTileAt({ x, y: z }, tile);
+            } else {
+              console.log("Couldn't find tile for", x, y, z, blockType);
+            }
+            break;
+          }
         }
       }
     }
