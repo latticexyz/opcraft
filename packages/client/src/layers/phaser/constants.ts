@@ -14,8 +14,8 @@ export enum Maps {
 
 export enum Assets {
   OverworldTileset = "OverworldTileset",
-  MountainTileset = "MountainTileset",
-  MainAtlas = "MainAtlas",
+  // MountainTileset = "MountainTileset",
+  // MainAtlas = "MainAtlas",
 }
 
 export enum Sprites {

@@ -190,6 +190,7 @@ async function bootGame() {
 
 const mountReact: { current: (mount: boolean) => void } = { current: () => void 0 };
 const setLayers: { current: (layers: Layers) => void } = { current: () => void 0 };
+
 async function remountReact() {
   mountReact.current(false);
   await sleep(0);
