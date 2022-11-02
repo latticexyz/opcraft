@@ -18,3 +18,22 @@ export const ForegroundTiles: Partial<Record<keyof typeof BlockType, number>> = 
   GrassPlant: 12,
   Kelp: 13,
 };
+
+export const HeightMapTiles: Partial<Record<number, number>> = {
+  "-1": 48,
+  "-2": 49,
+  "-3": 50,
+  "-4": 51,
+  "-5": 52,
+  "-6": 53,
+  "-7": 54,
+  "-8": 55,
+  "1": 56,
+  "2": 57,
+  "3": 58,
+  "4": 59,
+  "5": 60,
+  "6": 61,
+  "7": 62,
+  "8": 63,
+};

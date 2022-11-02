@@ -1,7 +1,7 @@
 import { defineEnterSystem, defineRxSystem, getComponentValueStrict, Has } from "@latticexyz/recs";
 import { NetworkLayer } from "../../network";
 import { PhaserLayer } from "../types";
-import { BackgroundTiles, ForegroundTiles } from "../assets/tilesets/opcraftTileset";
+import { BackgroundTiles, ForegroundTiles, HeightMapTiles } from "../assets/tilesets/opcraftTileset";
 import { getBiome, getTerrainBlock } from "../../network/api";
 import { BlockIdToKey } from "../../network/constants";
 import { getHeight } from "../../network/api/terrain/getHeight";
@@ -58,6 +58,12 @@ export function createMapSystem(context: PhaserLayer, network: NetworkLayer) {
         const height = getHeight({ x, y: 0, z }, biome, perlin);
         const structureChunk = isStructureChunk({ biomeVector: biome, height, coord: { x, y: height + 1, z }, perlin });
         const heightLimit = structureChunk ? height + STRUCTURE_CHUNK : height;
+
+        // TODO: do this better, with shaders or something instead of translucent color overlay
+        const heightTile = HeightMapTiles[Math.max(-8, Math.min(8, Math.floor(height / 8)))];
+        if (heightTile != null) {
+          Main.putTileAt({ x, y: z }, heightTile, "HeightMap");
+        }
 
         // iterate through Y position since perlin terrain may not have the highest placed block
         // TODO: is there a more efficient way to do this?
