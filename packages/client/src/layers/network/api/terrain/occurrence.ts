@@ -174,6 +174,28 @@ export function SmallPlant(state: TerrainState): EntityID | undefined {
   }
 }
 
+export function isStructureChunk(state: TerrainState) {
+  const {
+    coord: { y },
+    height,
+  } = state;
+
+  if (y < height || y < 0) return;
+
+  const biome = accessState(state, "biome");
+  if ([Biome.Mountains, Biome.Desert].includes(biome)) return;
+
+  const hash = accessState(state, "chunkHash");
+
+  if (biome === Biome.Savanna && hash < 50) {
+    return true;
+  }
+
+  if (biome === Biome.Forest && hash < 200) {
+    return true;
+  }
+}
+
 export function Structure(state: TerrainState) {
   const {
     coord: { y },

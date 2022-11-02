@@ -3,6 +3,8 @@ import { createChunks, createPhaserEngine } from "@latticexyz/phaserx";
 import { phaserConfig } from "./config";
 import { NetworkLayer } from "../network";
 import { createMapSystem } from "./systems";
+import { NoaLayer } from "../noa";
+import { TILE_HEIGHT } from "./constants";
 
 /**
  * The Phaser layer is responsible for rendering game objects to the screen.
@@ -18,7 +20,7 @@ export async function createPhaserLayer(network: NetworkLayer) {
   const { game, scenes, dispose: disposePhaser } = await createPhaserEngine(phaserConfig);
   world.registerDisposer(disposePhaser);
 
-  const chunks = createChunks(scenes.Main.camera.worldView$, 16 * 16); // Tile size in pixels * Tiles per chunk
+  const chunks = createChunks(scenes.Main.camera.worldView$, TILE_HEIGHT * 16, TILE_HEIGHT * 16); // Tile size in pixels * Tiles per chunk
 
   // --- LAYER CONTEXT --------------------------------------------------------------
   const context = {

@@ -437,6 +437,7 @@ export async function createNetworkLayer(config: GameConfig) {
     faucet,
     uniqueWorldId,
     types: { BlockIdToKey, BlockType },
+    perlin,
   };
 
   // --- SYSTEMS --------------------------------------------------------------------
