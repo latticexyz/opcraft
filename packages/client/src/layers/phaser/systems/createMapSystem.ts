@@ -1,7 +1,7 @@
 import { defineEnterSystem, defineRxSystem, getComponentValue, getComponentValueStrict, Has } from "@latticexyz/recs";
 import { NetworkLayer } from "../../network";
 import { PhaserLayer } from "../types";
-import { Textures } from "../assets/tilesets/opcraftTileset";
+import { BackgroundTiles, ForegroundTiles } from "../assets/tilesets/opcraftTileset";
 import { getBlockAtPosition, getTerrain } from "../../network/api";
 import { createPerlin } from "@latticexyz/noise";
 import { BlockIdToKey, BlockType } from "../../network/constants";
@@ -24,11 +24,14 @@ export function createMapSystem(context: PhaserLayer, network: NetworkLayer) {
 
   // Draw map for ECS tiles
   defineEnterSystem(world, [Has(Position), Has(Item)], ({ entity }) => {
+    console.log("entered", entity);
     const position = getComponentValueStrict(Position, entity);
     const item = getComponentValueStrict(Item, entity).value;
 
     // Main.putTileAt(position, Textures[item]);
   });
+
+  // TODO: populate currently visible chunks
 
   defineRxSystem(world, chunks.addedChunks$, async (addedChunk) => {
     // TODO: for each coordinate in the chunk:
@@ -49,14 +52,25 @@ export function createMapSystem(context: PhaserLayer, network: NetworkLayer) {
         for (let y = 128; y > -128; y--) {
           const entityId = getBlockAtPosition({ Position, Item, world }, perlin, { x, y, z });
           const blockType = BlockIdToKey[entityId];
-          if (blockType !== "Air") {
-            const tile = Textures[blockType];
-            if (tile) {
-              Main.putTileAt({ x, y: z }, tile);
-            } else {
-              console.log("Couldn't find tile for", x, y, z, blockType);
-            }
+
+          if (blockType === "Air") continue;
+
+          const foregroundTile = ForegroundTiles[blockType];
+          if (foregroundTile) {
+            Main.putTileAt({ x, y: z }, foregroundTile, "Foreground");
+            // Continue down y axis to get the background tile
+            continue;
+          }
+          const backgroundTile = BackgroundTiles[blockType];
+          if (backgroundTile) {
+            Main.putTileAt({ x, y: z }, backgroundTile, "Background");
+            // Stop drawing tile for this x, z
             break;
+          }
+
+          // Ignore flowers for now
+          if (!blockType.endsWith("Flower")) {
+            console.log(`No background tile found for block type ${blockType}`);
           }
         }
       }

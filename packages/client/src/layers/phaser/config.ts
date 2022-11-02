@@ -11,6 +11,7 @@ import {
   TileAnimations as OverworldTileAnimations,
 } from "../phaser/assets/tilesets/overworldTileset";
 import overworldTileset from "./assets/tilesets/overworld-tileset.png";
+import opcraftTileset from "./assets/tilesets/opcraft-tileset.png";
 const ANIMATION_INTERVAL = 200;
 
 export const phaserConfig = {
@@ -27,15 +28,16 @@ export const phaserConfig = {
         //     imagePath: "/atlases/sprites/",
         //   },
         // },
+        [Assets.OPCraftTileset]: { type: AssetType.Image, key: Assets.OPCraftTileset, path: opcraftTileset },
       },
       maps: {
         [Maps.Main]: defineMapConfig({
           chunkSize: TILE_WIDTH * 64, // tile size * tile amount
           tileWidth: TILE_WIDTH,
           tileHeight: TILE_HEIGHT,
-          backgroundTile: [OverworldTileset.Tron],
+          backgroundTile: [0],
           animationInterval: ANIMATION_INTERVAL,
-          tileAnimations: OverworldTileAnimations,
+          // tileAnimations: OverworldTileAnimations,
           layers: {
             layers: {
               Background: { tilesets: ["Default"], hasHueTintShader: true },
@@ -53,7 +55,7 @@ export const phaserConfig = {
       },
       animations: [],
       tilesets: {
-        Default: { assetKey: Assets.OverworldTileset, tileWidth: TILE_WIDTH, tileHeight: TILE_HEIGHT },
+        Default: { assetKey: Assets.OPCraftTileset, tileWidth: TILE_WIDTH, tileHeight: TILE_HEIGHT },
       },
     }),
   },

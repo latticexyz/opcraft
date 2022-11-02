@@ -1,5 +1,5 @@
-export const TILE_WIDTH = 16;
-export const TILE_HEIGHT = 16;
+export const TILE_WIDTH = 32;
+export const TILE_HEIGHT = 32;
 
 export enum Scenes {
   Main = "Main",
@@ -16,6 +16,7 @@ export enum Assets {
   OverworldTileset = "OverworldTileset",
   // MountainTileset = "MountainTileset",
   // MainAtlas = "MainAtlas",
+  OPCraftTileset = "OPCraftTileset",
 }
 
 export enum Sprites {
