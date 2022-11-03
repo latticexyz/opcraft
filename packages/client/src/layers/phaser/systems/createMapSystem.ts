@@ -9,7 +9,8 @@ import { isStructureChunk } from "../../network/api/terrain/occurrence";
 import { STRUCTURE_CHUNK } from "../../network/api/terrain/constants";
 import { CoordMap } from "@latticexyz/utils";
 import { concat, from } from "rxjs";
-import { TILE_HEIGHT } from "../constants";
+import { TILE_HEIGHT, TILE_WIDTH } from "../constants";
+import { pixelCoordToTileCoord } from "@latticexyz/phaserx";
 
 const cache = new CoordMap<boolean>();
 
@@ -44,8 +45,8 @@ export function createMapSystem(context: PhaserLayer, network: NetworkLayer) {
   //       or optionally click once to select a tile, then click a button in UI to teleport
   defineRxSystem(world, input.doubleClick$, (pointer) => {
     console.log("dblclick", pointer);
-    const x = pointer.worldX;
-    const z = pointer.worldY;
+    const pixelCoord = { x: pointer.worldX, y: pointer.worldY };
+    const { x, y: z } = pixelCoordToTileCoord(pixelCoord, TILE_WIDTH, TILE_HEIGHT);
     const biome = getBiome({ x, y: 0, z }, perlin);
     const y = getHeight({ x, y: 0, z }, biome, perlin);
 

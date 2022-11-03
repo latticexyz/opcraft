@@ -12,7 +12,7 @@ import {
   HasValue,
   EntityID,
 } from "@latticexyz/recs";
-import { awaitStreamValue, Coord, isNotEmpty, pickRandom, random, VoxelCoord } from "@latticexyz/utils";
+import { Coord, isNotEmpty, pickRandom, random, VoxelCoord } from "@latticexyz/utils";
 import { NetworkLayer } from "../network";
 import {
   definePlayerDirectionComponent,
@@ -51,7 +51,7 @@ import { setupDayNightCycle } from "./engine/dayNightCycle";
 import { getNoaPositionStrict, setNoaPosition } from "./engine/components/utils";
 import { registerTargetedPositionComponent } from "./engine/components/targetedPositionComponent";
 import { defaultAbiCoder as abi, keccak256 } from "ethers/lib/utils";
-import { GodID, SyncState } from "@latticexyz/network";
+import { GodID } from "@latticexyz/network";
 import { getChunkCoord, getChunkEntity } from "../../utils/chunk";
 import { BehaviorSubject, map, throttleTime, timer } from "rxjs";
 import { getStakeEntity } from "../../utils/stake";
@@ -207,6 +207,7 @@ export function createNoaLayer(network: NetworkLayer) {
 
   function teleport(coord: VoxelCoord) {
     setNoaPosition(noa, noa.playerEntity, coord);
+    setComponent(components.LocalPlayerPosition, SingletonEntity, coord);
   }
 
   function teleportRandom() {
@@ -303,14 +304,6 @@ export function createNoaLayer(network: NetworkLayer) {
   setupSky(noa);
   setupHand(noa);
   setupDayNightCycle(noa, glow);
-
-  // Pause noa until initial loading is done
-  setTimeout(() => {
-    if (getComponentValue(LoadingState, SingletonEntity)?.state !== SyncState.LIVE) noa.setPaused(true);
-  }, 1000);
-  awaitStreamValue(LoadingState.update$, ({ value }) => value[0]?.state === SyncState.LIVE).then(() =>
-    noa.setPaused(false)
-  );
 
   // --- SETUP STREAMS --------------------------------------------------------------
   // (Create streams as BehaviorSubject to allow for multiple observers and getting the current value)
