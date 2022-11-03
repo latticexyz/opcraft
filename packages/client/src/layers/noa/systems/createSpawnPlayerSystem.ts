@@ -26,8 +26,13 @@ export function createSpawnPlayerSystem(network: NetworkLayer, context: NoaLayer
     if (body) body.gravityMultiplier = 2;
 
     if (hasComponent(LocalPlayerPosition, SingletonEntity)) {
+      console.log(
+        "setting noa position from local player position",
+        getComponentValueStrict(LocalPlayerPosition, SingletonEntity)
+      );
       setNoaPosition(noa, noa.playerEntity, getComponentValueStrict(LocalPlayerPosition, SingletonEntity));
     } else {
+      console.log("setting noa position to spawn", SPAWN_POINT);
       setNoaPosition(noa, noa.playerEntity, SPAWN_POINT);
     }
   });

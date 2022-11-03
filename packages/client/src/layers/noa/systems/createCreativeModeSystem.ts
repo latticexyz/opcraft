@@ -13,11 +13,11 @@ export function createCreativeModeSystem(network: NetworkLayer, context: NoaLaye
   defineComponentSystem(world, GameConfig, (update) => {
     const entity = update.entity;
     if (entity !== SingletonEntity) return;
-    const currentValue = update.value[0];
-    if (currentValue?.creativeMode) {
-      noa.ents.getMovement(1).airJumps = 999;
-    } else {
-      noa.ents.getMovement(1).airJumps = 1;
-    }
+    // const currentValue = update.value[0];
+    // if (currentValue?.creativeMode) {
+    noa.ents.getMovement(1).airJumps = 999;
+    // } else {
+    //   noa.ents.getMovement(1).airJumps = 1;
+    // }
   });
 }

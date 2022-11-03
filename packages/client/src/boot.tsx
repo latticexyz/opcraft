@@ -121,8 +121,11 @@ async function bootGame() {
     const y = parseFloat(params.get("y") ?? "");
     const z = parseFloat(params.get("z") ?? "");
     if (!isNaN(x) && !isNaN(y) && !isNaN(z)) {
-      console.log("coord found in query, teleporting to", { x, y, z });
-      layers.noa?.api.teleport({ x, y, z });
+      // layers.noa?.api.teleport({ x, y, z });
+      if (layers.noa) {
+        console.log("coord found in query, setting player position to", { x, y, z });
+        setComponent(layers.noa.components.LocalPlayerPosition, layers.noa.SingletonEntity, { x, y, z });
+      }
     }
 
     Time.time.setPacemaker((setTimestamp) => {
