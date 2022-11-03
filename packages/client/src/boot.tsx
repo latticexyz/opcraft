@@ -116,6 +116,15 @@ async function bootGame() {
     if (!layers.noa && view === "game") layers.noa = await createNoaLayer(layers.network);
     if (!layers.phaser && view === "map") layers.phaser = await createPhaserLayer(layers.network);
 
+    // TODO: figure out if this should go somewhere else
+    const x = parseFloat(params.get("x") ?? "");
+    const y = parseFloat(params.get("y") ?? "");
+    const z = parseFloat(params.get("z") ?? "");
+    if (!isNaN(x) && !isNaN(y) && !isNaN(z)) {
+      console.log("coord found in query, teleporting to", { x, y, z });
+      layers.noa?.api.teleport({ x, y, z });
+    }
+
     Time.time.setPacemaker((setTimestamp) => {
       setInterval(() => {
         setTimestamp(Date.now());

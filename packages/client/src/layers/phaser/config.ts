@@ -41,8 +41,8 @@ export const phaserConfig = {
           layers: {
             layers: {
               Background: { tilesets: ["Default"], hasHueTintShader: true },
-              Foreground: { tilesets: ["Default"], hasHueTintShader: true },
               HeightMap: { tilesets: ["Default"], hasHueTintShader: true },
+              Foreground: { tilesets: ["Default"], hasHueTintShader: true },
             },
             defaultLayer: "Background",
           },

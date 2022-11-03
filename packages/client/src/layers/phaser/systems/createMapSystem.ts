@@ -24,6 +24,7 @@ export function createMapSystem(context: PhaserLayer, network: NetworkLayer) {
     world,
     scenes: {
       Main: {
+        input,
         maps: { Main },
       },
     },
@@ -37,6 +38,23 @@ export function createMapSystem(context: PhaserLayer, network: NetworkLayer) {
     const item = getComponentValueStrict(Item, entity).value;
 
     // Main.putTileAt(position, Textures[item]);
+  });
+
+  // TODO: highlight tile on hover, then use click instead of double click to teleport
+  //       or optionally click once to select a tile, then click a button in UI to teleport
+  defineRxSystem(world, input.doubleClick$, (pointer) => {
+    console.log("dblclick", pointer);
+    const x = pointer.worldX;
+    const z = pointer.worldY;
+    const biome = getBiome({ x, y: 0, z }, perlin);
+    const y = getHeight({ x, y: 0, z }, biome, perlin);
+
+    const params = new URLSearchParams(window.location.search);
+    params.set("view", "game");
+    params.set("x", x.toString());
+    params.set("y", y.toString());
+    params.set("z", z.toString());
+    window.location.search = params.toString();
   });
 
   // Concat with the visible chunks on page load
