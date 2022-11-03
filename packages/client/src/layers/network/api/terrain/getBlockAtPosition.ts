@@ -71,16 +71,16 @@ export function getTerrainBlock({ biome: biomeVector, height }: Terrain, coord: 
     Bedrock(state) ||
     Water(state) ||
     Air(state) ||
-    Diamond(state) ||
-    Coal(state) ||
+    // Diamond(state) ||
+    // Coal(state) ||
     Sand(state) ||
     Snow(state) ||
     Grass(state) ||
     Stone(state) ||
     Clay(state) ||
     Dirt(state) ||
-    Structure(state) ||
-    SmallPlant(state) ||
+    // Structure(state) ||
+    // SmallPlant(state) ||
     BlockType.Air
   );
 }

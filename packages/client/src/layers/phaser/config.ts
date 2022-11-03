@@ -5,29 +5,13 @@ import {
   defineMapConfig,
   defineCameraConfig,
 } from "@latticexyz/phaserx";
-import { Sprites, Assets, Maps, Scenes, TILE_HEIGHT, TILE_WIDTH } from "./constants";
-import {
-  Tileset as OverworldTileset,
-  TileAnimations as OverworldTileAnimations,
-} from "../phaser/assets/tilesets/overworldTileset";
-import overworldTileset from "./assets/tilesets/overworld-tileset.png";
+import { Assets, Maps, Scenes, TILE_HEIGHT, TILE_WIDTH } from "./constants";
 import opcraftTileset from "./assets/tilesets/opcraft-tileset.png";
-const ANIMATION_INTERVAL = 200;
 
 export const phaserConfig = {
   sceneConfig: {
     [Scenes.Main]: defineSceneConfig({
       assets: {
-        // TODO: we need to create a tileset from the OPCraft textures and load it here
-        [Assets.OverworldTileset]: { type: AssetType.Image, key: Assets.OverworldTileset, path: overworldTileset },
-        // [Assets.MainAtlas]: {
-        //   type: AssetType.MultiAtlas,
-        //   key: Assets.MainAtlas,
-        //   path: "/atlases/sprites/atlas.json",
-        //   options: {
-        //     imagePath: "/atlases/sprites/",
-        //   },
-        // },
         [Assets.OPCraftTileset]: { type: AssetType.Image, key: Assets.OPCraftTileset, path: opcraftTileset },
       },
       maps: {
@@ -36,13 +20,72 @@ export const phaserConfig = {
           tileWidth: TILE_WIDTH,
           tileHeight: TILE_HEIGHT,
           backgroundTile: [0],
-          animationInterval: ANIMATION_INTERVAL,
-          // tileAnimations: OverworldTileAnimations,
+          animationInterval: Number.MAX_SAFE_INTEGER,
           layers: {
             layers: {
-              Background: { tilesets: ["Default"], hasHueTintShader: true },
-              HeightMap: { tilesets: ["Default"], hasHueTintShader: true },
-              Foreground: { tilesets: ["Default"], hasHueTintShader: true },
+              Background: { tilesets: ["Default"], hasHueTintShader: false },
+              HeightMap: { tilesets: ["Default"], hasHueTintShader: false },
+              Foreground: { tilesets: ["Default"], hasHueTintShader: false },
+            },
+            defaultLayer: "Background",
+          },
+        }),
+        [Maps.X2]: defineMapConfig({
+          chunkSize: TILE_WIDTH * 64, // tile size * tile amount
+          tileWidth: TILE_WIDTH * 2,
+          tileHeight: TILE_HEIGHT * 2,
+          backgroundTile: [0],
+          animationInterval: Number.MAX_SAFE_INTEGER,
+          layers: {
+            layers: {
+              Background: { tilesets: ["X2"], hasHueTintShader: false },
+              HeightMap: { tilesets: ["X2"], hasHueTintShader: false },
+              Foreground: { tilesets: ["X2"], hasHueTintShader: false },
+            },
+            defaultLayer: "Background",
+          },
+        }),
+        [Maps.X4]: defineMapConfig({
+          chunkSize: TILE_WIDTH * 64, // tile size * tile amount
+          tileWidth: TILE_WIDTH * 4,
+          tileHeight: TILE_HEIGHT * 4,
+          backgroundTile: [0],
+          animationInterval: Number.MAX_SAFE_INTEGER,
+          layers: {
+            layers: {
+              Background: { tilesets: ["X4"], hasHueTintShader: false },
+              HeightMap: { tilesets: ["X4"], hasHueTintShader: false },
+              Foreground: { tilesets: ["X4"], hasHueTintShader: false },
+            },
+            defaultLayer: "Background",
+          },
+        }),
+        [Maps.X8]: defineMapConfig({
+          chunkSize: TILE_WIDTH * 2 * 64, // tile size * tile amount
+          tileWidth: TILE_WIDTH * 8,
+          tileHeight: TILE_HEIGHT * 8,
+          backgroundTile: [0],
+          animationInterval: Number.MAX_SAFE_INTEGER,
+          layers: {
+            layers: {
+              Background: { tilesets: ["X8"], hasHueTintShader: false },
+              HeightMap: { tilesets: ["X8"], hasHueTintShader: false },
+              Foreground: { tilesets: ["X8"], hasHueTintShader: false },
+            },
+            defaultLayer: "Background",
+          },
+        }),
+        [Maps.X16]: defineMapConfig({
+          chunkSize: TILE_WIDTH * 4 * 64, // tile size * tile amount
+          tileWidth: TILE_WIDTH * 16,
+          tileHeight: TILE_HEIGHT * 16,
+          backgroundTile: [0],
+          animationInterval: Number.MAX_SAFE_INTEGER,
+          layers: {
+            layers: {
+              Background: { tilesets: ["X16"], hasHueTintShader: false },
+              HeightMap: { tilesets: ["X16"], hasHueTintShader: false },
+              Foreground: { tilesets: ["X16"], hasHueTintShader: false },
             },
             defaultLayer: "Background",
           },
@@ -57,6 +100,10 @@ export const phaserConfig = {
       animations: [],
       tilesets: {
         Default: { assetKey: Assets.OPCraftTileset, tileWidth: TILE_WIDTH, tileHeight: TILE_HEIGHT },
+        X2: { assetKey: Assets.OPCraftTileset, tileWidth: TILE_WIDTH, tileHeight: TILE_HEIGHT },
+        X4: { assetKey: Assets.OPCraftTileset, tileWidth: TILE_WIDTH, tileHeight: TILE_HEIGHT },
+        X8: { assetKey: Assets.OPCraftTileset, tileWidth: TILE_WIDTH, tileHeight: TILE_HEIGHT },
+        X16: { assetKey: Assets.OPCraftTileset, tileWidth: TILE_WIDTH, tileHeight: TILE_HEIGHT },
       },
     }),
   },
@@ -70,7 +117,7 @@ export const phaserConfig = {
     pinchSpeed: 1,
     wheelSpeed: 1,
     maxZoom: 4,
-    minZoom: 1 / 16,
+    minZoom: 1 / 64,
   }),
   cullingChunkSize: TILE_HEIGHT * 16,
 };

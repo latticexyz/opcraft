@@ -7,9 +7,10 @@ export enum Scenes {
 
 export enum Maps {
   Main = "Main",
-  Pixel = "Pixel",
-  Tactic = "Tactic",
-  Strategic = "Strategic",
+  X2 = "X2",
+  X4 = "X4",
+  X8 = "X8",
+  X16 = "X16",
 }
 
 export enum Assets {

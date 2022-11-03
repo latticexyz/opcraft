@@ -20,7 +20,7 @@ export async function createPhaserLayer(network: NetworkLayer) {
   const { game, scenes, dispose: disposePhaser } = await createPhaserEngine(phaserConfig);
   world.registerDisposer(disposePhaser);
 
-  const chunks = createChunks(scenes.Main.camera.worldView$, TILE_HEIGHT * 16, TILE_HEIGHT * 16); // Tile size in pixels * Tiles per chunk
+  const chunks = createChunks(scenes.Main.camera.worldView$, TILE_HEIGHT * 64, TILE_HEIGHT * 64); // Tile size in pixels * Tiles per chunk
 
   // --- LAYER CONTEXT --------------------------------------------------------------
   const context = {
