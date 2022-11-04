@@ -71,8 +71,6 @@ export function createMapSystem(context: PhaserLayer, network: NetworkLayer) {
 
   // TODO: maybe move terrain exploration to webworker to reduce lags in main thread?
   defineRxSystem(world, newTile$, async ({ x, y: z }) => {
-    // TODO: export these from somewhere?
-
     const biome = getBiome({ x, y: 0, z }, perlin);
     const height = getHeight({ x, y: 0, z }, biome, perlin);
     const structureChunk = isStructureChunk({ biomeVector: biome, height, coord: { x, y: height + 1, z }, perlin });
