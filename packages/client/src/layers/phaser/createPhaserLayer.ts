@@ -3,8 +3,8 @@ import { createChunks, createPhaserEngine } from "@latticexyz/phaserx";
 import { phaserConfig } from "./config";
 import { NetworkLayer } from "../network";
 import { createMapSystem, createTileHoverSystem } from "./systems";
-import { NoaLayer } from "../noa";
 import { TILE_HEIGHT } from "./constants";
+import { createZoomLevel } from "./createZoomLevel";
 
 /**
  * The Phaser layer is responsible for rendering game objects to the screen.
@@ -30,6 +30,7 @@ export async function createPhaserLayer(network: NetworkLayer) {
     game,
     scenes,
     chunks,
+    zoomLevel$: createZoomLevel(scenes.Main.camera.zoom$),
   };
 
   // --- SYSTEMS --------------------------------------------------------------------

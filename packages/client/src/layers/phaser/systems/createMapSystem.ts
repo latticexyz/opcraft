@@ -11,14 +11,7 @@ import { Coord, CoordMap } from "@latticexyz/utils";
 import { BehaviorSubject, concat, distinctUntilChanged, map, of, Subject } from "rxjs";
 import { TILE_HEIGHT, TILE_WIDTH } from "../constants";
 import { pixelCoordToTileCoord } from "@latticexyz/phaserx";
-
-enum ZoomLevel {
-  X1,
-  X2,
-  X4,
-  X8,
-  X16,
-}
+import { ZoomLevel } from "../createZoomLevel";
 
 // Draw the 2D map
 export function createMapSystem(context: PhaserLayer, network: NetworkLayer) {
@@ -33,10 +26,10 @@ export function createMapSystem(context: PhaserLayer, network: NetworkLayer) {
       Main: {
         input,
         maps: { Main, X2, X4, X8, X16 },
-        camera,
       },
     },
     chunks,
+    zoomLevel$,
   } = context;
 
   const maps = {
@@ -46,20 +39,6 @@ export function createMapSystem(context: PhaserLayer, network: NetworkLayer) {
     [ZoomLevel.X8]: X8,
     [ZoomLevel.X16]: X16,
   };
-
-  const zoom$ = new BehaviorSubject(ZoomLevel.X1);
-  concat(of(1), camera.zoom$)
-    .pipe(
-      map((zoom) => {
-        if (zoom < 1 / 32) return ZoomLevel.X16;
-        if (zoom < 1 / 16) return ZoomLevel.X8;
-        if (zoom < 1 / 8) return ZoomLevel.X4;
-        if (zoom < 1 / 4) return ZoomLevel.X2;
-        return ZoomLevel.X1;
-      }),
-      distinctUntilChanged()
-    )
-    .subscribe(zoom$);
 
   const computedTiles = new CoordMap<boolean>();
 
@@ -136,11 +115,11 @@ export function createMapSystem(context: PhaserLayer, network: NetworkLayer) {
 
         const coord = { x, y };
 
-        const zoom = zoom$.getValue();
-        if (zoom === ZoomLevel.X2 && (x % 2 !== 0 || y % 2 !== 0)) continue;
-        if (zoom === ZoomLevel.X4 && (x % 4 !== 0 || y % 4 !== 0)) continue;
-        if (zoom === ZoomLevel.X8 && (x % 8 !== 0 || y % 8 !== 0)) continue;
-        if (zoom === ZoomLevel.X16 && (x % 16 !== 0 || y % 16 !== 0)) continue;
+        const { zoomLevel } = zoomLevel$.getValue();
+        if (zoomLevel === ZoomLevel.X2 && (x % 2 !== 0 || y % 2 !== 0)) continue;
+        if (zoomLevel === ZoomLevel.X4 && (x % 4 !== 0 || y % 4 !== 0)) continue;
+        if (zoomLevel === ZoomLevel.X8 && (x % 8 !== 0 || y % 8 !== 0)) continue;
+        if (zoomLevel === ZoomLevel.X16 && (x % 16 !== 0 || y % 16 !== 0)) continue;
 
         if (!computedTiles.get(coord)) {
           newTile$.next(coord);
@@ -151,17 +130,17 @@ export function createMapSystem(context: PhaserLayer, network: NetworkLayer) {
   });
 
   // Send current chunks through addedChunks$ when zoom changes
-  defineRxSystem(world, zoom$, () => {
+  defineRxSystem(world, zoomLevel$, () => {
     for (const chunk of chunks.visibleChunks.current.coords()) {
       addedChunks$.next(chunk);
     }
   });
 
   // React to zoom level changes
-  defineRxSystem(world, zoom$, (zoom) => {
+  defineRxSystem(world, zoomLevel$, ({ zoomLevel }) => {
     // Toggle maps when zooming out
-    for (const [zoomLevel, map] of Object.entries(maps)) {
-      map.setVisible(zoom === parseInt(zoomLevel));
+    for (const [mapZoomLevel, map] of Object.entries(maps)) {
+      map.setVisible(zoomLevel === parseInt(mapZoomLevel));
     }
   });
 
