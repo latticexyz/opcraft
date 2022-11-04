@@ -13,7 +13,6 @@ export function createTileHoverSystem(context: PhaserLayer, _network: NetworkLay
     zoomLevel$,
   } = context;
 
-  // TODO: figure out why this isn't loading
   const sprite = phaserScene.add.sprite(0, 0, "tileHover").setOrigin(0, 0).setVisible(false);
 
   const pointerPosition$ = new BehaviorSubject({ x: 0, y: 0 });

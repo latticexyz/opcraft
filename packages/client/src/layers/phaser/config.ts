@@ -13,7 +13,7 @@ export const phaserConfig = {
     [Scenes.Main]: defineSceneConfig({
       assets: {
         [Assets.OPCraftTileset]: { type: AssetType.Image, key: Assets.OPCraftTileset, path: opcraftTileset },
-        tileHover: { type: AssetType.Image, key: "tileHover", path: "/assets/blocks/18-Brown_mushroom.png" },
+        tileHover: { type: AssetType.Image, key: "tileHover", path: "/assets/blocks/11-Glass.png" },
       },
       maps: {
         [Maps.Main]: defineMapConfig({

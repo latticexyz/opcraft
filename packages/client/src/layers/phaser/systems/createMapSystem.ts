@@ -2,13 +2,12 @@ import { defineEnterSystem, defineRxSystem, getComponentValueStrict, Has } from 
 import { NetworkLayer } from "../../network";
 import { PhaserLayer } from "../types";
 import { BackgroundTiles, ForegroundTiles, HeightMapTiles } from "../assets/tilesets/opcraftTileset";
-import { getBiome, getTerrainBlock } from "../../network/api";
+import { getBiome, getTerrainBlock, getHeight } from "../../network/api";
 import { BlockIdToKey } from "../../network/constants";
-import { getHeight } from "../../network/api/terrain/getHeight";
 import { isStructureChunk } from "../../network/api/terrain/occurrence";
 import { STRUCTURE_CHUNK } from "../../network/api/terrain/constants";
 import { Coord, CoordMap } from "@latticexyz/utils";
-import { BehaviorSubject, concat, distinctUntilChanged, map, of, Subject } from "rxjs";
+import { Subject } from "rxjs";
 import { TILE_HEIGHT, TILE_WIDTH } from "../constants";
 import { pixelCoordToTileCoord } from "@latticexyz/phaserx";
 import { ZoomLevel } from "../createZoomLevel";
