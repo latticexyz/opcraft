@@ -14,7 +14,6 @@ export function createTileHoverSystem(context: PhaserLayer, _network: NetworkLay
   } = context;
 
   // TODO: figure out why this isn't loading
-  phaserScene.load.image("tileHover", "/assets/blocks/18-Brown_mushroom.png");
   const sprite = phaserScene.add.sprite(0, 0, "tileHover").setOrigin(0, 0).setVisible(false);
 
   const pointerPosition$ = new BehaviorSubject({ x: 0, y: 0 });

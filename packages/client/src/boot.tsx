@@ -18,7 +18,7 @@ import { createNoaLayer as createNoaLayerImport } from "./layers/noa";
 import { createPhaserLayer as createPhaserLayerImport } from "./layers/phaser";
 import { Layers } from "./types";
 import { Engine as EngineImport } from "./layers/react/engine/Engine";
-// import { registerUIComponents as registerUIComponentsImport } from "./layers/react/components";
+import { registerUIComponents as registerUIComponentsImport } from "./layers/react/components";
 import { Wallet } from "ethers";
 import { enableLogger, sleep } from "@latticexyz/utils";
 
@@ -28,7 +28,7 @@ enableLogger();
 let createNetworkLayer = createNetworkLayerImport;
 let createNoaLayer = createNoaLayerImport;
 let createPhaserLayer = createPhaserLayerImport;
-// let registerUIComponents = registerUIComponentsImport;
+let registerUIComponents = registerUIComponentsImport;
 let Engine = EngineImport;
 
 const defaultParams = {
@@ -220,7 +220,7 @@ function bootReact() {
   }
 
   renderEngine();
-  // registerUIComponents();
+  registerUIComponents();
 
   if (import.meta.hot) {
     // HMR React engine
@@ -230,13 +230,13 @@ function bootReact() {
     });
   }
 
-  // if (import.meta.hot) {
-  //   // HMR React components
-  //   import.meta.hot.accept("./layers/react/components/index.ts", async (module) => {
-  //     registerUIComponents = module.registerUIComponents;
-  //     registerUIComponents();
-  //   });
-  // }
+  if (import.meta.hot) {
+    // HMR React components
+    import.meta.hot.accept("./layers/react/components/index.ts", async (module) => {
+      registerUIComponents = module.registerUIComponents;
+      registerUIComponents();
+    });
+  }
 }
 
 export async function boot() {
