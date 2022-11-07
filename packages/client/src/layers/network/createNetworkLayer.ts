@@ -36,6 +36,7 @@ import {
   definePluginComponent,
   definePluginRegistryComponent,
   definePosition2DComponent,
+  defineChunkComponent,
 } from "./components";
 import {
   getBlockAtPosition as getBlockAtPositionApi,
@@ -51,7 +52,7 @@ import { createFaucetService, createRelayStream, GodID, SyncState } from "@latti
 import { SystemTypes } from "contracts/types/SystemTypes";
 import { SystemAbis } from "contracts/types/SystemAbis.mjs";
 import { map, timer, combineLatest, BehaviorSubject } from "rxjs";
-import { createInitSystem, createPluginSystem } from "./systems";
+import { createInitSystem } from "./systems";
 
 /**
  * The Network layer is the lowest layer in the client architecture.
@@ -70,6 +71,7 @@ export async function createNetworkLayer(config: GameConfig) {
   const components = {
     Position: definePositionComponent(world),
     Position2D: definePosition2DComponent(world),
+    Chunk: defineChunkComponent(world),
     ItemPrototype: defineItemPrototypeComponent(world),
     Item: defineItemComponent(world),
     Name: defineNameComponent(world),

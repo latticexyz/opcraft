@@ -1,13 +1,14 @@
 import { NetworkLayer } from "../types";
 import { itemTypes } from "../../../../data/itemTypes.json";
 import positionData from "../../../../data/positionsPerItem.json";
-import { createEntity, setComponent, withValue } from "@latticexyz/recs";
+import { createEntity, getComponentValue, setComponent, updateComponent, withValue } from "@latticexyz/recs";
 import { SyncState } from "@latticexyz/network";
+import { getChunkCoord, getChunkEntity } from "../../../utils/chunk";
 
 export function createInitSystem(context: NetworkLayer) {
   const {
     world,
-    components: { Position, Position2D, Item, LoadingState },
+    components: { Position, Position2D, Item, LoadingState, Chunk },
     SingletonEntity,
   } = context;
 
@@ -25,6 +26,9 @@ export function createInitSystem(context: NetworkLayer) {
         withValue(Position2D, { x, y: z }),
         withValue(Item, { value: item }),
       ]);
+      const chunkEntity = world.registerEntity({ id: getChunkEntity(getChunkCoord({ x, y, z })) });
+      const prevChanges = getComponentValue(Chunk, chunkEntity)?.changes ?? 0;
+      setComponent(Chunk, chunkEntity, { changes: prevChanges + 1 });
     }
   }
 

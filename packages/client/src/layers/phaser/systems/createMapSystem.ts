@@ -8,7 +8,7 @@ import { isStructureChunk } from "../../network/api/terrain/occurrence";
 import { STRUCTURE_CHUNK } from "../../network/api/terrain/constants";
 import { Coord, CoordMap } from "@latticexyz/utils";
 import { ZoomLevel } from "../createZoomLevel";
-import { BehaviorSubject, Subject } from "rxjs";
+import { Subject } from "rxjs";
 import { TILE_HEIGHT } from "../constants";
 
 const StepSizePerZoomLevel = {
@@ -41,7 +41,6 @@ export function createMapSystem(context: PhaserLayer, network: NetworkLayer) {
 
   // Setup local variables
   const computedTiles = new CoordMap<boolean>();
-  const zoom$ = new BehaviorSubject(ZoomLevel.X1);
   const addedChunks$ = new Subject<Coord>();
   chunks.addedChunks$.subscribe(addedChunks$);
   const newTile$ = new Subject<Coord>();

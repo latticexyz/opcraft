@@ -28,7 +28,7 @@ export function getBiomeHash(coord: VoxelCoord, biome: Biome) {
   return getCoordHash(Math.floor(coord.x / 300) + Math.floor(coord.z / 300), biome);
 }
 
-function getChunkCoord({ x, z }: VoxelCoord) {
+export function getChunkCoord({ x, z }: VoxelCoord) {
   const chunkCoord = {
     x: Math.floor(x / STRUCTURE_CHUNK),
     y: 0,

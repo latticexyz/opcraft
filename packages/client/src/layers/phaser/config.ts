@@ -62,7 +62,7 @@ export const phaserConfig = {
           },
         }),
         [Maps.X8]: defineMapConfig({
-          chunkSize: TILE_WIDTH * 64 * 8, // tile size * tile amount
+          chunkSize: TILE_WIDTH * 64 * 16, // tile size * tile amount
           tileWidth: TILE_WIDTH * 8,
           tileHeight: TILE_HEIGHT * 8,
           backgroundTile: [0],
@@ -77,7 +77,7 @@ export const phaserConfig = {
           },
         }),
         [Maps.X16]: defineMapConfig({
-          chunkSize: TILE_WIDTH * 64 * 16, // tile size * tile amount
+          chunkSize: TILE_WIDTH * 64 * 64, // tile size * tile amount
           tileWidth: TILE_WIDTH * 16,
           tileHeight: TILE_HEIGHT * 16,
           backgroundTile: [0],
@@ -89,6 +89,19 @@ export const phaserConfig = {
               Foreground: { tilesets: ["X16"], hasHueTintShader: false },
             },
             defaultLayer: "Background",
+          },
+        }),
+        [Maps.Heat]: defineMapConfig({
+          chunkSize: TILE_WIDTH * 64 * 64, // tile size * tile amount
+          tileWidth: TILE_WIDTH * 16,
+          tileHeight: TILE_HEIGHT * 16,
+          backgroundTile: [0],
+          animationInterval: Number.MAX_SAFE_INTEGER,
+          layers: {
+            layers: {
+              Main: { tilesets: ["X16"], hasHueTintShader: false },
+            },
+            defaultLayer: "Main",
           },
         }),
       },
@@ -118,7 +131,7 @@ export const phaserConfig = {
     pinchSpeed: 1,
     wheelSpeed: 1,
     maxZoom: 4,
-    minZoom: 1 / 64,
+    minZoom: 1 / 128,
   }),
   cullingChunkSize: TILE_HEIGHT * 16,
 };

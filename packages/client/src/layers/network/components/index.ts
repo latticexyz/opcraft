@@ -14,3 +14,4 @@ export { defineComponentsRegistryComponent } from "./ComponentsRegistryComponent
 export { defineNameComponent } from "./NameComponent";
 export { definePluginComponent } from "./PluginComponent";
 export { definePluginRegistryComponent } from "./PluginRegistryComponent";
+export { defineChunkComponent } from "./ChunkComponent";
