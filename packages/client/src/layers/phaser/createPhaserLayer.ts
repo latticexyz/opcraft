@@ -2,7 +2,7 @@ import { namespaceWorld } from "@latticexyz/recs";
 import { createChunks, createPhaserEngine } from "@latticexyz/phaserx";
 import { phaserConfig } from "./config";
 import { NetworkLayer } from "../network";
-import { createMapSystem, createTileHoverSystem } from "./systems";
+import { createMapSystem, createTileHoverSystem, createInputSystem } from "./systems";
 import { TILE_HEIGHT } from "./constants";
 import { createZoomLevel } from "./createZoomLevel";
 
@@ -36,6 +36,7 @@ export async function createPhaserLayer(network: NetworkLayer) {
   // --- SYSTEMS --------------------------------------------------------------------
   createMapSystem(context, network);
   createTileHoverSystem(context, network);
+  createInputSystem(context, network);
 
   return context;
 }

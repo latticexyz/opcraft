@@ -35,6 +35,7 @@ import {
   defineNameComponent,
   definePluginComponent,
   definePluginRegistryComponent,
+  definePosition2DComponent,
 } from "./components";
 import {
   getBlockAtPosition as getBlockAtPositionApi,
@@ -50,7 +51,7 @@ import { createFaucetService, createRelayStream, GodID } from "@latticexyz/netwo
 import { SystemTypes } from "contracts/types/SystemTypes";
 import { SystemAbis } from "contracts/types/SystemAbis.mjs";
 import { map, timer, combineLatest, BehaviorSubject } from "rxjs";
-import { createPluginSystem } from "./systems";
+import { createInitSystem, createPluginSystem } from "./systems";
 
 /**
  * The Network layer is the lowest layer in the client architecture.
@@ -67,6 +68,7 @@ export async function createNetworkLayer(config: GameConfig) {
   // --- COMPONENTS -----------------------------------------------------------------
   const components = {
     Position: definePositionComponent(world),
+    Position2D: definePosition2DComponent(world),
     ItemPrototype: defineItemPrototypeComponent(world),
     Item: defineItemComponent(world),
     Name: defineNameComponent(world),
@@ -153,6 +155,7 @@ export async function createNetworkLayer(config: GameConfig) {
   // Add indexers and optimistic updates
   const { withOptimisticUpdates } = actions;
   components.Position = createIndexer(withOptimisticUpdates(components.Position));
+  components.Position2D = createIndexer(withOptimisticUpdates(components.Position2D));
   components.OwnedBy = createIndexer(withOptimisticUpdates(components.OwnedBy));
   components.Item = withOptimisticUpdates(components.Item);
 
@@ -442,6 +445,7 @@ export async function createNetworkLayer(config: GameConfig) {
 
   // --- SYSTEMS --------------------------------------------------------------------
   // createPluginSystem(context);
+  createInitSystem(context);
 
   return context;
 }

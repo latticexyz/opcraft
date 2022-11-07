@@ -1,4 +1,4 @@
-import { defineEnterSystem, defineRxSystem, getComponentValueStrict, Has } from "@latticexyz/recs";
+import { defineRxSystem, EntityID, getComponentValueStrict, getEntitiesWithValue } from "@latticexyz/recs";
 import { NetworkLayer } from "../../network";
 import { PhaserLayer } from "../types";
 import { BackgroundTiles, ForegroundTiles, HeightMapTiles } from "../assets/tilesets/opcraftTileset";
@@ -7,23 +7,32 @@ import { BlockIdToKey } from "../../network/constants";
 import { isStructureChunk } from "../../network/api/terrain/occurrence";
 import { STRUCTURE_CHUNK } from "../../network/api/terrain/constants";
 import { Coord, CoordMap } from "@latticexyz/utils";
-import { Subject } from "rxjs";
-import { TILE_HEIGHT, TILE_WIDTH } from "../constants";
 import { pixelCoordToTileCoord } from "@latticexyz/phaserx";
 import { ZoomLevel } from "../createZoomLevel";
+import { BehaviorSubject, concat, of, Subject } from "rxjs";
+import { TILE_HEIGHT } from "../constants";
 
-// Draw the 2D map
+const StepSizePerZoomLevel = {
+  [ZoomLevel.X1]: 1,
+  [ZoomLevel.X2]: 2,
+  [ZoomLevel.X4]: 4,
+  [ZoomLevel.X8]: 8,
+  [ZoomLevel.X16]: 16,
+};
+
+/**
+ * System reacts to viewport changes and draws the map data (ecs, procgen) to the phaser tilemap
+ */
 export function createMapSystem(context: PhaserLayer, network: NetworkLayer) {
+  // Extract relevant data from the context objects
   const {
-    components: { Position, Item },
+    components: { Position, Item, Position2D },
     perlin,
   } = network;
-
   const {
     world,
     scenes: {
       Main: {
-        input,
         maps: { Main, X2, X4, X8, X16 },
       },
     },
@@ -31,6 +40,12 @@ export function createMapSystem(context: PhaserLayer, network: NetworkLayer) {
     zoomLevel$,
   } = context;
 
+  // Setup local variables
+  const computedTiles = new CoordMap<boolean>();
+  const zoom$ = new BehaviorSubject(ZoomLevel.X1);
+  const addedChunks$ = new Subject<Coord>();
+  chunks.addedChunks$.subscribe(addedChunks$);
+  const newTile$ = new Subject<Coord>();
   const maps = {
     [ZoomLevel.X1]: Main,
     [ZoomLevel.X2]: X2,
@@ -39,86 +54,81 @@ export function createMapSystem(context: PhaserLayer, network: NetworkLayer) {
     [ZoomLevel.X16]: X16,
   };
 
-  const computedTiles = new CoordMap<boolean>();
+  /**
+   * Draw the given tile at the given coord on the given layer on all maps
+   */
+  function drawTile(x: number, y: number, tile: number, layer: "HeightMap" | "Foreground" | "Background") {
+    for (const [zoom, map] of Object.entries(maps)) {
+      const stepSize = StepSizePerZoomLevel[parseInt(zoom) as ZoomLevel];
+      if (x % stepSize === 0 && y % stepSize === 0) map.putTileAt({ x: x / stepSize, y: y / stepSize }, tile, layer);
+    }
+  }
 
-  // Create a Subject to be able to send chunks through it manually
-  // but also send chunks.addedChunks$ through it
-  const addedChunks$ = new Subject<Coord>();
-  chunks.addedChunks$.subscribe(addedChunks$);
-  const newTile$ = new Subject<Coord>();
-
-  // TODO: maybe move terrain exploration to webworker to reduce lags in main thread?
+  /**
+   * Compute the block type (ecs, procgen) at each coordinate coming through the newTile$ stream
+   * and draw it on the phaser tilemap
+   */
   defineRxSystem(world, newTile$, async ({ x, y: z }) => {
     const biome = getBiome({ x, y: 0, z }, perlin);
     const height = getHeight({ x, y: 0, z }, biome, perlin);
     const structureChunk = isStructureChunk({ biomeVector: biome, height, coord: { x, y: height + 1, z }, perlin });
-    const heightLimit = structureChunk ? height + STRUCTURE_CHUNK : height;
+    let heightLimit = structureChunk ? height + STRUCTURE_CHUNK : height;
 
-    // TODO: do this better, with shaders or something instead of translucent color overlay
     const heightTile = HeightMapTiles[Math.max(-8, Math.min(8, Math.floor(height / 8)))];
-    if (heightTile != null) {
-      Main.putTileAt({ x, y: z }, heightTile, "HeightMap");
-      // TODO: maybe we should use the center tile instead of the top left one
-      if (x % 2 === 0 && z % 2 === 0) X2.putTileAt({ x: x / 2, y: z / 2 }, heightTile, "HeightMap");
-      if (x % 4 === 0 && z % 4 === 0) X4.putTileAt({ x: x / 4, y: z / 4 }, heightTile, "HeightMap");
-      if (x % 8 === 0 && z % 8 === 0) X8.putTileAt({ x: x / 8, y: z / 8 }, heightTile, "HeightMap");
-      if (x % 16 === 0 && z % 16 === 0) X16.putTileAt({ x: x / 16, y: z / 16 }, heightTile, "HeightMap");
+    if (heightTile != null) drawTile(x, z, heightTile, "HeightMap");
+
+    let foregroundTile: number | undefined;
+    let backgroundTile: number | undefined;
+
+    // First check ecs blocks at this 2D coordinate
+    const ecsBlocks = [...getEntitiesWithValue(Position2D, { x, y: z })]
+      .map((entity) => ({
+        entity,
+        position: getComponentValueStrict(Position, entity),
+      }))
+      .sort((a, b) => a.position.y - b.position.y)
+      .reverse();
+
+    for (const { entity, position } of ecsBlocks) {
+      const item = getComponentValueStrict(Item, entity).value;
+      const blockType = BlockIdToKey[item as EntityID];
+      foregroundTile = ForegroundTiles[blockType];
+      backgroundTile = BackgroundTiles[blockType];
+      heightLimit = position.y - 1;
+      if (backgroundTile) break;
     }
 
-    // iterate through Y position since perlin terrain may not have the highest placed block
-    // TODO: is there a more efficient way to do this?
-    // -> I think we should separately check for ECS blocks at this coord (and pre-process the ECS state to only contain the highest block)
-    for (let y = heightLimit; y >= height - 1; y--) {
-      const entityId = getTerrainBlock({ biome, height }, { x, y, z }, perlin);
-      const blockType = BlockIdToKey[entityId];
-
-      if (blockType === "Air") continue;
-
-      const foregroundTile = ForegroundTiles[blockType];
-      if (foregroundTile) {
-        Main.putTileAt({ x, y: z }, foregroundTile, "Foreground");
-        if (x % 2 === 0 && z % 2 === 0) X2.putTileAt({ x: x / 2, y: z / 2 }, foregroundTile, "Foreground");
-        if (x % 4 === 0 && z % 4 === 0) X4.putTileAt({ x: x / 4, y: z / 4 }, foregroundTile, "Foreground");
-        if (x % 8 === 0 && z % 8 === 0) X8.putTileAt({ x: x / 8, y: z / 8 }, foregroundTile, "Foreground");
-        if (x % 16 === 0 && z % 16 === 0) X16.putTileAt({ x: x / 16, y: z / 16 }, foregroundTile, "Foreground");
-        // Continue down y axis to get the background tile
-        continue;
+    // If no background ecs block was found at this 2D coordinate, compute the procgen terrain block at this coordinate
+    if (backgroundTile == null) {
+      for (let y = heightLimit; y >= Math.min(height - 1, heightLimit); y--) {
+        const entityId = getTerrainBlock({ biome, height }, { x, y, z }, perlin);
+        const blockType = BlockIdToKey[entityId];
+        if (blockType === "Air") continue;
+        foregroundTile = foregroundTile ?? ForegroundTiles[blockType];
+        backgroundTile = BackgroundTiles[blockType];
+        if (backgroundTile != null) break;
       }
-
-      const backgroundTile = BackgroundTiles[blockType];
-      if (backgroundTile) {
-        Main.putTileAt({ x, y: z }, backgroundTile, "Background");
-        // TODO: maybe we should use the center tile instead of the top left one
-        if (x % 2 === 0 && z % 2 === 0) X2.putTileAt({ x: x / 2, y: z / 2 }, backgroundTile, "Background");
-        if (x % 4 === 0 && z % 4 === 0) X4.putTileAt({ x: x / 4, y: z / 4 }, backgroundTile, "Background");
-        if (x % 8 === 0 && z % 8 === 0) X8.putTileAt({ x: x / 8, y: z / 8 }, backgroundTile, "Background");
-        if (x % 16 === 0 && z % 16 === 0) X16.putTileAt({ x: x / 16, y: z / 16 }, backgroundTile, "Background");
-        // Stop drawing tile for this x, z
-        break;
-      }
-
-      // Ignore flowers for now
-      // if (!blockType.endsWith("Flower")) {
-      //   console.log(`No background tile found for block type ${blockType}`);
-      // }
     }
+
+    // Draw the foreground and background tiles to the tilemap
+    if (foregroundTile != null) drawTile(x, z, foregroundTile, "Foreground");
+    if (backgroundTile != null) drawTile(x, z, backgroundTile, "Background");
   });
 
-  // Send new tiles through newTile$ when viewport changes
+  /**
+   * Compute new relevant (= not computed yet and visible in current zoom level) tiles
+   * in the chunks coming through the addedChunk$ stream
+   */
   defineRxSystem(world, addedChunks$, (chunk) => {
     const tilesPerChunk = chunks.chunkSize / TILE_HEIGHT;
-    for (let xOffset = 0; xOffset < tilesPerChunk; xOffset++) {
-      for (let yOffset = 0; yOffset < tilesPerChunk; yOffset++) {
+    const { zoomLevel } = zoomLevel$.getValue();
+    const stepSize = StepSizePerZoomLevel[zoomLevel];
+
+    for (let xOffset = 0; xOffset < tilesPerChunk; xOffset += stepSize) {
+      for (let yOffset = 0; yOffset < tilesPerChunk; yOffset += stepSize) {
         const x = chunk.x * tilesPerChunk + xOffset;
         const y = chunk.y * tilesPerChunk + yOffset;
-
         const coord = { x, y };
-
-        const { zoomLevel } = zoomLevel$.getValue();
-        if (zoomLevel === ZoomLevel.X2 && (x % 2 !== 0 || y % 2 !== 0)) continue;
-        if (zoomLevel === ZoomLevel.X4 && (x % 4 !== 0 || y % 4 !== 0)) continue;
-        if (zoomLevel === ZoomLevel.X8 && (x % 8 !== 0 || y % 8 !== 0)) continue;
-        if (zoomLevel === ZoomLevel.X16 && (x % 16 !== 0 || y % 16 !== 0)) continue;
 
         if (!computedTiles.get(coord)) {
           newTile$.next(coord);
@@ -128,43 +138,23 @@ export function createMapSystem(context: PhaserLayer, network: NetworkLayer) {
     }
   });
 
-  // Send current chunks through addedChunks$ when zoom changes
+  /**
+   * React to zoom level changes by sending chunks in the current viewport through addedChunks$
+   * (because they might include tiles that weren't relevant in the previous zoom level but are relevant now)
+   */
   defineRxSystem(world, zoomLevel$, () => {
     for (const chunk of chunks.visibleChunks.current.coords()) {
       addedChunks$.next(chunk);
     }
   });
 
-  // React to zoom level changes
+  /**
+   * React to zoom level changes by enabling/disabling tilemaps maps relevant/irrelevant to the new zoom level
+   */
   defineRxSystem(world, zoomLevel$, ({ zoomLevel }) => {
     // Toggle maps when zooming out
     for (const [mapZoomLevel, map] of Object.entries(maps)) {
       map.setVisible(zoomLevel === parseInt(mapZoomLevel));
     }
-  });
-
-  // TODO: draw map for ECS tiles
-  defineEnterSystem(world, [Has(Position), Has(Item)], ({ entity }) => {
-    console.log("entered", entity);
-    const position = getComponentValueStrict(Position, entity);
-    const item = getComponentValueStrict(Item, entity).value;
-    // Main.putTileAt(position, Textures[item]);
-  });
-
-  // TODO: highlight tile on hover, then use click instead of double click to teleport
-  //       or optionally click once to select a tile, then click a button in UI to teleport
-  defineRxSystem(world, input.doubleClick$, (pointer) => {
-    console.log("dblclick", pointer);
-    const pixelCoord = { x: pointer.worldX, y: pointer.worldY };
-    const { x, y: z } = pixelCoordToTileCoord(pixelCoord, TILE_WIDTH, TILE_HEIGHT);
-    const biome = getBiome({ x, y: 0, z }, perlin);
-    const y = getHeight({ x, y: 0, z }, biome, perlin);
-
-    const params = new URLSearchParams(window.location.search);
-    params.set("view", "game");
-    params.set("x", x.toString());
-    params.set("y", y.toString());
-    params.set("z", z.toString());
-    window.location.search = params.toString();
   });
 }

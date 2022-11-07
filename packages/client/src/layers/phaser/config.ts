@@ -32,7 +32,7 @@ export const phaserConfig = {
           },
         }),
         [Maps.X2]: defineMapConfig({
-          chunkSize: TILE_WIDTH * 64, // tile size * tile amount
+          chunkSize: TILE_WIDTH * 64 * 2, // tile size * tile amount
           tileWidth: TILE_WIDTH * 2,
           tileHeight: TILE_HEIGHT * 2,
           backgroundTile: [0],
@@ -47,7 +47,7 @@ export const phaserConfig = {
           },
         }),
         [Maps.X4]: defineMapConfig({
-          chunkSize: TILE_WIDTH * 64, // tile size * tile amount
+          chunkSize: TILE_WIDTH * 64 * 4, // tile size * tile amount
           tileWidth: TILE_WIDTH * 4,
           tileHeight: TILE_HEIGHT * 4,
           backgroundTile: [0],
@@ -62,7 +62,7 @@ export const phaserConfig = {
           },
         }),
         [Maps.X8]: defineMapConfig({
-          chunkSize: TILE_WIDTH * 2 * 64, // tile size * tile amount
+          chunkSize: TILE_WIDTH * 64 * 8, // tile size * tile amount
           tileWidth: TILE_WIDTH * 8,
           tileHeight: TILE_HEIGHT * 8,
           backgroundTile: [0],
@@ -77,7 +77,7 @@ export const phaserConfig = {
           },
         }),
         [Maps.X16]: defineMapConfig({
-          chunkSize: TILE_WIDTH * 4 * 64, // tile size * tile amount
+          chunkSize: TILE_WIDTH * 64 * 16, // tile size * tile amount
           tileWidth: TILE_WIDTH * 16,
           tileHeight: TILE_HEIGHT * 16,
           backgroundTile: [0],

@@ -1,6 +1,7 @@
 export { defineItemComponent } from "./ItemComponent";
 export { defineItemPrototypeComponent } from "./ItemPrototypeComponent";
 export { definePositionComponent } from "./PositionComponent";
+export { definePosition2DComponent } from "./Position2DComponent";
 export { defineOwnedByComponent } from "./OwnedByComponent";
 export { defineGameConfigComponent } from "./GameConfigComponent";
 export { defineRecipeComponent } from "./RecipeComponent";
