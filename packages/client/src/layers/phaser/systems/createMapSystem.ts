@@ -7,9 +7,8 @@ import { BlockIdToKey } from "../../network/constants";
 import { isStructureChunk } from "../../network/api/terrain/occurrence";
 import { STRUCTURE_CHUNK } from "../../network/api/terrain/constants";
 import { Coord, CoordMap } from "@latticexyz/utils";
-import { pixelCoordToTileCoord } from "@latticexyz/phaserx";
 import { ZoomLevel } from "../createZoomLevel";
-import { BehaviorSubject, concat, of, Subject } from "rxjs";
+import { BehaviorSubject, Subject } from "rxjs";
 import { TILE_HEIGHT } from "../constants";
 
 const StepSizePerZoomLevel = {
@@ -70,12 +69,9 @@ export function createMapSystem(context: PhaserLayer, network: NetworkLayer) {
    */
   defineRxSystem(world, newTile$, async ({ x, y: z }) => {
     const biome = getBiome({ x, y: 0, z }, perlin);
-    const height = getHeight({ x, y: 0, z }, biome, perlin);
+    let height = getHeight({ x, y: 0, z }, biome, perlin);
     const structureChunk = isStructureChunk({ biomeVector: biome, height, coord: { x, y: height + 1, z }, perlin });
     let heightLimit = structureChunk ? height + STRUCTURE_CHUNK : height;
-
-    const heightTile = HeightMapTiles[Math.max(-8, Math.min(8, Math.floor(height / 8)))];
-    if (heightTile != null) drawTile(x, z, heightTile, "HeightMap");
 
     let foregroundTile: number | undefined;
     let backgroundTile: number | undefined;
@@ -94,13 +90,18 @@ export function createMapSystem(context: PhaserLayer, network: NetworkLayer) {
       const blockType = BlockIdToKey[item as EntityID];
       foregroundTile = ForegroundTiles[blockType];
       backgroundTile = BackgroundTiles[blockType];
+      height = position.y;
       heightLimit = position.y - 1;
       if (backgroundTile) break;
     }
 
+    const heightTile = HeightMapTiles[Math.max(-8, Math.min(8, Math.floor(height / 8)))];
+    if (heightTile != null) drawTile(x, z, heightTile, "HeightMap");
+
     // If no background ecs block was found at this 2D coordinate, compute the procgen terrain block at this coordinate
     if (backgroundTile == null) {
-      for (let y = heightLimit; y >= Math.min(height - 1, heightLimit); y--) {
+      // Draw height map tile
+      for (let y = heightLimit; y >= height - 1; y--) {
         const entityId = getTerrainBlock({ biome, height }, { x, y, z }, perlin);
         const blockType = BlockIdToKey[entityId];
         if (blockType === "Air") continue;

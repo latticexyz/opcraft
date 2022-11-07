@@ -1,3 +1,4 @@
+import React from "react";
 import { pixelCoordToTileCoord } from "@latticexyz/phaserx";
 import { map, distinctUntilChanged } from "rxjs";
 import styled from "styled-components";

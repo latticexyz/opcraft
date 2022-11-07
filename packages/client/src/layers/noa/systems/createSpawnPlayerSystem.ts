@@ -1,6 +1,7 @@
 import { SyncState } from "@latticexyz/network";
-import { getComponentValueStrict, hasComponent } from "@latticexyz/recs";
+import { getComponentValue, getComponentValueStrict, hasComponent } from "@latticexyz/recs";
 import { awaitStreamValue } from "@latticexyz/utils";
+import { concat, map, of } from "rxjs";
 import { NetworkLayer } from "../../network";
 import { SPAWN_POINT } from "../constants";
 import { MINING_BLOCK_COMPONENT } from "../engine/components/miningBlockComponent";
@@ -18,7 +19,12 @@ export function createSpawnPlayerSystem(network: NetworkLayer, context: NoaLayer
     components: { LoadingState },
   } = network;
 
-  awaitStreamValue(LoadingState.update$, ({ value }) => value[0]?.state === SyncState.LIVE).then(() => {
+  const loadingState$ = concat(
+    of(getComponentValue(LoadingState, SingletonEntity)?.state),
+    LoadingState.update$.pipe(map((e) => e.value[0]?.state))
+  );
+
+  awaitStreamValue(loadingState$, (state) => state === SyncState.LIVE).then(() => {
     noa.entities.addComponentAgain(noa.playerEntity, MINING_BLOCK_COMPONENT, {});
 
     // Reset gravity once world is loaded

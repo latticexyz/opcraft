@@ -47,7 +47,7 @@ import {
 } from "./api";
 import { createPerlin } from "@latticexyz/noise";
 import { BlockIdToKey, BlockType } from "./constants";
-import { createFaucetService, createRelayStream, GodID } from "@latticexyz/network";
+import { createFaucetService, createRelayStream, GodID, SyncState } from "@latticexyz/network";
 import { SystemTypes } from "contracts/types/SystemTypes";
 import { SystemAbis } from "contracts/types/SystemAbis.mjs";
 import { map, timer, combineLatest, BehaviorSubject } from "rxjs";
@@ -64,6 +64,7 @@ export async function createNetworkLayer(config: GameConfig) {
   // --- WORLD ----------------------------------------------------------------------
   const world = createWorld();
   const uniqueWorldId = config.chainId + config.worldAddress;
+  const SingletonEntity = world.registerEntity({ id: GodID });
 
   // --- COMPONENTS -----------------------------------------------------------------
   const components = {
@@ -160,7 +161,6 @@ export async function createNetworkLayer(config: GameConfig) {
   components.Item = withOptimisticUpdates(components.Item);
 
   // --- API ------------------------------------------------------------------------
-
   const perlin = await createPerlin();
   const terrainContext = {
     Position: components.Position,
@@ -441,6 +441,7 @@ export async function createNetworkLayer(config: GameConfig) {
     uniqueWorldId,
     types: { BlockIdToKey, BlockType },
     perlin,
+    SingletonEntity,
   };
 
   // --- SYSTEMS --------------------------------------------------------------------
