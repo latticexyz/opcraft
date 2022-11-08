@@ -1,7 +1,7 @@
 import { defineRxSystem } from "@latticexyz/recs";
 import { NetworkLayer } from "../../network";
 import { PhaserLayer } from "../types";
-import { BackgroundTiles, ForegroundTiles, HeightMapTiles } from "../assets/tilesets/opcraftTileset";
+import { HeightMapTiles } from "../assets/tilesets/opcraftTileset";
 import { Coord, CoordMap } from "@latticexyz/utils";
 import { ZoomLevel } from "../createZoomLevel";
 import { Subject } from "rxjs";
@@ -29,7 +29,7 @@ export function createMapSystem(context: PhaserLayer, network: NetworkLayer) {
     world,
     scenes: {
       Main: {
-        maps: { Main, X2, X4, X8, X16 },
+        maps: { Main, X2, X4, X8, X16, Height },
       },
     },
     chunks,
@@ -73,7 +73,7 @@ export function createMapSystem(context: PhaserLayer, network: NetworkLayer) {
 
     const heightTile = HeightMapTiles[Math.max(-8, Math.min(8, Math.floor(y / 8)))];
     if (heightTile != null) {
-      drawTile(x, z, heightTile, "HeightMap");
+      Height.putTileAt({ x, y: z }, heightTile, "Main");
     }
     if (foregroundTile != null) {
       drawTile(x, z, foregroundTile, "Foreground");

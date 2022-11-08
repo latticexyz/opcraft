@@ -5,8 +5,8 @@
 // import { registerBlockExplorer } from "./BlockExplorer";
 // import { registerInventory } from "./Inventory";
 // import { registerSidebar } from "./Sidebar";
-// import { registerPlugins } from "./Plugins";
-import { registerTileInfo } from "./TileInfo";
+import { registerPlugins } from "./Plugins";
+import { registerMapUI } from "./MapUI";
 // export * from "./common";
 
 export function registerUIComponents() {
@@ -17,6 +17,6 @@ export function registerUIComponents() {
   // registerInventory();
   // registerSidebar();
   // registerComponentBrowser();
-  // registerPlugins();
-  registerTileInfo();
+  registerPlugins();
+  registerMapUI();
 }

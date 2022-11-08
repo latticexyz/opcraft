@@ -25,7 +25,6 @@ export const phaserConfig = {
           layers: {
             layers: {
               Background: { tilesets: ["Default"], hasHueTintShader: false },
-              HeightMap: { tilesets: ["Default"], hasHueTintShader: false },
               Foreground: { tilesets: ["Default"], hasHueTintShader: false },
             },
             defaultLayer: "Background",
@@ -40,7 +39,6 @@ export const phaserConfig = {
           layers: {
             layers: {
               Background: { tilesets: ["X2"], hasHueTintShader: false },
-              HeightMap: { tilesets: ["X2"], hasHueTintShader: false },
               Foreground: { tilesets: ["X2"], hasHueTintShader: false },
             },
             defaultLayer: "Background",
@@ -55,7 +53,6 @@ export const phaserConfig = {
           layers: {
             layers: {
               Background: { tilesets: ["X4"], hasHueTintShader: false },
-              HeightMap: { tilesets: ["X4"], hasHueTintShader: false },
               Foreground: { tilesets: ["X4"], hasHueTintShader: false },
             },
             defaultLayer: "Background",
@@ -70,7 +67,6 @@ export const phaserConfig = {
           layers: {
             layers: {
               Background: { tilesets: ["X8"], hasHueTintShader: false },
-              HeightMap: { tilesets: ["X8"], hasHueTintShader: false },
               Foreground: { tilesets: ["X8"], hasHueTintShader: false },
             },
             defaultLayer: "Background",
@@ -85,7 +81,6 @@ export const phaserConfig = {
           layers: {
             layers: {
               Background: { tilesets: ["X16"], hasHueTintShader: false },
-              HeightMap: { tilesets: ["X16"], hasHueTintShader: false },
               Foreground: { tilesets: ["X16"], hasHueTintShader: false },
             },
             defaultLayer: "Background",
@@ -100,6 +95,19 @@ export const phaserConfig = {
           layers: {
             layers: {
               Main: { tilesets: ["X16"], hasHueTintShader: false },
+            },
+            defaultLayer: "Main",
+          },
+        }),
+        [Maps.Height]: defineMapConfig({
+          chunkSize: TILE_WIDTH * 64, // tile size * tile amount
+          tileWidth: TILE_WIDTH,
+          tileHeight: TILE_HEIGHT,
+          backgroundTile: [0],
+          animationInterval: Number.MAX_SAFE_INTEGER,
+          layers: {
+            layers: {
+              Main: { tilesets: ["Default"], hasHueTintShader: false },
             },
             defaultLayer: "Main",
           },

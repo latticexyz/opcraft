@@ -19,6 +19,7 @@ export function createInputSystem(context: PhaserLayer, network: NetworkLayer) {
 
   // TODO: highlight tile on hover, then use click instead of double click to teleport
   //       or optionally click once to select a tile, then click a button in UI to teleport
+  // TODO: don't activate double click if clicking within an input, label, etc. to not interfere with form elements
   defineRxSystem(world, input.doubleClick$, async (pointer) => {
     if (!window.layers?.noa) {
       console.log("not teleporting, no noa layer");
