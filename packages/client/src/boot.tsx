@@ -64,10 +64,11 @@ export const ecs = {
  * Add new layers here.
  */
 async function bootGame() {
-  const layers: Partial<Layers> = {};
+  const layers = (window.layers ??= {});
+
   let initialBoot = true;
 
-  async function rebootGame(): Promise<Layers> {
+  async function rebootGame() {
     const params = new URLSearchParams(window.location.search);
     const view = params.get("view") ?? defaultParams.view;
     const worldAddress = params.get("worldAddress") ?? defaultParams.worldAddress;
@@ -113,17 +114,7 @@ async function bootGame() {
     if (!networkLayerConfig) throw new Error("Invalid config");
 
     if (!layers.network) layers.network = await createNetworkLayer(networkLayerConfig);
-    if (!layers.noa && view === "game") layers.noa = await createNoaLayer(layers.network);
-    if (!layers.phaser && view === "map") layers.phaser = await createPhaserLayer(layers.network);
-
-    // TODO: figure out if this should go somewhere else
-    const x = parseFloat(params.get("x") ?? "");
-    const y = parseFloat(params.get("y") ?? "");
-    const z = parseFloat(params.get("z") ?? "");
-    if (!isNaN(x) && !isNaN(y) && !isNaN(z)) {
-      console.log("coord found in query, setting player position to", { x, y, z });
-      layers.noa?.api.teleport({ x, y, z });
-    }
+    await changeView(view === "map" || view === "game" ? view : "map");
 
     Time.time.setPacemaker((setTimestamp) => {
       setInterval(() => {
@@ -141,8 +132,44 @@ async function bootGame() {
     mountReact.current(false);
     mountReact.current(true);
 
-    return layers as Layers;
+    return layers;
   }
+
+  const changeView = async (view: "game" | "map") => {
+    // TODO: move this into react with a router?
+
+    const params = new URLSearchParams(window.location.search);
+    params.set("view", view);
+    window.history.replaceState({}, "", `${window.location.pathname}?${params.toString()}`);
+
+    const layers = window.layers;
+    if (!layers?.network) throw new Error("Can't change view without network layer");
+    if (!layers.phaser) {
+      console.log("creating phaser layer");
+      layers.phaser = await createPhaserLayer(layers.network);
+    }
+    if (!layers.noa) {
+      console.log("creating noa layer");
+      layers.noa = await createNoaLayer(layers.network);
+      layers.noa.noa.setPaused(true);
+      layers.noa.noa.container.element.hidden = true;
+    }
+
+    console.log("changing view to", view);
+    if (view === "game") {
+      // Initialize or show Noa layer
+      layers.noa.noa.setPaused(false);
+      layers.noa.noa.container.element.hidden = false;
+      // Hide other layers
+      layers.phaser.game.canvas.hidden = true;
+    } else {
+      // Initialize or show Phaser layer
+      layers.phaser.game.canvas.hidden = false;
+      // Hide other layers
+      layers.noa.noa.setPaused(true);
+      layers.noa.noa.container.element.hidden = true;
+    }
+  };
 
   function dispose(layer: keyof Layers) {
     layers[layer]?.world.dispose();
@@ -151,9 +178,9 @@ async function bootGame() {
 
   await rebootGame();
 
-  (window as any).layers = layers;
-  (window as any).ecs = ecs;
-  (window as any).time = Time.time;
+  window.ecs = ecs;
+  window.time = Time.time;
+  window.changeView = changeView;
 
   let reloadingNetwork = false;
   let reloadingNoa = false;
@@ -202,12 +229,11 @@ async function bootGame() {
 const mountReact: { current: (mount: boolean) => void } = { current: () => void 0 };
 const setLayers: { current: (layers: Layers) => void } = { current: () => void 0 };
 
-async function remountReact() {
+window.remountReact = async () => {
   mountReact.current(false);
   await sleep(0);
   mountReact.current(true);
-}
-(window as any).remountReact = remountReact;
+};
 
 function bootReact() {
   const rootElement = document.getElementById("react-root");

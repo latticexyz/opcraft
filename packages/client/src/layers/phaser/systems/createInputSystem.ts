@@ -17,18 +17,17 @@ export function createInputSystem(context: PhaserLayer, network: NetworkLayer) {
 
   // TODO: highlight tile on hover, then use click instead of double click to teleport
   //       or optionally click once to select a tile, then click a button in UI to teleport
-  defineRxSystem(world, input.doubleClick$, (pointer) => {
+  defineRxSystem(world, input.doubleClick$, async (pointer) => {
     console.log("dblclick", pointer);
     const pixelCoord = { x: pointer.worldX, y: pointer.worldY };
+
+    // TODO: create helper to get x,y,z from pixel coord (same logic used in map)
+    //       this should hopefully give us a better y/height value
     const { x, y: z } = pixelCoordToTileCoord(pixelCoord, TILE_WIDTH, TILE_HEIGHT);
     const biome = getBiome({ x, y: 0, z }, perlin);
     const y = getHeight({ x, y: 0, z }, biome, perlin);
 
-    const params = new URLSearchParams(window.location.search);
-    params.set("view", "game");
-    params.set("x", x.toString());
-    params.set("y", y.toString());
-    params.set("z", z.toString());
-    window.location.search = params.toString();
+    await window.changeView?.("game");
+    window.layers?.noa?.api.teleport({ x, y, z });
   });
 }
