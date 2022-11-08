@@ -1,6 +1,6 @@
 import React from "react";
 import { pixelCoordToTileCoord } from "@latticexyz/phaserx";
-import { map, distinctUntilChanged } from "rxjs";
+import { map, distinctUntilChanged, concat, merge } from "rxjs";
 import styled from "styled-components";
 import { getBiome, getHeight } from "../../network/api";
 import { TILE_HEIGHT, TILE_WIDTH } from "../../phaser/constants";
@@ -28,18 +28,30 @@ export function registerMapUI() {
             },
           },
         },
+        noa: {
+          streams: { playerPosition$ },
+        },
         network: { perlin },
       } = layers;
 
-      return input.pointermove$.pipe(
-        map(({ pointer }) => {
-          const { x, y: z } = pixelCoordToTileCoord({ x: pointer.worldX, y: pointer.worldY }, TILE_WIDTH, TILE_HEIGHT);
-          const biome = getBiome({ x, y: 0, z }, perlin);
-          const y = getHeight({ x, y: 0, z }, biome, perlin);
-          return { x, y, z, Height, Heat };
-        }),
-        distinctUntilChanged((a, b) => a.x === b.x && a.z === b.z)
-      );
+      // TODO: make each stream conditional on whatever thing is visible
+      return merge(
+        input.pointermove$.pipe(
+          map(({ pointer }) => {
+            const { x, y: z } = pixelCoordToTileCoord(
+              { x: pointer.worldX, y: pointer.worldY },
+              TILE_WIDTH,
+              TILE_HEIGHT
+            );
+            const biome = getBiome({ x, y: 0, z }, perlin);
+            const y = getHeight({ x, y: 0, z }, biome, perlin);
+            return { x, y, z };
+          })
+        ),
+        playerPosition$.pipe(map(({ x, y, z }) => ({ x: Math.floor(x), y: Math.floor(y), z: Math.floor(z) })))
+      )
+        .pipe(distinctUntilChanged((a, b) => a.x === b.x && a.y === b.y && a.z === b.z))
+        .pipe(map(({ x, y, z }) => ({ x, y, z, Height, Heat })));
     },
     ({ x, y, z, Height, Heat }) => {
       return (
