@@ -21,6 +21,11 @@ export function createInputSystem(context: PhaserLayer, network: NetworkLayer) {
   //       or optionally click once to select a tile, then click a button in UI to teleport
   // TODO: don't activate double click if clicking within an input, label, etc. to not interfere with form elements
   defineRxSystem(world, input.doubleClick$, async (pointer) => {
+    if ((pointer.event.target as HTMLElement)?.nodeName !== "CANVAS") {
+      console.log("not teleporting, clicked outside canvas");
+      return;
+    }
+
     if (!window.layers?.noa) {
       console.log("not teleporting, no noa layer");
       return;
