@@ -112,6 +112,58 @@ export const phaserConfig = {
             defaultLayer: "Main",
           },
         }),
+        [Maps.HeightX2]: defineMapConfig({
+          chunkSize: TILE_WIDTH * 64 * 2, // tile size * tile amount
+          tileWidth: TILE_WIDTH * 2,
+          tileHeight: TILE_HEIGHT * 2,
+          backgroundTile: [0],
+          animationInterval: Number.MAX_SAFE_INTEGER,
+          layers: {
+            layers: {
+              Main: { tilesets: ["X2"], hasHueTintShader: false },
+            },
+            defaultLayer: "Main",
+          },
+        }),
+        [Maps.HeightX4]: defineMapConfig({
+          chunkSize: TILE_WIDTH * 64 * 4, // tile size * tile amount
+          tileWidth: TILE_WIDTH * 4,
+          tileHeight: TILE_HEIGHT * 4,
+          backgroundTile: [0],
+          animationInterval: Number.MAX_SAFE_INTEGER,
+          layers: {
+            layers: {
+              Main: { tilesets: ["X4"], hasHueTintShader: false },
+            },
+            defaultLayer: "Main",
+          },
+        }),
+        [Maps.HeightX8]: defineMapConfig({
+          chunkSize: TILE_WIDTH * 64 * 16, // tile size * tile amount
+          tileWidth: TILE_WIDTH * 8,
+          tileHeight: TILE_HEIGHT * 8,
+          backgroundTile: [0],
+          animationInterval: Number.MAX_SAFE_INTEGER,
+          layers: {
+            layers: {
+              Main: { tilesets: ["X8"], hasHueTintShader: false },
+            },
+            defaultLayer: "Main",
+          },
+        }),
+        [Maps.HeightX16]: defineMapConfig({
+          chunkSize: TILE_WIDTH * 64 * 64, // tile size * tile amount
+          tileWidth: TILE_WIDTH * 16,
+          tileHeight: TILE_HEIGHT * 16,
+          backgroundTile: [0],
+          animationInterval: Number.MAX_SAFE_INTEGER,
+          layers: {
+            layers: {
+              Main: { tilesets: ["X16"], hasHueTintShader: false },
+            },
+            defaultLayer: "Main",
+          },
+        }),
       },
       sprites: {
         // [Sprites.Settlement]: {

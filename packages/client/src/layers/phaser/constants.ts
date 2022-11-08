@@ -13,6 +13,10 @@ export enum Maps {
   X16 = "X16",
   Heat = "Heat",
   Height = "Height",
+  HeightX2 = "HeightX2",
+  HeightX4 = "HeightX4",
+  HeightX8 = "HeightX8",
+  HeightX16 = "HeightX16",
 }
 
 export enum Assets {

@@ -7,6 +7,7 @@ import { ZoomLevel } from "../createZoomLevel";
 import { Subject } from "rxjs";
 import { TILE_HEIGHT } from "../constants";
 import { getHighestTilesAt } from "../getHighestTilesAt";
+import { AnimatedTilemap } from "@latticexyz/phaserx";
 
 const StepSizePerZoomLevel = {
   [ZoomLevel.X1]: 1,
@@ -15,6 +16,8 @@ const StepSizePerZoomLevel = {
   [ZoomLevel.X8]: 8,
   [ZoomLevel.X16]: 16,
 };
+
+type Maps = { [key in ZoomLevel]: AnimatedTilemap<number, string, string> };
 
 /**
  * System reacts to viewport changes and draws the map data (ecs, procgen) to the phaser tilemap
@@ -29,7 +32,7 @@ export function createMapSystem(context: PhaserLayer, network: NetworkLayer) {
     world,
     scenes: {
       Main: {
-        maps: { Main, X2, X4, X8, X16, Height },
+        maps: { Main, X2, X4, X8, X16, Height, HeightX2, HeightX4, HeightX8, HeightX16 },
       },
     },
     chunks,
@@ -41,18 +44,25 @@ export function createMapSystem(context: PhaserLayer, network: NetworkLayer) {
   const addedChunks$ = new Subject<Coord>();
   chunks.addedChunks$.subscribe(addedChunks$);
   const newTile$ = new Subject<Coord>();
-  const maps = {
+  const terrainMaps: Maps = {
     [ZoomLevel.X1]: Main,
     [ZoomLevel.X2]: X2,
     [ZoomLevel.X4]: X4,
     [ZoomLevel.X8]: X8,
     [ZoomLevel.X16]: X16,
   };
+  const heightMaps: Maps = {
+    [ZoomLevel.X1]: Height,
+    [ZoomLevel.X2]: HeightX2,
+    [ZoomLevel.X4]: HeightX4,
+    [ZoomLevel.X8]: HeightX8,
+    [ZoomLevel.X16]: HeightX16,
+  };
 
   /**
    * Draw the given tile at the given coord on the given layer on all maps
    */
-  function drawTile(x: number, y: number, tile: number, layer: "HeightMap" | "Foreground" | "Background") {
+  function drawTile(x: number, y: number, tile: number, maps: Maps, layer?: "Foreground" | "Background") {
     for (const [zoom, map] of Object.entries(maps)) {
       const stepSize = StepSizePerZoomLevel[parseInt(zoom) as ZoomLevel];
       if (x % stepSize === 0 && y % stepSize === 0) {
@@ -73,13 +83,13 @@ export function createMapSystem(context: PhaserLayer, network: NetworkLayer) {
 
     const heightTile = HeightMapTiles[Math.max(-8, Math.min(8, Math.floor(y / 8)))];
     if (heightTile != null) {
-      Height.putTileAt({ x, y: z }, heightTile, "Main");
+      drawTile(x, z, heightTile, heightMaps);
     }
     if (foregroundTile != null) {
-      drawTile(x, z, foregroundTile, "Foreground");
+      drawTile(x, z, foregroundTile, terrainMaps, "Foreground");
     }
     if (backgroundTile != null) {
-      drawTile(x, z, backgroundTile, "Background");
+      drawTile(x, z, backgroundTile, terrainMaps, "Background");
     }
   });
 
@@ -121,7 +131,10 @@ export function createMapSystem(context: PhaserLayer, network: NetworkLayer) {
    */
   defineRxSystem(world, zoomLevel$, ({ zoomLevel }) => {
     // Toggle maps when zooming out
-    for (const [mapZoomLevel, map] of Object.entries(maps)) {
+    for (const [mapZoomLevel, map] of Object.entries(terrainMaps)) {
+      map.setVisible(zoomLevel === parseInt(mapZoomLevel));
+    }
+    for (const [mapZoomLevel, map] of Object.entries(heightMaps)) {
       map.setVisible(zoomLevel === parseInt(mapZoomLevel));
     }
   });
