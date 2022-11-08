@@ -206,6 +206,7 @@ export function createNoaLayer(network: NetworkLayer) {
   }
 
   function teleport(coord: VoxelCoord) {
+    console.log("teleporting to", coord);
     setNoaPosition(noa, noa.playerEntity, coord);
     setComponent(components.LocalPlayerPosition, SingletonEntity, coord);
   }
