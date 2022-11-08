@@ -52,7 +52,7 @@ import { createFaucetService, createRelayStream, GodID, SyncState } from "@latti
 import { SystemTypes } from "contracts/types/SystemTypes";
 import { SystemAbis } from "contracts/types/SystemAbis.mjs";
 import { map, timer, combineLatest, BehaviorSubject } from "rxjs";
-import { createInitSystem } from "./systems";
+import { createInitSystem, createPluginSystem } from "./systems";
 
 /**
  * The Network layer is the lowest layer in the client architecture.
@@ -447,7 +447,7 @@ export async function createNetworkLayer(config: GameConfig) {
   };
 
   // --- SYSTEMS --------------------------------------------------------------------
-  // createPluginSystem(context);
+  createPluginSystem(context);
   createInitSystem(context);
 
   return context;
