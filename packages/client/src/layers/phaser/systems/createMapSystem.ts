@@ -1,15 +1,12 @@
-import { defineRxSystem, EntityID, getComponentValueStrict, getEntitiesWithValue } from "@latticexyz/recs";
+import { defineRxSystem } from "@latticexyz/recs";
 import { NetworkLayer } from "../../network";
 import { PhaserLayer } from "../types";
 import { BackgroundTiles, ForegroundTiles, HeightMapTiles } from "../assets/tilesets/opcraftTileset";
-import { getBiome, getTerrainBlock, getHeight } from "../../network/api";
-import { BlockIdToKey } from "../../network/constants";
-import { isStructureChunk } from "../../network/api/terrain/occurrence";
-import { STRUCTURE_CHUNK } from "../../network/api/terrain/constants";
 import { Coord, CoordMap } from "@latticexyz/utils";
 import { ZoomLevel } from "../createZoomLevel";
 import { Subject } from "rxjs";
 import { TILE_HEIGHT } from "../constants";
+import { getHighestTilesAt } from "../getHighestTilesAt";
 
 const StepSizePerZoomLevel = {
   [ZoomLevel.X1]: 1,
@@ -58,7 +55,9 @@ export function createMapSystem(context: PhaserLayer, network: NetworkLayer) {
   function drawTile(x: number, y: number, tile: number, layer: "HeightMap" | "Foreground" | "Background") {
     for (const [zoom, map] of Object.entries(maps)) {
       const stepSize = StepSizePerZoomLevel[parseInt(zoom) as ZoomLevel];
-      if (x % stepSize === 0 && y % stepSize === 0) map.putTileAt({ x: x / stepSize, y: y / stepSize }, tile, layer);
+      if (x % stepSize === 0 && y % stepSize === 0) {
+        map.putTileAt({ x: x / stepSize, y: y / stepSize }, tile, layer);
+      }
     }
   }
 
@@ -67,52 +66,21 @@ export function createMapSystem(context: PhaserLayer, network: NetworkLayer) {
    * and draw it on the phaser tilemap
    */
   defineRxSystem(world, newTile$, async ({ x, y: z }) => {
-    const biome = getBiome({ x, y: 0, z }, perlin);
-    let height = getHeight({ x, y: 0, z }, biome, perlin);
-    const structureChunk = isStructureChunk({ biomeVector: biome, height, coord: { x, y: height + 1, z }, perlin });
-    let heightLimit = structureChunk ? height + STRUCTURE_CHUNK : height;
+    const highestTiles = getHighestTilesAt({ x, z, perlin, Position, Position2D, Item });
+    if (!highestTiles) return;
 
-    let foregroundTile: number | undefined;
-    let backgroundTile: number | undefined;
+    const { y, foregroundTile, backgroundTile } = highestTiles;
 
-    // First check ecs blocks at this 2D coordinate
-    const ecsBlocks = [...getEntitiesWithValue(Position2D, { x, y: z })]
-      .map((entity) => ({
-        entity,
-        position: getComponentValueStrict(Position, entity),
-      }))
-      .sort((a, b) => a.position.y - b.position.y)
-      .reverse();
-
-    for (const { entity, position } of ecsBlocks) {
-      const item = getComponentValueStrict(Item, entity).value;
-      const blockType = BlockIdToKey[item as EntityID];
-      foregroundTile = ForegroundTiles[blockType];
-      backgroundTile = BackgroundTiles[blockType];
-      height = position.y;
-      heightLimit = position.y - 1;
-      if (backgroundTile) break;
+    const heightTile = HeightMapTiles[Math.max(-8, Math.min(8, Math.floor(y / 8)))];
+    if (heightTile != null) {
+      drawTile(x, z, heightTile, "HeightMap");
     }
-
-    const heightTile = HeightMapTiles[Math.max(-8, Math.min(8, Math.floor(height / 8)))];
-    if (heightTile != null) drawTile(x, z, heightTile, "HeightMap");
-
-    // If no background ecs block was found at this 2D coordinate, compute the procgen terrain block at this coordinate
-    if (backgroundTile == null) {
-      // Draw height map tile
-      for (let y = heightLimit; y >= height - 1; y--) {
-        const entityId = getTerrainBlock({ biome, height }, { x, y, z }, perlin);
-        const blockType = BlockIdToKey[entityId];
-        if (blockType === "Air") continue;
-        foregroundTile = foregroundTile ?? ForegroundTiles[blockType];
-        backgroundTile = BackgroundTiles[blockType];
-        if (backgroundTile != null) break;
-      }
+    if (foregroundTile != null) {
+      drawTile(x, z, foregroundTile, "Foreground");
     }
-
-    // Draw the foreground and background tiles to the tilemap
-    if (foregroundTile != null) drawTile(x, z, foregroundTile, "Foreground");
-    if (backgroundTile != null) drawTile(x, z, backgroundTile, "Background");
+    if (backgroundTile != null) {
+      drawTile(x, z, backgroundTile, "Background");
+    }
   });
 
   /**

@@ -1,21 +1,62 @@
-import { BlockType } from "../../../network";
+import { BlockTypeKey } from "../../../network/constants";
 
-export const BackgroundTiles: Partial<Record<keyof typeof BlockType, number>> = {
+// TODO: fill in tilesets (zeroes)
+
+export const BackgroundTiles: Partial<Record<BlockTypeKey, number>> = {
   Grass: 1,
   Dirt: 2,
-  Sand: 3,
-  Stone: 5,
-  Coal: 6,
-  Snow: 7,
-  Wool: 8,
-  Diamond: 9,
   Log: 10,
+  Stone: 5,
+  Sand: 3,
+  Cobblestone: 0,
+  MossyCobblestone: 0,
+  Coal: 6,
+  Crafting: 0,
+  Iron: 0,
+  Gold: 0,
+  Diamond: 9,
+  Planks: 0,
+  Wool: 8,
+  OrangeWool: 0,
+  MagentaWool: 0,
+  LightBlueWool: 0,
+  YellowWool: 0,
+  LimeWool: 0,
+  PinkWool: 0,
+  GrayWool: 0,
+  LightGrayWool: 0,
+  CyanWool: 0,
+  PurpleWool: 0,
+  BlueWool: 0,
+  BrownWool: 0,
+  GreenWool: 0,
+  RedWool: 0,
+  BlackWool: 0,
+  Sponge: 0,
+  Snow: 7,
+  Clay: 0,
+  Bedrock: 0,
+  Bricks: 0,
 };
 
-export const ForegroundTiles: Partial<Record<keyof typeof BlockType, number>> = {
+export const ForegroundTiles: Partial<Record<BlockTypeKey, number>> = {
+  Glass: 0,
   Water: 4,
   Leaves: 11,
+  RedFlower: 0,
   GrassPlant: 12,
+  OrangeFlower: 0,
+  MagentaFlower: 0,
+  LightBlueFlower: 0,
+  LimeFlower: 0,
+  PinkFlower: 0,
+  GrayFlower: 0,
+  LightGrayFlower: 0,
+  CyanFlower: 0,
+  PurpleFlower: 0,
+  BlueFlower: 0,
+  GreenFlower: 0,
+  BlackFlower: 0,
   Kelp: 13,
 };
 
