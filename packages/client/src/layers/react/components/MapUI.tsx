@@ -1,11 +1,12 @@
 import React from "react";
 import { pixelCoordToTileCoord } from "@latticexyz/phaserx";
-import { map, distinctUntilChanged } from "rxjs";
+import { map, distinctUntilChanged, combineLatest, concat, of } from "rxjs";
 import styled from "styled-components";
 import { getBiome, getHeight } from "../../network/api";
 import { TILE_HEIGHT, TILE_WIDTH } from "../../phaser/constants";
 import { registerUIComponent } from "../engine";
 import { Container } from "./common";
+import { getComponentValue } from "@latticexyz/recs";
 
 // TODO: only show when on map view
 
@@ -22,26 +23,32 @@ export function registerMapUI() {
       const {
         phaser: {
           scenes: {
-            Main: {
-              input,
-              maps: { Height, Heat },
-            },
+            Main: { input, maps },
           },
+          components: { UI },
+          api: { toggleMap },
         },
-        network: { perlin },
+        network: { perlin, SingletonEntity },
       } = layers;
 
-      return input.pointermove$.pipe(
-        map(({ pointer }) => {
-          const { x, y: z } = pixelCoordToTileCoord({ x: pointer.worldX, y: pointer.worldY }, TILE_WIDTH, TILE_HEIGHT);
-          const biome = getBiome({ x, y: 0, z }, perlin);
-          const y = getHeight({ x, y: 0, z }, biome, perlin);
-          return { x, y, z, Height, Heat };
-        }),
-        distinctUntilChanged((a, b) => a.x === b.x && a.z === b.z)
-      );
+      return combineLatest([
+        input.pointermove$.pipe(
+          map(({ pointer }) => {
+            const { x, y: z } = pixelCoordToTileCoord(
+              { x: pointer.worldX, y: pointer.worldY },
+              TILE_WIDTH,
+              TILE_HEIGHT
+            );
+            const biome = getBiome({ x, y: 0, z }, perlin);
+            const y = getHeight({ x, y: 0, z }, biome, perlin);
+            return { x, y, z };
+          }),
+          distinctUntilChanged((a, b) => a.x === b.x && a.z === b.z)
+        ),
+        concat(of(getComponentValue(UI, SingletonEntity)), UI.update$.pipe(map((update) => update.value[0]))),
+      ]).pipe(map(([pointer, ui]) => ({ pointer, ui, maps, toggleMap })));
     },
-    ({ x, y, z, Height, Heat }) => {
+    ({ pointer: { x, y, z }, ui, toggleMap }) => {
       return (
         <>
           <TileInfo>
@@ -54,9 +61,9 @@ export function registerMapUI() {
               <label>
                 <input
                   type="checkbox"
-                  defaultChecked={Heat.visible.current}
+                  defaultChecked={ui?.activity}
                   onChange={(event) => {
-                    Heat.setVisible(event.target.checked);
+                    toggleMap("activity", event.target.checked);
                   }}
                 />{" "}
                 Show activity
@@ -66,12 +73,24 @@ export function registerMapUI() {
               <label>
                 <input
                   type="checkbox"
-                  defaultChecked={Height.visible.current}
+                  defaultChecked={ui?.height}
                   onChange={(event) => {
-                    Height.setVisible(event.target.checked);
+                    toggleMap("height", event.target.checked);
                   }}
                 />{" "}
                 Show contours
+              </label>
+            </p>
+            <p>
+              <label>
+                <input
+                  type="checkbox"
+                  defaultChecked={ui?.terrain}
+                  onChange={(event) => {
+                    toggleMap("terrain", event.target.checked);
+                  }}
+                />{" "}
+                Show terrain
               </label>
             </p>
           </MapLayerToggle>

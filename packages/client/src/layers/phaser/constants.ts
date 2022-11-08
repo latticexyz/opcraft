@@ -37,6 +37,22 @@ export enum Sprites {
   Donkey,
 }
 
+export enum ZoomLevel {
+  X1,
+  X2,
+  X4,
+  X8,
+  X16,
+}
+
+export const StepSizePerZoomLevel = {
+  [ZoomLevel.X1]: 1,
+  [ZoomLevel.X2]: 2,
+  [ZoomLevel.X4]: 4,
+  [ZoomLevel.X8]: 8,
+  [ZoomLevel.X16]: 16,
+};
+
 export enum Animations {}
 
 export const UnitTypeSprites: Record<number, Sprites> = {};

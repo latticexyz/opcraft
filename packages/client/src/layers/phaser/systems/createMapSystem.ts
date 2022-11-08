@@ -1,23 +1,12 @@
-import { defineRxSystem } from "@latticexyz/recs";
+import { defineComponent, defineComponentSystem, defineRxSystem, getComponentValue } from "@latticexyz/recs";
 import { NetworkLayer } from "../../network";
-import { PhaserLayer } from "../types";
+import { Maps, PhaserLayer } from "../types";
 import { HeightMapTiles } from "../assets/tilesets/opcraftTileset";
 import { Coord, CoordMap } from "@latticexyz/utils";
-import { ZoomLevel } from "../createZoomLevel";
-import { Subject } from "rxjs";
+import { StepSizePerZoomLevel, ZoomLevel } from "../constants";
+import { merge, Subject } from "rxjs";
 import { TILE_HEIGHT } from "../constants";
 import { getHighestTilesAt } from "../getHighestTilesAt";
-import { AnimatedTilemap } from "@latticexyz/phaserx";
-
-const StepSizePerZoomLevel = {
-  [ZoomLevel.X1]: 1,
-  [ZoomLevel.X2]: 2,
-  [ZoomLevel.X4]: 4,
-  [ZoomLevel.X8]: 8,
-  [ZoomLevel.X16]: 16,
-};
-
-type Maps = { [key in ZoomLevel]: AnimatedTilemap<number, string, string> };
 
 /**
  * System reacts to viewport changes and draws the map data (ecs, procgen) to the phaser tilemap
@@ -27,16 +16,19 @@ export function createMapSystem(context: PhaserLayer, network: NetworkLayer) {
   const {
     components: { Position, Item, Position2D },
     perlin,
+    SingletonEntity,
   } = network;
   const {
     world,
-    scenes: {
-      Main: {
-        maps: { Main, X2, X4, X8, X16, Height, HeightX2, HeightX4, HeightX8, HeightX16 },
-      },
-    },
     chunks,
     zoomLevel$,
+    maps,
+    scenes: {
+      Main: {
+        maps: { Heat },
+      },
+    },
+    components: { UI },
   } = context;
 
   // Setup local variables
@@ -44,20 +36,6 @@ export function createMapSystem(context: PhaserLayer, network: NetworkLayer) {
   const addedChunks$ = new Subject<Coord>();
   chunks.addedChunks$.subscribe(addedChunks$);
   const newTile$ = new Subject<Coord>();
-  const terrainMaps: Maps = {
-    [ZoomLevel.X1]: Main,
-    [ZoomLevel.X2]: X2,
-    [ZoomLevel.X4]: X4,
-    [ZoomLevel.X8]: X8,
-    [ZoomLevel.X16]: X16,
-  };
-  const heightMaps: Maps = {
-    [ZoomLevel.X1]: Height,
-    [ZoomLevel.X2]: HeightX2,
-    [ZoomLevel.X4]: HeightX4,
-    [ZoomLevel.X8]: HeightX8,
-    [ZoomLevel.X16]: HeightX16,
-  };
 
   /**
    * Draw the given tile at the given coord on the given layer on all maps
@@ -83,13 +61,13 @@ export function createMapSystem(context: PhaserLayer, network: NetworkLayer) {
 
     const heightTile = HeightMapTiles[Math.max(-8, Math.min(8, Math.floor(y / 8)))];
     if (heightTile != null) {
-      drawTile(x, z, heightTile, heightMaps);
+      drawTile(x, z, heightTile, maps.height);
     }
     if (foregroundTile != null) {
-      drawTile(x, z, foregroundTile, terrainMaps, "Foreground");
+      drawTile(x, z, foregroundTile, maps.terrain, "Foreground");
     }
     if (backgroundTile != null) {
-      drawTile(x, z, backgroundTile, terrainMaps, "Background");
+      drawTile(x, z, backgroundTile, maps.terrain, "Background");
     }
   });
 
@@ -129,13 +107,20 @@ export function createMapSystem(context: PhaserLayer, network: NetworkLayer) {
   /**
    * React to zoom level changes by enabling/disabling tilemaps maps relevant/irrelevant to the new zoom level
    */
-  defineRxSystem(world, zoomLevel$, ({ zoomLevel }) => {
+  defineRxSystem(world, merge(zoomLevel$, UI.update$), () => {
+    const { zoomLevel } = zoomLevel$.getValue();
+    const visible = getComponentValue(UI, SingletonEntity);
+
     // Toggle maps when zooming out
-    for (const [mapZoomLevel, map] of Object.entries(terrainMaps)) {
-      map.setVisible(zoomLevel === parseInt(mapZoomLevel));
+    for (const [mapZoomLevel, map] of Object.entries(maps.terrain)) {
+      map.setVisible(Boolean(visible?.terrain) && zoomLevel === parseInt(mapZoomLevel));
     }
-    for (const [mapZoomLevel, map] of Object.entries(heightMaps)) {
-      map.setVisible(zoomLevel === parseInt(mapZoomLevel));
+    for (const [mapZoomLevel, map] of Object.entries(maps.height)) {
+      map.setVisible(Boolean(visible?.height) && zoomLevel === parseInt(mapZoomLevel));
     }
+
+    // Hack to make sure heat map is on top
+    Heat.setVisible(!visible?.activity);
+    Heat.setVisible(Boolean(visible?.activity));
   });
 }

@@ -1,12 +1,5 @@
 import { BehaviorSubject, concat, distinctUntilKeyChanged, map, Observable, of } from "rxjs";
-
-export enum ZoomLevel {
-  X1,
-  X2,
-  X4,
-  X8,
-  X16,
-}
+import { ZoomLevel } from "./constants";
 
 export const createZoomLevel = (zoom$: Observable<number>) => {
   const zoomLevel$ = new BehaviorSubject({ zoom: 1, zoomLevel: ZoomLevel.X1, zoomMultiplier: 1 });
