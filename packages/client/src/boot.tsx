@@ -32,7 +32,7 @@ let registerUIComponents = registerUIComponentsImport;
 let Engine = EngineImport;
 
 const defaultParams = {
-  view: "map",
+  view: "map" as const,
   chainId: "64657",
   worldAddress: "0x3031a86EFA3A9c0B41EA089F2021C6490591fB8c",
   rpc: "https://opcraft-3-replica-0.bedrock-goerli.optimism.io",
@@ -137,10 +137,20 @@ async function bootGame() {
 
   const changeView = async (view: "game" | "map") => {
     // TODO: move this into react with a router?
-
     const params = new URLSearchParams(window.location.search);
+    const currentViewParam = params.get("view");
+    const currentView: "game" | "map" =
+      currentViewParam === "game" || currentViewParam === "map" ? currentViewParam : defaultParams.view;
     params.set("view", view);
-    window.history.replaceState({}, "", `${window.location.pathname}?${params.toString()}`);
+
+    if (currentView !== view) {
+      // TODO: push state isn't super useful without pop state handling, but
+      //       we're leaving it so you don't get stuck on a given view after
+      //       refresh
+      window.history.pushState({}, "", `${window.location.pathname}?${params.toString()}`);
+    } else if (currentViewParam != view) {
+      window.history.replaceState({}, "", `${window.location.pathname}?${params.toString()}`);
+    }
 
     const layers = window.layers;
     if (!layers?.network) throw new Error("Can't change view without network layer");
