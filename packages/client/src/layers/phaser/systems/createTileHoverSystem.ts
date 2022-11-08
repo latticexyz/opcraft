@@ -14,6 +14,7 @@ export function createTileHoverSystem(context: PhaserLayer, _network: NetworkLay
   } = context;
 
   const sprite = phaserScene.add.sprite(0, 0, "tileHover").setOrigin(0, 0).setVisible(false);
+  sprite.depth = 1000;
 
   const pointerPosition$ = new BehaviorSubject({ x: 0, y: 0 });
   input.pointermove$.pipe(map(({ pointer }) => ({ x: pointer.worldX, y: pointer.worldY }))).subscribe(pointerPosition$);
