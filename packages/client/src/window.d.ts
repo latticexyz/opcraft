@@ -8,6 +8,7 @@ declare global {
     ecs?: typeof ecs;
     time?: Time;
     remountReact?: () => Promise<void>;
-    changeView?: (view: "game" | "map") => Promise<void>;
+    getView?: () => "game" | "map";
+    setView?: (view: "game" | "map") => Promise<void>;
   }
 }

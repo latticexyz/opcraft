@@ -70,7 +70,6 @@ async function bootGame() {
 
   async function rebootGame() {
     const params = new URLSearchParams(window.location.search);
-    const view = params.get("view") ?? defaultParams.view;
     const worldAddress = params.get("worldAddress") ?? defaultParams.worldAddress;
     let privateKey = params.get("burnerWalletPrivateKey");
     const chainIdString = params.get("chainId") ?? defaultParams.chainId;
@@ -114,7 +113,7 @@ async function bootGame() {
     if (!networkLayerConfig) throw new Error("Invalid config");
 
     if (!layers.network) layers.network = await createNetworkLayer(networkLayerConfig);
-    await changeView(view === "map" || view === "game" ? view : "map");
+    await setView(getView());
 
     Time.time.setPacemaker((setTimestamp) => {
       setInterval(() => {
@@ -135,20 +134,26 @@ async function bootGame() {
     return layers;
   }
 
-  const changeView = async (view: "game" | "map") => {
+  const getView = () => {
     // TODO: move this into react with a router?
     const params = new URLSearchParams(window.location.search);
     const currentViewParam = params.get("view");
-    const currentView: "game" | "map" =
-      currentViewParam === "game" || currentViewParam === "map" ? currentViewParam : defaultParams.view;
-    params.set("view", view);
+    return currentViewParam === "game" || currentViewParam === "map" ? currentViewParam : defaultParams.view;
+  };
 
+  const setView = async (view: "game" | "map") => {
+    // TODO: move this into react with a router?
+    const currentView = getView();
+
+    const params = new URLSearchParams(window.location.search);
     if (currentView !== view) {
       // TODO: push state isn't super useful without pop state handling, but
       //       we're leaving it so you don't get stuck on a given view after
       //       refresh
+      params.set("view", view);
       window.history.pushState({}, "", `${window.location.pathname}?${params.toString()}`);
-    } else if (currentViewParam != view) {
+    } else if (params.get("view") !== view) {
+      params.set("view", view);
       window.history.replaceState({}, "", `${window.location.pathname}?${params.toString()}`);
     }
 
@@ -192,7 +197,8 @@ async function bootGame() {
 
   window.ecs = ecs;
   window.time = Time.time;
-  window.changeView = changeView;
+  window.getView = getView;
+  window.setView = setView;
 
   let reloadingNetwork = false;
   let reloadingNoa = false;

@@ -49,8 +49,35 @@ export function registerMapUI() {
       ]).pipe(map(([pointer, ui]) => ({ pointer, ui, maps, toggleMap })));
     },
     ({ pointer: { x, y, z }, ui, toggleMap }) => {
+      const currentView = window.getView?.();
       return (
         <>
+          <ViewToggle>
+            <input
+              id="MapUI-field-view-map"
+              type="radio"
+              name="view"
+              value="map"
+              defaultChecked={currentView === "map"}
+              onChange={() => {
+                window.setView?.("map");
+                // TODO: move map to current player position?
+              }}
+            />
+            <label htmlFor="MapUI-field-view-map">Map</label>
+            <input
+              id="MapUI-field-view-game"
+              type="radio"
+              name="view"
+              value="game"
+              defaultChecked={currentView === "game"}
+              onChange={() => {
+                window.setView?.("game");
+                // TODO: teleport to current map center position?
+              }}
+            />
+            <label htmlFor="MapUI-field-view-game">Game</label>
+          </ViewToggle>
           <TileInfo>
             <p>X: {x}</p>
             <p>Y: {y}</p>
@@ -99,6 +126,29 @@ export function registerMapUI() {
     }
   );
 }
+
+const ViewToggle = styled(Container)`
+  position: absolute;
+  left: 20px;
+  top: 20px;
+  line-height: 1;
+  pointer-events: all;
+
+  input[type="radio"] {
+    display: none;
+  }
+  label {
+    padding: 4px 6px;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  label:hover {
+    background-color: #444;
+  }
+  input:checked + label {
+    background-color: #060;
+  }
+`;
 
 const TileInfo = styled(Container)`
   position: absolute;
