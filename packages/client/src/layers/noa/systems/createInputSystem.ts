@@ -173,4 +173,11 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
   noa.inputs.down.on("plugins", () => {
     togglePlugins();
   });
+
+  noa.inputs.bind("view", "V");
+  noa.inputs.down.on("view", () => {
+    const view = window.getView?.() === "map" ? "game" : "map";
+    noa.container.setPointerLock(view === "game");
+    window.setView?.(view);
+  });
 }
