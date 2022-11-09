@@ -1,4 +1,3 @@
-import { formatEntityID } from "@latticexyz/network";
 import { getComponentValue, HasValue, runQuery, setComponent, updateComponent } from "@latticexyz/recs";
 import { sleep } from "@latticexyz/utils";
 import { NetworkLayer, BlockType } from "../../network";
@@ -13,27 +12,19 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
     noa,
     components: { SelectedSlot, UI, Tutorial, PreTeleportPosition },
     SingletonEntity,
-    api: { toggleInventory, togglePlugins, placeSelectedItem, getCurrentChunk, getSelectedBlockType, teleport },
-    streams: { stakeAndClaim$, playerPosition$ },
+    api: { toggleInventory, togglePlugins, placeSelectedItem, getSelectedBlockType, teleport },
+    streams: { playerPosition$ },
   } = context;
 
   const {
     components: { Item, Position, GameConfig },
-    api: { stake, claim },
-    network: { connectedAddress },
-    streams: { balanceGwei$ },
   } = network;
 
   // mine targeted block on on left click
   noa.inputs.bind("fire", "F");
 
   function canInteract() {
-    if (balanceGwei$.getValue() === 0) return false;
-    const { claim } = stakeAndClaim$.getValue() || {};
-    const playerAddress = connectedAddress.get();
-    if (!playerAddress) return false;
-    if (!claim) return true;
-    return claim.claimer === formatEntityID(playerAddress);
+    return true;
   }
 
   function mineTargetedBlock() {
@@ -159,26 +150,6 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
     if (!noa.container.hasPointerLock && !showInventory) return;
     toggleInventory();
     updateComponent(Tutorial, SingletonEntity, { inventory: false });
-  });
-
-  noa.inputs.bind("stake", "X");
-  noa.inputs.down.on("stake", () => {
-    if (!noa.container.hasPointerLock) return;
-    const chunk = getCurrentChunk();
-    chunk && stake(chunk);
-  });
-
-  noa.inputs.bind("claim", "C");
-  noa.inputs.down.on("claim", () => {
-    if (!noa.container.hasPointerLock) return;
-    const chunk = getCurrentChunk();
-    chunk && claim(chunk);
-  });
-
-  noa.inputs.bind("blockexplorer", "B");
-  noa.inputs.down.on("blockexplorer", () => {
-    if (!noa.container.hasPointerLock) return;
-    window.open(network.network.config.blockExplorer);
   });
 
   noa.inputs.bind("spawn", "O");

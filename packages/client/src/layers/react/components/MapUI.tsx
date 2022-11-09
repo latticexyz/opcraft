@@ -59,7 +59,6 @@ export function registerMapUI() {
     },
     ({ position: { x, y, z }, ui, toggleMap }) => {
       const currentView = window.getView?.();
-      console.log("current view", currentView);
       return (
         <>
           <ViewToggle>

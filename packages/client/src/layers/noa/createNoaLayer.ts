@@ -8,8 +8,6 @@ import {
   updateComponent,
   createLocalCache,
   getEntitiesWithValue,
-  runQuery,
-  HasValue,
   EntityID,
 } from "@latticexyz/recs";
 import { Coord, isNotEmpty, pickRandom, random, VoxelCoord } from "@latticexyz/utils";
@@ -36,9 +34,6 @@ import { setupNoaEngine } from "./setup";
 import {
   createBlockSystem,
   createInputSystem,
-  createInventoryIndexSystem,
-  createPlayerPositionSystem,
-  createRelaySystem,
   createSoundSystem,
   createSyncLocalPlayerPositionSystem,
   createTutorialSystem,
@@ -54,7 +49,6 @@ import { defaultAbiCoder as abi, keccak256 } from "ethers/lib/utils";
 import { GodID } from "@latticexyz/network";
 import { getChunkCoord, getChunkEntity } from "../../utils/chunk";
 import { BehaviorSubject, map, throttleTime, timer } from "rxjs";
-import { getStakeEntity } from "../../utils/stake";
 import { createCreativeModeSystem } from "./systems/createCreativeModeSystem";
 import { createSpawnPlayerSystem } from "./systems/createSpawnPlayerSystem";
 import { definePlayerMeshComponent } from "./components/PlayerMesh";
@@ -64,14 +58,9 @@ export function createNoaLayer(network: NetworkLayer) {
   const world = namespaceWorld(network.world, "noa");
   const {
     worldAddress,
-    network: {
-      config: { chainId },
-      connectedAddress,
-    },
-    components: { OwnedBy, Item, Recipe, Claim, Stake, LoadingState },
-    api: { build },
+    components: { Item, Recipe, Claim },
   } = network;
-  const uniqueWorldId = chainId + worldAddress;
+  const uniqueWorldId = worldAddress;
 
   const SingletonEntity = world.registerEntity({ id: GodID });
 
@@ -250,14 +239,7 @@ export function createNoaLayer(network: NetworkLayer) {
   }
 
   function placeSelectedItem(coord: VoxelCoord) {
-    const blockID = getSelectedBlockType();
-    if (!blockID) return console.warn("No item at selected slot");
-    const ownedEntityOfSelectedType = [
-      ...runQuery([HasValue(OwnedBy, { value: connectedAddress.get() }), HasValue(Item, { value: blockID })]),
-    ][0];
-    if (ownedEntityOfSelectedType == null) return console.warn("No owned item of type", blockID);
-    const itemEntity = world.entities[ownedEntityOfSelectedType];
-    network.api.build(itemEntity, coord);
+    console.warn("Can not build in frozen world");
   }
 
   function getCurrentPlayerPosition() {
@@ -272,9 +254,7 @@ export function createNoaLayer(network: NetworkLayer) {
   function getStakeAndClaim(chunk: Coord) {
     const chunkEntityIndex = world.entityToIndex.get(getChunkEntity(chunk));
     const claim = chunkEntityIndex == null ? undefined : getComponentValue(Claim, chunkEntityIndex);
-    const stakeEntityIndex = world.entityToIndex.get(getStakeEntity(chunk, connectedAddress.get() || "0x00"));
-    const stake = stakeEntityIndex == null ? undefined : getComponentValue(Stake, stakeEntityIndex);
-    return { claim, stake };
+    return { claim, state: 0 };
   }
 
   function playNextTheme() {
@@ -354,9 +334,6 @@ export function createNoaLayer(network: NetworkLayer) {
   // --- SYSTEMS --------------------------------------------------------------------
   createInputSystem(network, context);
   createBlockSystem(network, context);
-  createPlayerPositionSystem(network, context);
-  createRelaySystem(network, context);
-  createInventoryIndexSystem(network, context);
   createSyncLocalPlayerPositionSystem(network, context);
   createCreativeModeSystem(network, context);
   createSpawnPlayerSystem(network, context);

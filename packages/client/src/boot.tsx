@@ -66,8 +66,6 @@ export const ecs = {
 async function bootGame() {
   const layers = (window.layers ??= {});
 
-  let initialBoot = true;
-
   async function rebootGame() {
     const params = new URLSearchParams(window.location.search);
     const worldAddress = params.get("worldAddress") ?? defaultParams.worldAddress;
@@ -120,12 +118,6 @@ async function bootGame() {
         setTimestamp(Date.now());
       }, 100);
     });
-
-    // Start syncing once all systems have booted
-    if (initialBoot) {
-      initialBoot = false;
-      layers.network.startSync();
-    }
 
     // Remount react when rebooting layers
     mountReact.current(false);
@@ -213,7 +205,6 @@ async function bootGame() {
       dispose("noa");
       await rebootGame();
       console.log("HMR Network");
-      layers.network?.startSync();
       reloadingNetwork = false;
     });
 

@@ -8,19 +8,16 @@ import {
   EntityIndex,
   getComponentValue,
   getEntitiesWithValue,
-  HasValue,
   removeComponent,
-  runQuery,
   SchemaOf,
   setComponent,
   updateComponent,
   withValue,
 } from "@latticexyz/recs";
 import { setupDevSystems } from "./setup";
-import { createActionSystem, setupMUDNetwork, waitForActionCompletion } from "@latticexyz/std-client";
-import { GameConfig, getNetworkConfig } from "./config";
-import { awaitPromise, computedToStream, Coord, filterNullishValues, VoxelCoord } from "@latticexyz/utils";
-import { BigNumber, utils, Signer } from "ethers";
+import { createActionSystem, waitForActionCompletion } from "@latticexyz/std-client";
+import { GameConfig } from "./config";
+import { filterNullishValues, VoxelCoord } from "@latticexyz/utils";
 import {
   definePositionComponent,
   defineOwnedByComponent,
@@ -48,10 +45,8 @@ import {
 } from "./api";
 import { createPerlin } from "@latticexyz/noise";
 import { BlockIdToKey, BlockType } from "./constants";
-import { createFaucetService, createRelayStream, GodID, SyncState } from "@latticexyz/network";
-import { SystemTypes } from "contracts/types/SystemTypes";
-import { SystemAbis } from "contracts/types/SystemAbis.mjs";
-import { map, timer, combineLatest, BehaviorSubject } from "rxjs";
+import { GodID } from "@latticexyz/network";
+import { of } from "rxjs";
 import { createInitSystem, createPluginSystem } from "./systems";
 
 /**
@@ -71,9 +66,9 @@ export async function createNetworkLayer(config: GameConfig) {
   const components = {
     Position: definePositionComponent(world),
     Position2D: definePosition2DComponent(world),
+    Item: defineItemComponent(world),
     Chunk: defineChunkComponent(world),
     ItemPrototype: defineItemPrototypeComponent(world),
-    Item: defineItemComponent(world),
     Name: defineNameComponent(world),
     OwnedBy: defineOwnedByComponent(world),
     GameConfig: defineGameConfigComponent(world),
@@ -82,78 +77,79 @@ export async function createNetworkLayer(config: GameConfig) {
     Occurrence: defineOccurrenceComponent(world),
     Stake: defineStakeComponent(world),
     Claim: defineClaimComponent(world),
-    Plugin: createLocalCache(definePluginComponent(world), uniqueWorldId),
-    PluginRegistry: createLocalCache(definePluginRegistryComponent(world), uniqueWorldId),
+    Plugin: definePluginComponent(world),
+    PluginRegistry: definePluginRegistryComponent(world),
   };
 
   // --- SETUP ----------------------------------------------------------------------
-  const {
-    txQueue,
-    systems,
-    txReduced$,
-    network,
-    startSync,
-    encoders,
-    ecsEvent$,
-    mappings,
-    registerComponent,
-    registerSystem,
-  } = await setupMUDNetwork<typeof components, SystemTypes>(getNetworkConfig(config), world, components, SystemAbis, {
-    initialGasPrice: 2_000_000,
-  });
+  // const {
+  //   txQueue,
+  //   systems,
+  //   txReduced$,
+  //   network,
+  //   startSync,
+  //   encoders,
+  //   ecsEvent$,
+  //   mappings,
+  //   registerComponent,
+  //   registerSystem,
+  // } = await setupMUDNetwork<typeof components, SystemTypes>(getNetworkConfig(config), world, components, SystemAbis, {
+  //   initialGasPrice: 2_000_000,
+  // });
 
   // Relayer setup
-  const playerAddress = network.connectedAddress.get();
-  const playerSigner = network.signer.get();
-  let relay: Awaited<ReturnType<typeof createRelayStream>> | undefined;
-  try {
-    relay =
-      config.relayServiceUrl && playerAddress && playerSigner
-        ? await createRelayStream(playerSigner, config.relayServiceUrl, playerAddress)
-        : undefined;
-  } catch (e) {
-    console.error(e);
-  }
+  // const playerAddress = network.connectedAddress.get();
+  // const playerSigner = network.signer.get();
+  // let relay: Awaited<ReturnType<typeof createRelayStream>> | undefined;
+  // try {
+  //   relay =
+  //     config.relayServiceUrl && playerAddress && playerSigner
+  //       ? await createRelayStream(playerSigner, config.relayServiceUrl, playerAddress)
+  //       : undefined;
+  // } catch (e) {
+  //   console.error(e);
+  // }
 
-  relay && world.registerDisposer(relay.dispose);
-  if (relay) console.info("[Relayer] Relayer connected: " + config.relayServiceUrl);
+  // relay && world.registerDisposer(relay.dispose);
+  // if (relay) console.info("[Relayer] Relayer connected: " + config.relayServiceUrl);
 
   // Faucet setup
-  const faucet = config.faucetServiceUrl ? createFaucetService(config.faucetServiceUrl) : undefined;
+  // const faucet = config.faucetServiceUrl ? createFaucetService(config.faucetServiceUrl) : undefined;
 
-  if (config.devMode) {
-    const playerIsBroke = (await network.signer.get()?.getBalance())?.lte(utils.parseEther("0.005"));
-    if (playerIsBroke) {
-      console.info("[Dev Faucet] Dripping funds to player");
-      const address = network.connectedAddress.get();
-      address && (await faucet?.dripDev({ address }));
-    }
-  }
+  // if (config.devMode) {
+  //   const playerIsBroke = (await network.signer.get()?.getBalance())?.lte(utils.parseEther("0.005"));
+  //   if (playerIsBroke) {
+  //     console.info("[Dev Faucet] Dripping funds to player");
+  //     const address = network.connectedAddress.get();
+  //     address && (await faucet?.dripDev({ address }));
+  //   }
+  // }
 
   // Set initial component values
-  if (components.PluginRegistry.entities.length === 0) {
-    addPluginRegistry("https://opcraft-plugins.mud.dev");
-  }
+  // if (components.PluginRegistry.entities.length === 0) {
+  //   addPluginRegistry("https://opcraft-plugins.mud.dev");
+  // }
 
   // Enable chat plugin by default
-  if (
-    getEntitiesWithValue(components.Plugin, { host: "https://opcraft-plugins.mud.dev", path: "/chat.js" }).size === 0
-  ) {
-    console.info("Enabling chat plugin by default");
-    addPlugin({
-      host: "https://opcraft-plugins.mud.dev",
-      path: "/chat.js",
-      active: true,
-      source: "https://github.com/latticexyz/opcraft-plugins",
-    });
-  }
+  // if (
+  //   getEntitiesWithValue(components.Plugin, { host: "https://opcraft-plugins.mud.dev", path: "/chat.js" }).size === 0
+  // ) {
+  //   console.info("Enabling chat plugin by default");
+  //   addPlugin({
+  //     host: "https://opcraft-plugins.mud.dev",
+  //     path: "/chat.js",
+  //     active: true,
+  //     source: "https://github.com/latticexyz/opcraft-plugins",
+  //   });
+  // }
 
   // --- ACTION SYSTEM --------------------------------------------------------------
   const actions = createActionSystem<{
     actionType: string;
     coord?: VoxelCoord;
     blockType?: keyof typeof BlockType;
-  }>(world, txReduced$);
+    // }>(world, txReduced$);
+  }>(world, of());
 
   // Add indexers and optimistic updates
   const { withOptimisticUpdates } = actions;
@@ -189,30 +185,17 @@ export async function createNetworkLayer(config: GameConfig) {
     if (entityIndex == null) return console.warn("trying to place unknown entity", entity);
     const blockId = getComponentValue(components.Item, entityIndex)?.value;
     const blockType = blockId != null ? BlockIdToKey[blockId as EntityID] : undefined;
-    const godIndex = world.entityToIndex.get(GodID);
-    const creativeMode = godIndex != null && getComponentValue(components.GameConfig, godIndex)?.creativeMode;
 
     actions.add({
       id: `build+${coord.x}/${coord.y}/${coord.z}` as EntityID,
       metadata: { actionType: "build", coord, blockType },
       requirement: () => true,
       components: { Position: components.Position, Item: components.Item, OwnedBy: components.OwnedBy },
-      execute: () =>
-        systems[creativeMode ? "system.CreativeBuild" : "system.Build"].executeTyped(BigNumber.from(entity), coord, {
-          gasLimit: 500_000,
-        }),
-      updates: () => [
-        {
-          component: "OwnedBy",
-          entity: entityIndex,
-          value: { value: GodID },
-        },
-        {
-          component: "Position",
-          entity: entityIndex,
-          value: coord,
-        },
-      ],
+      execute: () => {
+        setComponent(components.OwnedBy, entityIndex, { value: GodID });
+        setComponent(components.Position, entityIndex, coord);
+      },
+      updates: () => [],
     });
   }
 
@@ -230,24 +213,12 @@ export async function createNetworkLayer(config: GameConfig) {
       metadata: { actionType: "mine", coord, blockType },
       requirement: () => true,
       components: { Position: components.Position, OwnedBy: components.OwnedBy, Item: components.Item },
-      execute: () => systems["system.Mine"].executeTyped(coord, blockId, { gasLimit: ecsBlock ? 400_000 : 1_000_000 }),
-      updates: () => [
-        {
-          component: "Position",
-          entity: airEntity,
-          value: coord,
-        },
-        {
-          component: "Item",
-          entity: airEntity,
-          value: { value: BlockType.Air },
-        },
-        {
-          component: "Position",
-          entity: blockEntity || (Number.MAX_SAFE_INTEGER as EntityIndex),
-          value: null,
-        },
-      ],
+      execute: () => {
+        setComponent(components.Position, airEntity, coord);
+        setComponent(components.Item, airEntity, { value: BlockType.Air });
+        blockEntity != null && removeComponent(components.Position, blockEntity);
+      },
+      updates: () => [],
     });
   }
 
@@ -259,76 +230,15 @@ export async function createNetworkLayer(config: GameConfig) {
       metadata: { actionType: "craft", blockType: BlockIdToKey[result] },
       requirement: () => true,
       components: { OwnedBy: components.OwnedBy },
-      execute: () => systems["system.Craft"].executeTyped(ingredients, { gasLimit: 600_000 }),
-      updates: () =>
-        entities.map((entity) => ({
-          component: "OwnedBy",
-          entity,
-          value: { value: GodID },
-        })),
+      execute: () => {
+        for (const entity of entities) {
+          setComponent(components.OwnedBy, entity, { value: GodID });
+        }
+      },
+      updates: () => [],
     });
 
     await waitForActionCompletion(actions.Action, id);
-  }
-
-  function stake(chunkCoord: Coord) {
-    const diamondEntityIndex = [
-      ...runQuery([
-        HasValue(components.OwnedBy, { value: network.connectedAddress.get() }),
-        HasValue(components.Item, { value: BlockType.Diamond }),
-      ]),
-    ][0];
-
-    if (diamondEntityIndex == null) return console.warn("No owned diamonds to stake");
-    const diamondEntity = world.entities[diamondEntityIndex];
-
-    actions.add({
-      id: `stake+${chunkCoord.x}/${chunkCoord.y}` as EntityID,
-      metadata: { actionType: "stake", blockType: "Diamond" },
-      requirement: () => true,
-      components: { OwnedBy: components.OwnedBy },
-      execute: () => systems["system.Stake"].executeTyped(diamondEntity, chunkCoord, { gasLimit: 400_000 }),
-      updates: () => [
-        {
-          component: "OwnedBy",
-          entity: diamondEntityIndex,
-          value: { value: GodID },
-        },
-      ],
-    });
-  }
-
-  function claim(chunkCoord: Coord) {
-    actions.add({
-      id: `claim+${chunkCoord.x}/${chunkCoord.y}` as EntityID,
-      metadata: { actionType: "claim", blockType: "Diamond" },
-      requirement: () => true,
-      components: {},
-      execute: () => systems["system.Claim"].executeTyped(chunkCoord, { gasLimit: 400_000 }),
-      updates: () => [],
-    });
-  }
-
-  function transfer(entity: EntityID, receiver: string) {
-    const entityIndex = world.entityToIndex.get(entity);
-    if (entityIndex == null) return console.warn("trying to transfer unknown entity", entity);
-    const blockId = getComponentValue(components.Item, entityIndex)?.value;
-    const blockType = blockId != null ? BlockIdToKey[blockId as EntityID] : undefined;
-
-    actions.add({
-      id: `transfer+${entity}` as EntityID,
-      metadata: { actionType: "transfer", blockType },
-      requirement: () => true,
-      components: { OwnedBy: components.OwnedBy },
-      execute: () => systems["system.Transfer"].executeTyped(entity, receiver, { gasLimit: 400_000 }),
-      updates: () => [
-        {
-          component: "OwnedBy",
-          entity: entityIndex,
-          value: { value: GodID },
-        },
-      ],
-    });
   }
 
   function togglePlugin(entity: EntityIndex, active?: boolean) {
@@ -379,43 +289,23 @@ export async function createNetworkLayer(config: GameConfig) {
     return entityIndex != null ? getComponentValue(components.Name, entityIndex)?.value : undefined;
   }
 
-  // --- STREAMS --------------------------------------------------------------------
-  const balanceGwei$ = new BehaviorSubject<number>(1);
-  world.registerDisposer(
-    combineLatest([timer(0, 5000), computedToStream(network.signer)])
-      .pipe(
-        map<[number, Signer | undefined], Promise<number>>(async ([, signer]) =>
-          signer
-            ? signer.getBalance().then((v) => v.div(BigNumber.from(10).pow(9)).toNumber())
-            : new Promise((res) => res(0))
-        ),
-        awaitPromise()
-      )
-      .subscribe(balanceGwei$)?.unsubscribe
-  );
-
-  const connectedClients$ = timer(0, 5000).pipe(
-    map(async () => relay?.countConnected() || 0),
-    awaitPromise()
-  );
-
   // --- CONTEXT --------------------------------------------------------------------
   const context = {
     world,
     components,
-    txQueue,
-    systems,
-    txReduced$,
-    startSync,
-    network,
+    // txQueue,
+    // systems,
+    // txReduced$,
+    // startSync,
+    // network,
     actions,
     api: {
       build,
       mine,
       craft,
-      stake,
-      claim,
-      transfer,
+      // stake,
+      // claim,
+      // transfer,
       getBlockAtPosition,
       getECSBlockAtPosition,
       getTerrainBlockAtPosition,
@@ -429,17 +319,17 @@ export async function createNetworkLayer(config: GameConfig) {
       removePluginRegistry,
       reloadPluginRegistry,
       reloadPluginRegistryUrl,
-      registerComponent,
-      registerSystem,
+      // registerComponent,
+      // registerSystem,
     },
-    dev: setupDevSystems(world, encoders as Promise<any>, systems),
-    streams: { connectedClients$, balanceGwei$ },
+    dev: setupDevSystems(world, new Promise((resolve) => resolve({})), {} as any),
+    // streams: { connectedClients$, balanceGwei$ },
     config,
-    relay,
+    // relay,
     worldAddress: config.worldAddress,
-    ecsEvent$,
-    mappings,
-    faucet,
+    // ecsEvent$,
+    // mappings,
+    // faucet,
     uniqueWorldId,
     types: { BlockIdToKey, BlockType },
     perlin,
@@ -447,8 +337,8 @@ export async function createNetworkLayer(config: GameConfig) {
   };
 
   // --- SYSTEMS --------------------------------------------------------------------
-  createPluginSystem(context);
-  createInitSystem(context);
+  // createPluginSystem(context);
+  setTimeout(() => createInitSystem(context), 1000);
 
   return context;
 }
