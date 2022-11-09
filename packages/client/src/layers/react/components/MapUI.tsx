@@ -1,12 +1,13 @@
 import React from "react";
 import { pixelCoordToTileCoord } from "@latticexyz/phaserx";
-import { map, distinctUntilChanged, combineLatest, concat, of } from "rxjs";
+import { map, distinctUntilChanged, combineLatest, concat, of, filter, merge } from "rxjs";
 import styled from "styled-components";
 import { getBiome, getHeight } from "../../network/api";
 import { TILE_HEIGHT, TILE_WIDTH } from "../../phaser/constants";
 import { registerUIComponent } from "../engine";
 import { Container } from "./common";
 import { getComponentValue } from "@latticexyz/recs";
+import { mapObject, VoxelCoord } from "@latticexyz/utils";
 
 // TODO: only show when on map view
 
@@ -29,26 +30,33 @@ export function registerMapUI() {
           api: { toggleMap },
         },
         network: { perlin, SingletonEntity },
+        noa: {
+          streams: { playerPosition$ },
+        },
       } = layers;
 
+      const pointerPosition$ = input.pointermove$.pipe(
+        map(({ pointer }) => {
+          const { x, y: z } = pixelCoordToTileCoord({ x: pointer.worldX, y: pointer.worldY }, TILE_WIDTH, TILE_HEIGHT);
+          const biome = getBiome({ x, y: 0, z }, perlin);
+          const y = getHeight({ x, y: 0, z }, biome, perlin);
+          return { x, y, z };
+        })
+      );
+
+      const noaPlayerPosition$ = playerPosition$.pipe(filter(() => window.getView?.() === "game"));
+
+      const position$ = merge(of({ x: 0, y: 0, z: 0 }), pointerPosition$, noaPlayerPosition$).pipe(
+        map((position) => mapObject<VoxelCoord, VoxelCoord>(position, (value) => Math.round(value))),
+        distinctUntilChanged((a, b) => a.x === b.x && a.z === b.z)
+      );
+
       return combineLatest([
-        input.pointermove$.pipe(
-          map(({ pointer }) => {
-            const { x, y: z } = pixelCoordToTileCoord(
-              { x: pointer.worldX, y: pointer.worldY },
-              TILE_WIDTH,
-              TILE_HEIGHT
-            );
-            const biome = getBiome({ x, y: 0, z }, perlin);
-            const y = getHeight({ x, y: 0, z }, biome, perlin);
-            return { x, y, z };
-          }),
-          distinctUntilChanged((a, b) => a.x === b.x && a.z === b.z)
-        ),
+        position$,
         concat(of(getComponentValue(UI, SingletonEntity)), UI.update$.pipe(map((update) => update.value[0]))),
-      ]).pipe(map(([pointer, ui]) => ({ pointer, ui, maps, toggleMap })));
+      ]).pipe(map(([position, ui]) => ({ position, ui, maps, toggleMap })));
     },
-    ({ pointer: { x, y, z }, ui, toggleMap }) => {
+    ({ position: { x, y, z }, ui, toggleMap }) => {
       const currentView = window.getView?.();
       return (
         <>
