@@ -1,7 +1,7 @@
 import { NetworkLayer } from "../types";
 import { itemTypes } from "../../../../data/itemTypes.json";
 import positionData from "../../../../data/positionsPerItem.json";
-import { createEntity, EntityID, getComponentValue, setComponent, updateComponent, withValue } from "@latticexyz/recs";
+import { createEntity, EntityID, getComponentValue, setComponent, withValue } from "@latticexyz/recs";
 import { SyncState } from "@latticexyz/network";
 import { getChunkCoord, getChunkEntity } from "../../../utils/chunk";
 import { sleep } from "@latticexyz/utils";
@@ -15,10 +15,13 @@ export async function createInitSystem(context: NetworkLayer) {
   } = context;
 
   let i = 0;
+  let percentage = 0;
+  const length = Object.entries((positionData as any).positionsPerItem).reduce(
+    (acc, [, arr]) => ((arr as any)[0] === 48 ? acc : acc + (arr as any)[1].length),
+    0
+  );
 
   setComponent(LoadingState, SingletonEntity, { state: SyncState.INITIAL, msg: "Initializing", percentage: 0 });
-  console.log("Initializing");
-
   const items = new Map<number, string>(itemTypes.map(([id, num]) => [num, id] as [number, string]));
 
   for (const [itemIndex, positions] of (positionData as any).positionsPerItem) {
@@ -36,15 +39,18 @@ export async function createInitSystem(context: NetworkLayer) {
       const chunkEntity = world.registerEntity({ id: getChunkEntity(getChunkCoord({ x, y, z })) });
       const prevChanges = getComponentValue(Chunk, chunkEntity)?.changes ?? 0;
       setComponent(Chunk, chunkEntity, { changes: prevChanges + 1 });
-      await sleep(0);
-      i++;
-      setComponent(LoadingState, SingletonEntity, {
-        state: SyncState.INITIAL,
-        msg: "Initializing " + BlockIdToKey[item as EntityID],
-        percentage: i / positions.length,
-      });
+      const p = Math.floor((i++ / length) * 100);
+      if (p !== percentage && p % 5 === 0) {
+        percentage = p;
+        setComponent(LoadingState, SingletonEntity, {
+          state: SyncState.INITIAL,
+          msg: `Initializing world (${BlockIdToKey[item as EntityID]}`,
+          percentage,
+        });
+        // This is needed to allow the main thead to context switch and update the loading bar
+        await sleep(0);
+      }
     }
-    i = 0;
   }
 
   // Done initializing

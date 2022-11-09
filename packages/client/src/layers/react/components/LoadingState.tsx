@@ -66,4 +66,5 @@ const LoadingContainer = styled.div`
 
 const Loading = styled(LoadingBar)`
   width: 100%;
+  min-width: 200px;
 `;
