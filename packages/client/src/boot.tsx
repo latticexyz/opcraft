@@ -172,9 +172,11 @@ async function bootGame() {
       layers.noa.noa.container.element.hidden = false;
       // Hide other layers
       layers.phaser.game.canvas.hidden = true;
+      layers.phaser.scenes.Main.input.disableInput();
     } else {
       // Initialize or show Phaser layer
       layers.phaser.game.canvas.hidden = false;
+      layers.phaser.scenes.Main.input.enableInput();
       // Hide other layers
       layers.noa.noa.setPaused(true);
       layers.noa.noa.container.element.hidden = true;

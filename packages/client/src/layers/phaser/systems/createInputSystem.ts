@@ -4,18 +4,38 @@ import { NetworkLayer } from "../../network";
 import { TILE_WIDTH, TILE_HEIGHT } from "../constants";
 import { getHighestTilesAt } from "../getHighestTilesAt";
 import { PhaserLayer } from "../types";
+import { filter } from "rxjs";
 
 export function createInputSystem(context: PhaserLayer, network: NetworkLayer) {
   const {
     world,
     scenes: {
-      Main: { input },
+      Main: { input, camera },
     },
   } = context;
   const {
     perlin,
     components: { Position, Item, Position2D },
   } = network;
+
+  // click-and-drag to move the camera
+  defineRxSystem(
+    world,
+    input.pointermove$.pipe(
+      filter(
+        ({ pointer }) =>
+          pointer.isDown &&
+          pointer.downElement instanceof HTMLCanvasElement &&
+          // ignore events when there's no currentTarget, which seems to capture when the mouse is over plugin UI
+          !!pointer.event.currentTarget
+      )
+    ),
+    ({ pointer }) => {
+      const deltaX = (pointer.x - pointer.prevPosition.x) / camera.phaserCamera.zoom;
+      const deltaY = (pointer.y - pointer.prevPosition.y) / camera.phaserCamera.zoom;
+      camera.setScroll(camera.phaserCamera.scrollX - deltaX, camera.phaserCamera.scrollY - deltaY);
+    }
+  );
 
   // TODO: highlight tile on hover, then use click instead of double click to teleport
   //       or optionally click once to select a tile, then click a button in UI to teleport
