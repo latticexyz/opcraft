@@ -5,13 +5,15 @@ import { ActionStatusIcon } from "../Action";
 import { Container } from "./Container";
 
 export const CloseableContainer: React.FC<
-  { onClose: () => void } & Partial<ThemedStyledFunction<"div", any, any, never>>
+  { onClose?: () => void } & Partial<ThemedStyledFunction<"div", any, any, never>>
 > = ({ onClose, children, ...props }) => {
   return (
     <RelativeContainer {...props}>
-      <CloseButton onClick={onClose}>
-        <ActionStatusIcon state={ActionState.Failed} />
-      </CloseButton>
+      {onClose && (
+        <CloseButton onClick={onClose}>
+          <ActionStatusIcon state={ActionState.Failed} />
+        </CloseButton>
+      )}
       <>{children}</>
     </RelativeContainer>
   );

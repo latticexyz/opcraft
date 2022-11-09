@@ -8,6 +8,7 @@ import { registerUIComponent } from "../engine";
 import { Container } from "./common";
 import { getComponentValue } from "@latticexyz/recs";
 import { mapObject, VoxelCoord } from "@latticexyz/utils";
+import { JoinSocial } from "./JoinSocial";
 
 // TODO: only show when on map view
 
@@ -132,6 +133,10 @@ export function registerMapUI() {
               </p>
             </MapLayerToggle>
           )}
+
+          <Socials>
+            <JoinSocial />
+          </Socials>
         </>
       );
     }
@@ -176,4 +181,10 @@ const MapLayerToggle = styled(Container)`
   width: 150px;
   line-height: 1;
   pointer-events: all;
+`;
+
+const Socials = styled.div`
+  position: absolute;
+  right: 20px;
+  top: 20px;
 `;

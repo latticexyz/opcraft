@@ -2,7 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import { Button, CloseableContainer, Gold } from "./common";
 
-export const JoinSocial: React.FC<{ onClose: () => void }> = ({ onClose }) => {
+export const JoinSocial: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
   return (
     <SocialContainer onClose={onClose}>
       <p>
