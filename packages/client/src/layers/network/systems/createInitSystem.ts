@@ -19,10 +19,10 @@ export async function createInitSystem(context: NetworkLayer) {
   });
 
   const positionData: { positionsPerItem: [number, [number, number, number][]] } = await (
-    await fetch("/data/positionsPerItem.json")
+    await fetch("/data/positionsPerItem.json.gz")
   ).json();
 
-  const itemData: { itemTypes: [string, number][] } = await (await fetch("/data/itemTypes.json")).json();
+  const itemData: { itemTypes: [string, number][] } = await (await fetch("/data/itemTypes.json.gz")).json();
 
   let i = 0;
   let percentage = 0;
