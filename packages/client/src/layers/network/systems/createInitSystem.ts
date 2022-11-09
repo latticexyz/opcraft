@@ -44,7 +44,7 @@ export async function createInitSystem(context: NetworkLayer) {
         percentage = p;
         setComponent(LoadingState, SingletonEntity, {
           state: SyncState.INITIAL,
-          msg: `Initializing world (${BlockIdToKey[item as EntityID]}`,
+          msg: `Initializing world (${BlockIdToKey[item as EntityID]})`,
           percentage,
         });
         // This is needed to allow the main thead to context switch and update the loading bar
