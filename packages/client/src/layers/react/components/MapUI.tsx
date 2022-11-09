@@ -58,6 +58,7 @@ export function registerMapUI() {
     },
     ({ position: { x, y, z }, ui, toggleMap }) => {
       const currentView = window.getView?.();
+      console.log("current view", currentView);
       return (
         <>
           <ViewToggle>
@@ -66,7 +67,7 @@ export function registerMapUI() {
               type="radio"
               name="view"
               value="map"
-              defaultChecked={currentView === "map"}
+              checked={currentView === "map"}
               onChange={() => {
                 window.setView?.("map");
                 // TODO: move map to current player position?
@@ -78,7 +79,7 @@ export function registerMapUI() {
               type="radio"
               name="view"
               value="game"
-              defaultChecked={currentView === "game"}
+              checked={currentView === "game"}
               onChange={() => {
                 window.setView?.("game");
                 // TODO: teleport to current map center position?
@@ -91,44 +92,46 @@ export function registerMapUI() {
             <p>Y: {y}</p>
             <p>Z: {z}</p>
           </TileInfo>
-          <MapLayerToggle>
-            <p>
-              <label>
-                <input
-                  type="checkbox"
-                  defaultChecked={ui?.activity}
-                  onChange={(event) => {
-                    toggleMap("activity", event.target.checked);
-                  }}
-                />{" "}
-                Show activity
-              </label>
-            </p>
-            <p>
-              <label>
-                <input
-                  type="checkbox"
-                  defaultChecked={ui?.height}
-                  onChange={(event) => {
-                    toggleMap("height", event.target.checked);
-                  }}
-                />{" "}
-                Show contours
-              </label>
-            </p>
-            <p>
-              <label>
-                <input
-                  type="checkbox"
-                  defaultChecked={ui?.terrain}
-                  onChange={(event) => {
-                    toggleMap("terrain", event.target.checked);
-                  }}
-                />{" "}
-                Show terrain
-              </label>
-            </p>
-          </MapLayerToggle>
+          {currentView === "map" && (
+            <MapLayerToggle>
+              <p>
+                <label>
+                  <input
+                    type="checkbox"
+                    defaultChecked={ui?.activity}
+                    onChange={(event) => {
+                      toggleMap("activity", event.target.checked);
+                    }}
+                  />{" "}
+                  Show activity
+                </label>
+              </p>
+              <p>
+                <label>
+                  <input
+                    type="checkbox"
+                    defaultChecked={ui?.height}
+                    onChange={(event) => {
+                      toggleMap("height", event.target.checked);
+                    }}
+                  />{" "}
+                  Show contours
+                </label>
+              </p>
+              <p>
+                <label>
+                  <input
+                    type="checkbox"
+                    defaultChecked={ui?.terrain}
+                    onChange={(event) => {
+                      toggleMap("terrain", event.target.checked);
+                    }}
+                  />{" "}
+                  Show terrain
+                </label>
+              </p>
+            </MapLayerToggle>
+          )}
         </>
       );
     }
