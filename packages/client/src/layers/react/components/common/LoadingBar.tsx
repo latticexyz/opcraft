@@ -18,5 +18,4 @@ const Inner = styled.div<{ percentage: number }>`
   height: 100%;
   width: ${(p) => p.percentage}%;
   background-color: #fff;
-  transition: all 300ms ease;
 `;
