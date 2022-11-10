@@ -9,7 +9,7 @@ import { Container, Gold } from "./common";
 import { getComponentValue } from "@latticexyz/recs";
 import { mapObject, VoxelCoord } from "@latticexyz/utils";
 import { JoinSocial } from "./JoinSocial";
-import { getChunkEntity } from "../../../utils/chunk";
+import { getChunkCoord, getChunkEntity } from "../../../utils/chunk";
 import playerNames from "../../../../data/playerNames.json";
 import chunkClaims from "../../../../data/chunkClaims.json";
 
@@ -60,7 +60,7 @@ export function registerMapUI() {
     },
     ({ position: { x, y, z }, ui, toggleMap }) => {
       const currentView = window.getView?.();
-      const chunkId = getChunkEntity({ x, y: z });
+      const chunkId = getChunkEntity(getChunkCoord({ x, y, z }));
       const claim = chunkClaims.find((c) => c.chunkId === chunkId);
       const owner = claim ? playerNames.find((p) => p.address === claim.claimer) : null;
       const ownerName = owner?.name ?? claim?.claimer.replace(/^(0x[0-9A-F]{3})[0-9A-F]+([0-9A-F]{4})$/i, "$1…$2");
