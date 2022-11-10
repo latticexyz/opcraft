@@ -5,12 +5,13 @@ import styled from "styled-components";
 import { getBiome, getHeight } from "../../network/api";
 import { TILE_HEIGHT, TILE_WIDTH } from "../../phaser/constants";
 import { registerUIComponent } from "../engine";
-import { Container } from "./common";
+import { Container, Gold } from "./common";
 import { getComponentValue } from "@latticexyz/recs";
 import { mapObject, VoxelCoord } from "@latticexyz/utils";
 import { JoinSocial } from "./JoinSocial";
-
-// TODO: only show when on map view
+import { getChunkEntity } from "../../../utils/chunk";
+import playerNames from "../../../../data/playerNames.json";
+import chunkClaims from "../../../../data/chunkClaims.json";
 
 export function registerMapUI() {
   registerUIComponent(
@@ -59,6 +60,11 @@ export function registerMapUI() {
     },
     ({ position: { x, y, z }, ui, toggleMap }) => {
       const currentView = window.getView?.();
+      const chunkId = getChunkEntity({ x, y: z });
+      const claim = chunkClaims.find((c) => c.chunkId === chunkId);
+      const owner = claim ? playerNames.find((p) => p.address === claim.claimer) : null;
+      const ownerName = owner?.name ?? claim?.claimer.replace(/^(0x[0-9A-F]{3})[0-9A-F]+([0-9A-F]{4})$/i, "$1…$2");
+
       return (
         <>
           <ViewToggle>
@@ -88,9 +94,20 @@ export function registerMapUI() {
             <label htmlFor="MapUI-field-view-game">Game</label>
           </ViewToggle>
           <TileInfo>
-            <p>X: {x}</p>
-            <p>Y: {y}</p>
-            <p>Z: {z}</p>
+            {ownerName ? (
+              <Container>
+                <p>Chunk claimed by</p>
+                <p>
+                  <Gold>{ownerName}</Gold>
+                </p>
+              </Container>
+            ) : null}
+
+            <Container style={{ width: "100px" }}>
+              <p>X: {x}</p>
+              <p>Y: {y}</p>
+              <p>Z: {z}</p>
+            </Container>
           </TileInfo>
           {currentView === "map" && (
             <MapLayerToggle>
@@ -165,12 +182,14 @@ const ViewToggle = styled(Container)`
   }
 `;
 
-const TileInfo = styled(Container)`
+const TileInfo = styled.div`
   position: absolute;
   left: 20px;
   bottom: 20px;
-  width: 100px;
   line-height: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 `;
 
 const MapLayerToggle = styled(Container)`
