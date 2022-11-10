@@ -5,6 +5,8 @@ import { getChunkCoord, getChunkEntity } from "../../../utils/chunk";
 import { sleep } from "@latticexyz/utils";
 import { BlockIdToKey, BlockType } from "../constants";
 
+const STORAGE = "https://s3.opcraft.mud.dev";
+
 export async function createInitSystem(context: NetworkLayer) {
   const {
     world,
@@ -19,10 +21,10 @@ export async function createInitSystem(context: NetworkLayer) {
   });
 
   const positionData: { positionsPerItem: [number, [number, number, number][]] } = await (
-    await fetch("/data/positionsPerItem.json.gz")
+    await fetch(STORAGE + "/positionsPerItem.json")
   ).json();
 
-  const itemData: { itemTypes: [string, number][] } = await (await fetch("/data/itemTypes.json.gz")).json();
+  const itemData: { itemTypes: [string, number][] } = await (await fetch(STORAGE + "/itemTypes.json")).json();
 
   let i = 0;
   let percentage = 0;
