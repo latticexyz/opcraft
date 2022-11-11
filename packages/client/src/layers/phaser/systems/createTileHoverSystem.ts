@@ -1,6 +1,5 @@
 import { defineRxSystem } from "@latticexyz/recs";
 import { NetworkLayer } from "../../network";
-import { TILE_WIDTH } from "../constants";
 import { PhaserLayer } from "../types";
 
 export function createTileHoverSystem(context: PhaserLayer, _network: NetworkLayer) {
