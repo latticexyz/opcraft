@@ -26,6 +26,7 @@ export async function createPhaserLayer(network: NetworkLayer) {
   // --- PHASER ENGINE SETUP --------------------------------------------------------
   const { game, scenes, dispose: disposePhaser } = await createPhaserEngine(phaserConfig);
   world.registerDisposer(disposePhaser);
+  scenes.Main.camera.setZoom(1 / 2);
 
   const chunks = createChunks(scenes.Main.camera.worldView$, TILE_HEIGHT * 64, TILE_HEIGHT * 64); // Tile size in pixels * Tiles per chunk
 
