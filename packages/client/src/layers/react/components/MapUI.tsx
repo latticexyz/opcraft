@@ -26,7 +26,7 @@ export function registerMapUI() {
       const {
         phaser: {
           scenes: {
-            Main: { input, maps },
+            Main: { input, maps, camera },
           },
           components: { UI },
           api: { toggleMap },
@@ -56,9 +56,9 @@ export function registerMapUI() {
       return combineLatest([
         position$,
         concat(of(getComponentValue(UI, SingletonEntity)), UI.update$.pipe(map((update) => update.value[0]))),
-      ]).pipe(map(([position, ui]) => ({ position, ui, maps, toggleMap })));
+      ]).pipe(map(([position, ui]) => ({ position, ui, maps, camera, toggleMap })));
     },
-    ({ position: { x, y, z }, ui, toggleMap }) => {
+    ({ position: { x, y, z }, ui, toggleMap, camera }) => {
       const currentView = window.getView?.();
       const chunkId = getChunkEntity(getChunkCoord({ x, y, z }));
       const claim = chunkClaims.find((c) => c.chunkId === chunkId);
@@ -75,8 +75,8 @@ export function registerMapUI() {
               value="map"
               checked={currentView === "map"}
               onChange={() => {
+                camera.centerOnCoord({ x, y: z }, TILE_WIDTH, TILE_HEIGHT);
                 window.setView?.("map");
-                // TODO: move map to current player position?
               }}
             />
             <label htmlFor="MapUI-field-view-map">Map</label>
