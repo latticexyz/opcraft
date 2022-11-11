@@ -7,6 +7,7 @@ import { registerLoadingState } from "./LoadingState";
 // import { registerSidebar } from "./Sidebar";
 // import { registerPlugins } from "./Plugins";
 import { registerMapUI } from "./MapUI";
+import { registerPosition } from "./Position";
 // export * from "./common";
 
 export function registerUIComponents() {
@@ -19,4 +20,5 @@ export function registerUIComponents() {
   // registerComponentBrowser();
   // registerPlugins();
   registerMapUI();
+  registerPosition();
 }

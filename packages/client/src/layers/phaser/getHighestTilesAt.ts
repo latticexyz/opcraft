@@ -1,6 +1,4 @@
 import { Component, EntityID, getComponentValueStrict, getEntitiesWithValue, Type } from "@latticexyz/recs";
-import { NetworkLayer } from "../network";
-import { PhaserLayer } from "./types";
 import { BackgroundTiles, ForegroundTiles } from "./assets/tilesets/opcraftTileset";
 import { getBiome, getTerrainBlock, getHeight } from "../network/api";
 import { BlockIdToKey, BlockTypeKey } from "../network/constants";

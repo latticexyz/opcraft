@@ -7,4 +7,5 @@ export const Container = styled.div`
   margin: 5px;
   border-radius: 3px;
   padding: 8px;
+  pointer-events: all;
 `;

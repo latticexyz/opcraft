@@ -1,27 +1,39 @@
 import styled from "styled-components";
 
-export const Button = styled.div<{ disabled?: boolean }>`
+export const Button = styled.button`
+  color: inherit;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+
   box-shadow: 0 0 0 3px #555;
-  background-color: #333;
+  background: #333;
   padding: 4px;
+  border: 0;
   border-radius: 3px;
   transition: all 100ms ease;
   user-select: none;
   text-align: center;
 
-  ${(p) =>
-    p.disabled
-      ? `opacity: 0.5;`
-      : `
-  cursor: pointer;
-  
-  :hover {
-    box-shadow: 0 0 0 3px #555, 0 0 0 5px #000;
-    background-color: #777;
+  :disabled {
+    opacity: 0.5;
+  }
+  :enabled {
+    cursor: pointer;
   }
 
-  :active {
+  :enabled:hover {
     box-shadow: 0 0 0 3px #555, 0 0 0 5px #000;
-    background-color: #666;
-  }`}
+    background: #777;
+  }
+
+  :enabled:active {
+    box-shadow: 0 0 0 3px #555, 0 0 0 5px #000;
+    background: #666;
+  }
 `;
+
+Button.defaultProps = {
+  type: "button",
+};

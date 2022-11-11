@@ -1,17 +1,11 @@
 import React from "react";
-import { pixelCoordToTileCoord } from "@latticexyz/phaserx";
-import { map, distinctUntilChanged, combineLatest, concat, of, filter, merge } from "rxjs";
+import { map, combineLatest, concat, of } from "rxjs";
 import styled from "styled-components";
-import { getBiome, getHeight } from "../../network/api";
 import { TILE_HEIGHT, TILE_WIDTH } from "../../phaser/constants";
 import { registerUIComponent } from "../engine";
-import { Container, Gold } from "./common";
+import { Container } from "./common";
 import { getComponentValue } from "@latticexyz/recs";
-import { mapObject, VoxelCoord } from "@latticexyz/utils";
 import { JoinSocial } from "./JoinSocial";
-import { getChunkCoord, getChunkEntity } from "../../../utils/chunk";
-import playerNames from "../../../../data/playerNames.json";
-import chunkClaims from "../../../../data/chunkClaims.json";
 
 export function registerMapUI() {
   registerUIComponent(
@@ -26,44 +20,26 @@ export function registerMapUI() {
       const {
         phaser: {
           scenes: {
-            Main: { input, maps, camera },
+            Main: {
+              camera: { centerOnCoord },
+            },
           },
           components: { UI },
           api: { toggleMap },
         },
-        network: { perlin, SingletonEntity },
+        network: { SingletonEntity },
         noa: {
-          streams: { playerPosition$ },
+          api: { getCurrentPlayerPosition },
         },
       } = layers;
 
-      const pointerPosition$ = input.pointermove$.pipe(
-        map(({ pointer }) => {
-          const { x, y: z } = pixelCoordToTileCoord({ x: pointer.worldX, y: pointer.worldY }, TILE_WIDTH, TILE_HEIGHT);
-          const biome = getBiome({ x, y: 0, z }, perlin);
-          const y = getHeight({ x, y: 0, z }, biome, perlin);
-          return { x, y, z };
-        })
-      );
-
-      const noaPlayerPosition$ = playerPosition$.pipe(filter(() => window.getView?.() === "game"));
-
-      const position$ = merge(of({ x: 0, y: 0, z: 0 }), pointerPosition$, noaPlayerPosition$).pipe(
-        map((position) => mapObject<VoxelCoord, VoxelCoord>(position, (value) => Math.round(value))),
-        distinctUntilChanged((a, b) => a.x === b.x && a.z === b.z)
-      );
-
       return combineLatest([
-        position$,
+        of({ centerOnCoord, toggleMap, getCurrentPlayerPosition }),
         concat(of(getComponentValue(UI, SingletonEntity)), UI.update$.pipe(map((update) => update.value[0]))),
-      ]).pipe(map(([position, ui]) => ({ position, ui, maps, camera, toggleMap })));
+      ]).pipe(map(([props, ui]) => ({ ...props, ui })));
     },
-    ({ position: { x, y, z }, ui, toggleMap, camera }) => {
+    ({ centerOnCoord, toggleMap, getCurrentPlayerPosition, ui }) => {
       const currentView = window.getView?.();
-      const chunkId = getChunkEntity(getChunkCoord({ x, y, z }));
-      const claim = chunkClaims.find((c) => c.chunkId === chunkId);
-      const owner = claim ? playerNames.find((p) => p.address === claim.claimer) : null;
-      const ownerName = owner?.name ?? claim?.claimer.replace(/^(0x[0-9A-F]{3})[0-9A-F]+([0-9A-F]{4})$/i, "$1…$2");
 
       return (
         <>
@@ -75,7 +51,8 @@ export function registerMapUI() {
               value="map"
               checked={currentView === "map"}
               onChange={() => {
-                camera.centerOnCoord({ x, y: z }, TILE_WIDTH, TILE_HEIGHT);
+                const { x, z } = getCurrentPlayerPosition();
+                centerOnCoord({ x, y: z }, TILE_WIDTH, TILE_HEIGHT);
                 window.setView?.("map");
               }}
             />
@@ -93,22 +70,7 @@ export function registerMapUI() {
             />
             <label htmlFor="MapUI-field-view-game">Game</label>
           </ViewToggle>
-          <TileInfo>
-            {ownerName ? (
-              <Container>
-                <p>Chunk claimed by</p>
-                <p>
-                  <Gold>{ownerName}</Gold>
-                </p>
-              </Container>
-            ) : null}
 
-            <Container style={{ width: "100px" }}>
-              <p>X: {x}</p>
-              <p>Y: {y}</p>
-              <p>Z: {z}</p>
-            </Container>
-          </TileInfo>
           {currentView === "map" && (
             <MapLayerToggle>
               <p>
@@ -180,16 +142,6 @@ const ViewToggle = styled(Container)`
   input:checked + label {
     background-color: #060;
   }
-`;
-
-const TileInfo = styled.div`
-  position: absolute;
-  left: 20px;
-  bottom: 20px;
-  line-height: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
 `;
 
 const MapLayerToggle = styled(Container)`
