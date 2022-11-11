@@ -59,7 +59,7 @@ export function registerPosition() {
       const claim = chunkClaims.find((c) => c.chunkId === chunkId);
       const owner = claim ? playerNames.find((p) => p.address === claim.claimer) : null;
       const ownerName = owner?.name ?? claim?.claimer.replace(/^(0x[0-9A-F]{3})[0-9A-F]+([0-9A-F]{4})$/i, "$1…$2");
-      const [showTeleport, setShowTeleport] = useState(true);
+      const [showTeleport, setShowTeleport] = useState(false);
 
       useEffect(() => {
         if (!showTeleport) return;
