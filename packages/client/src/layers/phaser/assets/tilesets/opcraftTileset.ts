@@ -1,80 +1,75 @@
 import { BlockTypeKey } from "../../../network/constants";
+import { gameTiles, heightTiles } from "../../../../tilemap/tiles";
 
-// TODO: fill in tilesets (zeroes)
+const backgroundTiles: BlockTypeKey[] = [
+  "Grass",
+  "Dirt",
+  "Log",
+  "Stone",
+  "Sand",
+  "Cobblestone",
+  "MossyCobblestone",
+  "Coal",
+  "Crafting",
+  "Iron",
+  "Gold",
+  "Diamond",
+  "Planks",
+  "Wool",
+  "OrangeWool",
+  "MagentaWool",
+  "LightBlueWool",
+  "YellowWool",
+  "LimeWool",
+  "PinkWool",
+  "GrayWool",
+  "LightGrayWool",
+  "CyanWool",
+  "PurpleWool",
+  "BlueWool",
+  "BrownWool",
+  "GreenWool",
+  "RedWool",
+  "BlackWool",
+  "Sponge",
+  "Snow",
+  "Clay",
+  "Bedrock",
+  "Bricks",
+];
 
-export const BackgroundTiles: Partial<Record<BlockTypeKey, number>> = {
-  Grass: 1,
-  Dirt: 2,
-  Log: 10,
-  Stone: 5,
-  Sand: 3,
-  Cobblestone: 0,
-  MossyCobblestone: 0,
-  Coal: 6,
-  Crafting: 0,
-  Iron: 0,
-  Gold: 0,
-  Diamond: 9,
-  Planks: 0,
-  Wool: 8,
-  OrangeWool: 0,
-  MagentaWool: 0,
-  LightBlueWool: 0,
-  YellowWool: 0,
-  LimeWool: 0,
-  PinkWool: 0,
-  GrayWool: 0,
-  LightGrayWool: 0,
-  CyanWool: 0,
-  PurpleWool: 0,
-  BlueWool: 0,
-  BrownWool: 0,
-  GreenWool: 0,
-  RedWool: 0,
-  BlackWool: 0,
-  Sponge: 0,
-  Snow: 7,
-  Clay: 0,
-  Bedrock: 0,
-  Bricks: 0,
-};
+const foregroundTiles: BlockTypeKey[] = [
+  "Glass",
+  "Water",
+  "Leaves",
+  "RedFlower",
+  "GrassPlant",
+  "OrangeFlower",
+  "MagentaFlower",
+  "LightBlueFlower",
+  "LimeFlower",
+  "PinkFlower",
+  "GrayFlower",
+  "LightGrayFlower",
+  "CyanFlower",
+  "PurpleFlower",
+  "BlueFlower",
+  "GreenFlower",
+  "BlackFlower",
+  "Kelp",
+];
 
-export const ForegroundTiles: Partial<Record<BlockTypeKey, number>> = {
-  Glass: 0,
-  Water: 4,
-  Leaves: 11,
-  RedFlower: 0,
-  GrassPlant: 12,
-  OrangeFlower: 0,
-  MagentaFlower: 0,
-  LightBlueFlower: 0,
-  LimeFlower: 0,
-  PinkFlower: 0,
-  GrayFlower: 0,
-  LightGrayFlower: 0,
-  CyanFlower: 0,
-  PurpleFlower: 0,
-  BlueFlower: 0,
-  GreenFlower: 0,
-  BlackFlower: 0,
-  Kelp: 13,
-};
+const tileTypes = Object.keys(gameTiles);
+const heightTypes = Object.keys(heightTiles);
 
-export const HeightMapTiles: Partial<Record<number, number>> = {
-  "-1": 48,
-  "-2": 49,
-  "-3": 50,
-  "-4": 51,
-  "-5": 52,
-  "-6": 53,
-  "-7": 54,
-  "-8": 55,
-  "1": 56,
-  "2": 57,
-  "3": 58,
-  "4": 59,
-  "5": 60,
-  "6": 61,
-  "7": 62,
-  "8": 63,
-};
+export const BackgroundTiles: Partial<Record<BlockTypeKey, number>> = Object.fromEntries(
+  backgroundTiles.map((tile) => [tile, tileTypes.indexOf(tile)])
+);
+
+export const ForegroundTiles: Partial<Record<BlockTypeKey, number>> = Object.fromEntries(
+  foregroundTiles.map((tile) => [tile, tileTypes.indexOf(tile)])
+);
+
+export const HeightMapTiles: Partial<Record<number, number>> = Object.fromEntries(
+  heightTypes.map((key) => [key, tileTypes.length + heightTypes.indexOf(key)])
+);

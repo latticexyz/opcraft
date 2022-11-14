@@ -6,7 +6,7 @@ import {
   defineCameraConfig,
 } from "@latticexyz/phaserx";
 import { Assets, Maps, Scenes, TILE_HEIGHT, TILE_WIDTH } from "./constants";
-import opcraftTileset from "./assets/tilesets/opcraft-tileset.png";
+import opcraftTileset from "./assets/tilesets/opcraftTiles.png";
 
 export const phaserConfig = {
   sceneConfig: {
