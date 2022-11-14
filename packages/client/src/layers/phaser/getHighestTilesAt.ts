@@ -48,6 +48,7 @@ export const getHighestTilesAt = ({
   });
 
   const heightLimit = ecsBlocks.reduce((max, block) => Math.max(max, block.position.y), terrainHeightLimit);
+
   const ecsBlockTypes: Partial<Record<`${number},${number},${number}`, BlockTypeKey>> = Object.fromEntries(
     ecsBlocks.map((block) => [`${block.position.x},${block.position.y},${block.position.z}`, block.blockType])
   );
@@ -55,7 +56,7 @@ export const getHighestTilesAt = ({
   let foregroundBlockType: keyof typeof ForegroundTiles | undefined;
   let backgroundBlockType: keyof typeof BackgroundTiles | undefined;
 
-  for (let y = heightLimit; y >= -64; y--) {
+  for (let y = heightLimit + 2; y >= -64; y--) {
     let blockType = ecsBlockTypes[`${x},${y},${z}`];
     if (!blockType) {
       const entityId = getTerrainBlock({ biome, height }, { x, y, z }, perlin);

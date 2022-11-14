@@ -76,6 +76,10 @@ export function getHeight({ x, z }: VoxelCoord, biome: [number, number, number, 
   height = roundTowardsZero(height);
   height -= 128;
 
+  // don't go below bedrock
+  // TODO: is this the right place for this?
+  height = Math.max(height, -64);
+
   // Set cache
   heightMap.set(flatCoord, height);
   return height;

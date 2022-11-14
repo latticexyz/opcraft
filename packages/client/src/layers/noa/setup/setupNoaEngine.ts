@@ -68,8 +68,8 @@ export function setupNoaEngine(api: API) {
   }
 
   // override the two water materials
-  noa.registry.registerMaterial(Textures.TransparentWater, [146 / 255, 215 / 255, 233 / 255, 0.5], undefined, true);
-  noa.registry.registerMaterial(Textures.Water, [1, 1, 1, 0.7], Textures.Water, true);
+  noa.registry.registerMaterial(Textures.TransparentWater, [146 / 255, 215 / 255, 233 / 255, 0.6], undefined, true);
+  noa.registry.registerMaterial(Textures.Water, [185 / 255, 210 / 255, 224 / 255, 0.6], Textures.Water, true);
   noa.registry.registerMaterial(Textures.Leaves, undefined, Textures.Leaves, true);
   noa.registry.registerMaterial(Textures.Glass, undefined, Textures.Glass, true);
 
