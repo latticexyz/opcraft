@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { map, combineLatest, concat, of } from "rxjs";
 import styled from "styled-components";
 import { TILE_HEIGHT, TILE_WIDTH } from "../../phaser/constants";
@@ -39,7 +39,21 @@ export function registerMapUI() {
       ]).pipe(map(([props, ui]) => ({ ...props, ui })));
     },
     ({ centerOnCoord, toggleMap, getCurrentPlayerPosition, ui }) => {
-      const currentView = window.getView?.();
+      const [view, setView] = useState(window.getView?.() ?? "map");
+
+      // oh no, this is so gross
+      useEffect(() => {
+        const originalSetView = window.setView;
+        if (!originalSetView) return;
+
+        window.setView = (view) => {
+          setView(view);
+          return originalSetView(view);
+        };
+        return () => {
+          window.setView = originalSetView;
+        };
+      }, []);
 
       return (
         <>
@@ -49,7 +63,7 @@ export function registerMapUI() {
               type="radio"
               name="view"
               value="map"
-              checked={currentView === "map"}
+              checked={view === "map"}
               onChange={() => {
                 const { x, z } = getCurrentPlayerPosition();
                 centerOnCoord({ x, y: z }, TILE_WIDTH, TILE_HEIGHT);
@@ -62,7 +76,7 @@ export function registerMapUI() {
               type="radio"
               name="view"
               value="game"
-              checked={currentView === "game"}
+              checked={view === "game"}
               onChange={() => {
                 window.setView?.("game");
                 // TODO: teleport to current map center position?
@@ -71,7 +85,7 @@ export function registerMapUI() {
             <label htmlFor="MapUI-field-view-game">Game</label>
           </ViewToggle>
 
-          {currentView === "map" && (
+          {view === "map" && (
             <MapLayerToggle>
               <p>
                 <label>
