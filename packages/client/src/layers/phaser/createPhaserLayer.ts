@@ -28,7 +28,7 @@ export async function createPhaserLayer(network: NetworkLayer) {
   world.registerDisposer(disposePhaser);
   scenes.Main.camera.setZoom(1 / 2);
 
-  const chunks = createChunks(scenes.Main.camera.worldView$, TILE_HEIGHT * 64, TILE_HEIGHT * 64); // Tile size in pixels * Tiles per chunk
+  const chunks = createChunks(scenes.Main.camera.worldView$, TILE_HEIGHT * 64, TILE_HEIGHT * 16); // Tile size in pixels * Tiles per chunk
 
   // --- API -----------------------------------------------------------------------
   const { Main, X2, X4, X8, X16, Height, HeightX2, HeightX4, HeightX8, HeightX16 } = scenes.Main.maps;

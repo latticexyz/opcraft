@@ -1,4 +1,4 @@
-import { defineComponent, defineComponentSystem, defineRxSystem, getComponentValue } from "@latticexyz/recs";
+import { defineRxSystem, getComponentValue } from "@latticexyz/recs";
 import { NetworkLayer } from "../../network";
 import { Maps, PhaserLayer } from "../types";
 import { HeightMapTiles } from "../assets/tilesets/opcraftTileset";
@@ -25,6 +25,7 @@ export function createMapSystem(context: PhaserLayer, network: NetworkLayer) {
     maps,
     scenes: {
       Main: {
+        phaserScene,
         maps: { Heat },
       },
     },
@@ -37,6 +38,8 @@ export function createMapSystem(context: PhaserLayer, network: NetworkLayer) {
   chunks.addedChunks$.subscribe(addedChunks$);
   const newTile$ = new Subject<Coord>();
 
+  // Prevent clearing the entire map before each redraw (before each tick)
+  (phaserScene.game.renderer.config as any).clearBeforeRender = false;
   /**
    * Draw the given tile at the given coord on the given layer on all maps
    */
@@ -54,21 +57,26 @@ export function createMapSystem(context: PhaserLayer, network: NetworkLayer) {
    * and draw it on the phaser tilemap
    */
   defineRxSystem(world, newTile$, async ({ x, y: z }) => {
-    const highestTiles = getHighestTilesAt({ x, z, perlin, Position, Position2D, Item });
-    if (!highestTiles) return;
+    requestIdleCallback(
+      () => {
+        const highestTiles = getHighestTilesAt({ x, z, perlin, Position, Position2D, Item });
+        if (!highestTiles) return;
 
-    const { y, foregroundTile, backgroundTile } = highestTiles;
+        const { y, foregroundTile, backgroundTile } = highestTiles;
 
-    const heightTile = HeightMapTiles[Math.max(-8, Math.min(8, Math.floor(y / 8)))];
-    if (heightTile != null) {
-      drawTile(x, z, heightTile, maps.height);
-    }
-    if (foregroundTile != null) {
-      drawTile(x, z, foregroundTile, maps.terrain, "Foreground");
-    }
-    if (backgroundTile != null) {
-      drawTile(x, z, backgroundTile, maps.terrain, "Background");
-    }
+        const heightTile = HeightMapTiles[Math.max(-8, Math.min(8, Math.floor(y / 8)))];
+        if (heightTile != null) {
+          drawTile(x, z, heightTile, maps.height);
+        }
+        if (foregroundTile != null) {
+          drawTile(x, z, foregroundTile, maps.terrain, "Foreground");
+        }
+        if (backgroundTile != null) {
+          drawTile(x, z, backgroundTile, maps.terrain, "Background");
+        }
+      },
+      { timeout: 3000 }
+    );
   });
 
   /**
