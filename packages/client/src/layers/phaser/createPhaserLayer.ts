@@ -1,4 +1,4 @@
-import { getComponentValue, namespaceWorld, SchemaOf, setComponent, updateComponent } from "@latticexyz/recs";
+import { getComponentValue, SchemaOf, setComponent, updateComponent } from "@latticexyz/recs";
 import { createChunks, createPhaserEngine } from "@latticexyz/phaserx";
 import { phaserConfig } from "./config";
 import { NetworkLayer } from "../network";
@@ -6,13 +6,13 @@ import { createMapSystem, createTileHoverSystem, createInputSystem, createHeatma
 import { TILE_HEIGHT, ZoomLevel } from "./constants";
 import { createZoomLevel } from "./createZoomLevel";
 import { defineUIComponent } from "./components";
+import { world } from "./world";
 
 /**
  * The Phaser layer is responsible for rendering game objects to the screen.
  */
 export async function createPhaserLayer(network: NetworkLayer) {
   // --- WORLD ----------------------------------------------------------------------
-  const world = namespaceWorld(network.world, "phaser");
   const { SingletonEntity } = network;
 
   // --- COMPONENTS -----------------------------------------------------------------

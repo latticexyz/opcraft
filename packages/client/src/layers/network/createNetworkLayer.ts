@@ -19,23 +19,6 @@ import { createActionSystem, waitForActionCompletion } from "@latticexyz/std-cli
 import { GameConfig } from "./config";
 import { filterNullishValues, VoxelCoord } from "@latticexyz/utils";
 import {
-  definePositionComponent,
-  defineOwnedByComponent,
-  defineGameConfigComponent,
-  defineRecipeComponent,
-  defineLoadingStateComponent,
-  defineItemComponent,
-  defineItemPrototypeComponent,
-  defineOccurrenceComponent,
-  defineStakeComponent,
-  defineClaimComponent,
-  defineNameComponent,
-  definePluginComponent,
-  definePluginRegistryComponent,
-  definePosition2DComponent,
-  defineChunkComponent,
-} from "./components";
-import {
   getBlockAtPosition as getBlockAtPositionApi,
   getEntityAtPosition as getEntityAtPositionApi,
   getECSBlock,
@@ -48,7 +31,8 @@ import { BlockIdToKey, BlockType } from "./constants";
 import { GodID } from "@latticexyz/network";
 import { of } from "rxjs";
 import { createInitSystem, createPluginSystem } from "./systems";
-
+import { world } from "./world";
+import * as components from "./components";
 /**
  * The Network layer is the lowest layer in the client architecture.
  * Its purpose is to synchronize the client components with the contract components.
@@ -58,28 +42,8 @@ export async function createNetworkLayer(config: GameConfig) {
   console.table(config);
 
   // --- WORLD ----------------------------------------------------------------------
-  const world = createWorld();
   const uniqueWorldId = config.chainId + config.worldAddress;
   const SingletonEntity = world.registerEntity({ id: GodID });
-
-  // --- COMPONENTS -----------------------------------------------------------------
-  const components = {
-    Position: definePositionComponent(world),
-    Position2D: definePosition2DComponent(world),
-    Item: defineItemComponent(world),
-    Chunk: defineChunkComponent(world),
-    ItemPrototype: defineItemPrototypeComponent(world),
-    Name: defineNameComponent(world),
-    OwnedBy: defineOwnedByComponent(world),
-    GameConfig: defineGameConfigComponent(world),
-    Recipe: defineRecipeComponent(world),
-    LoadingState: defineLoadingStateComponent(world),
-    Occurrence: defineOccurrenceComponent(world),
-    Stake: defineStakeComponent(world),
-    Claim: defineClaimComponent(world),
-    Plugin: definePluginComponent(world),
-    PluginRegistry: definePluginRegistryComponent(world),
-  };
 
   // --- SETUP ----------------------------------------------------------------------
   // const {

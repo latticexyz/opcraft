@@ -1,30 +1,15 @@
 import {
-  createIndexer,
   EntityIndex,
   getComponentValue,
-  namespaceWorld,
   removeComponent,
   setComponent,
   updateComponent,
-  createLocalCache,
   getEntitiesWithValue,
   EntityID,
+  createLocalCache,
 } from "@latticexyz/recs";
 import { Coord, isNotEmpty, pickRandom, random, VoxelCoord } from "@latticexyz/utils";
 import { NetworkLayer } from "../network";
-import {
-  definePlayerDirectionComponent,
-  definePlayerPositionComponent,
-  defineSelectedSlotComponent,
-  defineCraftingTableComponent,
-  defineUIComponent,
-  definePlayerLastMessage,
-  definePlayerRelayerChunkPositionComponent,
-  defineLocalPlayerPositionComponent,
-  defineTutorialComponent,
-  definePreTeleportPositionComponent,
-  defineSoundComponent,
-} from "./components";
 import { CRAFTING_SIDE, EMPTY_CRAFTING_TABLE } from "./constants";
 import { setupHand } from "./engine/hand";
 import { monkeyPatchMeshComponent } from "./engine/components/monkeyPatchMeshComponent";
@@ -41,7 +26,6 @@ import {
 import { registerHandComponent } from "./engine/components/handComponent";
 import { registerModelComponent } from "./engine/components/modelComponent";
 import { registerMiningBlockComponent } from "./engine/components/miningBlockComponent";
-import { defineInventoryIndexComponent } from "./components/InventoryIndex";
 import { setupDayNightCycle } from "./engine/dayNightCycle";
 import { getNoaPositionStrict, setNoaPosition } from "./engine/components/utils";
 import { registerTargetedPositionComponent } from "./engine/components/targetedPositionComponent";
@@ -51,35 +35,22 @@ import { getChunkCoord, getChunkEntity } from "../../utils/chunk";
 import { BehaviorSubject, map, throttleTime, timer } from "rxjs";
 import { createCreativeModeSystem } from "./systems/createCreativeModeSystem";
 import { createSpawnPlayerSystem } from "./systems/createSpawnPlayerSystem";
-import { definePlayerMeshComponent } from "./components/PlayerMesh";
 import { Engine } from "@babylonjs/core";
+import { world } from "./world";
+import * as components from "./components";
 
 export function createNoaLayer(network: NetworkLayer) {
-  const world = namespaceWorld(network.world, "noa");
   const {
     worldAddress,
     components: { Item, Recipe, Claim },
   } = network;
   const uniqueWorldId = worldAddress;
 
-  const SingletonEntity = world.registerEntity({ id: GodID });
+  createLocalCache(components.LocalPlayerPosition, uniqueWorldId);
+  createLocalCache(components.InventoryIndex, uniqueWorldId);
+  createLocalCache(components.Tutorial, uniqueWorldId);
 
-  // --- COMPONENTS -----------------------------------------------------------------
-  const components = {
-    SelectedSlot: defineSelectedSlotComponent(world),
-    CraftingTable: defineCraftingTableComponent(world),
-    PlayerPosition: definePlayerPositionComponent(world),
-    LocalPlayerPosition: createLocalCache(defineLocalPlayerPositionComponent(world), uniqueWorldId),
-    PlayerRelayerChunkPosition: createIndexer(definePlayerRelayerChunkPositionComponent(world)),
-    PlayerDirection: definePlayerDirectionComponent(world),
-    PlayerLastMessage: definePlayerLastMessage(world),
-    PlayerMesh: definePlayerMeshComponent(world),
-    UI: defineUIComponent(world),
-    InventoryIndex: createLocalCache(createIndexer(defineInventoryIndexComponent(world)), uniqueWorldId),
-    Tutorial: createLocalCache(defineTutorialComponent(world), uniqueWorldId),
-    PreTeleportPosition: definePreTeleportPositionComponent(world),
-    Sounds: defineSoundComponent(world),
-  };
+  const SingletonEntity = world.registerEntity({ id: GodID });
 
   // --- SETUP ----------------------------------------------------------------------
   const { noa, setBlock, glow } = setupNoaEngine(network.api);
