@@ -2,7 +2,12 @@
 
 An infinite, unstoppable World.
 
-The main branch client is automatically deployed to [opcraft.mud.dev](https://opcraft.mud.dev).
+The main branch client is automatically deployed to [craft.mud.dev](https://craft.mud.dev).
+
+Visit the frozen world of the first public playtest of OPCraft at [opcraft.mud.dev](https://opcraft.mud.dev).
+
+Read more about the [creation of OPCraft](https://lattice.xyz/blog/making-of-opcraft-part-1-building-an-on-chain-voxel-game) and [the crazy things that happened during our first public playtest](https://lattice.xyz/blog/making-of-opcraft-part-3-what-happened-in-two-weeks-of-OPCraft) on the [Lattice blog](https://lattice.xyz/blog).
+
 
 ### Running locally
 
