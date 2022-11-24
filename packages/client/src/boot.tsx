@@ -37,10 +37,11 @@ const defaultParams = {
   initialBlockNumber: "13174452",
   snapshot: "https://snapshot.simple-infra.lattice.xyz",
   stream: "https://stream.simple-infra.lattice.xyz",
-  relay: "",
-  faucet: "",
+  relay: "https://relay.simple-infra.lattice.xyz",
+  faucet: "https://faucet.simple-infra.lattice.xyz",
   blockTime: "1000",
   blockExplorer: "https://blockscout.com/optimism/opcraft",
+  dev: "true",
 };
 
 export const ecs = {
@@ -75,7 +76,8 @@ async function bootGame() {
     const streamServiceUrl = params.get("stream") ?? defaultParams.stream;
     const relayServiceUrl = params.get("relay") ?? defaultParams.relay;
     const faucetServiceUrl = params.get("faucet") ?? defaultParams.faucet;
-    const devMode = params.get("dev") === "true";
+    const devModeParam = params.get("dev") ?? defaultParams.dev;
+    const devMode = devModeParam === "true";
     const initialBlockNumberString = params.get("initialBlockNumber") ?? defaultParams.initialBlockNumber;
     const initialBlockNumber = initialBlockNumberString ? parseInt(initialBlockNumberString) : 0;
     const blockTimeString = params.get("blockTime") ?? defaultParams.blockTime;
