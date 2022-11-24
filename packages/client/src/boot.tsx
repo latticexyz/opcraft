@@ -30,15 +30,15 @@ let registerUIComponents = registerUIComponentsImport;
 let Engine = EngineImport;
 
 const defaultParams = {
-  chainId: "64657",
-  worldAddress: "0x3031a86EFA3A9c0B41EA089F2021C6490591fB8c",
-  rpc: "https://opcraft-3-replica-0.bedrock-goerli.optimism.io",
-  wsRpc: "wss://opcraft-3-replica-0.bedrock-goerli.optimism.io/ws",
-  initialBlockNumber: "4146",
-  snapshot: "https://ecs-snapshot.opcraft-mud-services.lattice.xyz",
-  stream: "https://ecs-stream.opcraft-mud-services.lattice.xyz",
-  relay: "https://ecs-relay.opcraft-mud-services.lattice.xyz",
-  faucet: "https://faucet.opcraft-mud-services.lattice.xyz",
+  chainId: "4242",
+  worldAddress: "0x3027cEd7fF2BB299B855E5079581A25cE08D5465",
+  rpc: "https://follower.super-degen-chain.lattice.xyz",
+  wsRpc: "wss://follower.super-degen-chain.lattice.xyz",
+  initialBlockNumber: "13174452",
+  snapshot: "https://snapshot.simple-infra.lattice.xyz",
+  stream: "https://stream.simple-infra.lattice.xyz",
+  relay: "",
+  faucet: "",
   blockTime: "1000",
   blockExplorer: "https://blockscout.com/optimism/opcraft",
 };
