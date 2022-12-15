@@ -1,15 +1,14 @@
-// SPDX-License-Identifier: GPL-3.0
+// SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0;
 
-import { DSTest } from "ds-test/test.sol";
-import { Utilities } from "./utils/Utilities.sol";
-import { Deploy } from "./utils/Deploy.sol";
-import { Cheats } from "./utils/Cheats.sol";
+import { Deploy } from "./Deploy.sol";
+import "std-contracts/test/MudTest.t.sol";
 
-contract DeployTest is DSTest {
-  Deploy internal deploy = new Deploy();
+contract DeployTest is MudTest {
+  constructor() MudTest(new Deploy()) {}
 
-  function testDeploy() public {
-    deploy.deploy(address(0), address(0), false);
+  function testDeploy() public view {
+    console.log("Deployer");
+    console.log(deployer);
   }
 }

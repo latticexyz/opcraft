@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.8.0;
 
-import "../MudTest.t.sol";
+import { Deploy } from "../Deploy.sol";
+import { MudTest } from "std-contracts/test/MudTest.t.sol";
 import { getStakeEntity } from "../../systems/StakeSystem.sol";
 import { ClaimSystem, ID as ClaimSystemID, Claim, getChunkEntity } from "../../systems/ClaimSystem.sol";
 import { Coord } from "../../types.sol";
@@ -10,6 +11,8 @@ import { ClaimComponent, ID as ClaimComponentID } from "../../components/ClaimCo
 import { addressToEntity } from "solecs/utils.sol";
 
 contract ClaimSystemTest is MudTest {
+  constructor() MudTest(new Deploy()) {}
+
   Coord internal chunk = Coord(12, -13);
 
   function setUp() public override {

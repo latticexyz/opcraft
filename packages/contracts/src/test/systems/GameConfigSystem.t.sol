@@ -1,9 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.8.0;
 
-import "../MudTest.t.sol";
+import { Deploy } from "../Deploy.sol";
+import { MudTest } from "std-contracts/test/MudTest.t.sol";
+import { console } from "forge-std/console.sol";
 
 contract GameConfigSystemTest is MudTest {
+  constructor() MudTest(new Deploy()) {}
+
   function testExecute() public {
     vm.startPrank(deployer);
     console.log(deployer);

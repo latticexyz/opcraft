@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.8.0;
 
-import "../MudTest.t.sol";
+import { Deploy } from "../Deploy.sol";
+import { MudTest } from "std-contracts/test/MudTest.t.sol";
 import { Coord } from "../../types.sol";
 import { TransferSystem, ID as TransferSystemID } from "../../systems/TransferSystem.sol";
 import { ItemComponent, ID as ItemComponentID } from "../../components/ItemComponent.sol";
@@ -10,6 +11,8 @@ import { DiamondID } from "../../prototypes/Blocks.sol";
 import { addressToEntity } from "solecs/utils.sol";
 
 contract TransferSystemTest is MudTest {
+  constructor() MudTest(new Deploy()) {}
+
   uint256 diamond;
 
   function setUp() public override {

@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.8.0;
 
-import "../MudTest.t.sol";
+import { Deploy } from "../Deploy.sol";
+import { MudTest } from "std-contracts/test/MudTest.t.sol";
 import { addressToEntity } from "solecs/utils.sol";
 import { MineSystem, ID as MineSystemID } from "../../systems/MineSystem.sol";
 import { ItemComponent, ID as ItemComponentID } from "../../components/ItemComponent.sol";
@@ -14,6 +15,8 @@ import { Coord, VoxelCoord } from "../../types.sol";
 import { getChunkCoord } from "../../utils.sol";
 
 contract MineSystemTest is MudTest {
+  constructor() MudTest(new Deploy()) {}
+
   function testMineTerrain() public {
     vm.startPrank(alice);
     MineSystem mineSystem = MineSystem(system(MineSystemID));

@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.8.0;
 
-import "../MudTest.t.sol";
+import { Deploy } from "../Deploy.sol";
+import { MudTest } from "std-contracts/test/MudTest.t.sol";
 import { addressToEntity } from "solecs/utils.sol";
 import { CraftSystem, ID as CraftSystemID } from "../../systems/CraftSystem.sol";
 import { ItemComponent, ID as ItemComponentID } from "../../components/ItemComponent.sol";
@@ -10,6 +11,8 @@ import { PlanksID, CraftingID, LogID } from "../../prototypes/Blocks.sol";
 import { initializeArray } from "../../utils.sol";
 
 contract CraftSystemTest is MudTest {
+  constructor() MudTest(new Deploy()) {}
+
   uint256[] internal planks;
   uint256 logBlock;
 

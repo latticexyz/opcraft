@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.8.0;
 
-import "../MudTest.t.sol";
+import { Deploy } from "../Deploy.sol";
+import { MudTest } from "std-contracts/test/MudTest.t.sol";
 import { StakeSystem, ID as StakeSystemID, getStakeEntity } from "../../systems/StakeSystem.sol";
 import { Coord } from "../../types.sol";
 import { StakeComponent, ID as StakeComponentID } from "../../components/StakeComponent.sol";
@@ -11,6 +12,8 @@ import { DiamondID } from "../../prototypes/Blocks.sol";
 import { addressToEntity } from "solecs/utils.sol";
 
 contract StakeSystemTest is MudTest {
+  constructor() MudTest(new Deploy()) {}
+
   uint256 diamond1;
   uint256 diamond2;
 
