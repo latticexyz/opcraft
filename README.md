@@ -8,6 +8,7 @@ Visit the frozen world of the first public playtest of OPCraft at [opcraft.mud.d
 
 Read more about the [creation of OPCraft](https://lattice.xyz/blog/making-of-opcraft-part-1-building-an-on-chain-voxel-game) and [the crazy things that happened during our first public playtest](https://lattice.xyz/blog/making-of-opcraft-part-3-what-happened-in-two-weeks-of-OPCraft) on the [Lattice blog](https://lattice.xyz/blog).
 
+Built using [MUD](https://github.com/latticexyz/mud) and [Noa](https://github.com/fenomas/noa).
 
 ### Running locally
 
