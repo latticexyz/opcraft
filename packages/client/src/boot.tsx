@@ -31,17 +31,17 @@ let Engine = EngineImport;
 
 const defaultParams = {
   chainId: "4242",
-  worldAddress: "0x3027cEd7fF2BB299B855E5079581A25cE08D5465",
-  rpc: "https://follower.super-degen-chain.lattice.xyz",
-  wsRpc: "wss://follower.super-degen-chain.lattice.xyz",
-  initialBlockNumber: "13174452",
-  snapshot: "https://snapshot.simple-infra.lattice.xyz",
-  stream: "https://stream.simple-infra.lattice.xyz",
-  relay: "https://relay.simple-infra.lattice.xyz",
-  faucet: "https://faucet.simple-infra.lattice.xyz",
+  worldAddress: "0xc1c15CCE34E16684d36B0F76B9fa4f74b3a279f4",
+  rpc: "https://follower.testnet-chain.linfra.xyz",
+  wsRpc: "wss://follower.testnet-chain.linfra.xyz",
+  initialBlockNumber: "1443526",
+  snapshot: "https://ecs-snapshot.testnet-mud-services.linfra.xyz",
+  stream: "https://ecs-stream.testnet-mud-services.linfra.xyz",
+  relay: "https://ecs-relay.testnet-mud-services.linfra.xyz",
+  faucet: "https://faucet.testnet-mud-services.linfra.xyz",
   blockTime: "1000",
-  blockExplorer: "https://blockscout.com/optimism/opcraft",
-  dev: "true",
+  blockExplorer: "https://explorer.testnet-chain.linfra.xyz",
+  dev: "false",
 };
 
 export const ecs = {
