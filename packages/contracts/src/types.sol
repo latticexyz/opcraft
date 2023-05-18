@@ -6,3 +6,8 @@ struct Coord {
   int32 x;
   int32 y;
 }
+
+struct TransitionRule {
+  string lookFor; // the name of the voxel to look for
+  string changeTo; // the name of the voxel to change to
+}

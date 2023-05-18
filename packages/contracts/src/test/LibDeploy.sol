@@ -26,7 +26,9 @@ import { OccurrenceComponent, ID as OccurrenceComponentID } from "components/Occ
 import { StakeComponent, ID as StakeComponentID } from "components/StakeComponent.sol";
 import { ClaimComponent, ID as ClaimComponentID } from "components/ClaimComponent.sol";
 import { NameComponent, ID as NameComponentID } from "components/NameComponent.sol";
-import { VoxelTransitionComponent, ID as VoxelTransitionComponentID } from "components/VoxelTransitionComponent.sol";
+import { ColorComponent, ID as ColorComponentID } from "components/ColorComponent.sol";
+import { TransitionRuleComponent, ID as TransitionRuleComponentID } from "components/TransitionRuleComponent.sol";
+import { VoxelRulesComponent, ID as VoxelRulesComponentID } from "components/VoxelRulesComponent.sol";
 
 // Systems (requires 'systems=...' remapping in project's remappings.txt)
 import { ComponentDevSystem, ID as ComponentDevSystemID } from "systems/ComponentDevSystem.sol";
@@ -44,6 +46,7 @@ import { BulkTransferSystem, ID as BulkTransferSystemID } from "systems/BulkTran
 import { NameSystem, ID as NameSystemID } from "systems/NameSystem.sol";
 import { InitSystem, ID as InitSystemID } from "systems/InitSystem.sol";
 import { Init2System, ID as Init2SystemID } from "systems/Init2System.sol";
+import { RegisterVoxelSystem, ID as RegisterVoxelSystemID } from "systems/RegisterVoxelSystem.sol";
 
 struct DeployResult {
   IWorld world;
@@ -110,8 +113,16 @@ library LibDeploy {
       comp = new NameComponent(address(result.world));
       console.log(address(comp));
 
-      console.log("Deploying VoxelTransitionComponent");
-      comp = new VoxelTransitionComponent(address(result.world));
+      console.log("Deploying ColorComponent");
+      comp = new ColorComponent(address(result.world));
+      console.log(address(comp));
+
+      console.log("Deploying TransitionRuleComponent");
+      comp = new TransitionRuleComponent(address(result.world));
+      console.log(address(comp));
+
+      console.log("Deploying VoxelRulesComponent");
+      comp = new VoxelRulesComponent(address(result.world));
       console.log(address(comp));
     }
 
@@ -150,7 +161,9 @@ library LibDeploy {
     authorizeWriter(components, StakeComponentID, address(system));
     authorizeWriter(components, ClaimComponentID, address(system));
     authorizeWriter(components, NameComponentID, address(system));
-    authorizeWriter(components, VoxelTransitionComponentID, address(system));
+    authorizeWriter(components, ColorComponentID, address(system));
+    authorizeWriter(components, TransitionRuleComponentID, address(system));
+    authorizeWriter(components, VoxelRulesComponentID, address(system));
     console.log(address(system));
 
     console.log("Deploying BulkSetStateSystem");
@@ -166,7 +179,9 @@ library LibDeploy {
     authorizeWriter(components, StakeComponentID, address(system));
     authorizeWriter(components, ClaimComponentID, address(system));
     authorizeWriter(components, NameComponentID, address(system));
-    authorizeWriter(components, VoxelTransitionComponentID, address(system));
+    authorizeWriter(components, ColorComponentID, address(system));
+    authorizeWriter(components, TransitionRuleComponentID, address(system));
+    authorizeWriter(components, VoxelRulesComponentID, address(system));
     console.log(address(system));
 
     console.log("Deploying MineSystem");
@@ -255,6 +270,16 @@ library LibDeploy {
     world.registerSystem(address(system), Init2SystemID);
     authorizeWriter(components, RecipeComponentID, address(system));
     if (init) system.execute(new bytes(0));
+    console.log(address(system));
+
+    console.log("Deploying RegisterVoxelSystem");
+    system = new RegisterVoxelSystem(world, address(components));
+    world.registerSystem(address(system), RegisterVoxelSystemID);
+    authorizeWriter(components, OwnedByComponentID, address(system));
+    authorizeWriter(components, NameComponentID, address(system));
+    authorizeWriter(components, ColorComponentID, address(system));
+    authorizeWriter(components, VoxelRulesComponentID, address(system));
+    authorizeWriter(components, TransitionRuleComponentID, address(system));
     console.log(address(system));
   }
 }

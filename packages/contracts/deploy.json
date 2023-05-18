@@ -10,7 +10,9 @@
     "StakeComponent",
     "ClaimComponent",
     "NameComponent",
-    "VoxelTransitionComponent"
+    "ColorComponent",
+    "TransitionRuleComponent",
+    "VoxelRulesComponent"
   ],
   "systems": [
     { "name": "ComponentDevSystem", "writeAccess": ["*"] },
@@ -35,6 +37,7 @@
       "name": "Init2System",
       "writeAccess": ["RecipeComponent"],
       "initialize": "new bytes(0)"
-    }
+    },
+    { "name": "RegisterVoxelSystem", "writeAccess": ["OwnedByComponent", "NameComponent", "ColorComponent", "VoxelRulesComponent", "TransitionRuleComponent"] }
   ]
 }
