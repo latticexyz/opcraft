@@ -9,7 +9,8 @@
     "OccurrenceComponent",
     "StakeComponent",
     "ClaimComponent",
-    "NameComponent"
+    "NameComponent",
+    "VoxelTransitionComponent"
   ],
   "systems": [
     { "name": "ComponentDevSystem", "writeAccess": ["*"] },

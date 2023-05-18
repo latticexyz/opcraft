@@ -1,6 +1,9 @@
 node_modules
 .yalc
 .eslintcache
-.DS_STORE
-.DS_Store
+*.DS_STORE
+*.DS_Store
 .parcel-cache
+
+venv
+*.idea
