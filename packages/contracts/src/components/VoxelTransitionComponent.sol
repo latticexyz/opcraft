@@ -27,8 +27,8 @@ contract VoxelTransitionComponent is BareComponent {
     set(entity, abi.encode(lookForType, changeToType));
   }
 
-  function get(uint256 entity) public view returns (string, string) {
-    (string memory lookForType, string memory changeToType) = abi.decode(getRawValue(entity), (uint8, string));
+  function get(uint256 entity) public view returns (string memory, string memory) {
+    (string memory lookForType, string memory changeToType) = abi.decode(getRawValue(entity), (string, string));
     return (lookForType, changeToType);
   }
 }
