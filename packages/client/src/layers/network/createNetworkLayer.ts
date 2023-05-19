@@ -51,6 +51,8 @@ import { SystemTypes } from "contracts/types/SystemTypes";
 import { SystemAbis } from "contracts/types/SystemAbis.mjs";
 import { map, timer, combineLatest, BehaviorSubject } from "rxjs";
 import { createPluginSystem } from "./systems";
+import { TransitionRule } from "./types";
+import { TransitionRuleStruct } from "contracts/types/ethers-contracts/RegisterVoxelSystem";
 
 /**
  * The Network layer is the lowest layer in the client architecture.
@@ -302,6 +304,17 @@ export async function createNetworkLayer(config: GameConfig) {
     });
   }
 
+  function registerVoxel(voxelType: string, rules: TransitionRuleStruct[], hexColor: string) {
+    actions.add({
+      id: `registerVoxel` as EntityID,
+      metadata: { actionType: "registerVoxel" },
+      requirement: () => true,
+      components: {},
+      execute: () =>
+        systems["system.RegisterVoxel"].executeTyped(voxelType, rules, hexColor, { gasLimit: 100_000_000 }),
+      updates: () => [],
+    });
+  }
   function transfer(entity: EntityID, receiver: string) {
     const entityIndex = world.entityToIndex.get(entity);
     if (entityIndex == null) return console.warn("trying to transfer unknown entity", entity);
@@ -408,6 +421,7 @@ export async function createNetworkLayer(config: GameConfig) {
       craft,
       stake,
       claim,
+      registerVoxel,
       transfer,
       getBlockAtPosition,
       getECSBlockAtPosition,
