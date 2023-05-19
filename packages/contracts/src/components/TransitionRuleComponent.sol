@@ -14,22 +14,18 @@ contract TransitionRuleComponent is BareComponent {
     values = new LibTypes.SchemaValue[](2);
 
     keys[0] = "lookForType";
-    values[0] = LibTypes.SchemaValue.STRING;
+    values[0] = LibTypes.SchemaValue.UINT256;
 
     keys[1] = "changeToType";
-    values[1] = LibTypes.SchemaValue.STRING;
+    values[1] = LibTypes.SchemaValue.UINT256;
   }
 
-  function set(
-    uint256 entity,
-    string memory lookForType,
-    string memory changeToType
-  ) public {
-    set(entity, abi.encode(lookForType, changeToType));
+  function set(uint256 entity, TransitionRule memory transitionRule) public {
+    set(entity, abi.encode(transitionRule.lookForType, transitionRule.changeToType));
   }
 
   function get(uint256 entity) public view returns (TransitionRule memory) {
-    (string memory lookForType, string memory changeToType) = abi.decode(getRawValue(entity), (string, string));
+    (uint256 lookForType, uint256 changeToType) = abi.decode(getRawValue(entity), (uint256, uint256));
     return TransitionRule(lookForType, changeToType);
   }
 }

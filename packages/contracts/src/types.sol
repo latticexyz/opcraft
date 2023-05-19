@@ -8,6 +8,6 @@ struct Coord {
 }
 
 struct TransitionRule {
-  string lookForType; // the type of the voxel to look for
-  string changeToType; // the type of the voxel to change to
+  uint256 lookForType; // the type of the voxel to look for
+  uint256 changeToType; // the type of the voxel to change to
 }

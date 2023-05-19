@@ -45,7 +45,7 @@ contract UpdateVoxelsSystem is System {
 
   struct NextVoxelState {
     uint256 voxelId;
-    string voxelType;
+    uint256 voxelType;
   }
 
   function execute(bytes memory arguments) public returns (bytes memory) {
@@ -63,14 +63,14 @@ contract UpdateVoxelsSystem is System {
     uint256 nextVoxelStatesLength = 0;
     for (uint256 i = 0; i < voxelIdsToUpdate.length; i++) {
       uint256 voxelId = voxelIdsToUpdate[i];
-      string memory nextType = updateVoxel(
+      uint256 nextType = updateVoxel(
         positionComponent,
         voxelRulesComponent,
         transitionRuleComponent,
         typeComponent,
         voxelId
       );
-      if (keccak256(bytes(nextType)) == keccak256(bytes(""))) {
+      if (nextType == type(uint256).max) {
         continue;
       }
       nextVoxelStates[nextVoxelStatesLength] = NextVoxelState(voxelId, nextType);
@@ -105,7 +105,7 @@ contract UpdateVoxelsSystem is System {
     TransitionRuleComponent transitionRuleComponent,
     TypeComponent typeComponent,
     uint256 voxelId
-  ) private returns (string memory nextType) {
+  ) private returns (uint256 nextType) {
     VoxelCoord memory voxelCoord = positionComponent.getValue(voxelId);
     uint256[] memory ruleIds = voxelRulesComponent.getValue(voxelId);
 
@@ -116,7 +116,7 @@ contract UpdateVoxelsSystem is System {
         return transitionRule.changeToType;
       }
     }
-    return "";
+    return type(uint256).max;
   }
 
   function getNeighboringVoxelIds(PositionComponent positionComponent, VoxelCoord memory centerCoord)
@@ -147,15 +147,14 @@ contract UpdateVoxelsSystem is System {
     PositionComponent positionComponent,
     TypeComponent typeComponent,
     VoxelCoord memory centerCoord,
-    string memory neighboringType
+    uint256 neighboringType
   ) private view returns (bool) {
     (uint256[] memory neighboringVoxelIds, uint256 numNeighbours) = getNeighboringVoxelIds(
       positionComponent,
       centerCoord
     );
     for (uint256 i = 0; i < numNeighbours; i++) {
-      // TODO: figure out a better solution for this string comparison maybe
-      if (keccak256(bytes(typeComponent.getValue(neighboringVoxelIds[i]))) == keccak256(bytes(neighboringType))) {
+      if (typeComponent.getValue(neighboringVoxelIds[i]) == neighboringType) {
         return true;
       }
     }

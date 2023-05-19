@@ -2,13 +2,13 @@ import React from "react";
 import styled from "styled-components";
 import { Button, CloseableContainer, Gold } from "./common";
 import {Layers} from "../../../types";
-import {TransitionRuleStruct} from "contracts/types/ethers-contracts/RegisterVoxelSystem";
+import {TransitionRuleStruct} from "contracts/types/ethers-contracts/RegisterVoxelTypeSystem";
 
 
 const createTransitionRule = (lookForType:string, changeToType:string):TransitionRuleStruct => {
 	return {
-		lookFor: lookForType,
-		changeTo: changeToType,
+		lookForType: lookForType,
+		changeToType: changeToType,
 	}
 }
 
@@ -21,7 +21,7 @@ export const ImportVoxel: React.FC<{ onClose: () => void; layers: Layers}> = ({ 
 
 	const registerVoxel = () => {
 		console.log("register voxel");
-		api.registerVoxel("test", [createTransitionRule("test1", "test2")], "#003300");
+		api.registerVoxelType("test", [createTransitionRule("test1", "test2")], "#003300");
 	}
 
 	return (

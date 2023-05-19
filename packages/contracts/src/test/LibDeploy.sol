@@ -48,8 +48,8 @@ import { BulkTransferSystem, ID as BulkTransferSystemID } from "systems/BulkTran
 import { NameSystem, ID as NameSystemID } from "systems/NameSystem.sol";
 import { InitSystem, ID as InitSystemID } from "systems/InitSystem.sol";
 import { Init2System, ID as Init2SystemID } from "systems/Init2System.sol";
-import { RegisterVoxelSystem, ID as RegisterVoxelSystemID } from "systems/RegisterVoxelSystem.sol";
-import { UpdateVoxelSystem, ID as UpdateVoxelSystemID } from "systems/UpdateVoxelSystem.sol";
+import { RegisterVoxelTypeSystem, ID as RegisterVoxelTypeSystemID } from "systems/RegisterVoxelTypeSystem.sol";
+import { UpdateVoxelsSystem, ID as UpdateVoxelsSystemID } from "systems/UpdateVoxelsSystem.sol";
 
 struct DeployResult {
   IWorld world;
@@ -287,19 +287,19 @@ library LibDeploy {
     if (init) system.execute(new bytes(0));
     console.log(address(system));
 
-    console.log("Deploying RegisterVoxelSystem");
-    system = new RegisterVoxelSystem(world, address(components));
-    world.registerSystem(address(system), RegisterVoxelSystemID);
+    console.log("Deploying RegisterVoxelTypeSystem");
+    system = new RegisterVoxelTypeSystem(world, address(components));
+    world.registerSystem(address(system), RegisterVoxelTypeSystemID);
     authorizeWriter(components, OwnedByComponentID, address(system));
-    authorizeWriter(components, NameComponentID, address(system));
+    authorizeWriter(components, TypeComponentID, address(system));
     authorizeWriter(components, ColorComponentID, address(system));
     authorizeWriter(components, VoxelRulesComponentID, address(system));
     authorizeWriter(components, TransitionRuleComponentID, address(system));
     console.log(address(system));
 
-    console.log("Deploying UpdateVoxelSystem");
-    system = new UpdateVoxelSystem(world, address(components));
-    world.registerSystem(address(system), UpdateVoxelSystemID);
+    console.log("Deploying UpdateVoxelsSystem");
+    system = new UpdateVoxelsSystem(world, address(components));
+    world.registerSystem(address(system), UpdateVoxelsSystemID);
     authorizeWriter(components, TypeComponentID, address(system));
     authorizeWriter(components, UpdateSetComponentID, address(system));
     console.log(address(system));
