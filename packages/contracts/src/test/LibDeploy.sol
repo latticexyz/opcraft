@@ -29,6 +29,8 @@ import { NameComponent, ID as NameComponentID } from "components/NameComponent.s
 import { ColorComponent, ID as ColorComponentID } from "components/ColorComponent.sol";
 import { TransitionRuleComponent, ID as TransitionRuleComponentID } from "components/TransitionRuleComponent.sol";
 import { VoxelRulesComponent, ID as VoxelRulesComponentID } from "components/VoxelRulesComponent.sol";
+import { TypeComponent, ID as TypeComponentID } from "components/TypeComponent.sol";
+import { UpdateSetComponent, ID as UpdateSetComponentID } from "components/UpdateSetComponent.sol";
 
 // Systems (requires 'systems=...' remapping in project's remappings.txt)
 import { ComponentDevSystem, ID as ComponentDevSystemID } from "systems/ComponentDevSystem.sol";
@@ -47,6 +49,7 @@ import { NameSystem, ID as NameSystemID } from "systems/NameSystem.sol";
 import { InitSystem, ID as InitSystemID } from "systems/InitSystem.sol";
 import { Init2System, ID as Init2SystemID } from "systems/Init2System.sol";
 import { RegisterVoxelSystem, ID as RegisterVoxelSystemID } from "systems/RegisterVoxelSystem.sol";
+import { UpdateVoxelSystem, ID as UpdateVoxelSystemID } from "systems/UpdateVoxelSystem.sol";
 
 struct DeployResult {
   IWorld world;
@@ -124,6 +127,14 @@ library LibDeploy {
       console.log("Deploying VoxelRulesComponent");
       comp = new VoxelRulesComponent(address(result.world));
       console.log(address(comp));
+
+      console.log("Deploying TypeComponent");
+      comp = new TypeComponent(address(result.world));
+      console.log(address(comp));
+
+      console.log("Deploying UpdateSetComponent");
+      comp = new UpdateSetComponent(address(result.world));
+      console.log(address(comp));
     }
 
     // Deploy systems
@@ -164,6 +175,8 @@ library LibDeploy {
     authorizeWriter(components, ColorComponentID, address(system));
     authorizeWriter(components, TransitionRuleComponentID, address(system));
     authorizeWriter(components, VoxelRulesComponentID, address(system));
+    authorizeWriter(components, TypeComponentID, address(system));
+    authorizeWriter(components, UpdateSetComponentID, address(system));
     console.log(address(system));
 
     console.log("Deploying BulkSetStateSystem");
@@ -182,6 +195,8 @@ library LibDeploy {
     authorizeWriter(components, ColorComponentID, address(system));
     authorizeWriter(components, TransitionRuleComponentID, address(system));
     authorizeWriter(components, VoxelRulesComponentID, address(system));
+    authorizeWriter(components, TypeComponentID, address(system));
+    authorizeWriter(components, UpdateSetComponentID, address(system));
     console.log(address(system));
 
     console.log("Deploying MineSystem");
@@ -280,6 +295,13 @@ library LibDeploy {
     authorizeWriter(components, ColorComponentID, address(system));
     authorizeWriter(components, VoxelRulesComponentID, address(system));
     authorizeWriter(components, TransitionRuleComponentID, address(system));
+    console.log(address(system));
+
+    console.log("Deploying UpdateVoxelSystem");
+    system = new UpdateVoxelSystem(world, address(components));
+    world.registerSystem(address(system), UpdateVoxelSystemID);
+    authorizeWriter(components, TypeComponentID, address(system));
+    authorizeWriter(components, UpdateSetComponentID, address(system));
     console.log(address(system));
   }
 }

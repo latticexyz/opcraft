@@ -7,6 +7,7 @@ import { PositionComponent, ID as PositionComponentID } from "../components/Posi
 import { ItemComponent, ID as ItemComponentID } from "../components/ItemComponent.sol";
 import { OwnedByComponent, ID as OwnedByComponentID } from "../components/OwnedByComponent.sol";
 import { ClaimComponent, ID as ClaimComponentID, Claim } from "../components/ClaimComponent.sol";
+import { TypeComponent, ID as TypeComponentID } from "../components/TypeComponent.sol";
 import { getClaimAtCoord } from "../systems/ClaimSystem.sol";
 import { VoxelCoord } from "../types.sol";
 import { AirID } from "../prototypes/Blocks.sol";
@@ -23,6 +24,8 @@ contract BuildSystem is System {
     OwnedByComponent ownedByComponent = OwnedByComponent(getAddressById(components, OwnedByComponentID));
     PositionComponent positionComponent = PositionComponent(getAddressById(components, PositionComponentID));
     ClaimComponent claimComponent = ClaimComponent(getAddressById(components, ClaimComponentID));
+    // TODO: specify the type of the block we just placed when building
+    TypeComponent typeComponent = TypeComponent(getAddressById(components, TypeComponentID));
 
     // Require block to be owned by caller
     require(ownedByComponent.getValue(blockEntity) == addressToEntity(msg.sender), "block is not owned by player");

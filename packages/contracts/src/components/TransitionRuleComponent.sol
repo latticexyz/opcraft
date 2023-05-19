@@ -2,6 +2,7 @@
 
 pragma solidity >=0.8.0;
 import "solecs/BareComponent.sol";
+import { TransitionRule } from "../types.sol";
 uint256 constant ID = uint256(keccak256("component.TransitionRule"));
 
 // if a voxel sees a voxelType it's looking for, then transition to the changeTo type
@@ -27,8 +28,8 @@ contract TransitionRuleComponent is BareComponent {
     set(entity, abi.encode(lookForType, changeToType));
   }
 
-  function get(uint256 entity) public view returns (string memory, string memory) {
+  function get(uint256 entity) public view returns (TransitionRule memory) {
     (string memory lookForType, string memory changeToType) = abi.decode(getRawValue(entity), (string, string));
-    return (lookForType, changeToType);
+    return TransitionRule(lookForType, changeToType);
   }
 }
