@@ -291,7 +291,7 @@ library LibDeploy {
     system = new RegisterVoxelTypeSystem(world, address(components));
     world.registerSystem(address(system), RegisterVoxelTypeSystemID);
     authorizeWriter(components, OwnedByComponentID, address(system));
-    authorizeWriter(components, TypeComponentID, address(system));
+    authorizeWriter(components, NameComponentID, address(system));
     authorizeWriter(components, ColorComponentID, address(system));
     authorizeWriter(components, VoxelRulesComponentID, address(system));
     authorizeWriter(components, TransitionRuleComponentID, address(system));

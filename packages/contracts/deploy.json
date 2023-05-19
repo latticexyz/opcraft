@@ -40,7 +40,7 @@
       "writeAccess": ["RecipeComponent"],
       "initialize": "new bytes(0)"
     },
-    { "name": "RegisterVoxelTypeSystem", "writeAccess": ["OwnedByComponent", "TypeComponent", "ColorComponent", "VoxelRulesComponent", "TransitionRuleComponent"] },
+    { "name": "RegisterVoxelTypeSystem", "writeAccess": ["OwnedByComponent", "NameComponent", "ColorComponent", "VoxelRulesComponent", "TransitionRuleComponent"] },
     { "name": "UpdateVoxelsSystem", "writeAccess": ["TypeComponent", "UpdateSetComponent"] }
   ]
 }
