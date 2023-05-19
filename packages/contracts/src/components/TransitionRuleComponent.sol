@@ -2,10 +2,10 @@
 
 pragma solidity >=0.8.0;
 import "solecs/BareComponent.sol";
-uint256 constant ID = uint256(keccak256("component.VoxelTransition"));
+uint256 constant ID = uint256(keccak256("component.TransitionRule"));
 
 // if a voxel sees a voxelType it's looking for, then transition to the changeTo type
-contract VoxelTransitionComponent is BareComponent {
+contract TransitionRuleComponent is BareComponent {
   constructor(address world) BareComponent(world, ID) {}
 
   function getSchema() public pure override returns (string[] memory keys, LibTypes.SchemaValue[] memory values) {
