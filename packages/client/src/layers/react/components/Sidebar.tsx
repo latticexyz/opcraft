@@ -6,7 +6,7 @@ import styled from "styled-components";
 import { Balance } from "./Balance";
 import { ChunkExplorer } from "./ChunkExplorer";
 import { JoinSocial } from "./JoinSocial";
-import { ImportVoxel } from "./ImportVoxel";
+import { RegisterVoxelType } from "./RegisterVoxelType";
 import { filterNullish } from "@latticexyz/utils";
 import { ComponentValue, getComponentValue, SchemaOf, updateComponent } from "@latticexyz/recs";
 import { Hint } from "./Hint";
@@ -80,7 +80,7 @@ export function registerSidebar() {
           <Balance {...balance} />
           <ChunkExplorer {...chunk} />
           {tutorial?.community && <JoinSocial onClose={() => updateTutorial({ community: false })} />}
-          {<ImportVoxel layers={layers} onClose={() => updateTutorial({ community: false })} />}
+          {<RegisterVoxelType layers={layers} onClose={() => updateTutorial({ community: false })} />}
           {tutorial?.moving && (
             <Hint onClose={() => updateTutorial({ moving: false })}>
               <Gold>Hint</Gold>: press <Gold>W, A, S, or D</Gold> to move around

@@ -8,6 +8,7 @@ import { getAddressById, addressToEntity } from "solecs/utils.sol";
 
 import { PositionComponent, ID as PositionComponentID } from "../components/PositionComponent.sol";
 import { OwnedByComponent, ID as OwnedByComponentID } from "../components/OwnedByComponent.sol";
+import { TypeComponent, ID as TypeComponentID } from "../components/TypeComponent.sol";
 import { ItemComponent, ID as ItemComponentID } from "../components/ItemComponent.sol";
 import { OccurrenceComponent, ID as OccurrenceComponentID, staticcallFunctionSelector } from "../components/OccurrenceComponent.sol";
 import { ClaimComponent, ID as ClaimComponentID, Claim } from "../components/ClaimComponent.sol";
@@ -70,6 +71,7 @@ contract MineSystem is System {
       positionComponent.remove(entity);
     }
 
+    TypeComponent(getAddressById(components, TypeComponentID)).set(entity, blockType);
     ownedByComponent.set(entity, addressToEntity(msg.sender));
     return abi.encode(entity);
   }

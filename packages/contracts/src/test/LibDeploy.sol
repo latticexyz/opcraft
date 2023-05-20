@@ -50,6 +50,7 @@ import { InitSystem, ID as InitSystemID } from "systems/InitSystem.sol";
 import { Init2System, ID as Init2SystemID } from "systems/Init2System.sol";
 import { RegisterVoxelTypeSystem, ID as RegisterVoxelTypeSystemID } from "systems/RegisterVoxelTypeSystem.sol";
 import { UpdateVoxelsSystem, ID as UpdateVoxelsSystemID } from "systems/UpdateVoxelsSystem.sol";
+import { GiftVoxelSystem, ID as GiftVoxelSystemID } from "systems/GiftVoxelSystem.sol";
 
 struct DeployResult {
   IWorld world;
@@ -205,6 +206,7 @@ library LibDeploy {
     authorizeWriter(components, PositionComponentID, address(system));
     authorizeWriter(components, OwnedByComponentID, address(system));
     authorizeWriter(components, ItemComponentID, address(system));
+    authorizeWriter(components, TypeComponentID, address(system));
     console.log(address(system));
 
     console.log("Deploying BuildSystem");
@@ -219,6 +221,7 @@ library LibDeploy {
     world.registerSystem(address(system), CreativeBuildSystemID);
     authorizeWriter(components, PositionComponentID, address(system));
     authorizeWriter(components, ItemComponentID, address(system));
+    authorizeWriter(components, TypeComponentID, address(system));
     console.log(address(system));
 
     console.log("Deploying CraftSystem");
@@ -295,6 +298,8 @@ library LibDeploy {
     authorizeWriter(components, ColorComponentID, address(system));
     authorizeWriter(components, VoxelRulesComponentID, address(system));
     authorizeWriter(components, TransitionRuleComponentID, address(system));
+    authorizeWriter(components, TypeComponentID, address(system));
+    authorizeWriter(components, ItemComponentID, address(system));
     console.log(address(system));
 
     console.log("Deploying UpdateVoxelsSystem");
@@ -302,6 +307,14 @@ library LibDeploy {
     world.registerSystem(address(system), UpdateVoxelsSystemID);
     authorizeWriter(components, TypeComponentID, address(system));
     authorizeWriter(components, UpdateSetComponentID, address(system));
+    console.log(address(system));
+
+    console.log("Deploying GiftVoxelSystem");
+    system = new GiftVoxelSystem(world, address(components));
+    world.registerSystem(address(system), GiftVoxelSystemID);
+    authorizeWriter(components, OwnedByComponentID, address(system));
+    authorizeWriter(components, TypeComponentID, address(system));
+    authorizeWriter(components, ItemComponentID, address(system));
     console.log(address(system));
   }
 }

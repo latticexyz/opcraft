@@ -9,6 +9,7 @@ export { defineOccurrenceComponent } from "./OccurrenceComponent";
 export { defineStakeComponent } from "./StakeComponent";
 export { defineClaimComponent } from "./ClaimComponent";
 export { defineSystemsRegistryComponent } from "./SystemsRegistryComponent";
+export { defineVoxelRulesComponent } from "./VoxelRulesComponent";
 export { defineComponentsRegistryComponent } from "./ComponentsRegistryComponent";
 export { defineNameComponent } from "./NameComponent";
 export { definePluginComponent } from "./PluginComponent";

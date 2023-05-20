@@ -59,6 +59,7 @@ import { createCreativeModeSystem } from "./systems/createCreativeModeSystem";
 import { createSpawnPlayerSystem } from "./systems/createSpawnPlayerSystem";
 import { definePlayerMeshComponent } from "./components/PlayerMesh";
 import { Engine } from "@babylonjs/core";
+import { defineVoxelRulesComponent } from "../network/components";
 
 export function createNoaLayer(network: NetworkLayer) {
   const world = namespaceWorld(network.world, "noa");

@@ -8,6 +8,8 @@ import { getAddressById, addressToEntity } from "solecs/utils.sol";
 
 import { TransitionRule } from "../types.sol";
 import { NameComponent, ID as NameComponentID } from "../components/NameComponent.sol";
+import { ItemComponent, ID as ItemComponentID } from "../components/ItemComponent.sol";
+import { TypeComponent, ID as TypeComponentID } from "../components/TypeComponent.sol";
 import { ColorComponent, ID as ColorComponentID } from "../components/ColorComponent.sol";
 import { OwnedByComponent, ID as OwnedByComponentID } from "../components/OwnedByComponent.sol";
 import { VoxelRulesComponent, ID as VoxelRulesComponentID } from "../components/VoxelRulesComponent.sol";
@@ -51,6 +53,11 @@ contract RegisterVoxelTypeSystem is System {
     nameComponent.set(voxelTypeId, voxelTypeName);
     colorComponent.set(voxelTypeId, hexColor);
 
+    // give the current user a copy of the voxel
+    uint256 entity = world.getUniqueEntityId();
+    ItemComponent(getAddressById(components, ItemComponentID)).set(entity, voxelTypeId);
+    TypeComponent(getAddressById(components, TypeComponentID)).set(entity, voxelTypeId); // not sure if this will break or not
+    ownedByComponent.set(entity, addressToEntity(msg.sender));
     return abi.encode(voxelTypeId);
   }
 
