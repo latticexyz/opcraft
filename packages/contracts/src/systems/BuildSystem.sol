@@ -25,7 +25,7 @@ contract BuildSystem is System {
     PositionComponent positionComponent = PositionComponent(getAddressById(components, PositionComponentID));
     ClaimComponent claimComponent = ClaimComponent(getAddressById(components, ClaimComponentID));
     // TODO: specify the type of the block we just placed when building
-    TypeComponent typeComponent = TypeComponent(getAddressById(components, TypeComponentID));
+    // TypeComponent typeComponent = TypeComponent(getAddressById(components, TypeComponentID));
 
     // Require block to be owned by caller
     require(ownedByComponent.getValue(blockEntity) == addressToEntity(msg.sender), "block is not owned by player");

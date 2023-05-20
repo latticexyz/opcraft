@@ -35,6 +35,7 @@ import {
   defineNameComponent,
   definePluginComponent,
   definePluginRegistryComponent,
+  defineVoxelRulesComponent,
 } from "./components";
 import {
   getBlockAtPosition as getBlockAtPositionApi,
@@ -80,6 +81,7 @@ export async function createNetworkLayer(config: GameConfig) {
     Claim: defineClaimComponent(world),
     Plugin: createLocalCache(definePluginComponent(world), uniqueWorldId),
     PluginRegistry: createLocalCache(definePluginRegistryComponent(world), uniqueWorldId),
+    VoxelRules: createLocalCache(defineVoxelRulesComponent(world), uniqueWorldId),
   };
 
   // --- SETUP ----------------------------------------------------------------------
@@ -184,7 +186,9 @@ export async function createNetworkLayer(config: GameConfig) {
     const blockId = getComponentValue(components.Item, entityIndex)?.value;
     const blockType = blockId != null ? BlockIdToKey[blockId as EntityID] : undefined;
     const godIndex = world.entityToIndex.get(GodID);
-    const creativeMode = godIndex != null && getComponentValue(components.GameConfig, godIndex)?.creativeMode;
+    // const creativeMode = godIndex != null && getComponentValue(components.GameConfig, godIndex)?.creativeMode;
+    // lol this is so sus
+    const creativeMode = true;
 
     actions.add({
       id: `build+${coord.x}/${coord.y}/${coord.z}` as EntityID,
@@ -314,6 +318,18 @@ export async function createNetworkLayer(config: GameConfig) {
       updates: () => [],
     });
   }
+
+  function giftVoxel(voxelTypeId: number) {
+    actions.add({
+      // id: `registerVoxelType+${voxelTypeName}-${rules.toString()}-${hexColor}` as EntityID,
+      id: `GiftVoxel` as EntityID,
+      metadata: { actionType: "GiftVoxel" },
+      requirement: () => true,
+      components: {},
+      execute: () => systems["system.GiftVoxel"].executeTyped(voxelTypeId, { gasLimit: 100_000_000 }),
+      updates: () => [],
+    });
+  }
   function transfer(entity: EntityID, receiver: string) {
     const entityIndex = world.entityToIndex.get(entity);
     if (entityIndex == null) return console.warn("trying to transfer unknown entity", entity);
@@ -421,6 +437,7 @@ export async function createNetworkLayer(config: GameConfig) {
       stake,
       claim,
       registerVoxelType,
+      giftVoxel,
       transfer,
       getBlockAtPosition,
       getECSBlockAtPosition,
