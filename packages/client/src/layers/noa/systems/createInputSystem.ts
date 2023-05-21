@@ -1,17 +1,18 @@
 import { formatEntityID } from "@latticexyz/network";
 import { getComponentValue, HasValue, runQuery, setComponent, updateComponent } from "@latticexyz/recs";
-import { sleep } from "@latticexyz/utils";
+import { sleep, VoxelCoord } from "@latticexyz/utils";
 import { NetworkLayer, BlockType } from "../../network";
 import { FAST_MINING_DURATION, SPAWN_POINT } from "../constants";
 import { HandComponent, HAND_COMPONENT } from "../engine/components/handComponent";
 import { MiningBlockComponent, MINING_BLOCK_COMPONENT } from "../engine/components/miningBlockComponent";
 import { getNoaComponent, getNoaComponentStrict } from "../engine/components/utils";
 import { NoaLayer } from "../types";
+import { Slide, toast } from "react-toastify";
 
 export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
   const {
     noa,
-    components: { SelectedSlot, UI, Tutorial, PreTeleportPosition },
+    components: { SelectedSlot, UI, Tutorial, VoxelSelection, PreTeleportPosition },
     SingletonEntity,
     api: { toggleInventory, togglePlugins, placeSelectedItem, getCurrentChunk, getSelectedBlockType, teleport },
     streams: { stakeAndClaim$, playerPosition$ },
@@ -201,5 +202,25 @@ export function createInputSystem(network: NetworkLayer, context: NoaLayer) {
   noa.inputs.bind("plugins", ";");
   noa.inputs.down.on("plugins", () => {
     togglePlugins();
+  });
+
+  noa.inputs.bind("select-block", "V");
+  noa.inputs.down.on("select-block", () => {
+    // print the block you're looking at to the console
+    if (!noa.targetedBlock) {
+      return;
+    }
+    const points: VoxelCoord[] = getComponentValue(VoxelSelection, SingletonEntity)?.points ?? [];
+    const x = noa.targetedBlock.position[0];
+    const y = noa.targetedBlock.position[1];
+    const z = noa.targetedBlock.position[2];
+    points.push({
+      x,
+      y,
+      z,
+    });
+    toast(`Selected block at ${x}, ${y}, ${z}`);
+
+    updateComponent(VoxelSelection, SingletonEntity, { points: points as any });
   });
 }

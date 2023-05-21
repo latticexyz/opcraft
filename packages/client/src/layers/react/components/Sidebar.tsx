@@ -11,6 +11,7 @@ import { filterNullish } from "@latticexyz/utils";
 import { ComponentValue, getComponentValue, SchemaOf, updateComponent } from "@latticexyz/recs";
 import { Hint } from "./Hint";
 import { Gold } from "./common";
+import {RegisterCreation} from "./RegisterCreation";
 
 type ObservableType<S extends Observable<unknown>> = S extends Observable<infer T> ? T : never;
 
@@ -34,7 +35,7 @@ export function registerSidebar() {
         noa: {
           streams: { playerChunk$ },
           api: { getStakeAndClaim },
-          components: { Tutorial },
+          components: { Tutorial, VoxelSelection },
           SingletonEntity,
         },
       } = layers;
@@ -60,12 +61,17 @@ export function registerSidebar() {
         Tutorial.update$.pipe(map((u) => u.value[0]))
       );
 
+      const voxelSelection$ = concat(
+        of(getComponentValue(VoxelSelection, SingletonEntity)),
+        VoxelSelection.update$.pipe(map((u) => u.value[0]))
+      );
+
       return combineLatest<
-        [ObservableType<typeof chunk$>, ObservableType<typeof balance$>, ObservableType<typeof tutorial$>]
-      >([chunk$, balance$, tutorial$]).pipe(map((props) => ({ props, layers })));
+        [ObservableType<typeof chunk$>, ObservableType<typeof balance$>, ObservableType<typeof tutorial$>, ObservableType<typeof voxelSelection$>]
+      >([chunk$, balance$, tutorial$, voxelSelection$]).pipe(map((props) => ({ props, layers })));
     },
     ({ props, layers }) => {
-      const [chunk, balance, tutorial] = props;
+      const [chunk, balance, tutorial, voxelSelection] = props;
       const {
         components: { Tutorial },
         SingletonEntity,
@@ -81,6 +87,7 @@ export function registerSidebar() {
           <ChunkExplorer {...chunk} />
           {tutorial?.community && <JoinSocial onClose={() => updateTutorial({ community: false })} />}
           {<RegisterVoxelType layers={layers} onClose={() => updateTutorial({ community: false })} />}
+          {(voxelSelection?.points ?? []).length >= 2 && <RegisterCreation layers={layers} onClose={() => {console.log("closed")}} />}
           {tutorial?.moving && (
             <Hint onClose={() => updateTutorial({ moving: false })}>
               <Gold>Hint</Gold>: press <Gold>W, A, S, or D</Gold> to move around

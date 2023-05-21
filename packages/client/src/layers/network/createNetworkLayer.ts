@@ -53,6 +53,7 @@ import { SystemAbis } from "contracts/types/SystemAbis.mjs";
 import { map, timer, combineLatest, BehaviorSubject } from "rxjs";
 import { createPluginSystem } from "./systems";
 import { TransitionRuleStruct } from "contracts/types/ethers-contracts/RegisterVoxelTypeSystem";
+import { VoxelCoordStruct } from "contracts/types/ethers-contracts/RegisterCreationSystem";
 
 /**
  * The Network layer is the lowest layer in the client architecture.
@@ -307,14 +308,14 @@ export async function createNetworkLayer(config: GameConfig) {
     });
   }
 
-  function registerVoxelType(voxelType: string, rules: TransitionRuleStruct[], hexColor: string) {
+  function registerVoxelType(voxelTypeName: string, rules: TransitionRuleStruct[], hexColor: string) {
     actions.add({
-      id: `registerVoxelType` as EntityID,
+      id: `registerVoxelType+${voxelTypeName}` as EntityID,
       metadata: { actionType: "registerVoxelType" },
       requirement: () => true,
       components: {},
       execute: () =>
-        systems["system.RegisterVoxelType"].executeTyped(voxelType, rules, hexColor, { gasLimit: 100_000_000 }),
+        systems["system.RegisterVoxelType"].executeTyped(voxelTypeName, rules, hexColor, { gasLimit: 100_000_000 }),
       updates: () => [],
     });
   }
@@ -327,6 +328,18 @@ export async function createNetworkLayer(config: GameConfig) {
       requirement: () => true,
       components: {},
       execute: () => systems["system.GiftVoxel"].executeTyped(voxelTypeId, { gasLimit: 100_000_000 }),
+      updates: () => [],
+    });
+  }
+
+  function registerCreation(creationName: string, vertex1: VoxelCoordStruct, vertex2: VoxelCoordStruct) {
+    actions.add({
+      id: `registerCreation+${creationName}` as EntityID,
+      metadata: { actionType: "registerCreation" },
+      requirement: () => true,
+      components: {},
+      execute: () =>
+        systems["system.RegisterCreation"].executeTyped(creationName, vertex1, vertex2, { gasLimit: 500_000_000 }),
       updates: () => [],
     });
   }
@@ -438,6 +451,7 @@ export async function createNetworkLayer(config: GameConfig) {
       claim,
       registerVoxelType,
       giftVoxel,
+      registerCreation,
       transfer,
       getBlockAtPosition,
       getECSBlockAtPosition,

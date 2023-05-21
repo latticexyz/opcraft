@@ -24,6 +24,7 @@ import {
   definePlayerRelayerChunkPositionComponent,
   defineLocalPlayerPositionComponent,
   defineTutorialComponent,
+  defineVoxelSelectionComponent,
   definePreTeleportPositionComponent,
   defineSoundComponent,
 } from "./components";
@@ -89,6 +90,7 @@ export function createNoaLayer(network: NetworkLayer) {
     UI: defineUIComponent(world),
     InventoryIndex: createLocalCache(createIndexer(defineInventoryIndexComponent(world)), uniqueWorldId),
     Tutorial: createLocalCache(defineTutorialComponent(world), uniqueWorldId),
+    VoxelSelection: createLocalCache(defineVoxelSelectionComponent(world), uniqueWorldId),
     PreTeleportPosition: definePreTeleportPositionComponent(world),
     Sounds: defineSoundComponent(world),
   };
@@ -119,6 +121,7 @@ export function createNoaLayer(network: NetworkLayer) {
       moving: true,
       teleport: true,
     });
+  setComponent(components.VoxelSelection, SingletonEntity, { points: [] });
 
   // --- API ------------------------------------------------------------------------
   function setCraftingTable(entities: EntityIndex[][]) {

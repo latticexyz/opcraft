@@ -10,8 +10,8 @@ import {EntityIndex} from "@latticexyz/recs";
 
 const createTransitionRule = (hasNeighboringVoxelType:number, changeMyselfToVoxelType:number):TransitionRuleStruct => {
 	return {
-		hasNeighboringVoxelType: hasNeighboringVoxelType,
-		changeMyselfToVoxelType: changeMyselfToVoxelType,
+		lookForType: hasNeighboringVoxelType,
+		changeToType: changeMyselfToVoxelType,
 		// hasNeighboringVoxelType: "d46ca57200929c441898fb9cae5ab569fe031a88fd000b65889d842c12018e59",
 		// changeMyselfToVoxelType: "d46ca57200929c441898fb9cae5ab569fe031a88fd000b65889d842c12018e59",
 	}

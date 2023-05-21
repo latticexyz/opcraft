@@ -14,7 +14,8 @@
     "TransitionRuleComponent",
     "VoxelRulesComponent",
     "TypeComponent",
-    "UpdateSetComponent"
+    "UpdateSetComponent",
+    "VoxelsComponent"
   ],
   "systems": [
     { "name": "ComponentDevSystem", "writeAccess": ["*"] },
@@ -42,6 +43,7 @@
     },
     { "name": "RegisterVoxelTypeSystem", "writeAccess": ["OwnedByComponent", "NameComponent", "ColorComponent", "VoxelRulesComponent", "TransitionRuleComponent", "TypeComponent", "ItemComponent"] },
     { "name": "UpdateVoxelsSystem", "writeAccess": ["TypeComponent", "UpdateSetComponent"] },
-    { "name": "GiftVoxelSystem", "writeAccess": ["OwnedByComponent", "TypeComponent", "ItemComponent"] }
+    { "name": "GiftVoxelSystem", "writeAccess": ["OwnedByComponent", "TypeComponent", "ItemComponent"] },
+    { "name": "RegisterCreationSystem", "writeAccess": ["PositionComponent", "VoxelsComponent", "OwnedByComponent", "NameComponent", "TypeComponent"] }
   ]
 }

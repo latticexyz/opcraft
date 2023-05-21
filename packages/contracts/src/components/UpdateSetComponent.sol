@@ -11,7 +11,7 @@ contract UpdateSetComponent is BoolComponent {
     set(voxelId, abi.encode(true));
   }
 
-  function getVoxels() public returns (uint256[] memory) {
+  function getVoxels() public view returns (uint256[] memory) {
     return getEntitiesWithValue(true);
   }
 
