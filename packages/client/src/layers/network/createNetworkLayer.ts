@@ -197,7 +197,7 @@ export async function createNetworkLayer(config: GameConfig) {
       components: { Position: components.Position, Item: components.Item, OwnedBy: components.OwnedBy },
       execute: () =>
         systems[creativeMode ? "system.CreativeBuild" : "system.Build"].executeTyped(BigNumber.from(entity), coord, {
-          gasLimit: 500_000,
+          gasLimit: 1_000_000,
         }),
       updates: () => [
         {

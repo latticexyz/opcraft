@@ -39,7 +39,7 @@ contract CreativeBuildSystem is System {
     uint256 entity = world.getUniqueEntityId();
     // TODO: remove itemCompoent
     itemComponent.set(entity, blockType);
-    // typeComponent.set(entity, voxelType);
+    typeComponent.set(entity, blockType);
     positionComponent.set(entity, coord);
   }
 
