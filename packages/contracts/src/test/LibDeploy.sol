@@ -34,6 +34,8 @@ import { UpdateSetComponent, ID as UpdateSetComponentID } from "components/Updat
 import { VoxelsComponent, ID as VoxelsComponentID } from "components/VoxelsComponent.sol";
 import { SignalComponent, ID as SignalComponentID } from "components/SignalComponent.sol";
 import { SignalSourceComponent, ID as SignalSourceComponentID } from "components/SignalSourceComponent.sol";
+import { PassesTestsComponent, ID as PassesTestsComponentID } from "components/PassesTestsComponent.sol";
+import { EntityIdComponent, ID as EntityIdComponentID } from "components/EntityIdComponent.sol";
 
 // Systems (requires 'systems=...' remapping in project's remappings.txt)
 import { ComponentDevSystem, ID as ComponentDevSystemID } from "systems/ComponentDevSystem.sol";
@@ -57,6 +59,9 @@ import { GiftVoxelSystem, ID as GiftVoxelSystemID } from "systems/GiftVoxelSyste
 import { RegisterCreationSystem, ID as RegisterCreationSystemID } from "systems/RegisterCreationSystem.sol";
 import { SignalSystem, ID as SignalSystemID } from "systems/SignalSystem.sol";
 import { SignalSourceSystem, ID as SignalSourceSystemID } from "systems/SignalSourceSystem.sol";
+import { AdderTestSystem, ID as AdderTestSystemID } from "systems/AdderTestSystem.sol";
+import { HalfAdderTestSystem, ID as HalfAdderTestSystemID } from "systems/HalfAdderTestSystem.sol";
+import { AndTestSystem, ID as AndTestSystemID } from "systems/AndTestSystem.sol";
 
 struct DeployResult {
   IWorld world;
@@ -154,6 +159,14 @@ library LibDeploy {
       console.log("Deploying SignalSourceComponent");
       comp = new SignalSourceComponent(address(result.world));
       console.log(address(comp));
+
+      console.log("Deploying PassesTestsComponent");
+      comp = new PassesTestsComponent(address(result.world));
+      console.log(address(comp));
+
+      console.log("Deploying EntityIdComponent");
+      comp = new EntityIdComponent(address(result.world));
+      console.log(address(comp));
     }
 
     // Deploy systems
@@ -199,6 +212,8 @@ library LibDeploy {
     authorizeWriter(components, VoxelsComponentID, address(system));
     authorizeWriter(components, SignalComponentID, address(system));
     authorizeWriter(components, SignalSourceComponentID, address(system));
+    authorizeWriter(components, PassesTestsComponentID, address(system));
+    authorizeWriter(components, EntityIdComponentID, address(system));
     console.log(address(system));
 
     console.log("Deploying BulkSetStateSystem");
@@ -222,6 +237,8 @@ library LibDeploy {
     authorizeWriter(components, VoxelsComponentID, address(system));
     authorizeWriter(components, SignalComponentID, address(system));
     authorizeWriter(components, SignalSourceComponentID, address(system));
+    authorizeWriter(components, PassesTestsComponentID, address(system));
+    authorizeWriter(components, EntityIdComponentID, address(system));
     console.log(address(system));
 
     console.log("Deploying MineSystem");
@@ -240,6 +257,8 @@ library LibDeploy {
     world.registerSystem(address(system), BuildSystemID);
     authorizeWriter(components, PositionComponentID, address(system));
     authorizeWriter(components, OwnedByComponentID, address(system));
+    authorizeWriter(components, ItemComponentID, address(system));
+    authorizeWriter(components, TypeComponentID, address(system));
     console.log(address(system));
 
     console.log("Deploying CreativeBuildSystem");
@@ -351,6 +370,7 @@ library LibDeploy {
     authorizeWriter(components, OwnedByComponentID, address(system));
     authorizeWriter(components, NameComponentID, address(system));
     authorizeWriter(components, TypeComponentID, address(system));
+    authorizeWriter(components, EntityIdComponentID, address(system));
     console.log(address(system));
 
     console.log("Deploying SignalSystem");
@@ -363,6 +383,27 @@ library LibDeploy {
     system = new SignalSourceSystem(world, address(components));
     world.registerSystem(address(system), SignalSourceSystemID);
     authorizeWriter(components, SignalSourceComponentID, address(system));
+    console.log(address(system));
+
+    console.log("Deploying AdderTestSystem");
+    system = new AdderTestSystem(world, address(components));
+    world.registerSystem(address(system), AdderTestSystemID);
+    authorizeWriter(components, SignalSourceComponentID, address(system));
+    authorizeWriter(components, PassesTestsComponentID, address(system));
+    console.log(address(system));
+
+    console.log("Deploying HalfAdderTestSystem");
+    system = new HalfAdderTestSystem(world, address(components));
+    world.registerSystem(address(system), HalfAdderTestSystemID);
+    authorizeWriter(components, SignalSourceComponentID, address(system));
+    authorizeWriter(components, PassesTestsComponentID, address(system));
+    console.log(address(system));
+
+    console.log("Deploying AndTestSystem");
+    system = new AndTestSystem(world, address(components));
+    world.registerSystem(address(system), AndTestSystemID);
+    authorizeWriter(components, SignalSourceComponentID, address(system));
+    authorizeWriter(components, PassesTestsComponentID, address(system));
     console.log(address(system));
   }
 }

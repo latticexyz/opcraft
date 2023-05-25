@@ -16,3 +16,4 @@ export { definePluginComponent } from "./PluginComponent";
 export { definePluginRegistryComponent } from "./PluginRegistryComponent";
 export { defineSignalComponent } from "./SignalComponent";
 export { defineSignalSourceComponent } from "./SignalSourceComponent";
+export { defineEntityIdComponent } from "./EntityIdComponent";

@@ -36,6 +36,7 @@ import {
   definePluginComponent,
   definePluginRegistryComponent,
   defineVoxelRulesComponent,
+  defineEntityIdComponent,
 } from "./components";
 import {
   getBlockAtPosition as getBlockAtPositionApi,
@@ -87,6 +88,7 @@ export async function createNetworkLayer(config: GameConfig) {
     VoxelRules: createLocalCache(defineVoxelRulesComponent(world), uniqueWorldId),
     Signal: defineSignalComponent(world),
     SignalSource: defineSignalSourceComponent(world),
+    EntityId: defineEntityIdComponent(world),
   };
 
   // --- SETUP ----------------------------------------------------------------------
@@ -355,7 +357,35 @@ export async function createNetworkLayer(config: GameConfig) {
       requirement: () => true,
       components: {},
       execute: () =>
-        systems["system.RegisterCreation"].executeTyped(creationName, vertex1, vertex2, { gasLimit: 500_000_000 }),
+        systems["system.RegisterCreation"].executeTyped(creationName, vertex1, vertex2, { gasLimit: 100_000_000 }),
+      updates: () => [],
+    });
+  }
+
+  function submitAdderTest(creationId: number, points: number[]) {
+    actions.add({
+      id: `submitAdderTest+${creationId}` as EntityID,
+      metadata: { actionType: "adderTest" },
+      requirement: () => true,
+      components: {},
+      execute: () =>
+        systems["system.AdderTest"].executeTyped(creationId, [points[0]], [points[1]], [points[2]], [points[3]], {
+          gasLimit: 100_000_000,
+        }),
+      updates: () => [],
+    });
+  }
+
+  function submitHalfAdderTest(creationId: number, points: VoxelCoord[]) {
+    actions.add({
+      id: `submitHalfAdderTest+${creationId}` as EntityID,
+      metadata: { actionType: "halfAdderTest" },
+      requirement: () => true,
+      components: {},
+      execute: () =>
+        systems["system.HalfAdderTest"].executeTyped(creationId, points[0], points[1], points[2], points[3], {
+          gasLimit: 100_000_000,
+        }),
       updates: () => [],
     });
   }
@@ -468,6 +498,8 @@ export async function createNetworkLayer(config: GameConfig) {
       registerVoxelType,
       giftVoxel,
       registerCreation,
+      submitAdderTest,
+      submitHalfAdderTest,
       transfer,
       getBlockAtPosition,
       getECSBlockAtPosition,

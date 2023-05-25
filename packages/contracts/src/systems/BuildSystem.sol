@@ -5,6 +5,7 @@ import { IWorld } from "solecs/interfaces/IWorld.sol";
 import { getAddressById, addressToEntity } from "solecs/utils.sol";
 import { PositionComponent, ID as PositionComponentID } from "../components/PositionComponent.sol";
 import { ItemComponent, ID as ItemComponentID } from "../components/ItemComponent.sol";
+import { TypeComponent, ID as TypeComponentID } from "../components/TypeComponent.sol";
 import { OwnedByComponent, ID as OwnedByComponentID } from "../components/OwnedByComponent.sol";
 import { ClaimComponent, ID as ClaimComponentID, Claim } from "../components/ClaimComponent.sol";
 import { TypeComponent, ID as TypeComponentID } from "../components/TypeComponent.sol";
@@ -25,6 +26,8 @@ contract BuildSystem is System {
     OwnedByComponent ownedByComponent = OwnedByComponent(getAddressById(components, OwnedByComponentID));
     PositionComponent positionComponent = PositionComponent(getAddressById(components, PositionComponentID));
     ClaimComponent claimComponent = ClaimComponent(getAddressById(components, ClaimComponentID));
+    ItemComponent itemComponent = ItemComponent(getAddressById(components, ItemComponentID));
+    TypeComponent typeComponent = TypeComponent(getAddressById(components, TypeComponentID));
     // TODO: specify the type of the block we just placed when building
     // TypeComponent typeComponent = TypeComponent(getAddressById(components, TypeComponentID));
 
@@ -35,7 +38,6 @@ contract BuildSystem is System {
     uint256[] memory entitiesAtPosition = positionComponent.getEntitiesWithValue(coord);
     require(entitiesAtPosition.length == 0 || entitiesAtPosition.length == 1, "can not built at non-empty coord");
     if (entitiesAtPosition.length == 1) {
-      ItemComponent itemComponent = ItemComponent(getAddressById(components, ItemComponentID));
       require(itemComponent.getValue(entitiesAtPosition[0]) == AirID, "can not built at non-empty coord (2)");
     }
 
@@ -43,12 +45,18 @@ contract BuildSystem is System {
     uint256 claimer = getClaimAtCoord(claimComponent, coord).claimer;
     require(claimer == 0 || claimer == addressToEntity(msg.sender), "can not build in claimed chunk");
 
-    // Remove block from inventory and place it in the world
-    ownedByComponent.remove(blockEntity);
-    positionComponent.set(blockEntity, coord);
+    // copy block and place it in the world
+
+    // curtis removed this so we are in creative mode. I didn't feel like porting this logic to the creative system (cause dhvani may change something)
+    // ownedByComponent.remove(blockEntity);
+    uint256 newEntity = world.getUniqueEntityId();
+    uint256 blockType = TypeComponent(getAddressById(components, TypeComponentID)).getValue(blockEntity);
+    itemComponent.set(newEntity, blockType); // TODO: remove itemCompoent
+    typeComponent.set(newEntity, blockType);
+    positionComponent.set(newEntity, coord);
 
     // Run block interaction logic
-    BlockInteraction.runInteractionSystems(world.systems(), components, blockEntity);
+    BlockInteraction.runInteractionSystems(world.systems(), components, newEntity);
   }
 
   function executeTyped(uint256 entity, VoxelCoord memory coord) public returns (bytes memory) {
