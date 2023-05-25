@@ -19,14 +19,72 @@ uint256 constant ID = uint256(keccak256("system.Powered"));
 contract PoweredSystem is System {
   constructor(IWorld _world, address _components) System(_world, _components) {}
 
-  function execute(bytes memory arguments) public returns (bytes memory) {
-    (uint256 centerEntityId, uint256[] memory neighbourEntityIds) = abi.decode(arguments, (uint256, uint256[]));
-
-    // Initialize components
+  function runLogic(
+    uint256 centerEntityId,
+    uint256 neighbourEntityId,
+    bool centerHasSignal,
+    bool centerHasSignalSource,
+    SignalData memory centerSignalData,
+    BlockDirection centerBlockDirection
+  ) private returns (bool) {
     PoweredComponent poweredComponent = PoweredComponent(getAddressById(components, PoweredComponentID));
     InvertedSignalComponent invertedSignalComponent = InvertedSignalComponent(
       getAddressById(components, InvertedSignalComponentID)
     );
+    bool centerIsPowered = poweredComponent.has(centerEntityId);
+    SignalData memory centerPowerData;
+    if (centerIsPowered) {
+      centerPowerData = poweredComponent.getValue(centerEntityId);
+    }
+
+    bool centerHasInvertedSignal = invertedSignalComponent.has(centerEntityId);
+    if (centerHasInvertedSignal) {
+      centerSignalData = invertedSignalComponent.getValue(centerEntityId);
+    }
+
+    bool changedEntity = false;
+
+    if (poweredComponent.has(neighbourEntityId)) {
+      SignalData memory neighbourSignalData = poweredComponent.getValue(neighbourEntityId);
+
+      // 3 conditions
+      // 1) if center is signal source, then we turn on no matter what
+      // 2) if its an inverted singal, we turn on as long as we're not below it
+      // 3) if its an active signal, turn on if we're in its direction or below it
+
+      bool shouldBePowered = centerHasSignalSource ||
+        (centerHasInvertedSignal && centerSignalData.isActive && centerBlockDirection != BlockDirection.Up) ||
+        (centerHasSignal &&
+          centerSignalData.isActive &&
+          (centerSignalData.direction == centerBlockDirection || centerBlockDirection == BlockDirection.Up));
+
+      if (neighbourSignalData.isActive) {
+        // check to see if we should be turned off
+        if (!shouldBePowered) {
+          neighbourSignalData.isActive = false;
+          neighbourSignalData.direction = BlockDirection.None;
+          poweredComponent.set(neighbourEntityId, neighbourSignalData);
+          changedEntity = true;
+        }
+      } else {
+        // check to see if we should be powered
+
+        if (shouldBePowered) {
+          neighbourSignalData.isActive = true;
+          neighbourSignalData.direction = centerBlockDirection;
+          poweredComponent.set(neighbourEntityId, neighbourSignalData);
+          changedEntity = true;
+        }
+      }
+    }
+
+    return changedEntity;
+  }
+
+  function execute(bytes memory arguments) public returns (bytes memory) {
+    (uint256 centerEntityId, uint256[] memory neighbourEntityIds) = abi.decode(arguments, (uint256, uint256[]));
+
+    // Initialize components
     SignalComponent signalComponent = SignalComponent(getAddressById(components, SignalComponentID));
     SignalSourceComponent signalSourceComponent = SignalSourceComponent(
       getAddressById(components, SignalSourceComponentID)
@@ -40,24 +98,13 @@ contract PoweredSystem is System {
     // check if centerEntityId is a SignalSource
     bool centerHasSignalSource = signalSourceComponent.has(centerEntityId);
     bool centerHasSignal = false;
-    bool centerHasInvertedSignal = false;
     SignalData memory centerSignalData;
     if (!centerHasSignalSource) {
       // check if its an active signal otherwise
       centerHasSignal = signalComponent.has(centerEntityId);
       if (centerHasSignal) {
         centerSignalData = signalComponent.getValue(centerEntityId);
-      } else {
-        centerHasInvertedSignal = invertedSignalComponent.has(centerEntityId);
-        if (centerHasInvertedSignal) {
-          centerSignalData = invertedSignalComponent.getValue(centerEntityId);
-        }
       }
-    }
-    bool centerIsPowered = poweredComponent.has(centerEntityId);
-    SignalData memory centerPowerData;
-    if (centerIsPowered) {
-      centerPowerData = poweredComponent.getValue(centerEntityId);
     }
 
     require(positionComponent.has(centerEntityId), "centerEntityId must have a position"); // even if its air, it must have a position
@@ -78,39 +125,14 @@ contract PoweredSystem is System {
         positionComponent.getValue(neighbourEntityId)
       );
 
-      if (poweredComponent.has(neighbourEntityId)) {
-        SignalData memory neighbourSignalData = poweredComponent.getValue(neighbourEntityId);
-
-        // 3 conditions
-        // 1) if center is signal source, then we turn on no matter what
-        // 2) if its an inverted singal, we turn on as long as we're not below it
-        // 3) if its an active signal, turn on if we're in its direction or below it
-
-        bool shouldBePowered = centerHasSignalSource ||
-          (centerHasInvertedSignal && centerSignalData.isActive && centerBlockDirection != BlockDirection.Up) ||
-          (centerHasSignal &&
-            centerSignalData.isActive &&
-            (centerSignalData.direction == centerBlockDirection || centerBlockDirection == BlockDirection.Up));
-
-        if (neighbourSignalData.isActive) {
-          // check to see if we should be turned off
-          if (!shouldBePowered) {
-            neighbourSignalData.isActive = false;
-            neighbourSignalData.direction = BlockDirection.None;
-            poweredComponent.set(neighbourEntityId, neighbourSignalData);
-            changedEntity = true;
-          }
-        } else {
-          // check to see if we should be powered
-
-          if (shouldBePowered) {
-            neighbourSignalData.isActive = true;
-            neighbourSignalData.direction = centerBlockDirection;
-            poweredComponent.set(neighbourEntityId, neighbourSignalData);
-            changedEntity = true;
-          }
-        }
-      }
+      changedEntity = runLogic(
+        centerEntityId,
+        neighbourEntityId,
+        centerHasSignal,
+        centerHasSignalSource,
+        centerSignalData,
+        centerBlockDirection
+      );
 
       if (changedEntity) {
         changedEntityIds[i] = neighbourEntityId;

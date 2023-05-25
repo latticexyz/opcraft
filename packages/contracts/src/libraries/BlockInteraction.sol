@@ -10,6 +10,8 @@ import { ClaimComponent, ID as ClaimComponentID, Claim } from "../components/Cla
 import { TypeComponent, ID as TypeComponentID } from "../components/TypeComponent.sol";
 import { SignalSystem, ID as SignalSystemID } from "../systems/SignalSystem.sol";
 import { SignalSourceSystem, ID as SignalSourceSystemID } from "../systems/SignalSourceSystem.sol";
+import { InvertedSignalSystem, ID as InvertedSignalSystemID } from "../systems/InvertedSignalSystem.sol";
+import { PoweredSystem, ID as PoweredSystemID } from "../systems/PoweredSystem.sol";
 import { getClaimAtCoord } from "../systems/ClaimSystem.sol";
 import { VoxelCoord } from "../types.sol";
 import { AirID } from "../prototypes/Blocks.sol";
@@ -79,6 +81,8 @@ library BlockInteraction {
     // TODO: instead of hard coding which systems to call, load them from a list so anybody can add to this list
     SignalSystem signalSystem = SignalSystem(getAddressById(systems, SignalSystemID));
     SignalSourceSystem signalSourceSystem = SignalSourceSystem(getAddressById(systems, SignalSourceSystemID));
+    InvertedSignalSystem invertedSignalSystem = InvertedSignalSystem(getAddressById(systems, InvertedSignalSystemID));
+    PoweredSystem poweredSystem = PoweredSystem(getAddressById(systems, PoweredSystemID));
 
     // get neighbour entities
     uint256[] memory centerEntitiesToCheckStack = new uint256[](MAX_NEIGHBOUR_UPDATE_DEPTH);
@@ -127,6 +131,42 @@ library BlockInteraction {
         for (uint256 i = 0; i < changedSignalSourceSystemEntityIds.length; i++) {
           if (changedSignalSourceSystemEntityIds[i] != 0) {
             centerEntitiesToCheckStack[centerEntitiesToCheckStackIdx] = changedSignalSourceSystemEntityIds[i];
+            centerEntitiesToCheckStackIdx++;
+            if (centerEntitiesToCheckStackIdx >= MAX_NEIGHBOUR_UPDATE_DEPTH) {
+              // TODO: Should tell the user that we reached max depth
+              break;
+            }
+          }
+        }
+
+        // call SignalSourceSystem with centerEntity and neighbourEntities
+        uint256[] memory changedInvertedSignalSystemEntityIds = invertedSignalSystem.executeTyped(
+          useCenterEntityId,
+          useNeighbourEntities
+        );
+
+        // if there are changed entities, we want to keep looping for this system
+        for (uint256 i = 0; i < changedInvertedSignalSystemEntityIds.length; i++) {
+          if (changedInvertedSignalSystemEntityIds[i] != 0) {
+            centerEntitiesToCheckStack[centerEntitiesToCheckStackIdx] = changedInvertedSignalSystemEntityIds[i];
+            centerEntitiesToCheckStackIdx++;
+            if (centerEntitiesToCheckStackIdx >= MAX_NEIGHBOUR_UPDATE_DEPTH) {
+              // TODO: Should tell the user that we reached max depth
+              break;
+            }
+          }
+        }
+
+        // call SignalSourceSystem with centerEntity and neighbourEntities
+        uint256[] memory changedPoweredSystemEntityIds = poweredSystem.executeTyped(
+          useCenterEntityId,
+          useNeighbourEntities
+        );
+
+        // if there are changed entities, we want to keep looping for this system
+        for (uint256 i = 0; i < changedPoweredSystemEntityIds.length; i++) {
+          if (changedPoweredSystemEntityIds[i] != 0) {
+            centerEntitiesToCheckStack[centerEntitiesToCheckStackIdx] = changedPoweredSystemEntityIds[i];
             centerEntitiesToCheckStackIdx++;
             if (centerEntitiesToCheckStackIdx >= MAX_NEIGHBOUR_UPDATE_DEPTH) {
               // TODO: Should tell the user that we reached max depth

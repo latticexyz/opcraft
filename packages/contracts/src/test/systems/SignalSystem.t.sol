@@ -17,7 +17,7 @@ import { getChunkEntity } from "../../systems/ClaimSystem.sol";
 import { Coord, VoxelCoord, BlockDirection, SignalData } from "../../types.sol";
 import { getChunkCoord } from "../../utils.sol";
 
-contract BuildSystemTest is MudTest {
+contract SignalSystemTest is MudTest {
   constructor() MudTest(new Deploy()) {}
 
   uint256 signalSource;
