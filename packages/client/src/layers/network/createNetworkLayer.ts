@@ -389,6 +389,18 @@ export async function createNetworkLayer(config: GameConfig) {
       updates: () => [],
     });
   }
+
+  function spawnCreation(creationId: number, lowerSouthWestCorner: VoxelCoordStruct) {
+    actions.add({
+      id: `spawnCreation+${creationId}` as EntityID,
+      metadata: { actionType: "spawnCreation" },
+      requirement: () => true,
+      components: {},
+      execute: () =>
+        systems["system.SpawnCreation"].executeTyped(creationId, lowerSouthWestCorner, { gasLimit: 100_000_000 }),
+      updates: () => [],
+    });
+  }
   function transfer(entity: EntityID, receiver: string) {
     const entityIndex = world.entityToIndex.get(entity);
     if (entityIndex == null) return console.warn("trying to transfer unknown entity", entity);
@@ -500,6 +512,7 @@ export async function createNetworkLayer(config: GameConfig) {
       registerCreation,
       submitAdderTest,
       submitHalfAdderTest,
+      spawnCreation,
       transfer,
       getBlockAtPosition,
       getECSBlockAtPosition,

@@ -9,6 +9,7 @@ import { TypeComponent, ID as TypeComponentID } from "../components/TypeComponen
 import { OwnedByComponent, ID as OwnedByComponentID } from "../components/OwnedByComponent.sol";
 import { ClaimComponent, ID as ClaimComponentID, Claim } from "../components/ClaimComponent.sol";
 import { TypeComponent, ID as TypeComponentID } from "../components/TypeComponent.sol";
+import { MineSystem, ID as MineSystemID } from "./MineSystem.sol";
 import { getClaimAtCoord } from "../systems/ClaimSystem.sol";
 import { VoxelCoord } from "../types.sol";
 import { AirID } from "../prototypes/Blocks.sol";
@@ -28,8 +29,6 @@ contract BuildSystem is System {
     ClaimComponent claimComponent = ClaimComponent(getAddressById(components, ClaimComponentID));
     ItemComponent itemComponent = ItemComponent(getAddressById(components, ItemComponentID));
     TypeComponent typeComponent = TypeComponent(getAddressById(components, TypeComponentID));
-    // TODO: specify the type of the block we just placed when building
-    // TypeComponent typeComponent = TypeComponent(getAddressById(components, TypeComponentID));
 
     // Require block to be owned by caller
     require(ownedByComponent.getValue(blockEntity) == addressToEntity(msg.sender), "block is not owned by player");
@@ -54,6 +53,7 @@ contract BuildSystem is System {
     itemComponent.set(newEntity, blockType); // TODO: remove itemCompoent
     typeComponent.set(newEntity, blockType);
     positionComponent.set(newEntity, coord);
+    MineSystem(getAddressById(components, MineSystemID)).addCustomComponents(blockType, newEntity);
 
     // Run block interaction logic
     BlockInteraction.runInteractionSystems(world.systems(), components, newEntity);

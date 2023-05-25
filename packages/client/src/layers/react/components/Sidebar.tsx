@@ -13,6 +13,7 @@ import { Hint } from "./Hint";
 import { Gold } from "./common";
 import {RegisterCreation} from "./RegisterCreation";
 import {SubmitHalfAdderTest} from "./SubmitHalfAdderTest";
+import {SpawnCreation} from "./SpawnCreation";
 
 type ObservableType<S extends Observable<unknown>> = S extends Observable<infer T> ? T : never;
 
@@ -90,6 +91,7 @@ export function registerSidebar() {
           {/*{<RegisterVoxelType layers={layers} onClose={() => updateTutorial({ community: false })} />}*/}
           {(voxelSelection?.points ?? []).length >= 2 && <RegisterCreation layers={layers} onClose={() => {console.log("closed")}} />}
           {(voxelSelection?.points ?? []).length >= 4 && <SubmitHalfAdderTest layers={layers} onClose={() => {console.log("closed")}} />}
+          {(voxelSelection?.points ?? []).length >= 1 && <SpawnCreation layers={layers} onClose={() => {console.log("closed")}} />}
           {/*{tutorial?.moving && (*/}
           {/*  <Hint onClose={() => updateTutorial({ moving: false })}>*/}
           {/*    <Gold>Hint</Gold>: press <Gold>W, A, S, or D</Gold> to move around*/}
