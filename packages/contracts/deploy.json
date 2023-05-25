@@ -19,12 +19,14 @@
     "SignalComponent",
     "SignalSourceComponent",
     "PassesTestsComponent",
-    "EntityIdComponent"
+    "EntityIdComponent",
+    "PoweredComponent",
+    "InvertedSignalComponent"
   ],
   "systems": [
     { "name": "ComponentDevSystem", "writeAccess": ["*"] },
     { "name": "BulkSetStateSystem", "writeAccess": ["*"] },
-    { "name": "MineSystem", "writeAccess": ["PositionComponent", "OwnedByComponent", "ItemComponent", "TypeComponent", "SignalComponent", "SignalSourceComponent"] },
+    { "name": "MineSystem", "writeAccess": ["PositionComponent", "OwnedByComponent", "ItemComponent", "TypeComponent", "SignalComponent", "SignalSourceComponent", "PoweredComponent", "InvertedSignalComponent"] },
     { "name": "BuildSystem", "writeAccess": ["PositionComponent", "OwnedByComponent", "ItemComponent", "TypeComponent", "SignalComponent", "SignalSourceComponent"] },
     { "name": "CreativeBuildSystem", "writeAccess": ["PositionComponent", "ItemComponent", "TypeComponent"] },
     { "name": "CraftSystem", "writeAccess": ["OwnedByComponent", "ItemComponent"] },
@@ -54,6 +56,8 @@
     { "name": "AdderTestSystem", "writeAccess": ["SignalSourceComponent", "PassesTestsComponent" ] },
     { "name": "HalfAdderTestSystem", "writeAccess": ["SignalSourceComponent", "PassesTestsComponent" ] },
     { "name": "AndTestSystem", "writeAccess": ["SignalSourceComponent", "PassesTestsComponent" ] },
-    { "name": "SpawnCreationSystem", "writeAccess": ["SignalSourceComponent", "PassesTestsComponent" ,  "TypeComponent", "ItemComponent", "PositionComponent", "SignalComponent", "SignalSourceComponent"] }
+    { "name": "SpawnCreationSystem", "writeAccess": ["SignalSourceComponent", "PassesTestsComponent" ,  "TypeComponent", "ItemComponent", "PositionComponent", "SignalComponent", "SignalSourceComponent"] },
+    { "name": "PoweredSystem", "writeAccess": ["PoweredComponent"]},
+    { "name": "InvertedSignalSystem", "writeAccess": ["InvertedSignalComponent"]}
   ]
 }

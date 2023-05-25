@@ -12,10 +12,12 @@ import { TypeComponent, ID as TypeComponentID } from "../components/TypeComponen
 import { ItemComponent, ID as ItemComponentID } from "../components/ItemComponent.sol";
 import { SignalComponent, ID as SignalComponentID } from "../components/SignalComponent.sol";
 import { SignalSourceComponent, ID as SignalSourceComponentID } from "../components/SignalSourceComponent.sol";
+import { PoweredComponent, ID as PoweredComponentID } from "../components/PoweredComponent.sol";
+import { InvertedSignalComponent, ID as InvertedSignalComponentID } from "../components/InvertedSignalComponent.sol";
 import { OccurrenceComponent, ID as OccurrenceComponentID, staticcallFunctionSelector } from "../components/OccurrenceComponent.sol";
 import { ClaimComponent, ID as ClaimComponentID, Claim } from "../components/ClaimComponent.sol";
 import { getClaimAtCoord } from "../systems/ClaimSystem.sol";
-import { AirID, WaterID, WoolID, SandID, BlueFlowerID } from "../prototypes/Blocks.sol";
+import { AirID, WaterID, WoolID, SandID, BlueFlowerID, GreenFlowerID } from "../prototypes/Blocks.sol";
 import { VoxelCoord, BlockDirection, SignalData } from "../types.sol";
 import { BlockInteraction } from "../libraries/BlockInteraction.sol";
 import { CreateBlock } from "../libraries/CreateBlock.sol";
