@@ -9,6 +9,8 @@ import { getAddressById, addressToEntity } from "solecs/utils.sol";
 import { PositionComponent, ID as PositionComponentID } from "../components/PositionComponent.sol";
 import { SignalComponent, ID as SignalComponentID } from "../components/SignalComponent.sol";
 import { SignalSourceComponent, ID as SignalSourceComponentID } from "../components/SignalSourceComponent.sol";
+import { PoweredComponent, ID as PoweredComponentID } from "../components/PoweredComponent.sol";
+import { InvertedSignalComponent, ID as InvertedSignalComponentID } from "../components/InvertedSignalComponent.sol";
 import { VoxelCoord, BlockDirection, SignalData } from "../types.sol";
 import { calculateBlockDirection } from "../utils.sol";
 
@@ -24,20 +26,37 @@ contract SignalSourceSystem is System {
     SignalSourceComponent signalSourceComponent = SignalSourceComponent(
       getAddressById(components, SignalSourceComponentID)
     );
+    PoweredComponent poweredComponent = PoweredComponent(getAddressById(components, PoweredComponentID));
     SignalComponent signalComponent = SignalComponent(getAddressById(components, SignalComponentID));
-    // PositionComponent positionComponent = PositionComponent(getAddressById(components, PositionComponentID));
+    InvertedSignalComponent invertedSignalComponent = InvertedSignalComponent(
+      getAddressById(components, InvertedSignalComponentID)
+    );
+    PositionComponent positionComponent = PositionComponent(getAddressById(components, PositionComponentID));
 
     // If a entity does not need to be changed, its value is set to 0
     // We do it this way because dynamic arrays in a function are not supported in Solidity yet
     uint256[] memory changedEntityIds = new uint256[](neighbourEntityIds.length);
 
     bool centerHasSignal = signalComponent.has(centerEntityId);
+    bool centerHasInvertedSignal = false;
     SignalData memory centerSignalData;
     if (centerHasSignal) {
       centerSignalData = signalComponent.getValue(centerEntityId);
+    } else {
+      centerHasInvertedSignal = invertedSignalComponent.has(centerEntityId);
+      if (centerHasInvertedSignal) {
+        centerSignalData = invertedSignalComponent.getValue(centerEntityId);
+      }
     }
 
-    // require(positionComponent.has(centerEntityId), "centerEntityId must have a position"); // even if its air, it must have a position
+    bool centerIsPowered = poweredComponent.has(centerEntityId);
+    SignalData memory centerPowerData;
+    if (centerIsPowered) {
+      centerPowerData = poweredComponent.getValue(centerEntityId);
+    }
+
+    require(positionComponent.has(centerEntityId), "centerEntityId must have a position"); // even if its air, it must have a position
+    VoxelCoord memory centerPosition = positionComponent.getValue(centerEntityId);
 
     // go through all neighbourEntityIds
     for (uint8 i = 0; i < neighbourEntityIds.length; i++) {
@@ -47,12 +66,37 @@ contract SignalSourceSystem is System {
         changedEntityIds[i] = 0;
         continue;
       }
-      // require(positionComponent.has(neighbourEntityId), "neighbourEntityId must have a position");
+      require(positionComponent.has(neighbourEntityId), "neighbourEntityId must have a position");
+      BlockDirection centerBlockDirection = calculateBlockDirection(
+        centerPosition,
+        positionComponent.getValue(neighbourEntityId)
+      );
 
       // if center is a signal that is not active, and neighbour is a signal source
       if ((centerHasSignal && !centerSignalData.isActive) && signalSourceComponent.has(neighbourEntityId)) {
         // if centerSignalData is not active, we need to add neighbour signal source block to entity list so it can be turned on
         changedEntity = true;
+      }
+
+      bool shouldBeSource = centerHasInvertedSignal &&
+        centerSignalData.isActive &&
+        centerBlockDirection == BlockDirection.Down;
+
+      // check to see if neighbour is a powered component
+      if (signalSourceComponent.has(neighbourEntityId)) {
+        bool isNaturalSource = signalSourceComponent.getValue(neighbourEntityId);
+        if (!shouldBeSource && !isNaturalSource) {
+          // should not be a signal source
+          signalSourceComponent.remove(neighbourEntityId);
+          changedEntity = true;
+        }
+      } else {
+        // if the neighbour is above the center which is an inverted signal
+        if (shouldBeSource) {
+          // then we SHOULD be a signal source
+          signalSourceComponent.set(neighbourEntityId, false);
+          changedEntity = true;
+        }
       }
 
       if (changedEntity) {
