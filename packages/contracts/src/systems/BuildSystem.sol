@@ -11,6 +11,7 @@ import { TypeComponent, ID as TypeComponentID } from "../components/TypeComponen
 import { getClaimAtCoord } from "../systems/ClaimSystem.sol";
 import { VoxelCoord } from "../types.sol";
 import { AirID } from "../prototypes/Blocks.sol";
+import { BlockInteraction } from "../libraries/BlockInteraction.sol";
 
 uint256 constant ID = uint256(keccak256("system.Build"));
 
@@ -45,6 +46,9 @@ contract BuildSystem is System {
     // Remove block from inventory and place it in the world
     ownedByComponent.remove(blockEntity);
     positionComponent.set(blockEntity, coord);
+
+    // Run block interaction logic
+    BlockInteraction.runInteractionSystems(world.systems(), components, blockEntity);
   }
 
   function executeTyped(uint256 entity, VoxelCoord memory coord) public returns (bytes memory) {

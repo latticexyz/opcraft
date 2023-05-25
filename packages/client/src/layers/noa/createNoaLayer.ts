@@ -43,6 +43,7 @@ import {
   createSoundSystem,
   createSyncLocalPlayerPositionSystem,
   createTutorialSystem,
+  createSignalSystem,
 } from "./systems";
 import { registerHandComponent } from "./engine/components/handComponent";
 import { registerModelComponent } from "./engine/components/modelComponent";
@@ -364,6 +365,7 @@ export function createNoaLayer(network: NetworkLayer) {
   // --- SYSTEMS --------------------------------------------------------------------
   createInputSystem(network, context);
   createBlockSystem(network, context);
+  createSignalSystem(network, context);
   createPlayerPositionSystem(network, context);
   createRelaySystem(network, context);
   createInventoryIndexSystem(network, context);

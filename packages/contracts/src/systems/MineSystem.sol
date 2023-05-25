@@ -10,16 +10,35 @@ import { PositionComponent, ID as PositionComponentID } from "../components/Posi
 import { OwnedByComponent, ID as OwnedByComponentID } from "../components/OwnedByComponent.sol";
 import { TypeComponent, ID as TypeComponentID } from "../components/TypeComponent.sol";
 import { ItemComponent, ID as ItemComponentID } from "../components/ItemComponent.sol";
+import { SignalComponent, ID as SignalComponentID, SignalData } from "../components/SignalComponent.sol";
+import { SignalSourceComponent, ID as SignalSourceComponentID } from "../components/SignalSourceComponent.sol";
 import { OccurrenceComponent, ID as OccurrenceComponentID, staticcallFunctionSelector } from "../components/OccurrenceComponent.sol";
 import { ClaimComponent, ID as ClaimComponentID, Claim } from "../components/ClaimComponent.sol";
 import { getClaimAtCoord } from "../systems/ClaimSystem.sol";
-import { AirID, WaterID } from "../prototypes/Blocks.sol";
-import { VoxelCoord } from "../types.sol";
+import { AirID, WaterID, WoolID, SandID, BlueFlowerID } from "../prototypes/Blocks.sol";
+import { VoxelCoord, BlockDirection } from "../types.sol";
+import { BlockInteraction } from "../libraries/BlockInteraction.sol";
 
 uint256 constant ID = uint256(keccak256("system.Mine"));
 
 contract MineSystem is System {
   constructor(IWorld _world, address _components) System(_world, _components) {}
+
+  function addCustomComponents(uint256 blockType, uint256 entity) public {
+    SignalComponent signalComponent = SignalComponent(getAddressById(components, SignalComponentID));
+    SignalSourceComponent signalSourceComponent = SignalSourceComponent(
+      getAddressById(components, SignalSourceComponentID)
+    );
+
+    // if the type of block is a wool, add signal to it
+    if (blockType == BlueFlowerID) {
+      signalComponent.set(entity, SignalData({ isActive: false, direction: BlockDirection.None }));
+    }
+    // if its a sand block, add signal source to it
+    if (blockType == SandID) {
+      signalSourceComponent.set(entity);
+    }
+  }
 
   function execute(bytes memory arguments) public returns (bytes memory) {
     (VoxelCoord memory coord, uint256 blockType) = abi.decode(arguments, (VoxelCoord, uint256));
@@ -42,6 +61,8 @@ contract MineSystem is System {
     uint256[] memory entitiesAtPosition = positionComponent.getEntitiesWithValue(coord);
 
     uint256 entity;
+    // TODO: Figure out how to not do this
+    uint256 airEntity;
 
     if (entitiesAtPosition.length == 0) {
       // If there is no entity at this position, try mining the terrain block at this position
@@ -59,7 +80,7 @@ contract MineSystem is System {
       itemComponent.set(entity, blockType);
 
       // Place an air block at this position
-      uint256 airEntity = world.getUniqueEntityId();
+      airEntity = world.getUniqueEntityId();
       itemComponent.set(airEntity, AirID);
       positionComponent.set(airEntity, coord);
     } else {
@@ -69,10 +90,23 @@ contract MineSystem is System {
       }
       require(entity != 0, "invalid block type");
       positionComponent.remove(entity);
+
+      // TODO: Figure out how to not do this
+      // Place an air block at this position so BlockInteraction can use this position
+      airEntity = world.getUniqueEntityId();
+      itemComponent.set(airEntity, AirID);
+      positionComponent.set(airEntity, coord);
     }
 
     TypeComponent(getAddressById(components, TypeComponentID)).set(entity, blockType);
     ownedByComponent.set(entity, addressToEntity(msg.sender));
+
+    // TODO: Remove this once we have a proper inventory system
+    addCustomComponents(blockType, entity);
+
+    // Run block interaction logic
+    BlockInteraction.runInteractionSystems(world.systems(), components, airEntity);
+
     return abi.encode(entity);
   }
 
