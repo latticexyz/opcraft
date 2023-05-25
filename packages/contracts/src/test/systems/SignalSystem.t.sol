@@ -10,11 +10,11 @@ import { ItemComponent, ID as ItemComponentID } from "../../components/ItemCompo
 import { OwnedByComponent, ID as OwnedByComponentID } from "../../components/OwnedByComponent.sol";
 import { PositionComponent, ID as PositionComponentID } from "../../components/PositionComponent.sol";
 import { ClaimComponent, ID as ClaimComponentID, Claim } from "../../components/ClaimComponent.sol";
-import { SignalComponent, ID as SignalComponentID, SignalData } from "../../components/SignalComponent.sol";
+import { SignalComponent, ID as SignalComponentID } from "../../components/SignalComponent.sol";
 import { SignalSourceComponent, ID as SignalSourceComponentID } from "../../components/SignalSourceComponent.sol";
 import { SandID, DiamondID, AirID, StoneID, WaterID, BedrockID, PlanksID, WoolID, PurpleWoolID } from "../../prototypes/Blocks.sol";
 import { getChunkEntity } from "../../systems/ClaimSystem.sol";
-import { Coord, VoxelCoord, BlockDirection } from "../../types.sol";
+import { Coord, VoxelCoord, BlockDirection, SignalData } from "../../types.sol";
 import { getChunkCoord } from "../../utils.sol";
 
 contract BuildSystemTest is MudTest {

@@ -7,9 +7,9 @@ import { IComponent } from "solecs/interfaces/IComponent.sol";
 import { getAddressById, addressToEntity } from "solecs/utils.sol";
 
 import { PositionComponent, ID as PositionComponentID } from "../components/PositionComponent.sol";
-import { SignalComponent, ID as SignalComponentID, SignalData } from "../components/SignalComponent.sol";
+import { SignalComponent, ID as SignalComponentID } from "../components/SignalComponent.sol";
 import { SignalSourceComponent, ID as SignalSourceComponentID } from "../components/SignalSourceComponent.sol";
-import { VoxelCoord, BlockDirection } from "../types.sol";
+import { VoxelCoord, BlockDirection, SignalData } from "../types.sol";
 import { calculateBlockDirection } from "../utils.sol";
 
 uint256 constant ID = uint256(keccak256("system.SignalSource"));
