@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0;
 
 import { CHUNK } from "./constants.sol";
-import { Coord, VoxelCoord } from "./types.sol";
+import { Coord, VoxelCoord, BlockDirection } from "./types.sol";
 
 // Divide with rounding down like Math.floor(a/b), not rounding towards zero
 function div(int32 a, int32 b) pure returns (int32) {
@@ -21,4 +21,36 @@ function initializeArray(uint256 x, uint256 y) pure returns (uint256[][] memory)
     arr[i] = new uint256[](y);
   }
   return arr;
+}
+
+function calculateBlockDirection(VoxelCoord memory centerCoord, VoxelCoord memory neighborCoord)
+  pure
+  returns (BlockDirection)
+{
+  if (neighborCoord.x == centerCoord.x && neighborCoord.y == centerCoord.y && neighborCoord.z == centerCoord.z) {
+    return BlockDirection.None;
+  } else if (neighborCoord.y > centerCoord.y) {
+    return BlockDirection.Up;
+  } else if (neighborCoord.y < centerCoord.y) {
+    return BlockDirection.Down;
+  } else if (neighborCoord.z > centerCoord.z) {
+    return BlockDirection.North;
+  } else if (neighborCoord.z < centerCoord.z) {
+    return BlockDirection.South;
+  } else if (neighborCoord.x > centerCoord.x) {
+    return BlockDirection.East;
+  } else if (neighborCoord.x < centerCoord.x) {
+    return BlockDirection.West;
+  } else {
+    return BlockDirection.None;
+  }
+}
+
+function hasEntity(uint256[] memory entities) pure returns (bool) {
+  for (uint8 i; i < entities.length; i++) {
+    if (entities[i] != 0) {
+      return true;
+    }
+  }
+  return false;
 }

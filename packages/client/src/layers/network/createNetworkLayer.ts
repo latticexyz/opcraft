@@ -54,6 +54,8 @@ import { map, timer, combineLatest, BehaviorSubject } from "rxjs";
 import { createPluginSystem } from "./systems";
 import { TransitionRuleStruct } from "contracts/types/ethers-contracts/RegisterVoxelTypeSystem";
 import { VoxelCoordStruct } from "contracts/types/ethers-contracts/RegisterCreationSystem";
+import { defineSignalComponent } from "./components/SignalComponent";
+import { defineSignalSourceComponent } from "./components/SignalSourceComponent";
 
 /**
  * The Network layer is the lowest layer in the client architecture.
@@ -83,6 +85,8 @@ export async function createNetworkLayer(config: GameConfig) {
     Plugin: createLocalCache(definePluginComponent(world), uniqueWorldId),
     PluginRegistry: createLocalCache(definePluginRegistryComponent(world), uniqueWorldId),
     VoxelRules: createLocalCache(defineVoxelRulesComponent(world), uniqueWorldId),
+    Signal: defineSignalComponent(world),
+    SignalSource: defineSignalSourceComponent(world),
   };
 
   // --- SETUP ----------------------------------------------------------------------
@@ -181,6 +185,15 @@ export async function createNetworkLayer(config: GameConfig) {
     return getEntityAtPositionApi(terrainContext, position);
   }
 
+  function getSignalData(entityIndex: EntityIndex) {
+    return getComponentValue(components.Signal, entityIndex);
+  }
+
+  function isSignalSource(entityIndex: EntityIndex) {
+    const signalSource = getComponentValue(components.SignalSource, entityIndex)?.value;
+    return signalSource;
+  }
+
   function build(entity: EntityID, coord: VoxelCoord) {
     const entityIndex = world.entityToIndex.get(entity);
     if (entityIndex == null) return console.warn("trying to place unknown entity", entity);
@@ -189,7 +202,9 @@ export async function createNetworkLayer(config: GameConfig) {
     const godIndex = world.entityToIndex.get(GodID);
     // const creativeMode = godIndex != null && getComponentValue(components.GameConfig, godIndex)?.creativeMode;
     // lol this is so sus
-    const creativeMode = true;
+
+    // Note: needs to be off for block interactions
+    const creativeMode = false;
 
     actions.add({
       id: `build+${coord.x}/${coord.y}/${coord.z}` as EntityID,
@@ -198,19 +213,19 @@ export async function createNetworkLayer(config: GameConfig) {
       components: { Position: components.Position, Item: components.Item, OwnedBy: components.OwnedBy },
       execute: () =>
         systems[creativeMode ? "system.CreativeBuild" : "system.Build"].executeTyped(BigNumber.from(entity), coord, {
-          gasLimit: 1_000_000,
+          gasLimit: 100_000_000,
         }),
       updates: () => [
-        {
-          component: "OwnedBy",
-          entity: entityIndex,
-          value: { value: GodID },
-        },
-        {
-          component: "Position",
-          entity: entityIndex,
-          value: coord,
-        },
+        // {
+        //   component: "OwnedBy",
+        //   entity: entityIndex,
+        //   value: { value: GodID },
+        // },
+        // {
+        //   component: "Position",
+        //   entity: entityIndex,
+        //   value: coord,
+        // },
       ],
     });
   }
@@ -229,7 +244,8 @@ export async function createNetworkLayer(config: GameConfig) {
       metadata: { actionType: "mine", coord, blockType },
       requirement: () => true,
       components: { Position: components.Position, OwnedBy: components.OwnedBy, Item: components.Item },
-      execute: () => systems["system.Mine"].executeTyped(coord, blockId, { gasLimit: ecsBlock ? 400_000 : 1_000_000 }),
+      execute: () =>
+        systems["system.Mine"].executeTyped(coord, blockId, { gasLimit: ecsBlock ? 100_000_000 : 100_000_000 }),
       updates: () => [
         {
           component: "Position",
@@ -456,6 +472,8 @@ export async function createNetworkLayer(config: GameConfig) {
       getBlockAtPosition,
       getECSBlockAtPosition,
       getTerrainBlockAtPosition,
+      getSignalData,
+      isSignalSource,
       getEntityAtPosition,
       getBiome,
       getName,

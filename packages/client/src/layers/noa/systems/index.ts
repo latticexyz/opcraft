@@ -6,3 +6,4 @@ export { createInventoryIndexSystem } from "./createInventoryIndexSystem";
 export { createSyncLocalPlayerPositionSystem } from "./createSyncLocalPlayerPositionSystem";
 export { createTutorialSystem } from "./createTutorialSystem";
 export { createSoundSystem } from "./createSoundSystem";
+export { createSignalSystem } from "./createSignalSystem";

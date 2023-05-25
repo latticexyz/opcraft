@@ -14,3 +14,5 @@ export { defineComponentsRegistryComponent } from "./ComponentsRegistryComponent
 export { defineNameComponent } from "./NameComponent";
 export { definePluginComponent } from "./PluginComponent";
 export { definePluginRegistryComponent } from "./PluginRegistryComponent";
+export { defineSignalComponent } from "./SignalComponent";
+export { defineSignalSourceComponent } from "./SignalSourceComponent";

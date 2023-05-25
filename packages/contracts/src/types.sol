@@ -11,3 +11,13 @@ struct TransitionRule {
   uint256 lookForType; // the type of the voxel to look for
   uint256 changeToType; // the type of the voxel to change to
 }
+
+enum BlockDirection {
+  None,
+  Up,
+  Down,
+  North,
+  South,
+  East,
+  West
+}

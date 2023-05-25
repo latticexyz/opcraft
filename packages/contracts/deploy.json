@@ -15,12 +15,14 @@
     "VoxelRulesComponent",
     "TypeComponent",
     "UpdateSetComponent",
-    "VoxelsComponent"
+    "VoxelsComponent",
+    "SignalComponent",
+    "SignalSourceComponent"
   ],
   "systems": [
     { "name": "ComponentDevSystem", "writeAccess": ["*"] },
     { "name": "BulkSetStateSystem", "writeAccess": ["*"] },
-    { "name": "MineSystem", "writeAccess": ["PositionComponent", "OwnedByComponent", "ItemComponent", "TypeComponent"] },
+    { "name": "MineSystem", "writeAccess": ["PositionComponent", "OwnedByComponent", "ItemComponent", "TypeComponent", "SignalComponent", "SignalSourceComponent"] },
     { "name": "BuildSystem", "writeAccess": ["PositionComponent", "OwnedByComponent"] },
     { "name": "CreativeBuildSystem", "writeAccess": ["PositionComponent", "ItemComponent", "TypeComponent"] },
     { "name": "CraftSystem", "writeAccess": ["OwnedByComponent", "ItemComponent"] },
@@ -44,6 +46,8 @@
     { "name": "RegisterVoxelTypeSystem", "writeAccess": ["OwnedByComponent", "NameComponent", "ColorComponent", "VoxelRulesComponent", "TransitionRuleComponent", "TypeComponent", "ItemComponent"] },
     { "name": "UpdateVoxelsSystem", "writeAccess": ["TypeComponent", "UpdateSetComponent"] },
     { "name": "GiftVoxelSystem", "writeAccess": ["OwnedByComponent", "TypeComponent", "ItemComponent"] },
-    { "name": "RegisterCreationSystem", "writeAccess": ["PositionComponent", "VoxelsComponent", "OwnedByComponent", "NameComponent", "TypeComponent"] }
+    { "name": "RegisterCreationSystem", "writeAccess": ["PositionComponent", "VoxelsComponent", "OwnedByComponent", "NameComponent", "TypeComponent"] },
+    { "name": "SignalSystem", "writeAccess": ["SignalComponent"]},
+    { "name": "SignalSourceSystem", "writeAccess": ["SignalSourceComponent"]}
   ]
 }
