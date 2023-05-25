@@ -14,19 +14,19 @@ import { SignalSourceComponent, ID as SignalSourceComponentID } from "../compone
 import { VoxelCoord, BlockDirection, SignalData } from "../types.sol";
 import { calculateBlockDirection } from "../utils.sol";
 
-uint256 constant ID = uint256(keccak256("system.InvertedSignal"));
+uint256 constant ID = uint256(keccak256("system.Powered"));
 
-contract InvertedSignalSystem is System {
+contract PoweredSystem is System {
   constructor(IWorld _world, address _components) System(_world, _components) {}
 
   function execute(bytes memory arguments) public returns (bytes memory) {
     (uint256 centerEntityId, uint256[] memory neighbourEntityIds) = abi.decode(arguments, (uint256, uint256[]));
 
     // Initialize components
+    PoweredComponent poweredComponent = PoweredComponent(getAddressById(components, PoweredComponentID));
     InvertedSignalComponent invertedSignalComponent = InvertedSignalComponent(
       getAddressById(components, InvertedSignalComponentID)
     );
-    PoweredComponent poweredComponent = PoweredComponent(getAddressById(components, PoweredComponentID));
     SignalComponent signalComponent = SignalComponent(getAddressById(components, SignalComponentID));
     SignalSourceComponent signalSourceComponent = SignalSourceComponent(
       getAddressById(components, SignalSourceComponentID)
@@ -40,12 +40,18 @@ contract InvertedSignalSystem is System {
     // check if centerEntityId is a SignalSource
     bool centerHasSignalSource = signalSourceComponent.has(centerEntityId);
     bool centerHasSignal = false;
+    bool centerHasInvertedSignal = false;
     SignalData memory centerSignalData;
     if (!centerHasSignalSource) {
       // check if its an active signal otherwise
       centerHasSignal = signalComponent.has(centerEntityId);
       if (centerHasSignal) {
         centerSignalData = signalComponent.getValue(centerEntityId);
+      } else {
+        centerHasInvertedSignal = invertedSignalComponent.has(centerEntityId);
+        if (centerHasInvertedSignal) {
+          centerSignalData = invertedSignalComponent.getValue(centerEntityId);
+        }
       }
     }
     bool centerIsPowered = poweredComponent.has(centerEntityId);
@@ -71,40 +77,36 @@ contract InvertedSignalSystem is System {
         centerPosition,
         positionComponent.getValue(neighbourEntityId)
       );
-      // check if neighbourEntityId exists in signalComponent
-      if (invertedSignalComponent.has(neighbourEntityId)) {
-        SignalData memory neighbourSignalData = invertedSignalComponent.getValue(neighbourEntityId);
-        if (neighbourSignalData.isActive) {
-          // check if we should remain active
-          if (centerIsPowered && centerPowerData.isActive) {
-            // if center is powered, then we are now adjacent to a powered block, so we should become inactive
-            neighbourSignalData.isActive = false;
-            neighbourSignalData.direction = centerBlockDirection; // blocked direction
-            invertedSignalComponent.set(neighbourEntityId, neighbourSignalData);
-            changedEntity = true;
-          }
 
-          // TODO: Do we need this? When the block turns off, it should update auto
-          // if we are active, lets make sure the center block if its a signal is active
-          if (centerHasSignal && !centerSignalData.isActive) {
-            // tell it to update
+      if (poweredComponent.has(neighbourEntityId)) {
+        SignalData memory neighbourSignalData = poweredComponent.getValue(neighbourEntityId);
+
+        // 3 conditions
+        // 1) if center is signal source, then we turn on no matter what
+        // 2) if its an inverted singal, we turn on as long as we're not below it
+        // 3) if its an active signal, turn on if we're in its direction or below it
+
+        bool shouldBePowered = centerHasSignalSource ||
+          (centerHasInvertedSignal && centerSignalData.isActive && centerBlockDirection != BlockDirection.Up) ||
+          (centerHasSignal &&
+            centerSignalData.isActive &&
+            (centerSignalData.direction == centerBlockDirection || centerBlockDirection == BlockDirection.Up));
+
+        if (neighbourSignalData.isActive) {
+          // check to see if we should be turned off
+          if (!shouldBePowered) {
+            neighbourSignalData.isActive = false;
+            neighbourSignalData.direction = BlockDirection.None;
+            poweredComponent.set(neighbourEntityId, neighbourSignalData);
             changedEntity = true;
           }
         } else {
-          // check to see if we should be active?
-          // were we previously blocked by a powered block
-          if (centerIsPowered && !centerPowerData.isActive && neighbourSignalData.direction == centerBlockDirection) {
-            // reactivate then
-            neighbourSignalData.isActive = true;
-            neighbourSignalData.direction = BlockDirection.None; // blocked direction
-            invertedSignalComponent.set(neighbourEntityId, neighbourSignalData);
-            changedEntity = true;
-          }
+          // check to see if we should be powered
 
-          // TODO: Do we need this? When the block turns off, it should update auto
-          // if we are not active but center is with out direction, then tell it to update
-          if (centerHasSignal && centerSignalData.isActive && centerSignalData.direction == centerBlockDirection) {
-            // tell it to update
+          if (shouldBePowered) {
+            neighbourSignalData.isActive = true;
+            neighbourSignalData.direction = centerBlockDirection;
+            poweredComponent.set(neighbourEntityId, neighbourSignalData);
             changedEntity = true;
           }
         }
