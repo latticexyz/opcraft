@@ -32,8 +32,11 @@ import { VoxelRulesComponent, ID as VoxelRulesComponentID } from "components/Vox
 import { TypeComponent, ID as TypeComponentID } from "components/TypeComponent.sol";
 import { UpdateSetComponent, ID as UpdateSetComponentID } from "components/UpdateSetComponent.sol";
 import { VoxelsComponent, ID as VoxelsComponentID } from "components/VoxelsComponent.sol";
+<<<<<<< HEAD
 import { SignalComponent, ID as SignalComponentID } from "components/SignalComponent.sol";
 import { SignalSourceComponent, ID as SignalSourceComponentID } from "components/SignalSourceComponent.sol";
+=======
+>>>>>>> dbfcc80 (feat: adder-test)
 
 // Systems (requires 'systems=...' remapping in project's remappings.txt)
 import { ComponentDevSystem, ID as ComponentDevSystemID } from "systems/ComponentDevSystem.sol";
@@ -55,8 +58,11 @@ import { RegisterVoxelTypeSystem, ID as RegisterVoxelTypeSystemID } from "system
 import { UpdateVoxelsSystem, ID as UpdateVoxelsSystemID } from "systems/UpdateVoxelsSystem.sol";
 import { GiftVoxelSystem, ID as GiftVoxelSystemID } from "systems/GiftVoxelSystem.sol";
 import { RegisterCreationSystem, ID as RegisterCreationSystemID } from "systems/RegisterCreationSystem.sol";
+<<<<<<< HEAD
 import { SignalSystem, ID as SignalSystemID } from "systems/SignalSystem.sol";
 import { SignalSourceSystem, ID as SignalSourceSystemID } from "systems/SignalSourceSystem.sol";
+=======
+>>>>>>> dbfcc80 (feat: adder-test)
 
 struct DeployResult {
   IWorld world;
@@ -146,6 +152,7 @@ library LibDeploy {
       console.log("Deploying VoxelsComponent");
       comp = new VoxelsComponent(address(result.world));
       console.log(address(comp));
+<<<<<<< HEAD
 
       console.log("Deploying SignalComponent");
       comp = new SignalComponent(address(result.world));
@@ -154,6 +161,8 @@ library LibDeploy {
       console.log("Deploying SignalSourceComponent");
       comp = new SignalSourceComponent(address(result.world));
       console.log(address(comp));
+=======
+>>>>>>> dbfcc80 (feat: adder-test)
     }
 
     // Deploy systems
@@ -197,8 +206,11 @@ library LibDeploy {
     authorizeWriter(components, TypeComponentID, address(system));
     authorizeWriter(components, UpdateSetComponentID, address(system));
     authorizeWriter(components, VoxelsComponentID, address(system));
+<<<<<<< HEAD
     authorizeWriter(components, SignalComponentID, address(system));
     authorizeWriter(components, SignalSourceComponentID, address(system));
+=======
+>>>>>>> dbfcc80 (feat: adder-test)
     console.log(address(system));
 
     console.log("Deploying BulkSetStateSystem");
@@ -220,8 +232,11 @@ library LibDeploy {
     authorizeWriter(components, TypeComponentID, address(system));
     authorizeWriter(components, UpdateSetComponentID, address(system));
     authorizeWriter(components, VoxelsComponentID, address(system));
+<<<<<<< HEAD
     authorizeWriter(components, SignalComponentID, address(system));
     authorizeWriter(components, SignalSourceComponentID, address(system));
+=======
+>>>>>>> dbfcc80 (feat: adder-test)
     console.log(address(system));
 
     console.log("Deploying MineSystem");
@@ -231,8 +246,11 @@ library LibDeploy {
     authorizeWriter(components, OwnedByComponentID, address(system));
     authorizeWriter(components, ItemComponentID, address(system));
     authorizeWriter(components, TypeComponentID, address(system));
+<<<<<<< HEAD
     authorizeWriter(components, SignalComponentID, address(system));
     authorizeWriter(components, SignalSourceComponentID, address(system));
+=======
+>>>>>>> dbfcc80 (feat: adder-test)
     console.log(address(system));
 
     console.log("Deploying BuildSystem");
@@ -352,6 +370,7 @@ library LibDeploy {
     authorizeWriter(components, NameComponentID, address(system));
     authorizeWriter(components, TypeComponentID, address(system));
     console.log(address(system));
+<<<<<<< HEAD
 
     console.log("Deploying SignalSystem");
     system = new SignalSystem(world, address(components));
@@ -364,5 +383,7 @@ library LibDeploy {
     world.registerSystem(address(system), SignalSourceSystemID);
     authorizeWriter(components, SignalSourceComponentID, address(system));
     console.log(address(system));
+=======
+>>>>>>> dbfcc80 (feat: adder-test)
   }
 }

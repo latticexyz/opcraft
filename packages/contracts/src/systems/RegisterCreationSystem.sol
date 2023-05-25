@@ -8,6 +8,7 @@ import { NameComponent, ID as NameComponentID } from "../components/NameComponen
 import { VoxelsComponent, ID as VoxelsComponentID } from "../components/VoxelsComponent.sol";
 import { TypeComponent, ID as TypeComponentID } from "../components/TypeComponent.sol";
 import { OwnedByComponent, ID as OwnedByComponentID } from "../components/OwnedByComponent.sol";
+import { EntityIdComponent, ID as EntityIdComponentID } from "../components/EntityIdComponent.sol";
 import { getClaimAtCoord } from "../systems/ClaimSystem.sol";
 import { VoxelCoord } from "../types.sol";
 import { AirID } from "../prototypes/Blocks.sol";
@@ -58,6 +59,7 @@ contract RegisterCreationSystem is System {
     // TODO: should names be unique?
     NameComponent(getAddressById(components, NameComponentID)).set(creationId, creationName);
     OwnedByComponent(getAddressById(components, OwnedByComponentID)).set(creationId, addressToEntity(msg.sender));
+    EntityIdComponent(getAddressById(components, EntityIdComponentID)).set(creationId, creationId);
 
     // now we can safely make this new creation
     VoxelCoord[] memory repositionedCoords = repositionBlocksSoLowerSouthwestCornerIsOnOrigin(creationVoxelCoords);
