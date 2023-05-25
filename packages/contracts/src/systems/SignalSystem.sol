@@ -7,10 +7,11 @@ import { IComponent } from "solecs/interfaces/IComponent.sol";
 import { getAddressById, addressToEntity } from "solecs/utils.sol";
 
 import { PositionComponent, ID as PositionComponentID } from "../components/PositionComponent.sol";
+import { PoweredComponent, ID as PoweredComponentID } from "../components/PoweredComponent.sol";
 import { SignalComponent, ID as SignalComponentID } from "../components/SignalComponent.sol";
 import { SignalSourceComponent, ID as SignalSourceComponentID } from "../components/SignalSourceComponent.sol";
 import { VoxelCoord, BlockDirection, SignalData } from "../types.sol";
-import { calculateBlockDirection } from "../utils.sol";
+import { calculateBlockDirection, getOppositeDirection } from "../utils.sol";
 
 uint256 constant ID = uint256(keccak256("system.Signal"));
 
@@ -21,6 +22,7 @@ contract SignalSystem is System {
     (uint256 centerEntityId, uint256[] memory neighbourEntityIds) = abi.decode(arguments, (uint256, uint256[]));
 
     // Initialize components
+    PoweredComponent poweredComponent = PoweredComponent(getAddressById(components, PoweredComponentID));
     SignalComponent signalComponent = SignalComponent(getAddressById(components, SignalComponentID));
     SignalSourceComponent signalSourceComponent = SignalSourceComponent(
       getAddressById(components, SignalSourceComponentID)
@@ -42,6 +44,12 @@ contract SignalSystem is System {
         centerSignalData = signalComponent.getValue(centerEntityId);
       }
     }
+    bool centerIsPowered = poweredComponent.has(centerEntityId);
+    SignalData memory centerPowerData;
+    if (centerIsPowered) {
+      centerPowerData = poweredComponent.getValue(centerEntityId);
+    }
+
     require(positionComponent.has(centerEntityId), "centerEntityId must have a position"); // even if its air, it must have a position
     VoxelCoord memory centerPosition = positionComponent.getValue(centerEntityId);
 
@@ -62,6 +70,7 @@ contract SignalSystem is System {
       // check if neighbourEntityId exists in signalComponent
       if (signalComponent.has(neighbourEntityId)) {
         SignalData memory neighbourSignalData = signalComponent.getValue(neighbourEntityId);
+
         // check if center is active
         if (centerHasSignalSource || (centerHasSignal && centerSignalData.isActive)) {
           // check if we are already active?
@@ -99,6 +108,16 @@ contract SignalSystem is System {
             }
           } else {
             // and we are not active either, then do nothing
+          }
+        }
+
+        if (centerIsPowered && !centerPowerData.isActive) {
+          if (
+            neighbourSignalData.isActive &&
+            (getOppositeDirection(neighbourSignalData.direction) == centerBlockDirection ||
+              centerBlockDirection == BlockDirection.Down)
+          ) {
+            changedEntity = true;
           }
         }
       }

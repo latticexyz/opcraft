@@ -99,6 +99,12 @@ contract SignalSourceSystem is System {
         }
       }
 
+      if (signalSourceComponent.has(neighbourEntityId)) {
+        if (centerIsPowered && !centerPowerData.isActive) {
+          changedEntity = true;
+        }
+      }
+
       if (changedEntity) {
         changedEntityIds[i] = neighbourEntityId;
       } else {

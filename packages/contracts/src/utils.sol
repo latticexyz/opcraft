@@ -46,6 +46,26 @@ function calculateBlockDirection(VoxelCoord memory centerCoord, VoxelCoord memor
   }
 }
 
+function getOppositeDirection(BlockDirection direction) pure returns (BlockDirection) {
+  if (direction == BlockDirection.None) {
+    return BlockDirection.None;
+  } else if (direction == BlockDirection.Up) {
+    return BlockDirection.Down;
+  } else if (direction == BlockDirection.Down) {
+    return BlockDirection.Up;
+  } else if (direction == BlockDirection.North) {
+    return BlockDirection.South;
+  } else if (direction == BlockDirection.South) {
+    return BlockDirection.North;
+  } else if (direction == BlockDirection.East) {
+    return BlockDirection.West;
+  } else if (direction == BlockDirection.West) {
+    return BlockDirection.East;
+  } else {
+    return BlockDirection.None;
+  }
+}
+
 function hasEntity(uint256[] memory entities) pure returns (bool) {
   for (uint8 i; i < entities.length; i++) {
     if (entities[i] != 0) {
