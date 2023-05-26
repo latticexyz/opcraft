@@ -423,6 +423,20 @@ export async function createNetworkLayer(config: GameConfig) {
       updates: () => [],
     });
   }
+
+  function submitNandTest(creationId: string, points: VoxelCoord[]) {
+    actions.add({
+      id: `submitAndTest+${creationId}` as EntityID,
+      metadata: { actionType: "nandTest" },
+      requirement: () => true,
+      components: {},
+      execute: () =>
+        systems["system.NandTest"].executeTyped(creationId, points[0], points[1], points[2], {
+          gasLimit: 100_000_000,
+        }),
+      updates: () => [],
+    });
+  }
   function transfer(entity: EntityID, receiver: string) {
     const entityIndex = world.entityToIndex.get(entity);
     if (entityIndex == null) return console.warn("trying to transfer unknown entity", entity);
@@ -536,6 +550,7 @@ export async function createNetworkLayer(config: GameConfig) {
       submitHalfAdderTest,
       spawnCreation,
       submitAndTest,
+      submitNandTest,
       transfer,
       getBlockAtPosition,
       getECSBlockAtPosition,

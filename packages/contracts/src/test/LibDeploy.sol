@@ -64,6 +64,7 @@ import { SignalSourceSystem, ID as SignalSourceSystemID } from "systems/SignalSo
 import { AdderTestSystem, ID as AdderTestSystemID } from "systems/AdderTestSystem.sol";
 import { HalfAdderTestSystem, ID as HalfAdderTestSystemID } from "systems/HalfAdderTestSystem.sol";
 import { AndTestSystem, ID as AndTestSystemID } from "systems/AndTestSystem.sol";
+import { NandTestSystem, ID as NandTestSystemID } from "systems/NandTestSystem.sol";
 import { SpawnCreationSystem, ID as SpawnCreationSystemID } from "systems/SpawnCreationSystem.sol";
 import { PoweredSystem, ID as PoweredSystemID } from "systems/PoweredSystem.sol";
 import { InvertedSignalSystem, ID as InvertedSignalSystemID } from "systems/InvertedSignalSystem.sol";
@@ -430,6 +431,13 @@ library LibDeploy {
     console.log("Deploying AndTestSystem");
     system = new AndTestSystem(world, address(components));
     world.registerSystem(address(system), AndTestSystemID);
+    authorizeWriter(components, SignalSourceComponentID, address(system));
+    authorizeWriter(components, PassesTestsComponentID, address(system));
+    console.log(address(system));
+
+    console.log("Deploying NandTestSystem");
+    system = new NandTestSystem(world, address(components));
+    world.registerSystem(address(system), NandTestSystemID);
     authorizeWriter(components, SignalSourceComponentID, address(system));
     authorizeWriter(components, PassesTestsComponentID, address(system));
     console.log(address(system));

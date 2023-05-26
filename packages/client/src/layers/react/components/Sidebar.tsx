@@ -15,6 +15,7 @@ import {RegisterCreation} from "./RegisterCreation";
 import {SubmitAndTest} from "./SubmitAndTest";
 import {SubmitHalfAdderTest} from "./SubmitHalfAdderTest";
 import {SpawnCreation} from "./SpawnCreation";
+import {SubmitNandTest} from "./SubmitNandTest";
 
 type ObservableType<S extends Observable<unknown>> = S extends Observable<infer T> ? T : never;
 
@@ -92,7 +93,8 @@ export function registerSidebar() {
           {/*{<RegisterVoxelType layers={layers} onClose={() => updateTutorial({ community: false })} />}*/}
           {(voxelSelection?.points ?? []).length >= 2 && <RegisterCreation layers={layers} onClose={() => {console.log("closed")}} />}
           {(voxelSelection?.points ?? []).length >= 3 && <SubmitAndTest layers={layers} onClose={() => {console.log("closed")}} />}
-          {(voxelSelection?.points ?? []).length >= 4 && <SubmitHalfAdderTest layers={layers} onClose={() => {console.log("closed")}} />}
+          {(voxelSelection?.points ?? []).length >= 3 && <SubmitNandTest layers={layers} onClose={() => {console.log("closed")}} />}
+          {/*{(voxelSelection?.points ?? []).length >= 4 && <SubmitHalfAdderTest layers={layers} onClose={() => {console.log("closed")}} />}*/}
           {(voxelSelection?.points ?? []).length >= 1 && <SpawnCreation layers={layers} onClose={() => {console.log("closed")}} />}
           {/*{tutorial?.moving && (*/}
           {/*  <Hint onClose={() => updateTutorial({ moving: false })}>*/}
