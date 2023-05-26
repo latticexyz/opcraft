@@ -66,26 +66,14 @@ contract SignalSystemTest is MudTest {
 
     BuildSystem buildSystem = BuildSystem(system(BuildSystemID));
     ItemComponent itemComponent = ItemComponent(component(ItemComponentID));
-    PositionComponent positionComponent = PositionComponent(component(PositionComponentID));
-    OwnedByComponent ownedByComponent = OwnedByComponent(component(OwnedByComponentID));
     SignalComponent signalComponent = SignalComponent(component(SignalComponentID));
 
     buildSystem.executeTyped(signal, signalCoord);
-    VoxelCoord memory signalPosition = positionComponent.getValue(signal);
-    assertEq(signalPosition.x, signalCoord.x);
-    assertEq(signalPosition.y, signalCoord.y);
-    assertEq(signalPosition.z, signalCoord.z);
-    assertTrue(!ownedByComponent.has(signal));
 
     // make sure signal is not active after being placed down cuz there's no source
     assertTrue(!signalComponent.getValue(signal).isActive);
 
     buildSystem.executeTyped(signalSource, singalSourceCoord);
-    VoxelCoord memory signalSourcePosition = positionComponent.getValue(signalSource);
-    assertEq(signalSourcePosition.x, singalSourceCoord.x);
-    assertEq(signalSourcePosition.y, singalSourceCoord.y);
-    assertEq(signalSourcePosition.z, singalSourceCoord.z);
-    assertTrue(!ownedByComponent.has(signalSource));
 
     // check if signal activated
     assertTrue(signalComponent.getValue(signal).isActive);
@@ -105,23 +93,11 @@ contract SignalSystemTest is MudTest {
 
     BuildSystem buildSystem = BuildSystem(system(BuildSystemID));
     ItemComponent itemComponent = ItemComponent(component(ItemComponentID));
-    PositionComponent positionComponent = PositionComponent(component(PositionComponentID));
-    OwnedByComponent ownedByComponent = OwnedByComponent(component(OwnedByComponentID));
     SignalComponent signalComponent = SignalComponent(component(SignalComponentID));
 
     buildSystem.executeTyped(signalSource, singalSourceCoord);
-    VoxelCoord memory signalSourcePosition = positionComponent.getValue(signalSource);
-    assertEq(signalSourcePosition.x, singalSourceCoord.x);
-    assertEq(signalSourcePosition.y, singalSourceCoord.y);
-    assertEq(signalSourcePosition.z, singalSourceCoord.z);
-    assertTrue(!ownedByComponent.has(signalSource));
 
     buildSystem.executeTyped(signal, signalCoord);
-    VoxelCoord memory signalPosition = positionComponent.getValue(signal);
-    assertEq(signalPosition.x, signalCoord.x);
-    assertEq(signalPosition.y, signalCoord.y);
-    assertEq(signalPosition.z, signalCoord.z);
-    assertTrue(!ownedByComponent.has(signal));
 
     // check if signal activated
     assertTrue(signalComponent.getValue(signal).isActive);
@@ -146,37 +122,20 @@ contract SignalSystemTest is MudTest {
 
     BuildSystem buildSystem = BuildSystem(system(BuildSystemID));
     ItemComponent itemComponent = ItemComponent(component(ItemComponentID));
-    PositionComponent positionComponent = PositionComponent(component(PositionComponentID));
-    OwnedByComponent ownedByComponent = OwnedByComponent(component(OwnedByComponentID));
     SignalComponent signalComponent = SignalComponent(component(SignalComponentID));
 
     buildSystem.executeTyped(signal, signalCoord);
-    VoxelCoord memory signalPosition = positionComponent.getValue(signal);
-    assertEq(signalPosition.x, signalCoord.x);
-    assertEq(signalPosition.y, signalCoord.y);
-    assertEq(signalPosition.z, signalCoord.z);
-    assertTrue(!ownedByComponent.has(signal));
 
     // make sure signal is not active after being placed down cuz there's no source
     assertTrue(!signalComponent.getValue(signal).isActive);
 
     buildSystem.executeTyped(signal2, signal2Coord);
-    VoxelCoord memory signal2Position = positionComponent.getValue(signal2);
-    assertEq(signal2Position.x, signal2Coord.x);
-    assertEq(signal2Position.y, signal2Coord.y);
-    assertEq(signal2Position.z, signal2Coord.z);
-    assertTrue(!ownedByComponent.has(signal2));
 
     // make sure signal is not active after being placed down cuz there's no source
     assertTrue(!signalComponent.getValue(signal).isActive);
     assertTrue(!signalComponent.getValue(signal2).isActive);
 
     buildSystem.executeTyped(signalSource, singalSourceCoord);
-    VoxelCoord memory signalSourcePosition = positionComponent.getValue(signalSource);
-    assertEq(signalSourcePosition.x, singalSourceCoord.x);
-    assertEq(signalSourcePosition.y, singalSourceCoord.y);
-    assertEq(signalSourcePosition.z, singalSourceCoord.z);
-    assertTrue(!ownedByComponent.has(signalSource));
 
     // check if both signal's are activated
     assertTrue(signalComponent.getValue(signal).isActive);
@@ -198,26 +157,14 @@ contract SignalSystemTest is MudTest {
     BuildSystem buildSystem = BuildSystem(system(BuildSystemID));
     MineSystem mineSystem = MineSystem(system(MineSystemID));
     ItemComponent itemComponent = ItemComponent(component(ItemComponentID));
-    PositionComponent positionComponent = PositionComponent(component(PositionComponentID));
-    OwnedByComponent ownedByComponent = OwnedByComponent(component(OwnedByComponentID));
     SignalComponent signalComponent = SignalComponent(component(SignalComponentID));
 
     buildSystem.executeTyped(signal, signalCoord);
-    VoxelCoord memory signalPosition = positionComponent.getValue(signal);
-    assertEq(signalPosition.x, signalCoord.x);
-    assertEq(signalPosition.y, signalCoord.y);
-    assertEq(signalPosition.z, signalCoord.z);
-    assertTrue(!ownedByComponent.has(signal));
 
     // make sure signal is not active after being placed down cuz there's no source
     assertTrue(!signalComponent.getValue(signal).isActive);
 
     buildSystem.executeTyped(signalSource, singalSourceCoord);
-    VoxelCoord memory signalSourcePosition = positionComponent.getValue(signalSource);
-    assertEq(signalSourcePosition.x, singalSourceCoord.x);
-    assertEq(signalSourcePosition.y, singalSourceCoord.y);
-    assertEq(signalSourcePosition.z, singalSourceCoord.z);
-    assertTrue(!ownedByComponent.has(signalSource));
 
     // check if signal activated
     assertTrue(signalComponent.getValue(signal).isActive);
@@ -225,7 +172,6 @@ contract SignalSystemTest is MudTest {
     // mine block source
     uint256 minedEntity = mineSystem.executeTyped(singalSourceCoord, PurpleWoolID);
     assertEq(itemComponent.getValue(minedEntity), PurpleWoolID);
-    assertEq(ownedByComponent.getValue(minedEntity), addressToEntity(alice));
 
     // make sure signal is not active after source is mined
     assertTrue(!signalComponent.getValue(signal).isActive);

@@ -20,6 +20,10 @@ import { CreateBlock } from "../libraries/CreateBlock.sol";
 
 uint256 constant ID = uint256(keccak256("system.Build"));
 
+// custom flag so tests can work with normal build system
+// TODO: The current method of creative mode should be moved to CreativeBuildSystem, and then this flag can be removed
+bool constant IS_TESTING = false;
+
 contract BuildSystem is System {
   constructor(IWorld _world, address _components) System(_world, _components) {}
 
@@ -52,20 +56,24 @@ contract BuildSystem is System {
 
     // curtis removed this so we are in creative mode. I didn't feel like porting this logic to the creative system (cause dhvani may change something)
     // ownedByComponent.remove(blockEntity);
-    // uint256 newEntity = world.getUniqueEntityId();
-    // uint256 blockType = itemComponent.getValue(blockEntity);
-    // itemComponent.set(newEntity, blockType); // TODO: remove itemCompoent
-    // typeComponent.set(newEntity, blockType);
-    // positionComponent.set(newEntity, coord);
 
-    // CreateBlock.addCustomComponents(components, blockType, newEntity);
+    if (!IS_TESTING) {
+      uint256 newEntity = world.getUniqueEntityId();
+      uint256 blockType = itemComponent.getValue(blockEntity);
+      itemComponent.set(newEntity, blockType); // TODO: remove itemCompoent
+      typeComponent.set(newEntity, blockType);
+      positionComponent.set(newEntity, coord);
 
-    // Remove block from inventory and place it in the world
-    ownedByComponent.remove(blockEntity);
-    positionComponent.set(blockEntity, coord);
+      CreateBlock.addCustomComponents(components, blockType, newEntity);
 
-    // Run block interaction logic
-    BlockInteraction.runInteractionSystems(world.systems(), components, blockEntity);
+      // Run block interaction logic
+      BlockInteraction.runInteractionSystems(world.systems(), components, newEntity);
+    } else {
+      // Remove block from inventory and place it in the world
+      ownedByComponent.remove(blockEntity);
+      positionComponent.set(blockEntity, coord);
+      BlockInteraction.runInteractionSystems(world.systems(), components, blockEntity);
+    }
   }
 
   function executeTyped(uint256 entity, VoxelCoord memory coord) public returns (bytes memory) {
