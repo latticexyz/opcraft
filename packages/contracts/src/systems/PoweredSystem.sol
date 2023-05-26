@@ -49,11 +49,11 @@ contract PoweredSystem is System {
 
       // 3 conditions
       // 1) if center is signal source, then we turn on no matter what
-      // 2) if its an inverted singal, we turn on as long as we're not below it
+      // 2) if its an inverted singal, we turn on as long as we're not below it (TODO: removed for now, but add it back in)
       // 3) if its an active signal, turn on if we're in its direction or below it
 
       bool shouldBePowered = centerHasSignalSource ||
-        (centerHasInvertedSignal && centerSignalData.isActive && centerBlockDirection != BlockDirection.Down) ||
+        // (centerHasInvertedSignal && centerSignalData.isActive && centerBlockDirection != BlockDirection.Down) ||
         (centerHasSignal &&
           centerSignalData.isActive &&
           (centerSignalData.direction == centerBlockDirection || centerBlockDirection == BlockDirection.Down));
