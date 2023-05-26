@@ -65,10 +65,13 @@ contract RegisterCreationSystem is System {
     EntityIdComponent(getAddressById(components, EntityIdComponentID)).set(creationId, creationId);
 
     // now we can safely make this new creation
-    VoxelCoord[] memory repositionedCoords = repositionBlocksSoLowerSouthwestCornerIsOnOrigin(creationVoxelCoords);
+    VoxelCoord[] memory repositionedCoords = repositionBlocksSoLowerSouthwestCornerIsOnOrigin(
+      creationVoxelCoords,
+      numVoxels
+    );
 
     // TODO: properly clone the voxels. we need to emit a clone event
-    for (uint32 i = 0; i < repositionedCoords.length; i++) {
+    for (uint32 i = 0; i < numVoxels; i++) {
       uint256 newVoxelId = world.getUniqueEntityId();
 
       VoxelCoord memory repositionedCoord = repositionedCoords[i];
@@ -129,15 +132,15 @@ contract RegisterCreationSystem is System {
   }
 
   // TODO: put this into a precompile for speed
-  function repositionBlocksSoLowerSouthwestCornerIsOnOrigin(VoxelCoord[] memory creationCoords)
+  function repositionBlocksSoLowerSouthwestCornerIsOnOrigin(VoxelCoord[] memory creationCoords, uint256 numVoxels)
     private
     pure
     returns (VoxelCoord[] memory)
   {
-    int32 lowestX = 0;
-    int32 lowestY = 0;
-    int32 lowestZ = 0;
-    for (uint32 i = 0; i < creationCoords.length; i++) {
+    int32 lowestX = 2147483647;
+    int32 lowestY = 2147483647;
+    int32 lowestZ = 2147483647;
+    for (uint32 i = 0; i < numVoxels; i++) {
       VoxelCoord memory voxel = creationCoords[i];
       if (voxel.x < lowestX) {
         lowestX = voxel.x;
@@ -150,8 +153,8 @@ contract RegisterCreationSystem is System {
       }
     }
 
-    VoxelCoord[] memory repositionedCoords = new VoxelCoord[](creationCoords.length);
-    for (uint32 i = 0; i < creationCoords.length; i++) {
+    VoxelCoord[] memory repositionedCoords = new VoxelCoord[](numVoxels);
+    for (uint32 i = 0; i < numVoxels; i++) {
       VoxelCoord memory voxel = creationCoords[i];
       VoxelCoord memory newRelativeCoord = VoxelCoord(voxel.x - lowestX, voxel.y - lowestY, voxel.z - lowestZ);
       repositionedCoords[i] = newRelativeCoord;

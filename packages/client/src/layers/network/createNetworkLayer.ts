@@ -382,7 +382,7 @@ export async function createNetworkLayer(config: GameConfig) {
     });
   }
 
-  function submitHalfAdderTest(creationId: number, points: VoxelCoord[]) {
+  function submitHalfAdderTest(creationId: string, points: VoxelCoord[]) {
     actions.add({
       id: `submitHalfAdderTest+${creationId}` as EntityID,
       metadata: { actionType: "halfAdderTest" },
@@ -396,7 +396,7 @@ export async function createNetworkLayer(config: GameConfig) {
     });
   }
 
-  function spawnCreation(creationId: number, lowerSouthWestCorner: VoxelCoordStruct) {
+  function spawnCreation(creationId: string, lowerSouthWestCorner: VoxelCoordStruct) {
     actions.add({
       id: `spawnCreation+${creationId}` as EntityID,
       metadata: { actionType: "spawnCreation" },

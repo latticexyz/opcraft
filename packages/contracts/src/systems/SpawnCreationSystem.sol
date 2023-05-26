@@ -54,6 +54,7 @@ contract SpawnCreationSystem is System {
     for (uint32 i = 0; i < creationVoxelIds.length; i++) {
       uint256 existingEntity = creationVoxelIds[i];
       uint256 newEntity = world.getUniqueEntityId();
+
       uint256 itemType = itemComponent.getValue(existingEntity);
       uint256 blockType = typeComponent.getValue(existingEntity);
       itemComponent.set(newEntity, itemType);

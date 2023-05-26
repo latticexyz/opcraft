@@ -20,19 +20,19 @@ export const SpawnCreation: React.FC<{ onClose: () => void; layers: Layers}> = (
 		},
 	} = layers;
 
-	const [creationIds, setCreationIds] = React.useState<number[]>();
+	const [creationIds, setCreationIds] = React.useState<string[]>();
 	React.useEffect(() => {
-		setCreationIds(Array.from(EntityId.values.value.values()).map(id => parseInt(id)));
+		setCreationIds(Array.from(EntityId.values.value.values()));
 		defineRxSystem(world, EntityId.update$.pipe(distinct()), (update) => {
-			setCreationIds(Array.from(EntityId.values.value.values()).map(id => parseInt(id)));
+			setCreationIds(Array.from(EntityId.values.value.values()));
 		});
 	}, []);
 
-	const spawnCreation = (creationId: number) => {
+	const spawnCreation = (creationId: string) => {
 		const points: VoxelCoord[] = getComponentValue(VoxelSelection, SingletonEntity)?.points ?? [];
 		const coord = points.slice(-1);
 		if(coord.length < 1) {
-			toast("Please select a the lowerSouthWest voxel to spawn the creation on");
+			toast("Please select the lowerSouthWest voxel to spawn the creation on");
 			return;
 		}
 		api.spawnCreation(creationId, coord[0]);
@@ -47,7 +47,7 @@ export const SpawnCreation: React.FC<{ onClose: () => void; layers: Layers}> = (
 				{
 					creationIds?.map((id) => {
 						return (
-							<Button key={`creation-id-${id}`} onClick={() => spawnCreation(id)}>Spawn 0x{id.toString(16).slice(0,7)}...</Button>
+							<Button key={`creation-id-${id}`} onClick={() => spawnCreation(id)}>Spawn 0x{id.slice(0,7)}...</Button>
 						)
 					})
 				}

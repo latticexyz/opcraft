@@ -20,15 +20,15 @@ export const SubmitHalfAdderTest: React.FC<{ onClose: () => void; layers: Layers
 		},
 	} = layers;
 
-	const [creationIds, setCreationIds] = React.useState<number[]>();
+	const [creationIds, setCreationIds] = React.useState<string[]>();
 	React.useEffect(() => {
-		setCreationIds(Array.from(EntityId.values.value.values()).map(id => parseInt(id)));
+		setCreationIds(Array.from(EntityId.values.value.values()));
 		defineRxSystem(world, EntityId.update$.pipe(distinct()), (update) => {
-				setCreationIds(Array.from(EntityId.values.value.values()).map(id => parseInt(id)));
+				setCreationIds(Array.from(EntityId.values.value.values()));
 		});
 	}, []);
 
-	const submit = (creationId: number) => {
+	const submit = (creationId: string) => {
 		let points: VoxelCoord[] = getComponentValue(VoxelSelection, SingletonEntity)?.points ?? [];
 		// only take the last 4 points to submit the test
 		points = points.slice(-4);
@@ -49,7 +49,7 @@ export const SubmitHalfAdderTest: React.FC<{ onClose: () => void; layers: Layers
 			{
 				creationIds?.map((id) => {
 					return (
-							<Button key={`creation-id-${id}`} onClick={() => submit(id)}>Submit 0x{id.toString(16).slice(0,7)}...</Button>
+							<Button key={`creation-id-${id}`} onClick={() => submit(id)}>Submit 0x{id.slice(0,7)}...</Button>
 					)
 				})
 			}
