@@ -60,11 +60,20 @@ contract PoweredSystem is System {
 
       if (neighbourSignalData.isActive) {
         // check to see if we should be turned off
-        if (!shouldBePowered) {
-          neighbourSignalData.isActive = false;
-          neighbourSignalData.direction = BlockDirection.None;
-          poweredComponent.set(neighbourEntityId, neighbourSignalData);
-          changedEntity = true;
+        if (neighbourSignalData.direction == centerBlockDirection) {
+          if (!shouldBePowered) {
+            neighbourSignalData.isActive = false;
+            neighbourSignalData.direction = BlockDirection.None;
+            poweredComponent.set(neighbourEntityId, neighbourSignalData);
+            changedEntity = true;
+          }
+        }
+
+        if (neighbourSignalData.isActive) {
+          if (centerHasInvertedSignal && centerSignalData.isActive) {
+            // should be off
+            changedEntity = true;
+          }
         }
       } else {
         // check to see if we should be powered
@@ -125,14 +134,16 @@ contract PoweredSystem is System {
         positionComponent.getValue(neighbourEntityId)
       );
 
-      changedEntity = runLogic(
-        centerEntityId,
-        neighbourEntityId,
-        centerHasSignal,
-        centerHasSignalSource,
-        centerSignalData,
-        centerBlockDirection
-      );
+      changedEntity =
+        changedEntity ||
+        runLogic(
+          centerEntityId,
+          neighbourEntityId,
+          centerHasSignal,
+          centerHasSignalSource,
+          centerSignalData,
+          centerBlockDirection
+        );
 
       if (changedEntity) {
         changedEntityIds[i] = neighbourEntityId;

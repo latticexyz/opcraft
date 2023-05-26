@@ -36,7 +36,7 @@ contract InvertedSignalSystemTest is MudTest {
 
     // Give a signal source to alice treating purple wool as a source
     signalSource = world.getUniqueEntityId();
-    SignalSourceComponent(component(SignalSourceComponentID)).set(signalSource);
+    SignalSourceComponent(component(SignalSourceComponentID)).set(signalSource, true);
     ItemComponent(component(ItemComponentID)).set(signalSource, PurpleWoolID);
     OwnedByComponent(component(OwnedByComponentID)).set(signalSource, addressToEntity(alice));
 
@@ -61,8 +61,8 @@ contract InvertedSignalSystemTest is MudTest {
       normalBlock,
       SignalData({ isActive: false, direction: BlockDirection.None })
     );
-    ItemComponent(component(ItemComponentID)).set(lastSignal, GrassID);
-    OwnedByComponent(component(OwnedByComponentID)).set(lastSignal, addressToEntity(alice));
+    ItemComponent(component(ItemComponentID)).set(normalBlock, GrassID);
+    OwnedByComponent(component(OwnedByComponentID)).set(normalBlock, addressToEntity(alice));
 
     invertedSignal = world.getUniqueEntityId();
     InvertedSignalComponent(component(InvertedSignalComponentID)).set(
@@ -87,8 +87,28 @@ contract InvertedSignalSystemTest is MudTest {
     vm.startPrank(alice);
 
     VoxelCoord memory singalSourceCoord = VoxelCoord({ x: 3275, y: 20, z: 4363 }); // Air
-    VoxelCoord memory signalCoord = VoxelCoord({
+    VoxelCoord memory signal1Coord = VoxelCoord({
       x: singalSourceCoord.x + 1,
+      y: singalSourceCoord.y,
+      z: singalSourceCoord.z
+    }); // Air
+    VoxelCoord memory signal2Coord = VoxelCoord({
+      x: singalSourceCoord.x + 2,
+      y: singalSourceCoord.y,
+      z: singalSourceCoord.z
+    }); // Air
+    VoxelCoord memory lastSignalCoord = VoxelCoord({
+      x: singalSourceCoord.x + 5,
+      y: singalSourceCoord.y,
+      z: singalSourceCoord.z
+    }); // Air
+    VoxelCoord memory invertedSignalCoord = VoxelCoord({
+      x: singalSourceCoord.x + 4,
+      y: singalSourceCoord.y,
+      z: singalSourceCoord.z
+    }); // Air
+    VoxelCoord memory normalBlockCoord = VoxelCoord({
+      x: singalSourceCoord.x + 3,
       y: singalSourceCoord.y,
       z: singalSourceCoord.z
     }); // Air
@@ -98,26 +118,38 @@ contract InvertedSignalSystemTest is MudTest {
     PositionComponent positionComponent = PositionComponent(component(PositionComponentID));
     OwnedByComponent ownedByComponent = OwnedByComponent(component(OwnedByComponentID));
     SignalComponent signalComponent = SignalComponent(component(SignalComponentID));
-
-    buildSystem.executeTyped(signal, signalCoord);
-    VoxelCoord memory signalPosition = positionComponent.getValue(signal);
-    assertEq(signalPosition.x, signalCoord.x);
-    assertEq(signalPosition.y, signalCoord.y);
-    assertEq(signalPosition.z, signalCoord.z);
-    assertTrue(!ownedByComponent.has(signal));
-
-    // make sure signal is not active after being placed down cuz there's no source
-    assertTrue(!signalComponent.getValue(signal).isActive);
+    PoweredComponent poweredComponent = PoweredComponent(component(PoweredComponentID));
+    InvertedSignalComponent invertedSignalComponent = InvertedSignalComponent(component(InvertedSignalComponentID));
 
     buildSystem.executeTyped(signalSource, singalSourceCoord);
-    VoxelCoord memory signalSourcePosition = positionComponent.getValue(signalSource);
-    assertEq(signalSourcePosition.x, singalSourceCoord.x);
-    assertEq(signalSourcePosition.y, singalSourceCoord.y);
-    assertEq(signalSourcePosition.z, singalSourceCoord.z);
-    assertTrue(!ownedByComponent.has(signalSource));
-
-    // check if signal activated
+    buildSystem.executeTyped(signal, signal1Coord);
+    buildSystem.executeTyped(signal2, signal2Coord);
+    buildSystem.executeTyped(lastSignal, lastSignalCoord);
     assertTrue(signalComponent.getValue(signal).isActive);
+    assertTrue(signalComponent.getValue(signal2).isActive);
+    assertTrue(!signalComponent.getValue(lastSignal).isActive);
+
+    buildSystem.executeTyped(normalBlock, normalBlockCoord);
+    assertTrue(poweredComponent.getValue(normalBlock).isActive);
+    buildSystem.executeTyped(invertedSignal, invertedSignalCoord);
+    assertTrue(poweredComponent.getValue(normalBlock).isActive);
+    // the inverted signal will not be active because its beside a powered block
+    assertTrue(!invertedSignalComponent.getValue(invertedSignal).isActive);
+    // thus the last wire is also not active
+    assertTrue(!signalComponent.getValue(lastSignal).isActive);
+
+    // if we remove the signal source, then the powered block should be off, and the inverted signal active
+    // and so the last signal is active
+    {
+      MineSystem mineSystem = MineSystem(system(MineSystemID));
+      mineSystem.executeTyped(singalSourceCoord, PurpleWoolID);
+    }
+    assertTrue(!signalComponent.getValue(signal).isActive);
+    assertTrue(!signalComponent.getValue(signal2).isActive);
+    assertTrue(invertedSignalComponent.getValue(invertedSignal).isActive);
+    assertTrue(signalComponent.getValue(lastSignal).isActive);
+    // normal block should be powered
+    assertTrue(poweredComponent.getValue(normalBlock).isActive);
 
     vm.stopPrank();
   }

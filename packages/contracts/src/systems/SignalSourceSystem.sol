@@ -19,7 +19,7 @@ uint256 constant ID = uint256(keccak256("system.SignalSource"));
 contract SignalSourceSystem is System {
   constructor(IWorld _world, address _components) System(_world, _components) {}
 
-  function additionalChecks(
+  function runLogic(
     SignalSourceComponent signalSourceComponent,
     uint256 centerEntityId,
     uint256 neighbourEntityId,
@@ -117,13 +117,9 @@ contract SignalSourceSystem is System {
         changedEntity = true;
       }
 
-      changedEntity = additionalChecks(
-        signalSourceComponent,
-        centerEntityId,
-        neighbourEntityId,
-        centerSignalData,
-        centerBlockDirection
-      );
+      changedEntity =
+        changedEntity ||
+        runLogic(signalSourceComponent, centerEntityId, neighbourEntityId, centerSignalData, centerBlockDirection);
 
       if (changedEntity) {
         changedEntityIds[i] = neighbourEntityId;

@@ -8,6 +8,7 @@ import { getAddressById, addressToEntity } from "solecs/utils.sol";
 
 import { PositionComponent, ID as PositionComponentID } from "../components/PositionComponent.sol";
 import { PoweredComponent, ID as PoweredComponentID } from "../components/PoweredComponent.sol";
+import { InvertedSignalComponent, ID as InvertedSignalComponentID } from "../components/InvertedSignalComponent.sol";
 import { SignalComponent, ID as SignalComponentID } from "../components/SignalComponent.sol";
 import { SignalSourceComponent, ID as SignalSourceComponentID } from "../components/SignalSourceComponent.sol";
 import { VoxelCoord, BlockDirection, SignalData } from "../types.sol";
@@ -18,11 +19,99 @@ uint256 constant ID = uint256(keccak256("system.Signal"));
 contract SignalSystem is System {
   constructor(IWorld _world, address _components) System(_world, _components) {}
 
+  function runLogic(
+    uint256 centerEntityId,
+    uint256 neighbourEntityId,
+    bool centerHasSignal,
+    bool centerHasSignalSource,
+    SignalData memory centerSignalData,
+    BlockDirection centerBlockDirection
+  ) public returns (bool) {
+    InvertedSignalComponent invertedSignalComponent = InvertedSignalComponent(
+      getAddressById(components, InvertedSignalComponentID)
+    );
+    SignalComponent signalComponent = SignalComponent(getAddressById(components, SignalComponentID));
+    PoweredComponent poweredComponent = PoweredComponent(getAddressById(components, PoweredComponentID));
+
+    bool centerIsPowered = poweredComponent.has(centerEntityId);
+    SignalData memory centerPowerData;
+    if (centerIsPowered) {
+      centerPowerData = poweredComponent.getValue(centerEntityId);
+    }
+
+    bool centerHasInvertedSignal = invertedSignalComponent.has(centerEntityId);
+    if (centerHasInvertedSignal) {
+      centerSignalData = invertedSignalComponent.getValue(centerEntityId);
+    }
+
+    bool changedEntity = false;
+
+    // check if neighbourEntityId exists in signalComponent
+    if (signalComponent.has(neighbourEntityId)) {
+      SignalData memory neighbourSignalData = signalComponent.getValue(neighbourEntityId);
+
+      // check if center is active
+      if (
+        centerHasSignalSource ||
+        (centerHasSignal && centerSignalData.isActive) ||
+        (centerHasInvertedSignal && centerSignalData.isActive)
+      ) {
+        // check if we are already active?
+        if (neighbourSignalData.isActive) {
+          // then do nothing
+        } else {
+          // otherwise, if center is active, and we are not active, we should become active
+          // using this center as the source block direction
+          neighbourSignalData.isActive = true;
+          neighbourSignalData.direction = centerBlockDirection;
+          signalComponent.set(neighbourEntityId, neighbourSignalData);
+          changedEntity = true;
+        }
+      } else {
+        // if center is not active or doesn't exist
+        if (neighbourSignalData.isActive) {
+          // and we are active
+          // check if the source used to come from the center direction
+          if (neighbourSignalData.direction == centerBlockDirection) {
+            // then we should become inactive
+            neighbourSignalData.isActive = false;
+            neighbourSignalData.direction = BlockDirection.None;
+            signalComponent.set(neighbourEntityId, neighbourSignalData);
+            changedEntity = true;
+          } else {
+            // otherwise, do nothing
+
+            // check if center block is a signal block that is not active, because if we're active we need to update it
+            if (centerHasSignal && !centerSignalData.isActive) {
+              // then since our source is from someplace else (previous if statement), then we can give the center block our signal
+              // we dont want to update it here, otherwise the other neighbours won't get the appropriate signal
+              // so we simply add ourself to the changed list, so it will get called as a neighbour
+              changedEntity = true;
+            }
+          }
+        } else {
+          // and we are not active either, then do nothing
+        }
+      }
+
+      if (centerIsPowered && !centerPowerData.isActive) {
+        if (
+          neighbourSignalData.isActive &&
+          (getOppositeDirection(neighbourSignalData.direction) == centerBlockDirection ||
+            centerBlockDirection == BlockDirection.Down)
+        ) {
+          changedEntity = true;
+        }
+      }
+    }
+
+    return changedEntity;
+  }
+
   function execute(bytes memory arguments) public returns (bytes memory) {
     (uint256 centerEntityId, uint256[] memory neighbourEntityIds) = abi.decode(arguments, (uint256, uint256[]));
 
     // Initialize components
-    PoweredComponent poweredComponent = PoweredComponent(getAddressById(components, PoweredComponentID));
     SignalComponent signalComponent = SignalComponent(getAddressById(components, SignalComponentID));
     SignalSourceComponent signalSourceComponent = SignalSourceComponent(
       getAddressById(components, SignalSourceComponentID)
@@ -44,11 +133,6 @@ contract SignalSystem is System {
         centerSignalData = signalComponent.getValue(centerEntityId);
       }
     }
-    bool centerIsPowered = poweredComponent.has(centerEntityId);
-    SignalData memory centerPowerData;
-    if (centerIsPowered) {
-      centerPowerData = poweredComponent.getValue(centerEntityId);
-    }
 
     require(positionComponent.has(centerEntityId), "centerEntityId must have a position"); // even if its air, it must have a position
     VoxelCoord memory centerPosition = positionComponent.getValue(centerEntityId);
@@ -67,60 +151,14 @@ contract SignalSystem is System {
         centerPosition,
         positionComponent.getValue(neighbourEntityId)
       );
-      // check if neighbourEntityId exists in signalComponent
-      if (signalComponent.has(neighbourEntityId)) {
-        SignalData memory neighbourSignalData = signalComponent.getValue(neighbourEntityId);
-
-        // check if center is active
-        if (centerHasSignalSource || (centerHasSignal && centerSignalData.isActive)) {
-          // check if we are already active?
-          if (neighbourSignalData.isActive) {
-            // then do nothing
-          } else {
-            // otherwise, if center is active, and we are not active, we should become active
-            // using this center as the source block direction
-            neighbourSignalData.isActive = true;
-            neighbourSignalData.direction = centerBlockDirection;
-            signalComponent.set(neighbourEntityId, neighbourSignalData);
-            changedEntity = true;
-          }
-        } else {
-          // if center is not active or doesn't exist
-          if (neighbourSignalData.isActive) {
-            // and we are active
-            // check if the source used to come from the center direction
-            if (neighbourSignalData.direction == centerBlockDirection) {
-              // then we should become inactive
-              neighbourSignalData.isActive = false;
-              neighbourSignalData.direction = BlockDirection.None;
-              signalComponent.set(neighbourEntityId, neighbourSignalData);
-              changedEntity = true;
-            } else {
-              // otherwise, do nothing
-
-              // check if center block is a signal block that is not active, because if we're active we need to update it
-              if (centerHasSignal && !centerSignalData.isActive) {
-                // then since our source is from someplace else (previous if statement), then we can give the center block our signal
-                // we dont want to update it here, otherwise the other neighbours won't get the appropriate signal
-                // so we simply add ourself to the changed list, so it will get called as a neighbour
-                changedEntity = true;
-              }
-            }
-          } else {
-            // and we are not active either, then do nothing
-          }
-        }
-
-        if (centerIsPowered && !centerPowerData.isActive) {
-          if (
-            neighbourSignalData.isActive &&
-            (getOppositeDirection(neighbourSignalData.direction) == centerBlockDirection ||
-              centerBlockDirection == BlockDirection.Down)
-          ) {
-            changedEntity = true;
-          }
-        }
-      }
+      changedEntity = runLogic(
+        centerEntityId,
+        neighbourEntityId,
+        centerHasSignal,
+        centerHasSignalSource,
+        centerSignalData,
+        centerBlockDirection
+      );
 
       if (changedEntity) {
         changedEntityIds[i] = neighbourEntityId;

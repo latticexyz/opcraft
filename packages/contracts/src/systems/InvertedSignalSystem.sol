@@ -12,7 +12,7 @@ import { InvertedSignalComponent, ID as InvertedSignalComponentID } from "../com
 import { SignalComponent, ID as SignalComponentID } from "../components/SignalComponent.sol";
 import { SignalSourceComponent, ID as SignalSourceComponentID } from "../components/SignalSourceComponent.sol";
 import { VoxelCoord, BlockDirection, SignalData } from "../types.sol";
-import { calculateBlockDirection } from "../utils.sol";
+import { calculateBlockDirection, getOppositeDirection } from "../utils.sol";
 
 uint256 constant ID = uint256(keccak256("system.InvertedSignal"));
 
@@ -43,7 +43,11 @@ contract InvertedSignalSystem is System {
       SignalData memory neighbourSignalData = invertedSignalComponent.getValue(neighbourEntityId);
       if (neighbourSignalData.isActive) {
         // check if we should remain active
-        if (centerIsPowered && centerPowerData.isActive) {
+        if (
+          centerIsPowered &&
+          centerPowerData.isActive &&
+          getOppositeDirection(centerPowerData.direction) != centerBlockDirection
+        ) {
           // if center is powered, then we are now adjacent to a powered block, so we should become inactive
           neighbourSignalData.isActive = false;
           neighbourSignalData.direction = centerBlockDirection; // blocked direction
@@ -124,13 +128,9 @@ contract InvertedSignalSystem is System {
         positionComponent.getValue(neighbourEntityId)
       );
       // check if neighbourEntityId exists in signalComponent
-      changedEntity = runLogic(
-        centerEntityId,
-        neighbourEntityId,
-        centerBlockDirection,
-        centerHasSignal,
-        centerSignalData
-      );
+      changedEntity =
+        changedEntity ||
+        runLogic(centerEntityId, neighbourEntityId, centerBlockDirection, centerHasSignal, centerSignalData);
 
       if (changedEntity) {
         changedEntityIds[i] = neighbourEntityId;

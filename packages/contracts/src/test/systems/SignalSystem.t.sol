@@ -30,7 +30,7 @@ contract SignalSystemTest is MudTest {
 
     // Give a signal source to alice treating purple wool as a source
     signalSource = world.getUniqueEntityId();
-    SignalSourceComponent(component(SignalSourceComponentID)).set(signalSource);
+    SignalSourceComponent(component(SignalSourceComponentID)).set(signalSource, true);
     ItemComponent(component(ItemComponentID)).set(signalSource, PurpleWoolID);
     OwnedByComponent(component(OwnedByComponentID)).set(signalSource, addressToEntity(alice));
 
