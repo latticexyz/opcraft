@@ -28,16 +28,19 @@ export const SubmitAndTest: React.FC<{ onClose: () => void; layers: Layers}> = (
 				setCreationIds(Array.from(EntityId.values.value.values()));
 		});
 
-		const andTestId =  keccak256("system.AndTest") as EntityID;
+		const andTestId =  world.entityToIndex.get(keccak256("system.AndTest") as EntityID);
 
-		if(PassesTests.values.value.has(andTestId)) {
-			setPassesTests(Array.from(PassesTests.values.value.get(andTestId)));
-		}
-		defineRxSystem(world, PassesTests.update$.pipe(distinct()), (update) => {
-			debugger;
-			if(PassesTests.values.value.has(andTestId)) {
+		setTimeout(() => {
+			if (PassesTests.values.value.has(andTestId)) {
 				setPassesTests(Array.from(PassesTests.values.value.get(andTestId)));
 			}
+		}, 4000);
+		defineRxSystem(world, PassesTests.update$.pipe(distinct()), (update) => {
+			setTimeout(() => {
+				if (PassesTests.values.value.has(andTestId)) {
+					setPassesTests(Array.from(PassesTests.values.value.get(andTestId)));
+				}
+			}, 4000);
 		});
 	}, []);
 

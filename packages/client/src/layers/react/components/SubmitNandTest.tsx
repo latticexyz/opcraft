@@ -28,16 +28,19 @@ export const SubmitNandTest: React.FC<{ onClose: () => void; layers: Layers}> = 
 				setCreationIds(Array.from(EntityId.values.value.values()));
 		});
 
-		const nandTestId =  keccak256("system.NandTest") as EntityID;
+		const nandTestId =  world.entityToIndex.get(keccak256("system.NandTest") as EntityID);
 
-		if(PassesTests.values.value.has(nandTestId)) {
-			setPassesTests(Array.from(PassesTests.values.value.get(nandTestId)));
-		}
-		defineRxSystem(world, PassesTests.update$.pipe(distinct()), (update) => {
-			debugger;
+		setTimeout(() => {
 			if(PassesTests.values.value.has(nandTestId)) {
-				setPassesTests(Array.from(PassesTests.values.value.get(nandTestId)));
+					setPassesTests(Array.from(PassesTests.values.value.get(nandTestId)));
 			}
+		}, 4000);
+		defineRxSystem(world, PassesTests.update$.pipe(distinct()), (update) => {
+			setTimeout(() => {
+				if(PassesTests.values.value.has(nandTestId)) {
+						setPassesTests(Array.from(PassesTests.values.value.get(nandTestId)));
+				}
+			}, 4000);
 		});
 	}, []);
 

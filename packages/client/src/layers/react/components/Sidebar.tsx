@@ -91,11 +91,11 @@ export function registerSidebar() {
           <ChunkExplorer {...chunk} />
           {/*{tutorial?.community && <JoinSocial onClose={() => updateTutorial({ community: false })} />}*/}
           {/*{<RegisterVoxelType layers={layers} onClose={() => updateTutorial({ community: false })} />}*/}
-          {(voxelSelection?.points ?? []).length >= 2 && <RegisterCreation layers={layers} onClose={() => {console.log("closed")}} />}
-          {(voxelSelection?.points ?? []).length >= 3 && <SubmitAndTest layers={layers} onClose={() => {console.log("closed")}} />}
-          {(voxelSelection?.points ?? []).length >= 3 && <SubmitNandTest layers={layers} onClose={() => {console.log("closed")}} />}
+          { <RegisterCreation layers={layers} onClose={() => {console.log("closed")}} />}
+          { <SubmitAndTest layers={layers} onClose={() => {console.log("closed")}} />}
+          {<SubmitNandTest layers={layers} onClose={() => {console.log("closed")}} />}
           {/*{(voxelSelection?.points ?? []).length >= 4 && <SubmitHalfAdderTest layers={layers} onClose={() => {console.log("closed")}} />}*/}
-          {(voxelSelection?.points ?? []).length >= 1 && <SpawnCreation layers={layers} onClose={() => {console.log("closed")}} />}
+          { <SpawnCreation layers={layers} onClose={() => {console.log("closed")}} />}
           {/*{tutorial?.moving && (*/}
           {/*  <Hint onClose={() => updateTutorial({ moving: false })}>*/}
           {/*    <Gold>Hint</Gold>: press <Gold>W, A, S, or D</Gold> to move around*/}
