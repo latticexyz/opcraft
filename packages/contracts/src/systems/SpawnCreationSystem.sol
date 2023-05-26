@@ -63,20 +63,25 @@ contract SpawnCreationSystem is System {
       CreateBlock.addCustomComponents(components, blockType, newEntity);
 
       VoxelCoord memory relativeCoord = positionComponent.getValue(existingEntity);
-
-      positionComponent.set(
-        newEntity,
-        VoxelCoord(
-          lowerSouthWestCorner.x + relativeCoord.x,
-          lowerSouthWestCorner.y + relativeCoord.y,
-          lowerSouthWestCorner.z + relativeCoord.z
-        )
+      VoxelCoord memory newCoord = VoxelCoord(
+        lowerSouthWestCorner.x + relativeCoord.x,
+        lowerSouthWestCorner.y + relativeCoord.y,
+        lowerSouthWestCorner.z + relativeCoord.z
       );
+
+      // remove any existing entities at this position
+      uint256[] memory entitiesAtPosition = positionComponent.getEntitiesWithValue(newCoord);
+      require(entitiesAtPosition.length == 0 || entitiesAtPosition.length == 1, "can not built at non-empty coord (4)");
+      if (entitiesAtPosition.length == 1) {
+        positionComponent.remove(entitiesAtPosition[0]);
+      }
+
+      positionComponent.set(newEntity, newCoord);
 
       // TODO: do I uncomment this? I'm not so sure. but I think for tests it's fine, since the test already runs the interaction systems
       // I'll leave this commented for now
       // Run block interaction logic
-      // BlockInteraction.runInteractionSystems(world.systems(), components, newEntity);
+      BlockInteraction.runInteractionSystems(world.systems(), components, newEntity);
     }
   }
 
