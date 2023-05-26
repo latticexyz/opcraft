@@ -35,8 +35,10 @@ library CreateBlock {
     else if (blockType == SandID) {
       signalSourceComponent.set(entity, true);
     } else {
-      // make all other blocks powered but off
-      poweredComponent.set(entity, SignalData({ isActive: false, direction: BlockDirection.None }));
+      if (blockType != AirID) {
+        // make all other blocks powered but off
+        poweredComponent.set(entity, SignalData({ isActive: false, direction: BlockDirection.None }));
+      }
     }
   }
 }

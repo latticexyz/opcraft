@@ -36,19 +36,19 @@ contract AndTestSystem is System {
 
     (uint256 in1VoxelId, uint256 in2VoxelId, uint256 outVoxelId) = getVoxelIds(in1Voxel, in2Voxel, outVoxel);
 
-    signalSourceComponent.set(in1VoxelId);
-    signalSourceComponent.set(in2VoxelId);
+    signalSourceComponent.set(in1VoxelId, true);
+    signalSourceComponent.set(in2VoxelId, true);
 
     BlockInteraction.runInteractionSystems(world.systems(), components, in1VoxelId); // TODO: add a way to add both voxels onto the interaction queue
     BlockInteraction.runInteractionSystems(world.systems(), components, in2VoxelId);
 
     if (signalComponent.getValue(outVoxelId).isActive) {
       passesTestsComponent.addTest(ID, creationId);
-      //   return abi.encode(true); // if the transaction passes, the test passed!
+      return abi.encode(true); // if the transaction passes, the test passed!
     }
     require(false, "AndTest failed"); // this is really hacky but by failing the transaction, the user gets immediate feedback in the ui
     // the test failed
-    // return abi.encode(false);
+    return abi.encode(false);
   }
 
   function getVoxelIds(

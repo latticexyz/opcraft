@@ -85,11 +85,11 @@ contract MineSystem is System {
       positionComponent.set(airEntity, coord);
     }
 
-    TypeComponent(getAddressById(components, TypeComponentID)).set(entity, blockType);
+    TypeComponent(getAddressById(components, TypeComponentID)).set(entity, AirID);
     ownedByComponent.set(entity, addressToEntity(msg.sender));
 
     // TODO: Remove this once we have a proper inventory system
-    CreateBlock.addCustomComponents(components, blockType, entity);
+    CreateBlock.addCustomComponents(components, AirID, entity);
 
     // Run block interaction logic
     BlockInteraction.runInteractionSystems(world.systems(), components, airEntity);
