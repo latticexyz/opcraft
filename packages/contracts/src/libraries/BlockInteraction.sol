@@ -59,7 +59,7 @@ library BlockInteraction {
 
       require(
         neighbourEntitiesAtPosition.length == 0 || neighbourEntitiesAtPosition.length == 1,
-        "can not built at non-empty coord"
+        "can not built at non-empty coord (3)"
       );
       if (neighbourEntitiesAtPosition.length == 1) {
         // entity exists so add it to the list

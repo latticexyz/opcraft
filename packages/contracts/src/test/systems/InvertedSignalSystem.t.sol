@@ -29,6 +29,7 @@ contract InvertedSignalSystemTest is MudTest {
   uint256 normalBlock;
   uint256 invertedSignal;
   uint256 lastSignal;
+  uint256 extraSignal;
 
   function setUp() public override {
     super.setUp();
@@ -79,6 +80,14 @@ contract InvertedSignalSystemTest is MudTest {
     );
     ItemComponent(component(ItemComponentID)).set(lastSignal, WoolID);
     OwnedByComponent(component(OwnedByComponentID)).set(lastSignal, addressToEntity(alice));
+
+    extraSignal = world.getUniqueEntityId();
+    SignalComponent(component(SignalComponentID)).set(
+      extraSignal,
+      SignalData({ isActive: false, direction: BlockDirection.None })
+    );
+    ItemComponent(component(ItemComponentID)).set(extraSignal, WoolID);
+    OwnedByComponent(component(OwnedByComponentID)).set(extraSignal, addressToEntity(alice));
 
     vm.stopPrank();
   }
@@ -150,6 +159,16 @@ contract InvertedSignalSystemTest is MudTest {
     assertTrue(signalComponent.getValue(lastSignal).isActive);
     // normal block should be powered
     assertTrue(poweredComponent.getValue(normalBlock).isActive);
+
+    // mine normal block, place wire to connect
+    {
+      MineSystem mineSystem = MineSystem(system(MineSystemID));
+      mineSystem.executeTyped(normalBlockCoord, GrassID);
+    }
+    buildSystem.executeTyped(extraSignal, normalBlockCoord);
+    // assertTrue(signalComponent.getValue(extraSignal).isActive);
+    // assertTrue(signalComponent.getValue(signal).isActive);
+    // assertTrue(signalComponent.getValue(signal2).isActive);
 
     vm.stopPrank();
   }
