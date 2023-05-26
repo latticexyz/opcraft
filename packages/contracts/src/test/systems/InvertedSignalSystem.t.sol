@@ -199,8 +199,6 @@ contract InvertedSignalSystemTest is MudTest {
     assertTrue(!signalComponent.getValue(signal2).isActive);
     assertTrue(invertedSignalComponent.getValue(invertedSignal).isActive);
     assertTrue(signalComponent.getValue(lastSignal).isActive);
-    // normal block should be powered
-    assertTrue(poweredComponent.getValue(normalBlock).isActive);
 
     // mine normal block, place wire to connect
     {
@@ -338,7 +336,22 @@ contract InvertedSignalSystemTest is MudTest {
     // assert output is now 1
     assertTrue(signalComponent.getValue(signal).isActive);
     assertTrue(signalComponent.getValue(signal2).isActive);
+    assertTrue(!signalComponent.getValue(extraSignal).isActive);
     assertTrue(signalComponent.getValue(lastSignal).isActive);
+    assertTrue(!invertedSignalComponent.getValue(invertedSignal).isActive);
+    assertTrue(!invertedSignalComponent.getValue(invertedSignal2).isActive);
+
+    // now break one and make sure output goes back to 0
+    {
+      MineSystem mineSystem = MineSystem(system(MineSystemID));
+      mineSystem.executeTyped(signalSourceCoord, PurpleWoolID);
+    }
+    assertTrue(invertedSignalComponent.getValue(invertedSignal2).isActive);
+    assertTrue(signalComponent.getValue(extraSignal).isActive);
+    assertTrue(!signalComponent.getValue(signal).isActive);
+    assertTrue(signalComponent.getValue(signal2).isActive);
+    assertTrue(poweredComponent.getValue(normalBlock2).isActive);
+    assertTrue(!signalComponent.getValue(lastSignal).isActive);
 
     vm.stopPrank();
   }
