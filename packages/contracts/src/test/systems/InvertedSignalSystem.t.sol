@@ -24,10 +24,15 @@ contract InvertedSignalSystemTest is MudTest {
   constructor() MudTest(new Deploy()) {}
 
   uint256 signalSource;
+  uint256 signalSource2;
   uint256 signal;
   uint256 signal2;
   uint256 normalBlock;
+  uint256 normalBlock2;
+  uint256 normalBlock3;
   uint256 invertedSignal;
+  uint256 invertedSignal2;
+  uint256 invertedSignal3;
   uint256 lastSignal;
   uint256 extraSignal;
 
@@ -40,6 +45,11 @@ contract InvertedSignalSystemTest is MudTest {
     SignalSourceComponent(component(SignalSourceComponentID)).set(signalSource, true);
     ItemComponent(component(ItemComponentID)).set(signalSource, PurpleWoolID);
     OwnedByComponent(component(OwnedByComponentID)).set(signalSource, addressToEntity(alice));
+
+    signalSource2 = world.getUniqueEntityId();
+    SignalSourceComponent(component(SignalSourceComponentID)).set(signalSource2, true);
+    ItemComponent(component(ItemComponentID)).set(signalSource2, PurpleWoolID);
+    OwnedByComponent(component(OwnedByComponentID)).set(signalSource2, addressToEntity(alice));
 
     signal = world.getUniqueEntityId();
     SignalComponent(component(SignalComponentID)).set(
@@ -65,6 +75,22 @@ contract InvertedSignalSystemTest is MudTest {
     ItemComponent(component(ItemComponentID)).set(normalBlock, GrassID);
     OwnedByComponent(component(OwnedByComponentID)).set(normalBlock, addressToEntity(alice));
 
+    normalBlock2 = world.getUniqueEntityId();
+    PoweredComponent(component(PoweredComponentID)).set(
+      normalBlock2,
+      SignalData({ isActive: false, direction: BlockDirection.None })
+    );
+    ItemComponent(component(ItemComponentID)).set(normalBlock2, GrassID);
+    OwnedByComponent(component(OwnedByComponentID)).set(normalBlock2, addressToEntity(alice));
+
+    normalBlock3 = world.getUniqueEntityId();
+    PoweredComponent(component(PoweredComponentID)).set(
+      normalBlock3,
+      SignalData({ isActive: false, direction: BlockDirection.None })
+    );
+    ItemComponent(component(ItemComponentID)).set(normalBlock3, GrassID);
+    OwnedByComponent(component(OwnedByComponentID)).set(normalBlock3, addressToEntity(alice));
+
     invertedSignal = world.getUniqueEntityId();
     InvertedSignalComponent(component(InvertedSignalComponentID)).set(
       invertedSignal,
@@ -72,6 +98,22 @@ contract InvertedSignalSystemTest is MudTest {
     );
     ItemComponent(component(ItemComponentID)).set(invertedSignal, PlanksID);
     OwnedByComponent(component(OwnedByComponentID)).set(invertedSignal, addressToEntity(alice));
+
+    invertedSignal2 = world.getUniqueEntityId();
+    InvertedSignalComponent(component(InvertedSignalComponentID)).set(
+      invertedSignal2,
+      SignalData({ isActive: true, direction: BlockDirection.None })
+    );
+    ItemComponent(component(ItemComponentID)).set(invertedSignal2, PlanksID);
+    OwnedByComponent(component(OwnedByComponentID)).set(invertedSignal2, addressToEntity(alice));
+
+    invertedSignal3 = world.getUniqueEntityId();
+    InvertedSignalComponent(component(InvertedSignalComponentID)).set(
+      invertedSignal3,
+      SignalData({ isActive: true, direction: BlockDirection.None })
+    );
+    ItemComponent(component(ItemComponentID)).set(invertedSignal3, PlanksID);
+    OwnedByComponent(component(OwnedByComponentID)).set(invertedSignal3, addressToEntity(alice));
 
     lastSignal = world.getUniqueEntityId();
     SignalComponent(component(SignalComponentID)).set(
@@ -169,6 +211,134 @@ contract InvertedSignalSystemTest is MudTest {
     assertTrue(signalComponent.getValue(extraSignal).isActive);
     assertTrue(signalComponent.getValue(signal).isActive);
     assertTrue(signalComponent.getValue(signal2).isActive);
+
+    vm.stopPrank();
+  }
+
+  function testAndGate() public {
+    vm.startPrank(alice);
+
+    VoxelCoord memory normalBlockCoord = VoxelCoord({ x: 3275, y: 20, z: 4363 }); // Air
+    VoxelCoord memory normalBlockCoord2 = VoxelCoord({
+      x: normalBlockCoord.x + 1,
+      y: normalBlockCoord.y,
+      z: normalBlockCoord.z
+    }); // Air
+    VoxelCoord memory normalBlockCoord3 = VoxelCoord({
+      x: normalBlockCoord.x + 2,
+      y: normalBlockCoord.y,
+      z: normalBlockCoord.z
+    }); // Air
+
+    // on top of middle block
+    VoxelCoord memory normalBlockSignalCoord = VoxelCoord({
+      x: normalBlockCoord2.x,
+      y: normalBlockCoord2.y + 1,
+      z: normalBlockCoord2.z
+    }); // Air
+
+    VoxelCoord memory invertedSignal2Coord = VoxelCoord({
+      x: normalBlockCoord.x,
+      y: normalBlockCoord.y + 1,
+      z: normalBlockCoord.z
+    }); // Air
+
+    VoxelCoord memory invertedSignal3Coord = VoxelCoord({
+      x: normalBlockCoord3.x,
+      y: normalBlockCoord3.y + 1,
+      z: normalBlockCoord3.z
+    }); // Air
+
+    VoxelCoord memory invertedSignalCoord = VoxelCoord({
+      x: normalBlockCoord2.x,
+      y: normalBlockCoord2.y,
+      z: normalBlockCoord2.z + 1
+    }); //
+
+    VoxelCoord memory signalCoord = VoxelCoord({
+      x: normalBlockCoord3.x,
+      y: normalBlockCoord3.y,
+      z: normalBlockCoord3.z - 1
+    }); //
+
+    VoxelCoord memory signal2Coord = VoxelCoord({
+      x: normalBlockCoord.x,
+      y: normalBlockCoord.y,
+      z: normalBlockCoord.z - 1
+    }); //
+
+    VoxelCoord memory lastSignalCoord = VoxelCoord({
+      x: normalBlockCoord2.x,
+      y: normalBlockCoord2.y,
+      z: normalBlockCoord2.z + 2
+    }); //
+
+    VoxelCoord memory signalSourceCoord = VoxelCoord({ x: signalCoord.x, y: signalCoord.y, z: signalCoord.z - 1 }); //
+
+    VoxelCoord memory signal2SourceCoord = VoxelCoord({ x: signal2Coord.x, y: signal2Coord.y, z: signal2Coord.z - 1 }); //
+
+    // ItemComponent itemComponent = ItemComponent(component(ItemComponentID));
+    // PositionComponent positionComponent = PositionComponent(component(PositionComponentID));
+    // OwnedByComponent ownedByComponent = OwnedByComponent(component(OwnedByComponentID));
+    // PoweredComponent poweredComponent = PoweredComponent(component(PoweredComponentID));
+
+    {
+      BuildSystem buildSystem = BuildSystem(system(BuildSystemID));
+      buildSystem.executeTyped(normalBlock, normalBlockCoord);
+      buildSystem.executeTyped(normalBlock2, normalBlockCoord2);
+      buildSystem.executeTyped(normalBlock3, normalBlockCoord3);
+      buildSystem.executeTyped(extraSignal, normalBlockSignalCoord);
+      buildSystem.executeTyped(invertedSignal, invertedSignal2Coord);
+      buildSystem.executeTyped(invertedSignal2, invertedSignal3Coord);
+    }
+
+    SignalComponent signalComponent = SignalComponent(component(SignalComponentID));
+    InvertedSignalComponent invertedSignalComponent = InvertedSignalComponent(component(InvertedSignalComponentID));
+    PoweredComponent poweredComponent = PoweredComponent(component(PoweredComponentID));
+    assertTrue(signalComponent.getValue(extraSignal).isActive);
+    assertTrue(invertedSignalComponent.getValue(invertedSignal).isActive);
+    assertTrue(invertedSignalComponent.getValue(invertedSignal2).isActive);
+    assertTrue(!poweredComponent.getValue(normalBlock).isActive);
+    assertTrue(!poweredComponent.getValue(normalBlock3).isActive);
+    assertTrue(poweredComponent.getValue(normalBlock2).isActive);
+
+    {
+      BuildSystem buildSystem = BuildSystem(system(BuildSystemID));
+      buildSystem.executeTyped(invertedSignal3, invertedSignalCoord);
+      buildSystem.executeTyped(lastSignal, lastSignalCoord);
+    }
+    assertTrue(!invertedSignalComponent.getValue(invertedSignal3).isActive);
+    assertTrue(!signalComponent.getValue(lastSignal).isActive);
+
+    {
+      BuildSystem buildSystem = BuildSystem(system(BuildSystemID));
+      buildSystem.executeTyped(signal, signalCoord);
+      buildSystem.executeTyped(signal2, signal2Coord);
+    }
+    assertTrue(!signalComponent.getValue(signal).isActive);
+    assertTrue(!signalComponent.getValue(signal2).isActive);
+
+    // with no input sources, output should be 0
+    assertTrue(!signalComponent.getValue(lastSignal).isActive);
+
+    // add input source to 1
+    {
+      BuildSystem buildSystem = BuildSystem(system(BuildSystemID));
+      buildSystem.executeTyped(signalSource, signalSourceCoord);
+    }
+    // assert output is still 0
+    assertTrue(signalComponent.getValue(signal).isActive);
+    assertTrue(!signalComponent.getValue(lastSignal).isActive);
+
+    // add another input source
+    {
+      BuildSystem buildSystem = BuildSystem(system(BuildSystemID));
+      buildSystem.executeTyped(signalSource2, signal2SourceCoord);
+    }
+    // assert output is now 1
+    assertTrue(signalComponent.getValue(signal).isActive);
+    assertTrue(signalComponent.getValue(signal2).isActive);
+    assertTrue(signalComponent.getValue(lastSignal).isActive);
 
     vm.stopPrank();
   }
