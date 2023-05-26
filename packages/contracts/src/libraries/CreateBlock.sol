@@ -8,7 +8,7 @@ import { PoweredComponent, ID as PoweredComponentID } from "../components/Powere
 import { InvertedSignalComponent, ID as InvertedSignalComponentID } from "../components/InvertedSignalComponent.sol";
 import { VoxelCoord, BlockDirection } from "../types.sol";
 
-import { AirID, WaterID, WoolID, SandID, BlueFlowerID, GreenFlowerID } from "../prototypes/Blocks.sol";
+import { AirID, WaterID, WoolID, SandID, CyanFlowerID, OrangeFlowerID } from "../prototypes/Blocks.sol";
 
 library CreateBlock {
   function addCustomComponents(
@@ -26,9 +26,9 @@ library CreateBlock {
     PoweredComponent poweredComponent = PoweredComponent(getAddressById(components, PoweredComponentID));
 
     // if the type of block is a wool, add signal to it
-    if (blockType == BlueFlowerID) {
+    if (blockType == CyanFlowerID) {
       signalComponent.set(entity, SignalData({ isActive: false, direction: BlockDirection.None }));
-    } else if (blockType == GreenFlowerID) {
+    } else if (blockType == OrangeFlowerID) {
       invertedSignalComponent.set(entity, SignalData({ isActive: true, direction: BlockDirection.None }));
     }
     // if its a sand block, add signal source to it

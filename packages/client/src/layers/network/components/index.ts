@@ -15,5 +15,6 @@ export { defineNameComponent } from "./NameComponent";
 export { definePluginComponent } from "./PluginComponent";
 export { definePluginRegistryComponent } from "./PluginRegistryComponent";
 export { defineSignalComponent } from "./SignalComponent";
+export { defineInvertedSignalComponent } from "./InvertedSignalComponent";
 export { defineSignalSourceComponent } from "./SignalSourceComponent";
 export { defineEntityIdComponent } from "./EntityIdComponent";
