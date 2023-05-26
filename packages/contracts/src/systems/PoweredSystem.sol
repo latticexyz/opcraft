@@ -53,10 +53,10 @@ contract PoweredSystem is System {
       // 3) if its an active signal, turn on if we're in its direction or below it
 
       bool shouldBePowered = centerHasSignalSource ||
-        (centerHasInvertedSignal && centerSignalData.isActive && centerBlockDirection != BlockDirection.Up) ||
+        (centerHasInvertedSignal && centerSignalData.isActive && centerBlockDirection != BlockDirection.Down) ||
         (centerHasSignal &&
           centerSignalData.isActive &&
-          (centerSignalData.direction == centerBlockDirection || centerBlockDirection == BlockDirection.Up));
+          (centerSignalData.direction == centerBlockDirection || centerBlockDirection == BlockDirection.Down));
 
       if (neighbourSignalData.isActive) {
         // check to see if we should be turned off
