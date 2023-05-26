@@ -372,6 +372,7 @@ library LibDeploy {
     authorizeWriter(components, VoxelsComponentID, address(system));
     authorizeWriter(components, OwnedByComponentID, address(system));
     authorizeWriter(components, NameComponentID, address(system));
+    authorizeWriter(components, ItemComponentID, address(system));
     authorizeWriter(components, TypeComponentID, address(system));
     authorizeWriter(components, EntityIdComponentID, address(system));
     authorizeWriter(components, SignalComponentID, address(system));
@@ -414,8 +415,6 @@ library LibDeploy {
     console.log("Deploying SpawnCreationSystem");
     system = new SpawnCreationSystem(world, address(components));
     world.registerSystem(address(system), SpawnCreationSystemID);
-    authorizeWriter(components, SignalSourceComponentID, address(system));
-    authorizeWriter(components, PassesTestsComponentID, address(system));
     authorizeWriter(components, TypeComponentID, address(system));
     authorizeWriter(components, ItemComponentID, address(system));
     authorizeWriter(components, PositionComponentID, address(system));
