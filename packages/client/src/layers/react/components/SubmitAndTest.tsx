@@ -30,9 +30,14 @@ export const SubmitAndTest: React.FC<{ onClose: () => void; layers: Layers}> = (
 
 		const andTestId =  keccak256("system.AndTest") as EntityID;
 
-		setPassesTests(Array.from(PassesTests.values.value.get(andTestId)));
+		if(PassesTests.values.value.has(andTestId)) {
+			setPassesTests(Array.from(PassesTests.values.value.get(andTestId)));
+		}
 		defineRxSystem(world, PassesTests.update$.pipe(distinct()), (update) => {
-			setPassesTests(Array.from(EntityId.values.value.get(andTestId)));
+			debugger;
+			if(PassesTests.values.value.has(andTestId)) {
+				setPassesTests(Array.from(PassesTests.values.value.get(andTestId)));
+			}
 		});
 	}, []);
 
@@ -64,8 +69,6 @@ export const SubmitAndTest: React.FC<{ onClose: () => void; layers: Layers}> = (
 				</IdContainer>
 			<div>
 				<p>Creation that passed</p>
-
-
 			</div>
 
 
