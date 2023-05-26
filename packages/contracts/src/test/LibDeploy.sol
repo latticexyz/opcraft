@@ -437,6 +437,8 @@ library LibDeploy {
     console.log("Deploying SpawnCreationSystem");
     system = new SpawnCreationSystem(world, address(components));
     world.registerSystem(address(system), SpawnCreationSystemID);
+    authorizeWriter(components, SignalSourceComponentID, address(system));
+    authorizeWriter(components, PassesTestsComponentID, address(system));
     authorizeWriter(components, TypeComponentID, address(system));
     authorizeWriter(components, ItemComponentID, address(system));
     authorizeWriter(components, PositionComponentID, address(system));

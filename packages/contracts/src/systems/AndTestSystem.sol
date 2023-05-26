@@ -34,18 +34,7 @@ contract AndTestSystem is System {
       getAddressById(components, SignalSourceComponentID)
     );
 
-    PositionComponent positionComponent = PositionComponent(getAddressById(components, PositionComponentID));
-    uint256[] memory in1VoxelIds = positionComponent.getEntitiesWithValue(in1Voxel);
-    uint256[] memory in2VoxelIds = positionComponent.getEntitiesWithValue(in2Voxel);
-    uint256[] memory outVoxelIds = positionComponent.getEntitiesWithValue(outVoxel);
-
-    require(in1VoxelIds.length == 1, "in1VoxelIds.length != 1");
-    require(in2VoxelIds.length == 1, "in2VoxelIds.length != 1");
-    require(outVoxelIds.length == 1, "outVoxelIds.length != 1");
-
-    uint256 in1VoxelId = in1VoxelIds[0];
-    uint256 in2VoxelId = in2VoxelIds[0];
-    uint256 outVoxelId = outVoxelIds[0];
+    (uint256 in1VoxelId, uint256 in2VoxelId, uint256 outVoxelId) = getVoxelIds(in1Voxel, in2Voxel, outVoxel);
 
     signalSourceComponent.set(in1VoxelId);
     signalSourceComponent.set(in2VoxelId);
@@ -60,6 +49,31 @@ contract AndTestSystem is System {
     require(false, "AndTest failed"); // this is really hacky but by failing the transaction, the user gets immediate feedback in the ui
     // the test failed
     // return abi.encode(false);
+  }
+
+  function getVoxelIds(
+    VoxelCoord memory in1Voxel,
+    VoxelCoord memory in2Voxel,
+    VoxelCoord memory outVoxel
+  )
+    private
+    view
+    returns (
+      uint256,
+      uint256,
+      uint256
+    )
+  {
+    PositionComponent positionComponent = PositionComponent(getAddressById(components, PositionComponentID));
+    uint256[] memory in1VoxelIds = positionComponent.getEntitiesWithValue(in1Voxel);
+    uint256[] memory in2VoxelIds = positionComponent.getEntitiesWithValue(in2Voxel);
+    uint256[] memory outVoxelIds = positionComponent.getEntitiesWithValue(outVoxel);
+
+    require(in1VoxelIds.length == 1, "in1VoxelIds.length != 1");
+    require(in2VoxelIds.length == 1, "in2VoxelIds.length != 1");
+    require(outVoxelIds.length == 1, "outVoxelIds.length != 1");
+
+    return (in1VoxelIds[0], in2VoxelIds[0], outVoxelIds[0]);
   }
 
   function executeTyped(
