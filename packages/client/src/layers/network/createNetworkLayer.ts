@@ -58,6 +58,7 @@ import { VoxelCoordStruct } from "contracts/types/ethers-contracts/RegisterCreat
 import { defineSignalComponent } from "./components/SignalComponent";
 import { defineInvertedSignalComponent } from "./components/InvertedSignalComponent";
 import { defineSignalSourceComponent } from "./components/SignalSourceComponent";
+import { definePassesTestsComponent } from "./components/PassesTestsComponent";
 
 /**
  * The Network layer is the lowest layer in the client architecture.
@@ -91,6 +92,7 @@ export async function createNetworkLayer(config: GameConfig) {
     InvertedSignal: defineInvertedSignalComponent(world),
     SignalSource: defineSignalSourceComponent(world),
     EntityId: defineEntityIdComponent(world),
+    PassesTests: definePassesTestsComponent(world),
   };
 
   // --- SETUP ----------------------------------------------------------------------
@@ -407,6 +409,20 @@ export async function createNetworkLayer(config: GameConfig) {
       updates: () => [],
     });
   }
+
+  function submitAndTest(creationId: string, points: VoxelCoord[]) {
+    actions.add({
+      id: `submitAndTest+${creationId}` as EntityID,
+      metadata: { actionType: "andTest" },
+      requirement: () => true,
+      components: {},
+      execute: () =>
+        systems["system.AndTest"].executeTyped(creationId, points[0], points[1], points[2], {
+          gasLimit: 100_000_000,
+        }),
+      updates: () => [],
+    });
+  }
   function transfer(entity: EntityID, receiver: string) {
     const entityIndex = world.entityToIndex.get(entity);
     if (entityIndex == null) return console.warn("trying to transfer unknown entity", entity);
@@ -519,6 +535,7 @@ export async function createNetworkLayer(config: GameConfig) {
       submitAdderTest,
       submitHalfAdderTest,
       spawnCreation,
+      submitAndTest,
       transfer,
       getBlockAtPosition,
       getECSBlockAtPosition,

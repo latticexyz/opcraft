@@ -10,6 +10,7 @@ import { NameComponent, ID as NameComponentID } from "../components/NameComponen
 import { SignalComponent, ID as SignalComponentID, SignalData } from "../components/SignalComponent.sol";
 import { SignalSourceComponent, ID as SignalSourceComponentID } from "../components/SignalSourceComponent.sol";
 import { PositionComponent, ID as PositionComponentID } from "../components/PositionComponent.sol";
+import { BlockInteraction } from "../libraries/BlockInteraction.sol";
 
 import { VoxelCoord } from "../types.sol";
 
@@ -48,8 +49,12 @@ contract AndTestSystem is System {
 
     signalSourceComponent.set(in1VoxelId);
     signalSourceComponent.set(in2VoxelId);
+
+    BlockInteraction.runInteractionSystems(world.systems(), components, in1VoxelId); // TODO: add a way to add both voxels onto the interaction queue
+    BlockInteraction.runInteractionSystems(world.systems(), components, in2VoxelId);
+
     if (signalComponent.getValue(outVoxelId).isActive) {
-      passesTestsComponent.addTest(creationId, ID);
+      passesTestsComponent.addTest(ID, creationId);
       //   return abi.encode(true); // if the transaction passes, the test passed!
     }
     require(false, "AndTest failed"); // this is really hacky but by failing the transaction, the user gets immediate feedback in the ui

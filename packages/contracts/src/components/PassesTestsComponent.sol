@@ -4,7 +4,7 @@ import "std-contracts/components/Uint256ArrayBareComponent.sol";
 
 uint256 constant ID = uint256(keccak256("component.PassesTests"));
 
-// maps the creationIds -> testIds it passes
+// maps the testId -> creationIds[] that passed the test
 contract PassesTestsComponent is Uint256ArrayBareComponent {
   constructor(address world) Uint256ArrayBareComponent(world, ID) {}
 
