@@ -67,9 +67,20 @@ export const SubmitAndTest: React.FC<{ onClose: () => void; layers: Layers}> = (
 				})
 			}
 				</IdContainer>
-			<div>
-				<p>Creation that passed</p>
-			</div>
+			{
+				passesTests && passesTests.length > 0 && (
+				<div>
+					<p>Creation that passed</p>
+					{
+						passesTests?.map((id) => {
+							return (
+								<div key={`creation-id-${id}`}>0x{id.slice(0,7)}...</div>
+							)
+						})
+					}
+				</div>
+				)
+			}
 
 
 		</ImportContainer>
