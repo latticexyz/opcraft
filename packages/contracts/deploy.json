@@ -56,6 +56,7 @@
     { "name": "AdderTestSystem", "writeAccess": ["SignalSourceComponent", "PassesTestsComponent" ] },
     { "name": "HalfAdderTestSystem", "writeAccess": ["SignalSourceComponent", "PassesTestsComponent" ] },
     { "name": "AndTestSystem", "writeAccess": ["SignalSourceComponent", "PassesTestsComponent" ] },
+    { "name": "NandTestSystem", "writeAccess": ["SignalSourceComponent", "PassesTestsComponent" ] },
     { "name": "SpawnCreationSystem", "writeAccess": ["SignalSourceComponent", "PassesTestsComponent" ,  "TypeComponent", "ItemComponent", "PositionComponent", "SignalComponent", "SignalSourceComponent", "PoweredComponent", "InvertedSignalComponent"] },
     { "name": "PoweredSystem", "writeAccess": ["PoweredComponent"]},
     { "name": "InvertedSignalSystem", "writeAccess": ["InvertedSignalComponent"]}
