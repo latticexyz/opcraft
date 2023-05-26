@@ -166,9 +166,9 @@ contract InvertedSignalSystemTest is MudTest {
       mineSystem.executeTyped(normalBlockCoord, GrassID);
     }
     buildSystem.executeTyped(extraSignal, normalBlockCoord);
-    // assertTrue(signalComponent.getValue(extraSignal).isActive);
-    // assertTrue(signalComponent.getValue(signal).isActive);
-    // assertTrue(signalComponent.getValue(signal2).isActive);
+    assertTrue(signalComponent.getValue(extraSignal).isActive);
+    assertTrue(signalComponent.getValue(signal).isActive);
+    assertTrue(signalComponent.getValue(signal2).isActive);
 
     vm.stopPrank();
   }

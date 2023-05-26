@@ -41,6 +41,7 @@ contract BuildSystem is System {
     require(entitiesAtPosition.length == 0 || entitiesAtPosition.length == 1, "can not built at non-empty coord");
     if (entitiesAtPosition.length == 1) {
       require(itemComponent.getValue(entitiesAtPosition[0]) == AirID, "can not built at non-empty coord (2)");
+      positionComponent.remove(entitiesAtPosition[0]); // remove air ID
     }
 
     // Check claim in chunk
@@ -51,16 +52,20 @@ contract BuildSystem is System {
 
     // curtis removed this so we are in creative mode. I didn't feel like porting this logic to the creative system (cause dhvani may change something)
     // ownedByComponent.remove(blockEntity);
-    uint256 newEntity = world.getUniqueEntityId();
-    uint256 blockType = itemComponent.getValue(blockEntity);
-    itemComponent.set(newEntity, blockType); // TODO: remove itemCompoent
-    typeComponent.set(newEntity, blockType);
-    positionComponent.set(newEntity, coord);
+    // uint256 newEntity = world.getUniqueEntityId();
+    // uint256 blockType = itemComponent.getValue(blockEntity);
+    // itemComponent.set(newEntity, blockType); // TODO: remove itemCompoent
+    // typeComponent.set(newEntity, blockType);
+    // positionComponent.set(newEntity, coord);
 
-    CreateBlock.addCustomComponents(components, blockType, newEntity);
+    // CreateBlock.addCustomComponents(components, blockType, newEntity);
+
+    // Remove block from inventory and place it in the world
+    ownedByComponent.remove(blockEntity);
+    positionComponent.set(blockEntity, coord);
 
     // Run block interaction logic
-    BlockInteraction.runInteractionSystems(world.systems(), components, newEntity);
+    BlockInteraction.runInteractionSystems(world.systems(), components, blockEntity);
   }
 
   function executeTyped(uint256 entity, VoxelCoord memory coord) public returns (bytes memory) {

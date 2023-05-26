@@ -198,10 +198,7 @@ library LibDeploy {
    * Deploy systems to the given world.
    * If `init` flag is set, systems with `initialize` setting in `deploy.json` will be executed.
    */
-  function deploySystems(
-    address _world,
-    bool init
-  ) internal {
+  function deploySystems(address _world, bool init) internal {
     IWorld world = IWorld(_world);
     // Deploy systems
     ISystem system;
@@ -283,6 +280,7 @@ library LibDeploy {
     authorizeWriter(components, TypeComponentID, address(system));
     authorizeWriter(components, SignalComponentID, address(system));
     authorizeWriter(components, SignalSourceComponentID, address(system));
+    authorizeWriter(components, PoweredComponentID, address(system));
     console.log(address(system));
 
     console.log("Deploying CreativeBuildSystem");
@@ -349,14 +347,14 @@ library LibDeploy {
     authorizeWriter(components, GameConfigComponentID, address(system));
     authorizeWriter(components, ItemPrototypeComponentID, address(system));
     authorizeWriter(components, OccurrenceComponentID, address(system));
-      if(init) system.execute(new bytes(0));
+    if (init) system.execute(new bytes(0));
     console.log(address(system));
 
     console.log("Deploying Init2System");
     system = new Init2System(world, address(components));
     world.registerSystem(address(system), Init2SystemID);
     authorizeWriter(components, RecipeComponentID, address(system));
-      if(init) system.execute(new bytes(0));
+    if (init) system.execute(new bytes(0));
     console.log(address(system));
 
     console.log("Deploying RegisterVoxelTypeSystem");
@@ -397,6 +395,8 @@ library LibDeploy {
     authorizeWriter(components, EntityIdComponentID, address(system));
     authorizeWriter(components, SignalComponentID, address(system));
     authorizeWriter(components, SignalSourceComponentID, address(system));
+    authorizeWriter(components, ItemComponentID, address(system));
+    authorizeWriter(components, PoweredComponentID, address(system));
     console.log(address(system));
 
     console.log("Deploying SignalSystem");
@@ -442,6 +442,9 @@ library LibDeploy {
     authorizeWriter(components, PositionComponentID, address(system));
     authorizeWriter(components, SignalComponentID, address(system));
     authorizeWriter(components, SignalSourceComponentID, address(system));
+    authorizeWriter(components, PoweredComponentID, address(system));
+    console.log(address(system));
+
     console.log("Deploying PoweredSystem");
     system = new PoweredSystem(world, address(components));
     world.registerSystem(address(system), PoweredSystemID);
