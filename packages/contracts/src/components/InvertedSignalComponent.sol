@@ -4,9 +4,9 @@ import "solecs/Component.sol";
 
 import { BlockDirection, SignalData } from "../types.sol";
 
-uint256 constant ID = uint256(keccak256("component.Signal"));
+uint256 constant ID = uint256(keccak256("component.InvertedSignal"));
 
-contract SignalComponent is Component {
+contract InvertedSignalComponent is Component {
   constructor(address world) Component(world, ID) {}
 
   function getSchema() public pure override returns (string[] memory keys, LibTypes.SchemaValue[] memory values) {

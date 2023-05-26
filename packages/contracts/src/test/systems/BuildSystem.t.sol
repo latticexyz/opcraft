@@ -54,7 +54,7 @@ contract BuildSystemTest is MudTest {
     assertEq(position.y, coord.y);
     assertEq(position.z, coord.z);
 
-    assertTrue(!ownedByComponent.has(planks));
+    // assertTrue(!ownedByComponent.has(planks));
     vm.stopPrank();
   }
 

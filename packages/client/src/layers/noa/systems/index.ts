@@ -7,3 +7,4 @@ export { createSyncLocalPlayerPositionSystem } from "./createSyncLocalPlayerPosi
 export { createTutorialSystem } from "./createTutorialSystem";
 export { createSoundSystem } from "./createSoundSystem";
 export { createSignalSystem } from "./createSignalSystem";
+export { createInvertedSignalSystem } from "./createInvertedSignalSystem";

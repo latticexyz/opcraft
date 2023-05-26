@@ -4,27 +4,27 @@ import { EntityID } from "@latticexyz/recs";
 import { NetworkLayer } from "../../network";
 import { NoaLayer } from "../types";
 
-export async function createSignalSystem(network: NetworkLayer, context: NoaLayer) {
+export async function createInvertedSignalSystem(network: NetworkLayer, context: NoaLayer) {
   const {
     api: { setBlock },
   } = context;
 
   const {
     world,
-    components: { Position, Signal },
-    api: { getSignalData, isSignalSource },
+    components: { Position, InvertedSignal },
+    api: { getInvertedSignalData, isSignalSource },
   } = network;
 
-  defineComponentSystem(world, Signal, (update) => {
+  defineComponentSystem(world, InvertedSignal, (update) => {
     const position = getComponentValue(Position, update.entity);
-    const blockSignalData: any = getSignalData(update.entity);
+    const blockSignalData: any = getInvertedSignalData(update.entity);
 
     if (position !== undefined) {
       if (blockSignalData.isActive) {
         // set block to redflower
-        setBlock(position, keccak256("block.RedFlower") as EntityID);
+        setBlock(position, keccak256("block.OrangeFlower") as EntityID);
       } else {
-        setBlock(position, keccak256("block.CyanFlower") as EntityID);
+        setBlock(position, keccak256("block.LimeFlower") as EntityID);
       }
     }
   });

@@ -12,6 +12,11 @@ struct TransitionRule {
   uint256 changeToType; // the type of the voxel to change to
 }
 
+struct SignalData {
+  bool isActive;
+  BlockDirection direction;
+}
+
 enum BlockDirection {
   None,
   Up,

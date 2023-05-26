@@ -56,6 +56,7 @@ import { createPluginSystem } from "./systems";
 import { TransitionRuleStruct } from "contracts/types/ethers-contracts/RegisterVoxelTypeSystem";
 import { VoxelCoordStruct } from "contracts/types/ethers-contracts/RegisterCreationSystem";
 import { defineSignalComponent } from "./components/SignalComponent";
+import { defineInvertedSignalComponent } from "./components/InvertedSignalComponent";
 import { defineSignalSourceComponent } from "./components/SignalSourceComponent";
 
 /**
@@ -87,6 +88,7 @@ export async function createNetworkLayer(config: GameConfig) {
     PluginRegistry: createLocalCache(definePluginRegistryComponent(world), uniqueWorldId),
     VoxelRules: createLocalCache(defineVoxelRulesComponent(world), uniqueWorldId),
     Signal: defineSignalComponent(world),
+    InvertedSignal: defineInvertedSignalComponent(world),
     SignalSource: defineSignalSourceComponent(world),
     EntityId: defineEntityIdComponent(world),
   };
@@ -189,6 +191,10 @@ export async function createNetworkLayer(config: GameConfig) {
 
   function getSignalData(entityIndex: EntityIndex) {
     return getComponentValue(components.Signal, entityIndex);
+  }
+
+  function getInvertedSignalData(entityIndex: EntityIndex) {
+    return getComponentValue(components.InvertedSignal, entityIndex);
   }
 
   function isSignalSource(entityIndex: EntityIndex) {
@@ -518,6 +524,7 @@ export async function createNetworkLayer(config: GameConfig) {
       getECSBlockAtPosition,
       getTerrainBlockAtPosition,
       getSignalData,
+      getInvertedSignalData,
       isSignalSource,
       getEntityAtPosition,
       getBiome,

@@ -36,6 +36,8 @@ import { SignalComponent, ID as SignalComponentID } from "components/SignalCompo
 import { SignalSourceComponent, ID as SignalSourceComponentID } from "components/SignalSourceComponent.sol";
 import { PassesTestsComponent, ID as PassesTestsComponentID } from "components/PassesTestsComponent.sol";
 import { EntityIdComponent, ID as EntityIdComponentID } from "components/EntityIdComponent.sol";
+import { PoweredComponent, ID as PoweredComponentID } from "components/PoweredComponent.sol";
+import { InvertedSignalComponent, ID as InvertedSignalComponentID } from "components/InvertedSignalComponent.sol";
 
 // Systems (requires 'systems=...' remapping in project's remappings.txt)
 import { ComponentDevSystem, ID as ComponentDevSystemID } from "systems/ComponentDevSystem.sol";
@@ -63,6 +65,8 @@ import { AdderTestSystem, ID as AdderTestSystemID } from "systems/AdderTestSyste
 import { HalfAdderTestSystem, ID as HalfAdderTestSystemID } from "systems/HalfAdderTestSystem.sol";
 import { AndTestSystem, ID as AndTestSystemID } from "systems/AndTestSystem.sol";
 import { SpawnCreationSystem, ID as SpawnCreationSystemID } from "systems/SpawnCreationSystem.sol";
+import { PoweredSystem, ID as PoweredSystemID } from "systems/PoweredSystem.sol";
+import { InvertedSignalSystem, ID as InvertedSignalSystemID } from "systems/InvertedSignalSystem.sol";
 
 struct DeployResult {
   IWorld world;
@@ -168,6 +172,14 @@ library LibDeploy {
       console.log("Deploying EntityIdComponent");
       comp = new EntityIdComponent(address(result.world));
       console.log(address(comp));
+
+      console.log("Deploying PoweredComponent");
+      comp = new PoweredComponent(address(result.world));
+      console.log(address(comp));
+
+      console.log("Deploying InvertedSignalComponent");
+      comp = new InvertedSignalComponent(address(result.world));
+      console.log(address(comp));
     }
 
     // Deploy systems
@@ -215,6 +227,8 @@ library LibDeploy {
     authorizeWriter(components, SignalSourceComponentID, address(system));
     authorizeWriter(components, PassesTestsComponentID, address(system));
     authorizeWriter(components, EntityIdComponentID, address(system));
+    authorizeWriter(components, PoweredComponentID, address(system));
+    authorizeWriter(components, InvertedSignalComponentID, address(system));
     console.log(address(system));
 
     console.log("Deploying BulkSetStateSystem");
@@ -240,6 +254,8 @@ library LibDeploy {
     authorizeWriter(components, SignalSourceComponentID, address(system));
     authorizeWriter(components, PassesTestsComponentID, address(system));
     authorizeWriter(components, EntityIdComponentID, address(system));
+    authorizeWriter(components, PoweredComponentID, address(system));
+    authorizeWriter(components, InvertedSignalComponentID, address(system));
     console.log(address(system));
 
     console.log("Deploying MineSystem");
@@ -251,6 +267,8 @@ library LibDeploy {
     authorizeWriter(components, TypeComponentID, address(system));
     authorizeWriter(components, SignalComponentID, address(system));
     authorizeWriter(components, SignalSourceComponentID, address(system));
+    authorizeWriter(components, PoweredComponentID, address(system));
+    authorizeWriter(components, InvertedSignalComponentID, address(system));
     console.log(address(system));
 
     console.log("Deploying BuildSystem");
@@ -262,6 +280,7 @@ library LibDeploy {
     authorizeWriter(components, TypeComponentID, address(system));
     authorizeWriter(components, SignalComponentID, address(system));
     authorizeWriter(components, SignalSourceComponentID, address(system));
+    authorizeWriter(components, PoweredComponentID, address(system));
     console.log(address(system));
 
     console.log("Deploying CreativeBuildSystem");
@@ -376,6 +395,8 @@ library LibDeploy {
     authorizeWriter(components, EntityIdComponentID, address(system));
     authorizeWriter(components, SignalComponentID, address(system));
     authorizeWriter(components, SignalSourceComponentID, address(system));
+    authorizeWriter(components, ItemComponentID, address(system));
+    authorizeWriter(components, PoweredComponentID, address(system));
     console.log(address(system));
 
     console.log("Deploying SignalSystem");
@@ -421,6 +442,19 @@ library LibDeploy {
     authorizeWriter(components, PositionComponentID, address(system));
     authorizeWriter(components, SignalComponentID, address(system));
     authorizeWriter(components, SignalSourceComponentID, address(system));
+    authorizeWriter(components, PoweredComponentID, address(system));
+    console.log(address(system));
+
+    console.log("Deploying PoweredSystem");
+    system = new PoweredSystem(world, address(components));
+    world.registerSystem(address(system), PoweredSystemID);
+    authorizeWriter(components, PoweredComponentID, address(system));
+    console.log(address(system));
+
+    console.log("Deploying InvertedSignalSystem");
+    system = new InvertedSignalSystem(world, address(components));
+    world.registerSystem(address(system), InvertedSignalSystemID);
+    authorizeWriter(components, InvertedSignalComponentID, address(system));
     console.log(address(system));
   }
 }
