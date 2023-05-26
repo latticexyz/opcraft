@@ -62,6 +62,7 @@ import { SignalSourceSystem, ID as SignalSourceSystemID } from "systems/SignalSo
 import { AdderTestSystem, ID as AdderTestSystemID } from "systems/AdderTestSystem.sol";
 import { HalfAdderTestSystem, ID as HalfAdderTestSystemID } from "systems/HalfAdderTestSystem.sol";
 import { AndTestSystem, ID as AndTestSystemID } from "systems/AndTestSystem.sol";
+import { SpawnCreationSystem, ID as SpawnCreationSystemID } from "systems/SpawnCreationSystem.sol";
 
 struct DeployResult {
   IWorld world;
@@ -259,6 +260,8 @@ library LibDeploy {
     authorizeWriter(components, OwnedByComponentID, address(system));
     authorizeWriter(components, ItemComponentID, address(system));
     authorizeWriter(components, TypeComponentID, address(system));
+    authorizeWriter(components, SignalComponentID, address(system));
+    authorizeWriter(components, SignalSourceComponentID, address(system));
     console.log(address(system));
 
     console.log("Deploying CreativeBuildSystem");
@@ -371,6 +374,8 @@ library LibDeploy {
     authorizeWriter(components, NameComponentID, address(system));
     authorizeWriter(components, TypeComponentID, address(system));
     authorizeWriter(components, EntityIdComponentID, address(system));
+    authorizeWriter(components, SignalComponentID, address(system));
+    authorizeWriter(components, SignalSourceComponentID, address(system));
     console.log(address(system));
 
     console.log("Deploying SignalSystem");
@@ -404,6 +409,18 @@ library LibDeploy {
     world.registerSystem(address(system), AndTestSystemID);
     authorizeWriter(components, SignalSourceComponentID, address(system));
     authorizeWriter(components, PassesTestsComponentID, address(system));
+    console.log(address(system));
+
+    console.log("Deploying SpawnCreationSystem");
+    system = new SpawnCreationSystem(world, address(components));
+    world.registerSystem(address(system), SpawnCreationSystemID);
+    authorizeWriter(components, SignalSourceComponentID, address(system));
+    authorizeWriter(components, PassesTestsComponentID, address(system));
+    authorizeWriter(components, TypeComponentID, address(system));
+    authorizeWriter(components, ItemComponentID, address(system));
+    authorizeWriter(components, PositionComponentID, address(system));
+    authorizeWriter(components, SignalComponentID, address(system));
+    authorizeWriter(components, SignalSourceComponentID, address(system));
     console.log(address(system));
   }
 }

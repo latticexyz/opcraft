@@ -7,12 +7,14 @@ import { getAddressById, addressToEntity } from "solecs/utils.sol";
 import { NameComponent, ID as NameComponentID } from "../components/NameComponent.sol";
 import { VoxelsComponent, ID as VoxelsComponentID } from "../components/VoxelsComponent.sol";
 import { TypeComponent, ID as TypeComponentID } from "../components/TypeComponent.sol";
+import { ItemComponent, ID as ItemComponentID } from "../components/ItemComponent.sol";
 import { OwnedByComponent, ID as OwnedByComponentID } from "../components/OwnedByComponent.sol";
 import { EntityIdComponent, ID as EntityIdComponentID } from "../components/EntityIdComponent.sol";
 import { getClaimAtCoord } from "../systems/ClaimSystem.sol";
 import { VoxelCoord } from "../types.sol";
 import { AirID } from "../prototypes/Blocks.sol";
 import { PositionComponent, ID as PositionComponentID } from "../components/PositionComponent.sol";
+import { CreateBlock } from "../libraries/CreateBlock.sol";
 
 uint256 constant ID = uint256(keccak256("system.RegisterCreation"));
 
@@ -39,6 +41,7 @@ contract RegisterCreationSystem is System {
     // NameComponent nameComponent = NameComponent(getAddressById(components, NameComponentID));
     VoxelsComponent voxelsComponent = VoxelsComponent(getAddressById(components, VoxelsComponentID));
     TypeComponent typeComponent = TypeComponent(getAddressById(components, TypeComponentID));
+    ItemComponent itemComponent = ItemComponent(getAddressById(components, ItemComponentID));
     // OwnedByComponent ownedByComponent = OwnedByComponent(getAddressById(components, OwnedByComponentID));
 
     require(
@@ -71,7 +74,10 @@ contract RegisterCreationSystem is System {
       VoxelCoord memory repositionedCoord = repositionedCoords[i];
       positionComponent.set(newVoxelId, repositionedCoord);
       // TODO: this should be itemComponent
-      // typeComponent.set(newVoxelId, typeComponent.getValue(creationVoxelIds[i]));
+      uint256 blockType = itemComponent.getValue(creationVoxelIds[i]);
+      itemComponent.set(newVoxelId, blockType);
+      typeComponent.set(newVoxelId, blockType); // TODO: assume that item and type component are the same rn
+      CreateBlock.addCustomComponents(components, blockType, newVoxelId);
 
       voxelsComponent.addVoxel(creationId, newVoxelId);
     }
