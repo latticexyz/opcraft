@@ -12,6 +12,7 @@ import { SignalSystem, ID as SignalSystemID } from "../systems/SignalSystem.sol"
 import { SignalSourceSystem, ID as SignalSourceSystemID } from "../systems/SignalSourceSystem.sol";
 import { InvertedSignalSystem, ID as InvertedSignalSystemID } from "../systems/InvertedSignalSystem.sol";
 import { PoweredSystem, ID as PoweredSystemID } from "../systems/PoweredSystem.sol";
+import { PistonSystem, ID as PistonSystemID } from "../systems/PistonSystem.sol";
 import { getClaimAtCoord } from "../systems/ClaimSystem.sol";
 import { VoxelCoord } from "../types.sol";
 import { AirID } from "../prototypes/Blocks.sol";
@@ -83,6 +84,7 @@ library BlockInteraction {
     SignalSourceSystem signalSourceSystem = SignalSourceSystem(getAddressById(systems, SignalSourceSystemID));
     InvertedSignalSystem invertedSignalSystem = InvertedSignalSystem(getAddressById(systems, InvertedSignalSystemID));
     PoweredSystem poweredSystem = PoweredSystem(getAddressById(systems, PoweredSystemID));
+    PistonSystem pistonSystem = PistonSystem(getAddressById(systems, PistonSystemID));
 
     // get neighbour entities
     uint256[] memory centerEntitiesToCheckStack = new uint256[](MAX_NEIGHBOUR_UPDATE_DEPTH);
@@ -167,6 +169,23 @@ library BlockInteraction {
         for (uint256 i = 0; i < changedPoweredSystemEntityIds.length; i++) {
           if (changedPoweredSystemEntityIds[i] != 0) {
             centerEntitiesToCheckStack[centerEntitiesToCheckStackIdx] = changedPoweredSystemEntityIds[i];
+            centerEntitiesToCheckStackIdx++;
+            if (centerEntitiesToCheckStackIdx >= MAX_NEIGHBOUR_UPDATE_DEPTH) {
+              // TODO: Should tell the user that we reached max depth
+              break;
+            }
+          }
+        }
+
+        uint256[] memory changedPistonSystemEntityIds = pistonSystem.executeTyped(
+          useCenterEntityId,
+          useNeighbourEntities
+        );
+
+        // if there are changed entities, we want to keep looping for this system
+        for (uint256 i = 0; i < changedPistonSystemEntityIds.length; i++) {
+          if (changedPistonSystemEntityIds[i] != 0) {
+            centerEntitiesToCheckStack[centerEntitiesToCheckStackIdx] = changedPistonSystemEntityIds[i];
             centerEntitiesToCheckStackIdx++;
             if (centerEntitiesToCheckStackIdx >= MAX_NEIGHBOUR_UPDATE_DEPTH) {
               // TODO: Should tell the user that we reached max depth

@@ -66,6 +66,30 @@ function getOppositeDirection(BlockDirection direction) pure returns (BlockDirec
   }
 }
 
+function getVoxelCoordInDirection(
+  VoxelCoord memory coord,
+  BlockDirection direction,
+  int32 distance
+) pure returns (VoxelCoord memory) {
+  VoxelCoord memory newCoord = VoxelCoord(coord.x, coord.y, coord.z);
+
+  if (direction == BlockDirection.Up) {
+    newCoord.y += distance;
+  } else if (direction == BlockDirection.Down) {
+    newCoord.y -= distance;
+  } else if (direction == BlockDirection.North) {
+    newCoord.z += distance;
+  } else if (direction == BlockDirection.South) {
+    newCoord.z -= distance;
+  } else if (direction == BlockDirection.East) {
+    newCoord.x += distance;
+  } else if (direction == BlockDirection.West) {
+    newCoord.x -= distance;
+  }
+
+  return newCoord;
+}
+
 function hasEntity(uint256[] memory entities) pure returns (bool) {
   for (uint8 i; i < entities.length; i++) {
     if (entities[i] != 0) {

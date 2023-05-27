@@ -21,13 +21,14 @@
     "PassesTestsComponent",
     "EntityIdComponent",
     "PoweredComponent",
-    "InvertedSignalComponent"
+    "InvertedSignalComponent",
+    "PistonComponent"
   ],
   "systems": [
     { "name": "ComponentDevSystem", "writeAccess": ["*"] },
     { "name": "BulkSetStateSystem", "writeAccess": ["*"] },
-    { "name": "MineSystem", "writeAccess": ["PositionComponent", "OwnedByComponent", "ItemComponent", "TypeComponent", "SignalComponent", "SignalSourceComponent", "PoweredComponent", "InvertedSignalComponent"] },
-    { "name": "BuildSystem", "writeAccess": ["PositionComponent", "OwnedByComponent", "ItemComponent", "TypeComponent", "SignalComponent", "SignalSourceComponent", "PoweredComponent", "InvertedSignalComponent"] },
+    { "name": "MineSystem", "writeAccess": ["PositionComponent", "OwnedByComponent", "ItemComponent", "TypeComponent", "SignalComponent", "SignalSourceComponent", "PoweredComponent", "InvertedSignalComponent", "PistonComponent"] },
+    { "name": "BuildSystem", "writeAccess": ["PositionComponent", "OwnedByComponent", "ItemComponent", "TypeComponent", "SignalComponent", "SignalSourceComponent", "PoweredComponent", "InvertedSignalComponent", "PistonComponent"] },
     { "name": "CreativeBuildSystem", "writeAccess": ["PositionComponent", "ItemComponent", "TypeComponent"] },
     { "name": "CraftSystem", "writeAccess": ["OwnedByComponent", "ItemComponent"] },
     { "name": "OccurrenceSystem", "writeAccess": [] },
@@ -50,15 +51,16 @@
     { "name": "RegisterVoxelTypeSystem", "writeAccess": ["OwnedByComponent", "NameComponent", "ColorComponent", "VoxelRulesComponent", "TransitionRuleComponent", "TypeComponent", "ItemComponent"] },
     { "name": "UpdateVoxelsSystem", "writeAccess": ["TypeComponent", "UpdateSetComponent"] },
     { "name": "GiftVoxelSystem", "writeAccess": ["OwnedByComponent", "TypeComponent", "ItemComponent"] },
-    { "name": "RegisterCreationSystem", "writeAccess": ["PositionComponent", "VoxelsComponent", "OwnedByComponent", "NameComponent", "TypeComponent", "EntityIdComponent", "SignalComponent", "SignalSourceComponent", "ItemComponent", "PoweredComponent", "InvertedSignalComponent"] },
+    { "name": "RegisterCreationSystem", "writeAccess": ["PositionComponent", "VoxelsComponent", "OwnedByComponent", "NameComponent", "TypeComponent", "EntityIdComponent", "SignalComponent", "SignalSourceComponent", "ItemComponent", "PoweredComponent", "InvertedSignalComponent", "PistonComponent"] },
     { "name": "SignalSystem", "writeAccess": ["SignalComponent"]},
     { "name": "SignalSourceSystem", "writeAccess": ["SignalSourceComponent"]},
     { "name": "AdderTestSystem", "writeAccess": ["SignalSourceComponent", "PassesTestsComponent" ] },
     { "name": "HalfAdderTestSystem", "writeAccess": ["SignalSourceComponent", "PassesTestsComponent" ] },
     { "name": "AndTestSystem", "writeAccess": ["SignalSourceComponent", "PassesTestsComponent" ] },
     { "name": "NandTestSystem", "writeAccess": ["SignalSourceComponent", "PassesTestsComponent" ] },
-    { "name": "SpawnCreationSystem", "writeAccess": ["SignalSourceComponent", "PassesTestsComponent" ,  "TypeComponent", "ItemComponent", "PositionComponent", "SignalComponent", "SignalSourceComponent", "PoweredComponent", "InvertedSignalComponent"] },
+    { "name": "SpawnCreationSystem", "writeAccess": ["SignalSourceComponent", "PassesTestsComponent" ,  "TypeComponent", "ItemComponent", "PositionComponent", "SignalComponent", "SignalSourceComponent", "PoweredComponent", "InvertedSignalComponent", "PistonComponent"] },
     { "name": "PoweredSystem", "writeAccess": ["PoweredComponent"]},
-    { "name": "InvertedSignalSystem", "writeAccess": ["InvertedSignalComponent"]}
+    { "name": "InvertedSignalSystem", "writeAccess": ["InvertedSignalComponent"]},
+    { "name": "PistonSystem", "writeAccess": ["PistonComponent", "PositionComponent", "ItemComponent"]}
   ]
 }
